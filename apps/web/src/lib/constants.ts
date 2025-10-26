@@ -10,3 +10,4 @@ export const DEAD_HP_VALUE = 0;
 export const HP_SLIDER_STEP = 5;
 export const LATEST_CHANNELS_DISPLAY_COUNT = 15;
 export const DPS_METER_TOAST_DURATION = 10 * 1000; // 10 seconds
+export const GAME_TIMEZONE_OFFSET = -2; // UTC-2
