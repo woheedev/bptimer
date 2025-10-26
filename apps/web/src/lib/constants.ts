@@ -11,3 +11,37 @@ export const HP_SLIDER_STEP = 5;
 export const LATEST_CHANNELS_DISPLAY_COUNT = 15;
 export const DPS_METER_TOAST_DURATION = 10 * 1000; // 10 seconds
 export const GAME_TIMEZONE_OFFSET = -2; // UTC-2
+export const AUTO_REFRESH_STORAGE_KEY = 'auto-refresh-enabled';
+export const FAVORITE_MOBS_STORAGE_KEY = 'favorite-mobs';
+export const EVENT_TIMERS_COLLAPSED_STORAGE_KEY = 'event-timers-collapsed';
+
+import { Hammer, Heart, Medal, Sparkles, Swords } from '@lucide/svelte/icons';
+export const PAGES = [
+	{
+		title: 'Bosses',
+		url: '/',
+		icon: Swords
+	},
+	{
+		title: 'Magical Creatures',
+		url: '/magical-creatures',
+		icon: Sparkles
+	},
+	{
+		title: 'Favorites',
+		url: '/favorites',
+		icon: Heart
+	},
+	{
+		title: 'Leaderboard - Coming Soon',
+		url: '#leaderboard',
+		icon: Medal,
+		comingSoon: true
+	},
+	{
+		title: 'Tools - Coming Soon',
+		url: '#tools',
+		icon: Hammer,
+		comingSoon: true
+	}
+];

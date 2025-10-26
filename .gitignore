@@ -1,29 +1,50 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 node_modules
 .pnp
 .pnp.js
 
-# testing
+# Build outputs
+build
+dist
+package
+.turbo
+*.tsbuildinfo
+
+# Testing
 coverage
+.nyc_output
 
-# svelte
-.svelte-kit
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# env files
+# Environment variables
 .env
 .env.*
 !.env.example
 
-# turbo
-.turbo
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+*.pem
+Thumbs.db
+
+# IDE / Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings
+
+# Temporary files
+*.tmp
+*.temp
+vite.config.*.timestamp-*

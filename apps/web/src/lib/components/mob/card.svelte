@@ -3,9 +3,12 @@
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { Toggle } from '$lib/components/ui/toggle';
 	import { DEAD_HP_VALUE, LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
+	import { favoriteMobsStore } from '$lib/stores/favorite-mobs.svelte';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getMobImagePath } from '$lib/utils/mob-utils';
+	import Heart from '@lucide/svelte/icons/heart';
 
 	let {
 		mob,
@@ -63,6 +66,8 @@
 
 		return [...activePills, ...emptyPills];
 	});
+
+	let isFavorited = $derived.by(() => favoriteMobsStore.favoriteMobs.has(mob.id));
 </script>
 
 <Card.Root class="@container/card flex h-full flex-col justify-between">
@@ -98,7 +103,21 @@
 		</div>
 	</Card.Content>
 
-	<Card.Footer class="flex-col items-start gap-1.5 text-sm">
-		<Button onclick={handleViewDetails} class="w-full" variant="secondary">View Details</Button>
+	<Card.Footer class="flex items-center justify-between gap-2 text-sm">
+		<Button onclick={handleViewDetails} class="flex-1" variant="secondary" size="sm"
+			>View Details</Button
+		>
+		<Toggle
+			pressed={isFavorited}
+			onPressedChange={() => favoriteMobsStore.toggleFavoriteMob(mob.id)}
+			variant="outline"
+			size="sm"
+			class="p-2"
+		>
+			<Heart
+				class={isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}
+				size={16}
+			/>
+		</Toggle>
 	</Card.Footer>
 </Card.Root>

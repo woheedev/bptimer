@@ -1,16 +1,23 @@
+import { includeIgnoreFile } from '@eslint/compat';
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript-eslint';
 
+const gitignorePath = fileURLToPath(new URL('../../.gitignore', import.meta.url));
+
 export default [
+  // Include gitignore patterns
+  includeIgnoreFile(gitignorePath),
+
   // Base configs
   js.configs.recommended,
   ...ts.configs.recommended,
   ...svelte.configs['flat/recommended'],
-  ...svelte.configs['flat/prettier'],
   prettier,
+  ...svelte.configs['flat/prettier'],
 
   // Global configuration
   {
@@ -18,13 +25,8 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node
-      },
-      parserOptions: {
-        projectService: true,
-        extraFileExtensions: ['.svelte']
       }
-    },
-    rules: {}
+    }
   },
 
   // Svelte-specific configuration
@@ -37,29 +39,24 @@ export default [
     }
   },
 
-  // Ignore patterns
+  // Svelte TypeScript files with runes (.svelte.ts)
+  {
+    files: ['**/*.svelte.ts', '**/*.svelte.js'],
+    languageOptions: {
+      parserOptions: {
+        parser: ts.parser
+      }
+    }
+  },
+
+  // Additional ignore patterns
   {
     ignores: [
-      '**/.*',
-      '.*',
-      '**/.DS_Store',
-      '**/node_modules',
-      '**/build',
-      '**/dist',
-      '**/.svelte-kit',
-      '**/package',
-      '**/.env',
-      '**/.env.*',
-      '!**/.env.example',
-      '**/pnpm-lock.yaml',
-      '**/bun.lock',
-      '**/package-lock.json',
-      '**/yarn.lock',
-      '**/vite.config.*.timestamp-*',
-      '**/*.config.js',
-      '**/*.config.cjs',
-      '**/*.config.mjs',
-      '**/*.config.ts'
+      '**/build/**',
+      '**/dist/**',
+      '**/.svelte-kit/**',
+      '**/package/**',
+      '**/vite.config.*.timestamp-*'
     ]
   }
 ];

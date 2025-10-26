@@ -6,9 +6,6 @@ const config: Config = {
 	preprocess: vitePreprocess(),
 	kit: {
 		adapter: adapter(),
-		alias: {
-			$types: 'src/types'
-		},
 		prerender: {
 			handleHttpError: ({ path, message }) => {
 				// Ignore Chrome DevTools request

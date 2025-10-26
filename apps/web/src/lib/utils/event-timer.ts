@@ -1,5 +1,5 @@
-import type { EventConfig, EventStatus } from '$lib/types/events';
 import { GAME_TIMEZONE_OFFSET } from '$lib/constants';
+import type { EventConfig, EventStatus } from '$lib/types/events';
 
 export const EVENT_CONFIGS: EventConfig[] = [
 	{

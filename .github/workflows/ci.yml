@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      PUBLIC_POCKETBASE_BASE_URL: ${{ vars.PUBLIC_POCKETBASE_BASE_URL || 'https://db.bptimer.com' }}
       TURBO_TELEMETRY_DISABLED: 1
 
     steps:

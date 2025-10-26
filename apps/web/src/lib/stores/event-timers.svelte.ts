@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { GAME_TIMEZONE_OFFSET } from '$lib/constants';
+import { EVENT_TIMERS_COLLAPSED_STORAGE_KEY, GAME_TIMEZONE_OFFSET } from '$lib/constants';
 import type { EventTimer } from '$lib/types/events';
 import {
 	calculateCurrentEventEnd,
@@ -15,7 +15,7 @@ function createEventTimersStore() {
 	let isCollapsed = $state(true);
 
 	if (browser) {
-		const stored = localStorage.getItem('event-timers-collapsed');
+		const stored = localStorage.getItem(EVENT_TIMERS_COLLAPSED_STORAGE_KEY);
 		isCollapsed = stored === null ? true : stored === 'true';
 	}
 
@@ -52,7 +52,7 @@ function createEventTimersStore() {
 	function toggleCollapsed() {
 		isCollapsed = !isCollapsed;
 		if (browser) {
-			localStorage.setItem('event-timers-collapsed', isCollapsed.toString());
+			localStorage.setItem(EVENT_TIMERS_COLLAPSED_STORAGE_KEY, isCollapsed.toString());
 		}
 	}
 

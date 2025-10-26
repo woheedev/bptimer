@@ -1,6 +1,6 @@
 import { DEAD_HP_VALUE, LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
+import type { ChannelEntry } from '$lib/types/runtime';
 import { isDataStale, toSnakeCase } from '$lib/utils/general-utils';
-import type { ChannelEntry } from '$types/runtime';
 
 /**
  * Determines mob status based on HP percentage and data freshness

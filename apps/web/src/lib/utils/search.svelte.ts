@@ -3,7 +3,7 @@ import { debounce } from '$lib/utils/debounce.svelte';
 export type SearchableMob = {
 	id: string;
 	name: string;
-	[key: string]: any;
+	[key: string]: unknown;
 };
 
 /**

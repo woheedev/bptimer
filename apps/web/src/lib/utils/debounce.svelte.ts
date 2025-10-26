@@ -10,7 +10,7 @@
  * @param delay - The delay in milliseconds (default: 300ms)
  * @returns A debounced version of the function with an execute method
  */
-export function debounce<T extends (...args: any[]) => void>(
+export function debounce<T extends (...args: never[]) => void>(
 	fn: T,
 	delay: number = 300
 ): { execute: T } {

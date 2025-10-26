@@ -1,34 +1,3 @@
-<script lang="ts" module>
-	import { Hammer, Medal, Sparkles, Swords } from '@lucide/svelte/icons';
-
-	const data = {
-		navMain: [
-			{
-				title: 'Bosses',
-				url: '/',
-				icon: Swords
-			},
-			{
-				title: 'Magical Creatures',
-				url: '/magical-creatures',
-				icon: Sparkles
-			},
-			{
-				title: 'Leaderboard - Coming Soon',
-				url: '#leaderboard',
-				icon: Medal,
-				comingSoon: true
-			},
-			{
-				title: 'Tools - Coming Soon',
-				url: '#tools',
-				icon: Hammer,
-				comingSoon: true
-			}
-		]
-	};
-</script>
-
 <script lang="ts">
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
@@ -36,12 +5,13 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { Switch } from '$lib/components/ui/switch/index.js';
-	import { autoRefreshEnabled } from '$lib/stores/auto-refresh.svelte';
+	import { PAGES } from '$lib/constants';
+	import { autoRefreshStore } from '$lib/stores/auto-refresh.svelte';
 	import { mode, toggleMode } from 'mode-watcher';
 	import type { ComponentProps } from 'svelte';
 
 	// Reactive store value
-	let isAutoRefreshEnabled = $derived($autoRefreshEnabled);
+	let isAutoRefreshEnabled = $derived(autoRefreshStore.enabled);
 
 	let {
 		ref = $bindable(null),
@@ -59,14 +29,16 @@
 		<NavigationUser />
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<NavigationMain items={data.navMain} />
+		<Sidebar.Group>
+			<NavigationMain items={PAGES} />
+		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer class="p-4 {sidebar.state === 'collapsed' ? 'hidden' : ''}">
 		{#if sidebar.state !== 'collapsed'}
 			<div class="mb-4 flex items-center space-x-2">
 				<Switch
 					id="auto-refresh"
-					onCheckedChange={(checked) => autoRefreshEnabled.set(checked)}
+					onCheckedChange={(checked) => autoRefreshStore.setEnabled(checked)}
 					checked={isAutoRefreshEnabled}
 				/>
 				<Label for="auto-refresh">Auto Refresh</Label>

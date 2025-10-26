@@ -1,5 +1,5 @@
 import { pb } from '$lib/pocketbase';
-import type { UserRecordModel } from '$types/auth';
+import type { UserRecordModel } from '$lib/types/auth';
 
 /**
  * Gets the PocketBase file URL for a user's avatar

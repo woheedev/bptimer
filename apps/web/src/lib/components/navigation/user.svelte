@@ -8,9 +8,9 @@
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
 	import * as Skeleton from '$lib/components/ui/skeleton/index.js';
 	import { signIn, signOut } from '$lib/oauth';
+	import type { UserRecordModel } from '$lib/types/auth';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getAvatarUrl } from '$lib/utils/user-utils';
-	import type { UserRecordModel } from '$types/auth';
 	import BellIcon from '@lucide/svelte/icons/bell';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';

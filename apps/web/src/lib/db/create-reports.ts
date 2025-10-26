@@ -1,6 +1,6 @@
 import { pb } from '$lib/pocketbase';
 import { hpReportInputSchema } from '$lib/schemas';
-import type { HpReport } from '$types/db';
+import type { HpReport } from '$lib/types/db';
 
 export async function createReport(
 	boss_id: string,

@@ -23,12 +23,13 @@ export function getInitials(name?: string): string {
  * Example: formatTimeAgo("2023-10-25T10:00:00Z") -> "2h ago" (if current time is 12:00)
  *
  * @param dateString - The date string to format
+ * @param now - Optional current time for reactive updates
  * @returns Human-readable time ago string
  */
-export function formatTimeAgo(dateString: string): string {
+export function formatTimeAgo(dateString: string, now?: Date): string {
 	const date = new Date(dateString);
-	const now = new Date();
-	const diffMs = now.getTime() - date.getTime();
+	const currentNow = now || new Date();
+	const diffMs = currentNow.getTime() - date.getTime();
 	const diffSeconds = Math.floor(diffMs / 1000);
 	const diffMins = Math.floor(diffMs / (1000 * 60));
 	const diffHours = Math.floor(diffMs / (1000 * 60 * 60));

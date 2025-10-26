@@ -6,7 +6,7 @@
 	import { Slider } from '$lib/components/ui/slider/index.js';
 	import { HP_SLIDER_STEP, MAX_HP_VALUE, MIN_HP_VALUE } from '$lib/constants';
 	import { hpSubmissionInputSchema } from '$lib/schemas';
-	import type { UserRecordModel } from '$types/auth';
+	import type { UserRecordModel } from '$lib/types/auth';
 
 	let {
 		selectedChannel,

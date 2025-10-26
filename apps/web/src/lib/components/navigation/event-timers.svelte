@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { eventTimersStore } from '$lib/stores/event-timers.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { eventTimersStore } from '$lib/stores/event-timers.svelte';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 
@@ -38,7 +38,8 @@
 		<div class="grid grid-cols-2 gap-2 px-4 pb-3 md:grid-cols-3 lg:grid-cols-6">
 			{#each store.timers as timer (timer.id)}
 				<div
-					class="flex items-center gap-2 rounded-lg border p-2 transition-colors {timer.id === 'daily-reset' || timer.id === 'weekly-reset'
+					class="flex items-center gap-2 rounded-lg border p-2 transition-colors {timer.id ===
+						'daily-reset' || timer.id === 'weekly-reset'
 						? 'border-border'
 						: timer.isActive
 							? 'border-green-500 bg-green-500/10'

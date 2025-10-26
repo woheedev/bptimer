@@ -6,17 +6,31 @@
 	import { Spinner } from '$lib/components/ui/spinner';
 	import { AUTO_REFRESH_INTERVAL } from '$lib/constants';
 	import { getBosses, getMagicalCreatures } from '$lib/db/get-mobs';
-	import { autoRefreshEnabled } from '$lib/stores/auto-refresh.svelte';
+	import { autoRefreshStore } from '$lib/stores/auto-refresh.svelte';
 	import { updateLatestChannels } from '$lib/utils/mob-utils';
 	import { createDebouncedSearch, filterMobsByName } from '$lib/utils/search.svelte';
 	import { onMount } from 'svelte';
 
 	let {
 		type = 'boss',
-		searchQuery = $bindable('')
+		searchQuery = $bindable(''),
+		mobs: providedMobs = $bindable()
 	}: {
 		type?: 'boss' | 'magical_creature';
 		searchQuery?: string;
+		mobs?: Array<{
+			id: string;
+			name: string;
+			uid: number;
+			type: string;
+			total_channels: number;
+			latestChannels?: Array<{
+				channel: number;
+				status: 'alive' | 'dead' | 'unknown';
+				hp_percentage: number;
+				last_updated: string;
+			}>;
+		}>;
 	} = $props();
 
 	let mobs = $state<
@@ -24,6 +38,7 @@
 			id: string;
 			name: string;
 			uid: number;
+			type: string;
 			total_channels: number;
 			latestChannels?: Array<{
 				channel: number;
@@ -70,10 +85,14 @@
 	}, 300);
 
 	// Get singular and plural names based on type
-	let singularName = $derived(type === 'boss' ? 'boss' : 'creature');
-	let pluralName = $derived(type === 'boss' ? 'bosses' : 'creatures');
+	let singularName = $derived(providedMobs ? 'mob' : type === 'boss' ? 'boss' : 'creature');
+	let pluralName = $derived(providedMobs ? 'mobs' : type === 'boss' ? 'bosses' : 'creatures');
 
 	async function loadMobs() {
+		if (providedMobs) {
+			mobs = providedMobs;
+			return;
+		}
 		try {
 			const response = type === 'boss' ? await getBosses() : await getMagicalCreatures();
 			if ('data' in response) {
@@ -87,13 +106,22 @@
 	}
 
 	onMount(async () => {
-		await loadMobs();
+		if (!providedMobs) {
+			await loadMobs();
+		}
 		loading = false;
+	});
+
+	$effect(() => {
+		if (providedMobs) {
+			mobs = providedMobs;
+			loading = false;
+		}
 	});
 
 	// Auto-refresh logic
 	$effect(() => {
-		if ($autoRefreshEnabled) {
+		if (autoRefreshStore.enabled) {
 			const interval = setInterval(() => {
 				loadMobs();
 			}, AUTO_REFRESH_INTERVAL);
@@ -167,6 +195,14 @@
 				<div class="flex min-h-96 items-center justify-center">
 					<Spinner class="size-8" />
 				</div>
+			{:else if providedMobs && filteredMobs.length === 0}
+				<!-- Empty state for no favorites -->
+				<Empty class="min-h-96">
+					<p class="text-muted-foreground mb-2 text-lg">No favorite mobs yet</p>
+					<p class="text-muted-foreground text-sm">
+						Click the heart icon on mob cards to add favorites
+					</p>
+				</Empty>
 			{:else if filteredMobs.length === 0 && searchQuery}
 				<!-- Empty state for no search results -->
 				<Empty class="min-h-96">
@@ -187,7 +223,7 @@
 							latestChannels={mob.latestChannels || []}
 							onViewDetails={handleViewDetails}
 							onChannelClick={handleViewDetails}
-							{type}
+							type={providedMobs ? mob.type : type}
 						/>
 					{/each}
 				</div>

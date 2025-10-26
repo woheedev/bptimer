@@ -1,8 +1,8 @@
 import { pb } from '$lib/pocketbase';
 import { hpReportSchema } from '$lib/schemas';
+import type { UserRecordModel } from '$lib/types/auth';
 import { mapUserRecord } from '$lib/utils/user-utils';
 import { validateWithSchema } from '$lib/utils/validation';
-import type { UserRecordModel } from '$types/auth';
 
 // Validate HP report records
 function validateHpReports(reports: Record<string, unknown>[]): void {

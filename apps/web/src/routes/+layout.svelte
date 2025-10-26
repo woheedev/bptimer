@@ -4,7 +4,7 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { DPS_METER_TOAST_DURATION } from '$lib/constants';
 	import { pb } from '$lib/pocketbase';
-	import type { UserRecordModel } from '$types/auth';
+	import type { UserRecordModel } from '$lib/types/auth';
 	import { ModeWatcher } from 'mode-watcher';
 	import { setContext } from 'svelte';
 	import { toast } from 'svelte-sonner';

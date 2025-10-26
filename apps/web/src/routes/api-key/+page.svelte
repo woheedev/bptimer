@@ -8,7 +8,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { signInAPI, signOut } from '$lib/oauth';
 	import { pb } from '$lib/pocketbase';
-	import type { UserRecordModel } from '$types/auth';
+	import type { UserRecordModel } from '$lib/types/auth';
 	import { onMount } from 'svelte';
 
 	let currentUser = $state<UserRecordModel | null>(null);

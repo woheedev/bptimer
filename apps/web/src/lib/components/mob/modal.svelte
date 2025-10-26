@@ -13,10 +13,10 @@
 	import { getChannels } from '$lib/db/get-channels';
 	import { getChannelReports, getLatestMobReports } from '$lib/db/get-reports';
 	import { pb } from '$lib/pocketbase';
+	import type { UserRecordModel } from '$lib/types/auth';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getMobImagePath } from '$lib/utils/mob-utils';
 	import { mapUserRecord } from '$lib/utils/user-utils';
-	import type { UserRecordModel } from '$types/auth';
 	import Eye from '@lucide/svelte/icons/eye';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';

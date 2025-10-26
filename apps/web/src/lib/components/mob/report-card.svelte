@@ -21,6 +21,16 @@
 
 	// Get user initials for avatar fallback
 	let user_initials = $derived(getInitials(report.user.name));
+
+	// Reactive time for live updates
+	let now = $state(Date.now());
+
+	$effect(() => {
+		const interval = setInterval(() => {
+			now = Date.now();
+		}, 1000);
+		return () => clearInterval(interval);
+	});
 </script>
 
 <div class="shrink-0 rounded-lg border p-3">
@@ -77,7 +87,7 @@
 	<!-- Bottom: Timestamp -->
 	<div class="mt-2 flex justify-end">
 		<p class="text-muted-foreground text-xs">
-			{formatTimeAgo(report.create_time)}
+			{formatTimeAgo(report.create_time, new Date(now))}
 		</p>
 	</div>
 </div>
