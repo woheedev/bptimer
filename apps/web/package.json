@@ -11,7 +11,7 @@
 		"check": "bun run --bun svelte-kit sync && bun run --bun svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "bun run --bun svelte-kit sync && bun run --bun svelte-check --tsconfig ./tsconfig.json --watch",
 		"deploy": "wrangler deploy",
-		"dev": "vite dev",
+		"dev": "bun run --bun svelte-kit sync && bun run --bun vite dev",
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"test": "bun run test:integration && bun run test:unit",
