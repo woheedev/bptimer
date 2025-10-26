@@ -6,6 +6,8 @@
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import * as Tabs from '$lib/components/ui/tabs/index.js';
+	import { Toggle } from '$lib/components/ui/toggle/index.js';
 	import { DEFAULT_HP_VALUE } from '$lib/constants';
 	import { createReport } from '$lib/db/create-reports';
 	import { getChannels } from '$lib/db/get-channels';
@@ -15,6 +17,8 @@
 	import { getMobImagePath } from '$lib/utils/mob-utils';
 	import { mapUserRecord } from '$lib/utils/user-utils';
 	import type { UserRecordModel } from '$types/auth';
+	import Eye from '@lucide/svelte/icons/eye';
+	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 
 	let {
@@ -68,8 +72,11 @@
 		isLoadingReports: false,
 		showBackButton: false,
 		errorMessage: null as string | null,
-		hasError: false
+		hasError: false,
+		isPanelVisible: true
 	});
+
+	let activeTab = $state('submit');
 
 	let initialChannelHandled = $state(false);
 
@@ -202,6 +209,13 @@
 
 	let initials = $derived(getInitials(mobName));
 
+	// Dynamic class for left section based on panel visibility
+	let leftSectionClass = $derived(
+		`flex flex-1 flex-col overflow-hidden pr-0 lg:flex-none lg:pr-2 ${
+			ui_state.isPanelVisible ? 'lg:w-3/4' : 'lg:w-full'
+		}`
+	);
+
 	// Create channel grid for all channels - memoized to only recalculate when channels or totalChannels change
 	let channelGrid = $derived.by(() => {
 		if (!totalChannels || !data_state.channels.length) return [];
@@ -324,40 +338,58 @@
 	}}
 >
 	<Dialog.Content
-		class="max-h-[90vh] w-[90vw]! max-w-[1400px]! overflow-hidden"
-		style="width: 90vw !important; max-width: 1400px !important;"
+		class="h-[95vh] max-h-[90vh] w-[95vw]! max-w-[1400px]! overflow-hidden lg:h-[90vh]"
+		style="width: 95vw !important; max-width: 1400px !important;"
 	>
 		<Dialog.Header>
-			<div class="flex items-center space-x-3">
-				<Avatar.Root class="h-12 w-12">
+			<div class="flex items-center space-x-2 lg:space-x-3">
+				<Avatar.Root class="h-10 w-10 lg:h-12 lg:w-12">
 					<Avatar.Image src={getMobImagePath(type, mobName)} alt={mobName} />
-					<Avatar.Fallback class="bg-red-500 text-lg font-bold text-white">
+					<Avatar.Fallback class="bg-red-500 text-base font-bold text-white lg:text-lg">
 						{initials}
 					</Avatar.Fallback>
 				</Avatar.Root>
 				<div>
-					<Dialog.Title class="text-xl font-bold">{mobName}</Dialog.Title>
-					<p class="text-muted-foreground text-sm">{totalChannels} channels total</p>
+					<Dialog.Title class="text-lg font-bold lg:text-xl">{mobName}</Dialog.Title>
+					<p class="text-muted-foreground text-xs lg:text-sm">{totalChannels} channels total</p>
 				</div>
 			</div>
 		</Dialog.Header>
 
 		<!-- Main content with grid layout -->
-		<div class="flex h-[calc(90vh-140px)] gap-4">
-			<!-- Left section: Channel Grid (3/4 width) -->
-			<div class="flex flex-1 flex-col overflow-hidden pr-2">
+		<div class="flex h-[calc(95vh-140px)] flex-col gap-4 lg:h-[calc(90vh-140px)] lg:flex-row">
+			<!-- Left section: Channel Grid (3/4 width on desktop when panel visible, full width when hidden) -->
+			<div class={leftSectionClass}>
 				<div class="mb-4 flex items-center justify-between">
 					<h3 class="text-lg font-semibold">
 						{submission_state.selectedChannel
 							? `Channel ${submission_state.selectedChannel} Details`
 							: 'All Channels'}
 					</h3>
-					<div class="flex items-center gap-2">
+					<div class="flex items-center gap-1 lg:gap-2">
 						{#if ui_state.showBackButton}
-							<Button onclick={handleBackToAllReports} variant="outline" size="sm">
-								← Back to All Reports
+							<Button
+								onclick={handleBackToAllReports}
+								variant="outline"
+								size="sm"
+								class="text-xs lg:text-sm"
+							>
+								<span class="hidden lg:inline">← Back to All Reports</span>
+								<span class="lg:hidden">← Back</span>
 							</Button>
 						{/if}
+						<Toggle
+							bind:pressed={ui_state.isPanelVisible}
+							variant="outline"
+							size="sm"
+							title={ui_state.isPanelVisible ? 'Hide panel' : 'Show panel'}
+						>
+							{#if ui_state.isPanelVisible}
+								<Eye class="h-4 w-4" />
+							{:else}
+								<EyeOff class="h-4 w-4" />
+							{/if}
+						</Toggle>
 						<Button
 							onclick={handleRefresh}
 							variant="outline"
@@ -369,7 +401,7 @@
 						</Button>
 					</div>
 				</div>
-				<div class="bg-background flex-1 overflow-y-auto rounded-lg border p-4">
+				<div class="bg-background flex-1 overflow-y-auto rounded-lg border p-4 md:flex-1">
 					{#if ui_state.isLoading}
 						<div class="flex h-32 items-center justify-center">
 							<div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
@@ -392,7 +424,7 @@
 							</Button>
 						</div>
 					{:else if channelGrid.length > 0}
-						<div class="grid grid-cols-10 gap-1">
+						<div class="grid grid-cols-5 gap-1 lg:grid-cols-10">
 							{#each channelGrid as channel (channel.channelNumber)}
 								<ChannelPill
 									channelNumber={channel.channelNumber}
@@ -409,25 +441,63 @@
 				</div>
 			</div>
 
-			<!-- Right section: HP Reporting and Reports (1/4 width) -->
-			<div class="flex w-1/4 max-w-sm min-w-[280px] flex-col space-y-4">
-				<!-- HP Reporting Section -->
-				<MobHpSubmit
-					selectedChannel={submission_state.selectedChannel}
-					{user}
-					bind:hpValue={submission_state.hpValue}
-					bind:fullVoteCount={submission_state.fullVoteCount}
-					isSubmitting={submission_state.isSubmitting}
-					onSubmit={handleSubmitReport}
-				/>
+			<!-- Right section: HP Reporting and Reports (1/4 width on desktop, full width on mobile/tablet) -->
+			{#if ui_state.isPanelVisible}
+				<div class="flex w-full flex-col lg:h-full lg:w-1/4 lg:max-w-sm lg:min-w-[280px]">
+					<!-- Desktop layout: stacked components -->
+					<div class="hidden h-full lg:flex lg:flex-col lg:space-y-4">
+						<!-- HP Reporting Section -->
+						<MobHpSubmit
+							selectedChannel={submission_state.selectedChannel}
+							{user}
+							bind:hpValue={submission_state.hpValue}
+							bind:fullVoteCount={submission_state.fullVoteCount}
+							isSubmitting={submission_state.isSubmitting}
+							onSubmit={handleSubmitReport}
+						/>
 
-				<!-- Reports Section -->
-				<MobLastReports
-					reports={data_state.reports}
-					isLoadingReports={ui_state.isLoadingReports}
-					selectedChannel={submission_state.selectedChannel}
-				/>
-			</div>
+						<!-- Reports Section -->
+						<div class="flex-1 overflow-hidden">
+							<MobLastReports
+								reports={data_state.reports}
+								isLoadingReports={ui_state.isLoadingReports}
+								selectedChannel={submission_state.selectedChannel}
+							/>
+						</div>
+					</div>
+
+					<!-- Mobile/tablet layout: tabs -->
+					<div class="lg:hidden">
+						<Tabs.Root bind:value={activeTab}>
+							<Tabs.List class="grid w-full grid-cols-2">
+								<Tabs.Trigger value="submit">Submit HP</Tabs.Trigger>
+								<Tabs.Trigger value="reports">Reports</Tabs.Trigger>
+							</Tabs.List>
+							<Tabs.Content value="submit" class="mt-4">
+								<div class="max-h-[35vh] overflow-y-auto">
+									<MobHpSubmit
+										selectedChannel={submission_state.selectedChannel}
+										{user}
+										bind:hpValue={submission_state.hpValue}
+										bind:fullVoteCount={submission_state.fullVoteCount}
+										isSubmitting={submission_state.isSubmitting}
+										onSubmit={handleSubmitReport}
+									/>
+								</div>
+							</Tabs.Content>
+							<Tabs.Content value="reports" class="mt-4">
+								<div class="max-h-[35vh] overflow-y-auto">
+									<MobLastReports
+										reports={data_state.reports}
+										isLoadingReports={ui_state.isLoadingReports}
+										selectedChannel={submission_state.selectedChannel}
+									/>
+								</div>
+							</Tabs.Content>
+						</Tabs.Root>
+					</div>
+				</div>
+			{/if}
 		</div>
 	</Dialog.Content>
 </Dialog.Root>

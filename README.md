@@ -21,18 +21,14 @@ The BP Timer is a web panel for Blue Protocol: Star Resonance, designed to quick
 
 ## Getting started
 
-Create a new repository with the "use this template" button on GitHub, or run the following commands:
+Clone this repository then run the following commands:
 
 ```sh
-git clone https://github.com/woheedev/bptimer.git my-app
-
-cd my-app
-rm -rf .git
-
-git init
-git add -A
-git commit -m "Initial commit"
+git clone https://github.com/woheedev/bptimer.git bp-timer
+cd bp-timer
 ```
+
+_Fork this repo instead if you plan on submitting changes!_
 
 ### Set up the development environment
 
@@ -64,7 +60,7 @@ git commit -m "Initial commit"
     bun run dev
     ```
 
-5.  [Create an account](http://localhost:5173/create-account) on the local web app, and [start building](http://localhost:5173/)
+5.  Create an account by logging in via Discord on the local web app, and [start building](http://localhost:5173/)
 
 ## CI/CD
 

@@ -24,7 +24,7 @@
 </script>
 
 <!-- Reports Section -->
-<Card.Root class="flex min-h-0 flex-1 flex-col overflow-hidden">
+<Card.Root class="flex h-full min-h-0 flex-1 flex-col">
 	<Card.Header class="pb-2">
 		<Card.Title class="text-base">
 			{selectedChannel ? `Channel ${selectedChannel} Reports` : 'Latest Reports'}
