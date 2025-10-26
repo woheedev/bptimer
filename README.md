@@ -46,6 +46,7 @@ _Fork this repo instead if you plan on submitting changes!_
 
     Fill in the required values in `./apps/web/.env`:
     - `PB_ADMIN_EMAIL` and `PB_ADMIN_PASSWORD` for the initial Pocketbase admin account
+      - **Important:** `PB_ADMIN_PASSWORD` must be at least 8 characters long.
     - `PUBLIC_POCKETBASE_BASE_URL=http://localhost:8090`
     - `PB_OAUTH2_DISCORD_CLIENT_ID` and `PB_OAUTH2_DISCORD_CLIENT_SECRET` for the Discord OAuth login which are obtained by creating an application in the [Discord Developer Portal](https://discord.com/developers/applications) under the OAuth2 section
     - Optionally, there are extra optional settings that can be applied automatically. Otherwise you can set them via pocketbase admin panel.
