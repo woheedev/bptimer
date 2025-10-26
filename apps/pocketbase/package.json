@@ -1,0 +1,12 @@
+{
+  "name": "pb",
+  "version": "0.0.1",
+  "author": "Wohee",
+  "description": "PocketBase backend for the BPSR Timer Panel monorepo",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "scripts": {
+    "deploy": "fly deploy",
+    "dev": "docker-compose up"
+  }
+}

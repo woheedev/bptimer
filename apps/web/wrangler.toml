@@ -1,0 +1,7 @@
+name = "bptimer-panel"
+main = ".svelte-kit/cloudflare/_worker.js"
+compatibility_date = "2025-10-24"
+assets = { directory = ".svelte-kit/cloudflare/assets", binding = "ASSETS" }
+
+[placement]
+mode = "smart"

@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "collectionId": "pbc_1612934933",
+      "collectionName": "maps",
+      "id": "54pxug6u6rcq8s6",
+      "name": "Asterleeds",
+      "total_channels": 400,
+      "uid": 1
+    },
+    {
+      "collectionId": "pbc_1612934933",
+      "collectionName": "maps",
+      "id": "ej9gpy8bine5slx",
+      "name": "Underground District",
+      "total_channels": 100,
+      "uid": 2
+    },
+    {
+      "collectionId": "pbc_1612934933",
+      "collectionName": "maps",
+      "id": "y5113bivekssnnu",
+      "name": "Asteria Plains",
+      "total_channels": 450,
+      "uid": 3
+    },
+    {
+      "collectionId": "pbc_1612934933",
+      "collectionName": "maps",
+      "id": "dwh80eswdxlf4zm",
+      "name": "Windhowl Canyon",
+      "total_channels": 150,
+      "uid": 4
+    },
+    {
+      "collectionId": "pbc_1612934933",
+      "collectionName": "maps",
+      "id": "t8absmgtz68saaj",
+      "name": "Skimmer's Lair",
+      "total_channels": 123,
+      "uid": 5
+    },
+    {
+      "collectionId": "pbc_1612934933",
+      "collectionName": "maps",
+      "id": "iekx8xa3fyx1lxc",
+      "name": "Duskdye Woods",
+      "total_channels": 150,
+      "uid": 6
+    },
+    {
+      "collectionId": "pbc_1612934933",
+      "collectionName": "maps",
+      "id": "z2zdt889vxz8j6b",
+      "name": "Everfall Forest",
+      "total_channels": 150,
+      "uid": 7
+    }
+  ],
+  "page": 1,
+  "perPage": 30,
+  "totalItems": 7,
+  "totalPages": 1
+}
