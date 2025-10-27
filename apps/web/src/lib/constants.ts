@@ -34,7 +34,7 @@ export const AUTO_REFRESH_STORAGE_KEY = 'auto-refresh-enabled';
 export const FAVORITE_MOBS_STORAGE_KEY = 'favorite-mobs';
 export const EVENT_TIMERS_COLLAPSED_STORAGE_KEY = 'event-timers-collapsed';
 
-import { Download, Hammer, Heart, Medal, Sparkles, Swords } from '@lucide/svelte/icons';
+import { Download, Hammer, Heart, Map, Medal, Sparkles, Swords } from '@lucide/svelte/icons';
 
 export const PAGES = [
 	{
@@ -71,4 +71,8 @@ export const PAGES = [
 		icon: Hammer,
 		comingSoon: true
 	}
+];
+
+export const PARTNER_PAGES = [
+	{ title: 'Interactive Maps', url: 'https://starresonance.th.gl', icon: Map, external: true }
 ];

@@ -5,7 +5,7 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { Switch } from '$lib/components/ui/switch/index.js';
-	import { PAGES } from '$lib/constants';
+	import { PAGES, PARTNER_PAGES } from '$lib/constants';
 	import { autoRefreshStore } from '$lib/stores/auto-refresh.svelte';
 	import { mode, toggleMode } from 'mode-watcher';
 	import type { ComponentProps } from 'svelte';
@@ -31,6 +31,10 @@
 	<Sidebar.Content>
 		<Sidebar.Group>
 			<NavigationMain items={PAGES} />
+		</Sidebar.Group>
+		<Sidebar.Group>
+			<Sidebar.GroupLabel>Partner Sites</Sidebar.GroupLabel>
+			<NavigationMain items={PARTNER_PAGES} />
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer class="p-4 {sidebar.state === 'collapsed' ? 'hidden' : ''}">
