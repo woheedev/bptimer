@@ -27,6 +27,7 @@
 		id: string;
 		name: string;
 		uid: number;
+		type: 'boss' | 'magical_creature';
 		icon_name?: string;
 		total_channels: number;
 		channels: Array<{
@@ -119,10 +120,14 @@
 		totalChannels: number,
 		channel?: number
 	) {
+		const mob = mobs.find((m) => m.id === mobId);
+		const mobType = mob?.type || type; // Fallback to container type
+
 		selectedMob = {
 			id: mobId,
 			name: mobName,
 			uid: mobUid,
+			type: mobType,
 			total_channels: totalChannels,
 			channels: [],
 			reports: []
@@ -222,7 +227,7 @@
 					totalChannels={selectedMob.total_channels}
 					onClose={handleCloseModal}
 					onReportSubmitted={handleReportSubmitted}
-					{type}
+					type={selectedMob.type}
 					initialSelectedChannel={selectedChannel}
 				/>
 			{/if}
