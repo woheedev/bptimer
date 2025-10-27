@@ -43,6 +43,13 @@
 	setContext('user', getUser);
 </script>
 
+<svelte:head>
+	<meta
+		name="description"
+		content="Blue Protocol Timer - Track boss spawns, magical creature spawns, and event timers in real-time. Powered by winj's DPS Meter and community data."
+	/>
+</svelte:head>
+
 <!-- Page content -->
 <main class="flex-1">
 	<ModeWatcher defaultMode="dark" />
