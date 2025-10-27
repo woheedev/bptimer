@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { HP_CRITICAL_THRESHOLD, HP_LOW_THRESHOLD } from '$lib/constants';
 
 	let {
 		channelNumber,
@@ -19,8 +20,8 @@
 		if (status === 'dead') return 'dead';
 		if (status === 'unknown') return 'unknown';
 		if (hpPercentage <= 0) return 'dead';
-		if (hpPercentage < 30) return 'critical';
-		if (hpPercentage < 60) return 'low';
+		if (hpPercentage < HP_CRITICAL_THRESHOLD) return 'critical';
+		if (hpPercentage < HP_LOW_THRESHOLD) return 'low';
 		return 'healthy';
 	}
 

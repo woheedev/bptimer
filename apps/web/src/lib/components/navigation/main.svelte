@@ -1,23 +1,32 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import type { Component } from 'svelte';
+	import type { PageItem } from '$lib/types/ui';
+
 	let {
 		items
-	}: { items: { title: string; url: string; icon?: Component; comingSoon?: boolean }[] } = $props();
+	}: {
+		items: PageItem[];
+	} = $props();
 </script>
 
 <Sidebar.GroupContent class="flex flex-col gap-2">
 	<Sidebar.Menu>
 		{#each items as item (item.title)}
+			{@const isActive = !item.external && !item.comingSoon && page.url.pathname === item.url}
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton
 					tooltipContent={item.title}
+					variant={item.variant || 'default'}
+					{isActive}
 					{...item.comingSoon ? { disabled: true } : {}}
 					onclick={item.comingSoon
 						? undefined
-						: // eslint-disable-next-line svelte/no-navigation-without-resolve
-							() => goto(item.url)}
+						: item.external
+							? () => window.open(item.url, '_blank')
+							: // eslint-disable-next-line svelte/no-navigation-without-resolve
+								() => goto(item.url)}
 				>
 					{#if item.icon}
 						<item.icon />

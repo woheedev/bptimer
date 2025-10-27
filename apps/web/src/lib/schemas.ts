@@ -1,3 +1,4 @@
+import { MAX_SEARCH_QUERY_LENGTH } from '$lib/constants';
 import { z } from 'zod';
 
 // User schema
@@ -189,7 +190,7 @@ export const channelStatusSchema = z.object({
 export type ChannelStatusSchema = z.infer<typeof channelStatusSchema>;
 
 // Input validation schemas for frontend
-export const searchQuerySchema = z.string().min(0).max(100).trim();
+export const searchQuerySchema = z.string().min(0).max(MAX_SEARCH_QUERY_LENGTH).trim();
 
 export const hpReportInputSchema = z.object({
 	mobId: z

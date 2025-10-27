@@ -1,4 +1,4 @@
-import { STALE_DATA_TIMEOUT } from '$lib/constants';
+import { DAY, HOUR, JUST_NOW_THRESHOLD, MINUTE, SECOND, STALE_DATA_TIMEOUT } from '$lib/constants';
 
 /**
  * Gets initials from any name string
@@ -30,12 +30,12 @@ export function formatTimeAgo(dateString: string, now?: Date): string {
 	const date = new Date(dateString);
 	const currentNow = now || new Date();
 	const diffMs = currentNow.getTime() - date.getTime();
-	const diffSeconds = Math.floor(diffMs / 1000);
-	const diffMins = Math.floor(diffMs / (1000 * 60));
-	const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+	const diffSeconds = Math.floor(diffMs / SECOND);
+	const diffMins = Math.floor(diffMs / MINUTE);
+	const diffHours = Math.floor(diffMs / HOUR);
+	const diffDays = Math.floor(diffMs / DAY);
 
-	if (diffSeconds < 15) return 'Just now';
+	if (diffSeconds < JUST_NOW_THRESHOLD) return 'Just now';
 	if (diffSeconds < 60) return `${diffSeconds}s ago`;
 	if (diffMins < 60) return `${diffMins}m ago`;
 	if (diffHours < 24) return `${diffHours}h ago`;

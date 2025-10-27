@@ -1,4 +1,4 @@
-import { GAME_TIMEZONE_OFFSET } from '$lib/constants';
+import { DAY, GAME_TIMEZONE_OFFSET, HOUR, MINUTE, SECOND } from '$lib/constants';
 import type { EventConfig, EventStatus } from '$lib/types/events';
 
 export const EVENT_CONFIGS: EventConfig[] = [
@@ -69,11 +69,11 @@ export const EVENT_CONFIGS: EventConfig[] = [
 ];
 
 export function formatCountdown(milliseconds: number): string {
-	const totalSeconds = Math.floor(milliseconds / 1000);
-	const days = Math.floor(totalSeconds / 86400);
-	const hours = Math.floor((totalSeconds % 86400) / 3600);
-	const minutes = Math.floor((totalSeconds % 3600) / 60);
-	const seconds = totalSeconds % 60;
+	const totalSeconds = Math.floor(milliseconds / SECOND);
+	const days = Math.floor(totalSeconds / DAY);
+	const hours = Math.floor((totalSeconds % DAY) / HOUR);
+	const minutes = Math.floor((totalSeconds % HOUR) / MINUTE);
+	const seconds = totalSeconds % MINUTE;
 
 	if (days > 0) {
 		return `${days}d ${hours}h ${minutes}m`;
@@ -87,7 +87,7 @@ export function formatCountdown(milliseconds: number): string {
 }
 
 function getGameTime(): Date {
-	return new Date(Date.now() + GAME_TIMEZONE_OFFSET * 60 * 60 * 1000);
+	return new Date(Date.now() + GAME_TIMEZONE_OFFSET * HOUR);
 }
 
 export function calculateNextEventTime(config: EventConfig): Date {

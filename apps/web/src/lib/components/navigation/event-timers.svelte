@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { SECOND } from '$lib/constants';
 	import { eventTimersStore } from '$lib/stores/event-timers.svelte';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 
 	const store = eventTimersStore;
 
@@ -11,31 +9,15 @@
 	$effect(() => {
 		const interval = setInterval(() => {
 			store.updateTimers();
-		}, 1000);
+		}, SECOND);
 
 		return () => clearInterval(interval);
 	});
 </script>
 
-<div class="bg-background border-b">
-	<div class="flex items-center justify-between px-4 py-2">
-		<Button
-			variant="ghost"
-			size="sm"
-			class="flex items-center gap-2"
-			onclick={() => store.toggleCollapsed()}
-		>
-			{#if store.isCollapsed}
-				<ChevronDown class="h-4 w-4" />
-			{:else}
-				<ChevronUp class="h-4 w-4" />
-			{/if}
-			<span class="text-sm font-medium">Event Timers</span>
-		</Button>
-	</div>
-
+<div class="bg-background {!store.isCollapsed ? 'border-b' : ''}">
 	{#if !store.isCollapsed}
-		<div class="grid grid-cols-2 gap-2 px-4 pb-3 md:grid-cols-3 lg:grid-cols-6">
+		<div class="grid grid-cols-2 gap-2 px-4 py-3 md:grid-cols-3 lg:grid-cols-6">
 			{#each store.timers as timer (timer.id)}
 				<div
 					class="flex items-center gap-2 rounded-lg border p-2 transition-colors {timer.id ===

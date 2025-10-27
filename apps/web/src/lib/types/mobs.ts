@@ -11,7 +11,7 @@ export interface MobWithChannels {
 	id: string;
 	uid: number;
 	name: string;
-	type: string;
+	type: 'boss' | 'magical_creature';
 	total_channels: number;
-	latestChannels: ChannelEntry[];
+	latestChannels?: ChannelEntry[];
 }

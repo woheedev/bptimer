@@ -4,6 +4,8 @@
  * for the user to stop typing before executing an action
  */
 
+import { DEBOUNCE_DELAY } from '$lib/constants';
+
 /**
  * Creates a debounced version of a function
  * @param fn - The function to debounce
@@ -12,7 +14,7 @@
  */
 export function debounce<T extends (...args: never[]) => void>(
 	fn: T,
-	delay: number = 300
+	delay: number = DEBOUNCE_DELAY
 ): { execute: T } {
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -35,7 +37,7 @@ export function debounce<T extends (...args: never[]) => void>(
  * @param delay - The delay in milliseconds (default: 300ms)
  * @returns An object with current value and a debounced setter
  */
-export function createDebouncedState<T>(initialValue: T, delay: number = 300) {
+export function createDebouncedState<T>(initialValue: T, delay: number = DEBOUNCE_DELAY) {
 	let value = $state(initialValue);
 	const setter = debounce((newValue: T) => {
 		value = newValue;

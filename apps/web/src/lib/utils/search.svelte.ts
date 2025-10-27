@@ -1,18 +1,16 @@
+import { DEBOUNCE_DELAY } from '$lib/constants';
 import { debounce } from '$lib/utils/debounce.svelte';
-
-export type SearchableMob = {
-	id: string;
-	name: string;
-	[key: string]: unknown;
-};
 
 /**
  * Filter mobs by name (case-insensitive)
- * @param mobs - Array of mob objects
+ * @param mobs - Array of mob objects with at least id and name properties
  * @param query - Search query string
  * @returns Filtered array of mobs matching the query
  */
-export function filterMobsByName<T extends SearchableMob>(mobs: T[], query: string): T[] {
+export function filterMobsByName<T extends { id: string; name: string }>(
+	mobs: T[],
+	query: string
+): T[] {
 	if (!query || query.trim() === '') {
 		return mobs;
 	}
@@ -30,7 +28,7 @@ export function filterMobsByName<T extends SearchableMob>(mobs: T[], query: stri
  */
 export function createDebouncedSearch(
 	callback: (query: string) => void,
-	delay: number = 300
+	delay: number = DEBOUNCE_DELAY
 ): { execute: (query: string) => void } {
 	return debounce(callback, delay);
 }
@@ -42,7 +40,7 @@ export function createDebouncedSearch(
  * @param delay - Debounce delay in milliseconds (default: 300ms)
  * @returns Object with query value and setQuery method
  */
-export function createSearchState(initialQuery: string = '', delay: number = 300) {
+export function createSearchState(initialQuery: string = '', delay: number = DEBOUNCE_DELAY) {
 	let query = $state(initialQuery);
 
 	const debouncedSet = debounce((newQuery: string) => {

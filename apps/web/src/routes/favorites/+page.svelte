@@ -4,28 +4,10 @@
 	import NavigationSidebar from '$lib/components/navigation/sidebar.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { getMobsByIds } from '$lib/db/get-mobs';
 	import { favoriteMobsStore } from '$lib/stores/favorite-mobs.svelte';
-	import type { MobWithChannels } from '$lib/types/runtime';
 
 	let mobs_data: MobContainer | undefined = $state();
-	let favoritedMobs: MobWithChannels[] = $state([]);
-
-	$effect(() => {
-		const ids = Array.from(favoriteMobsStore.favoriteMobs);
-		if (ids.length > 0) {
-			getMobsByIds(ids).then((result) => {
-				if ('data' in result) {
-					favoritedMobs = result.data;
-				} else {
-					console.error('Failed to fetch favorited mobs:', result.error);
-					favoritedMobs = [];
-				}
-			});
-		} else {
-			favoritedMobs = [];
-		}
-	});
+	let mobIds = $derived(Array.from(favoriteMobsStore.favoriteMobs));
 </script>
 
 <svelte:boundary>
@@ -33,7 +15,7 @@
 		<NavigationSidebar />
 		<Sidebar.Inset>
 			<NavigationHeader search={mobs_data?.search} />
-			<MobContainer bind:this={mobs_data} mobs={favoritedMobs} />
+			<MobContainer bind:this={mobs_data} {mobIds} />
 		</Sidebar.Inset>
 	</Sidebar.Provider>
 

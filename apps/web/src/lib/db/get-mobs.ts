@@ -1,7 +1,7 @@
 import { LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
 import { pb } from '$lib/pocketbase';
 import { mobChannelStatusSchema, mobSchema } from '$lib/schemas';
-import type { ChannelEntry, MobWithChannels } from '$lib/types/runtime';
+import type { ChannelEntry, MobWithChannels } from '$lib/types/mobs';
 import { isDataStale } from '$lib/utils/general-utils';
 import { getMobStatus } from '$lib/utils/mob-utils';
 import { validateWithSchema } from '$lib/utils/validation';

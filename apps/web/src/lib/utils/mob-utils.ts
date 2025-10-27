@@ -1,5 +1,5 @@
 import { DEAD_HP_VALUE, LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
-import type { ChannelEntry } from '$lib/types/runtime';
+import type { ChannelEntry } from '$lib/types/mobs';
 import { isDataStale, toSnakeCase } from '$lib/utils/general-utils';
 
 /**
@@ -8,15 +8,24 @@ import { isDataStale, toSnakeCase } from '$lib/utils/general-utils';
  * @param hp_percentage - The HP percentage (0-100)
  * @param last_updated - The timestamp string of the last update
  * @returns 'alive' if HP > 0 and data is fresh, 'dead' if HP = 0, 'unknown' if data is stale
+ *
+ * Note: Dead mobs (HP = 0) stay 'dead' even when data is stale, until the pockerbase cronjob
+ * resets them to 100% HP at their respawn time. This prevents dead bosses from showing as
+ * 'unknown' before they respawn.
  */
 export function getMobStatus(
 	hp_percentage: number,
 	last_updated: string
 ): 'alive' | 'dead' | 'unknown' {
+	if (hp_percentage === DEAD_HP_VALUE) {
+		return 'dead';
+	}
+
 	if (isDataStale(last_updated)) {
 		return 'unknown';
 	}
-	return hp_percentage === 0 ? 'dead' : 'alive';
+
+	return 'alive';
 }
 
 /**

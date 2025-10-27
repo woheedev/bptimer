@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { EVENT_TIMERS_COLLAPSED_STORAGE_KEY, GAME_TIMEZONE_OFFSET } from '$lib/constants';
+import { EVENT_TIMERS_COLLAPSED_STORAGE_KEY, GAME_TIMEZONE_OFFSET, HOUR } from '$lib/constants';
 import type { EventTimer } from '$lib/types/events';
 import {
 	calculateCurrentEventEnd,
@@ -16,11 +16,11 @@ function createEventTimersStore() {
 
 	if (browser) {
 		const stored = localStorage.getItem(EVENT_TIMERS_COLLAPSED_STORAGE_KEY);
-		isCollapsed = stored === null ? true : stored === 'true';
+		isCollapsed = stored === null ? false : stored === 'true';
 	}
 
 	function updateTimers() {
-		const now = new Date(Date.now() + GAME_TIMEZONE_OFFSET * 60 * 60 * 1000);
+		const now = new Date(Date.now() + GAME_TIMEZONE_OFFSET * HOUR);
 
 		timers = EVENT_CONFIGS.map((config) => {
 			const active = isEventActive(config);

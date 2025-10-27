@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { SECOND } from '$lib/constants';
 	import { formatTimeAgo, getInitials } from '$lib/utils/general-utils';
 	import ThumbsDownIcon from '@lucide/svelte/icons/thumbs-down';
 	import ThumbsUpIcon from '@lucide/svelte/icons/thumbs-up';
@@ -28,7 +29,7 @@
 	$effect(() => {
 		const interval = setInterval(() => {
 			now = Date.now();
-		}, 1000);
+		}, SECOND);
 		return () => clearInterval(interval);
 	});
 </script>

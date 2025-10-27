@@ -4,9 +4,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Empty } from '$lib/components/ui/empty';
 	import { Spinner } from '$lib/components/ui/spinner';
-	import { AUTO_REFRESH_INTERVAL } from '$lib/constants';
-	import { getBosses, getMagicalCreatures } from '$lib/db/get-mobs';
+	import { AUTO_REFRESH_INTERVAL, DEBOUNCE_DELAY } from '$lib/constants';
+	import { getBosses, getMagicalCreatures, getMobsByIds } from '$lib/db/get-mobs';
 	import { autoRefreshStore } from '$lib/stores/auto-refresh.svelte';
+	import type { MobWithChannels } from '$lib/types/mobs';
 	import { updateLatestChannels } from '$lib/utils/mob-utils';
 	import { createDebouncedSearch, filterMobsByName } from '$lib/utils/search.svelte';
 	import { onMount } from 'svelte';
@@ -14,40 +15,14 @@
 	let {
 		type = 'boss',
 		searchQuery = $bindable(''),
-		mobs: providedMobs = $bindable()
+		mobIds = $bindable()
 	}: {
 		type?: 'boss' | 'magical_creature';
 		searchQuery?: string;
-		mobs?: Array<{
-			id: string;
-			name: string;
-			uid: number;
-			type: string;
-			total_channels: number;
-			latestChannels?: Array<{
-				channel: number;
-				status: 'alive' | 'dead' | 'unknown';
-				hp_percentage: number;
-				last_updated: string;
-			}>;
-		}>;
+		mobIds?: string[];
 	} = $props();
 
-	let mobs = $state<
-		Array<{
-			id: string;
-			name: string;
-			uid: number;
-			type: string;
-			total_channels: number;
-			latestChannels?: Array<{
-				channel: number;
-				status: 'alive' | 'dead' | 'unknown';
-				hp_percentage: number;
-				last_updated: string;
-			}>;
-		}>
-	>([]);
+	let mobs = $state<MobWithChannels[]>([]);
 	let selectedMob = $state<{
 		id: string;
 		name: string;
@@ -82,19 +57,24 @@
 	// Create debounced search function
 	export const search = createDebouncedSearch((query) => {
 		searchQuery = query;
-	}, 300);
+	}, DEBOUNCE_DELAY);
 
 	// Get singular and plural names based on type
-	let singularName = $derived(providedMobs ? 'mob' : type === 'boss' ? 'boss' : 'creature');
-	let pluralName = $derived(providedMobs ? 'mobs' : type === 'boss' ? 'bosses' : 'creatures');
+	let isFavorites = $derived(mobIds !== undefined);
+	let singularName = $derived(isFavorites ? 'mob' : type === 'boss' ? 'boss' : 'creature');
+	let pluralName = $derived(isFavorites ? 'mobs' : type === 'boss' ? 'bosses' : 'creatures');
 
 	async function loadMobs() {
-		if (providedMobs) {
-			mobs = providedMobs;
-			return;
-		}
 		try {
-			const response = type === 'boss' ? await getBosses() : await getMagicalCreatures();
+			let response;
+			if (mobIds !== undefined) {
+				response = await getMobsByIds(mobIds);
+			} else if (type === 'boss') {
+				response = await getBosses();
+			} else {
+				response = await getMagicalCreatures();
+			}
+
 			if ('data' in response) {
 				mobs = response.data;
 			} else {
@@ -106,16 +86,19 @@
 	}
 
 	onMount(async () => {
-		if (!providedMobs) {
+		if (mobIds === undefined) {
 			await loadMobs();
+			loading = false;
 		}
-		loading = false;
 	});
 
 	$effect(() => {
-		if (providedMobs) {
-			mobs = providedMobs;
-			loading = false;
+		// Handle favorites loading when mobIds changes
+		if (mobIds !== undefined) {
+			loading = true;
+			loadMobs().then(() => {
+				loading = false;
+			});
 		}
 	});
 
@@ -176,7 +159,7 @@
 </script>
 
 <div class="flex flex-1 flex-col">
-	<div class="@container/main flex flex-1 flex-col gap-2">
+	<div class="@container/main flex flex-col gap-2">
 		<div class="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
 			<!-- Search result count -->
 			{#if searchQuery && !loading}
@@ -192,10 +175,10 @@
 			{/if}
 
 			{#if loading}
-				<div class="flex min-h-96 items-center justify-center">
+				<div class="flex min-h-screen flex-col items-center justify-center space-y-4">
 					<Spinner class="size-8" />
 				</div>
-			{:else if providedMobs && filteredMobs.length === 0}
+			{:else if isFavorites && filteredMobs.length === 0}
 				<!-- Empty state for no favorites -->
 				<Empty class="min-h-96">
 					<p class="text-muted-foreground mb-2 text-lg">No favorite mobs yet</p>
@@ -223,7 +206,7 @@
 							latestChannels={mob.latestChannels || []}
 							onViewDetails={handleViewDetails}
 							onChannelClick={handleViewDetails}
-							type={providedMobs ? mob.type : type}
+							type={isFavorites ? mob.type : type}
 						/>
 					{/each}
 				</div>
