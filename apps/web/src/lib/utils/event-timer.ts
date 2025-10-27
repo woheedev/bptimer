@@ -70,10 +70,10 @@ export const EVENT_CONFIGS: EventConfig[] = [
 
 export function formatCountdown(milliseconds: number): string {
 	const totalSeconds = Math.floor(milliseconds / SECOND);
-	const days = Math.floor(totalSeconds / DAY);
-	const hours = Math.floor((totalSeconds % DAY) / HOUR);
-	const minutes = Math.floor((totalSeconds % HOUR) / MINUTE);
-	const seconds = totalSeconds % MINUTE;
+	const days = Math.floor(totalSeconds / (DAY / SECOND));
+	const hours = Math.floor((totalSeconds % (DAY / SECOND)) / (HOUR / SECOND));
+	const minutes = Math.floor((totalSeconds % (HOUR / SECOND)) / (MINUTE / SECOND));
+	const seconds = totalSeconds % (MINUTE / SECOND);
 
 	if (days > 0) {
 		return `${days}d ${hours}h ${minutes}m`;
