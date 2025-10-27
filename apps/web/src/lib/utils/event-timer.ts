@@ -40,10 +40,12 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		name: 'Stimen Vaults',
 		icon: '/images/events/stimen-vault.webp',
 		schedule: {
-			days: [0, 1, 2, 3, 4, 5, 6],
+			days: [1],
 			hour: 2,
 			minute: 0,
-			durationHours: 3
+			durationHours: 3,
+			intervalWeeks: 2,
+			referenceDate: '2025-10-20'
 		}
 	},
 	{
@@ -62,11 +64,28 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		icon: '/images/events/weekly-reset.webp',
 		schedule: {
 			days: [1],
-			hour: 2,
+			hour: 5,
 			minute: 0
 		}
 	}
 ];
+
+function getWeeksSinceReference(referenceDate: string, targetDate: Date): number {
+	const reference = new Date(referenceDate);
+	const diffMs = targetDate.getTime() - reference.getTime();
+	return Math.floor(diffMs / (7 * DAY));
+}
+
+function isValidIntervalWeek(config: EventConfig, date: Date): boolean {
+	if (!config.schedule.intervalWeeks || config.schedule.intervalWeeks <= 1) {
+		return true;
+	}
+	if (!config.schedule.referenceDate) {
+		return true;
+	}
+	const weeksSince = getWeeksSinceReference(config.schedule.referenceDate, date);
+	return weeksSince % config.schedule.intervalWeeks === 0;
+}
 
 export function formatCountdown(milliseconds: number): string {
 	const totalSeconds = Math.floor(milliseconds / SECOND);
@@ -99,22 +118,15 @@ export function calculateNextEventTime(config: EventConfig): Date {
 	const targetStart = new Date(now);
 	targetStart.setUTCHours(config.schedule.hour, config.schedule.minute, 0, 0);
 
-	if (!config.schedule.days) {
-		if (targetStart <= now) {
-			targetStart.setUTCDate(targetStart.getUTCDate() + 1);
-		}
-		return targetStart;
-	}
-
 	const eventHasPassed =
 		currentHour > config.schedule.hour ||
 		(currentHour === config.schedule.hour && currentMinute >= config.schedule.minute);
 
 	let daysToAdd = 0;
-	if (!config.schedule.days.includes(currentDay) || eventHasPassed) {
+	if (!config.schedule.days?.includes(currentDay) || eventHasPassed) {
 		for (let i = 1; i <= 7; i++) {
 			const nextDay = (currentDay + i) % 7;
-			if (config.schedule.days.includes(nextDay)) {
+			if (config.schedule.days?.includes(nextDay)) {
 				daysToAdd = i;
 				break;
 			}
@@ -122,6 +134,20 @@ export function calculateNextEventTime(config: EventConfig): Date {
 	}
 
 	targetStart.setUTCDate(targetStart.getUTCDate() + daysToAdd);
+
+	if (
+		config.schedule.intervalWeeks &&
+		config.schedule.intervalWeeks > 1 &&
+		config.schedule.referenceDate
+	) {
+		const weeksSince = getWeeksSinceReference(config.schedule.referenceDate, targetStart);
+		const remainder = weeksSince % config.schedule.intervalWeeks;
+		if (remainder !== 0) {
+			const weeksToAdd = config.schedule.intervalWeeks - remainder;
+			targetStart.setUTCDate(targetStart.getUTCDate() + weeksToAdd * 7);
+		}
+	}
+
 	return targetStart;
 }
 
@@ -136,7 +162,12 @@ export function calculateCurrentEventEnd(config: EventConfig): Date | null {
 	const todayEnd = new Date(todayStart);
 	todayEnd.setUTCHours(todayEnd.getUTCHours() + config.schedule.durationHours);
 
-	if (config.schedule.days?.includes(currentDay) && now >= todayStart && now < todayEnd) {
+	if (
+		config.schedule.days?.includes(currentDay) &&
+		isValidIntervalWeek(config, todayStart) &&
+		now >= todayStart &&
+		now < todayEnd
+	) {
 		return todayEnd;
 	}
 
@@ -148,7 +179,11 @@ export function calculateCurrentEventEnd(config: EventConfig): Date | null {
 		const yesterdayEnd = new Date(yesterdayStart);
 		yesterdayEnd.setUTCHours(yesterdayEnd.getUTCHours() + config.schedule.durationHours);
 
-		if (now >= yesterdayStart && now < yesterdayEnd) {
+		if (
+			isValidIntervalWeek(config, yesterdayStart) &&
+			now >= yesterdayStart &&
+			now < yesterdayEnd
+		) {
 			return yesterdayEnd;
 		}
 	}
@@ -167,7 +202,12 @@ export function isEventActive(config: EventConfig): boolean {
 	const todayEnd = new Date(todayStart);
 	todayEnd.setUTCHours(todayEnd.getUTCHours() + config.schedule.durationHours);
 
-	if (config.schedule.days?.includes(currentDay) && now >= todayStart && now < todayEnd) {
+	if (
+		config.schedule.days?.includes(currentDay) &&
+		isValidIntervalWeek(config, todayStart) &&
+		now >= todayStart &&
+		now < todayEnd
+	) {
 		return true;
 	}
 
@@ -179,7 +219,11 @@ export function isEventActive(config: EventConfig): boolean {
 		const yesterdayEnd = new Date(yesterdayStart);
 		yesterdayEnd.setUTCHours(yesterdayEnd.getUTCHours() + config.schedule.durationHours);
 
-		if (now >= yesterdayStart && now < yesterdayEnd) {
+		if (
+			isValidIntervalWeek(config, yesterdayStart) &&
+			now >= yesterdayStart &&
+			now < yesterdayEnd
+		) {
 			return true;
 		}
 	}

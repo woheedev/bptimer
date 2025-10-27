@@ -5,6 +5,8 @@ export interface EventSchedule {
 	hour: number;
 	minute: number;
 	durationHours?: number;
+	intervalWeeks?: number; // Amount of weeks between occurrences
+	referenceDate?: string; // ISO Date string for a known reset (for intervalWeeks) ex: 2025-10-20
 }
 
 export interface EventConfig {

@@ -32,7 +32,7 @@
 	import { cn, type WithElementRef, type WithoutChildrenOrChild } from '$lib/utils.js';
 	import { mergeProps } from 'bits-ui';
 	import type { ComponentProps, Snippet } from 'svelte';
-	import type { HTMLAttributes } from 'svelte/elements';
+	import type { HTMLAnchorAttributes } from 'svelte/elements';
 	import { useSidebar } from './context.svelte.js';
 
 	let {
@@ -46,7 +46,7 @@
 		tooltipContent,
 		tooltipContentProps,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & {
+	}: WithElementRef<HTMLAnchorAttributes> & {
 		isActive?: boolean;
 		variant?: SidebarMenuButtonVariant;
 		size?: SidebarMenuButtonSize;
@@ -72,9 +72,9 @@
 	{#if child}
 		{@render child({ props: mergedProps })}
 	{:else}
-		<button bind:this={ref} {...mergedProps}>
+		<a bind:this={ref} {...mergedProps}>
 			{@render children?.()}
-		</button>
+		</a>
 	{/if}
 {/snippet}
 

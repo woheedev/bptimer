@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { PageItem } from '$lib/types/ui';
@@ -20,13 +19,15 @@
 					tooltipContent={item.title}
 					variant={item.variant || 'default'}
 					{isActive}
-					{...item.comingSoon ? { disabled: true } : {}}
+					href={item.comingSoon ? undefined : item.url}
+					target={item.external ? '_blank' : undefined}
+					rel={item.external ? 'noopener noreferrer' : undefined}
+					aria-disabled={item.comingSoon ? true : undefined}
 					onclick={item.comingSoon
-						? undefined
-						: item.external
-							? () => window.open(item.url, '_blank')
-							: // eslint-disable-next-line svelte/no-navigation-without-resolve
-								() => goto(item.url)}
+						? (e) => {
+								e.preventDefault();
+							}
+						: undefined}
 				>
 					{#if item.icon}
 						<item.icon />
