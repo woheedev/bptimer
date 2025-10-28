@@ -1,7 +1,6 @@
 name = "bptimer-panel"
 compatibility_date = "2025-10-24"
 workers_dev = false
-preview_urls = false
 send_metrics = false
 
 [assets]
