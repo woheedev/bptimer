@@ -5,16 +5,7 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config: Config = {
 	preprocess: vitePreprocess(),
 	kit: {
-		adapter: adapter(),
-		prerender: {
-			handleHttpError: ({ path, message }) => {
-				// Ignore Chrome DevTools request
-				if (path === '/.well-known/appspecific/com.chrome.devtools.json') {
-					return;
-				}
-				throw new Error(message);
-			}
-		}
+		adapter: adapter()
 	}
 };
 

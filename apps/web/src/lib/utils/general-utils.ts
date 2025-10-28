@@ -1,4 +1,15 @@
-import { DAY, HOUR, JUST_NOW_THRESHOLD, MINUTE, SECOND, STALE_DATA_TIMEOUT } from '$lib/constants';
+import {
+	DAY,
+	HOUR,
+	HP_HIGH_THRESHOLD,
+	JUST_NOW_THRESHOLD,
+	MAX_HP_VALUE,
+	MINUTE,
+	SECOND,
+	STALE_DATA_TIMEOUT,
+	STALE_DATA_TIMEOUT_FULL_HP,
+	STALE_DATA_TIMEOUT_HIGH_HP
+} from '$lib/constants';
 
 /**
  * Gets initials from any name string
@@ -43,14 +54,30 @@ export function formatTimeAgo(dateString: string, now?: Date): string {
 }
 
 /**
- * Determines if data is stale (older than STALE_DATA_TIMEOUT)
- * Can be used for any timestamp-based data freshness check
+ * Determines if data is stale based on HP percentage
+ * - 100% HP: 10 minute timeout
+ * - 80-99% HP: 7 minute timeout
+ * - < 80% HP: 5 minute timeout
  *
  * @param last_updated - The timestamp string to check
+ * @param hp_percentage - The HP percentage to determine timeout
  * @returns True if the data is older than the timeout, false otherwise
  */
-export function isDataStale(last_updated: string): boolean {
-	const timeoutAgo = new Date(Date.now() - STALE_DATA_TIMEOUT);
+export function isDataStale(last_updated: string, hp_percentage?: number): boolean {
+	let timeout = STALE_DATA_TIMEOUT; // Default 5 minutes
+
+	if (hp_percentage !== undefined) {
+		if (hp_percentage === MAX_HP_VALUE) {
+			// 100%
+			timeout = STALE_DATA_TIMEOUT_FULL_HP; // 10 minutes
+		} else if (hp_percentage >= HP_HIGH_THRESHOLD) {
+			// 80-99%
+			timeout = STALE_DATA_TIMEOUT_HIGH_HP; // 7 minutes
+		}
+		// < 80% uses default 5 minutes
+	}
+
+	const timeoutAgo = new Date(Date.now() - timeout);
 	const updateTime = new Date(last_updated);
 	return updateTime < timeoutAgo;
 }

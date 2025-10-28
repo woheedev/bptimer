@@ -21,7 +21,7 @@ export function getMobStatus(
 		return 'dead';
 	}
 
-	if (isDataStale(last_updated)) {
+	if (isDataStale(last_updated, hp_percentage)) {
 		return 'unknown';
 	}
 
@@ -51,26 +51,15 @@ export function getMobImagePath(
 
 /**
  * Updates the latest channels list with a new channel report.
- * This function maintains the list sorted by HP percentage (lowest first) and then by channel number.
- * It also filters out stale data and keeps only the latest 25 entries.
+ * Maintains the same sort order as get-mobs.ts:
+ * - Alive channels first: sorted by HP ascending, then most recent first
+ * - Dead channels last: sorted by most recent first
  */
 export function updateLatestChannels(
 	latest_channels: ChannelEntry[],
 	channel: number,
 	hp_percentage: number
 ): ChannelEntry[] {
-	// Early return if no channels exist
-	if (!latest_channels || latest_channels.length === 0) {
-		return [
-			{
-				channel,
-				hp_percentage: hp_percentage,
-				status: hp_percentage === DEAD_HP_VALUE ? 'dead' : 'alive',
-				last_updated: new Date().toISOString()
-			}
-		];
-	}
-
 	const status = hp_percentage === DEAD_HP_VALUE ? 'dead' : 'alive';
 	const newEntry: ChannelEntry = {
 		channel,
@@ -79,20 +68,30 @@ export function updateLatestChannels(
 		last_updated: new Date().toISOString()
 	};
 
-	// Remove existing entry for this channel and create new array
+	// Remove existing entry for this channel
 	const filtered = latest_channels.filter((c) => c.channel !== channel);
 
-	// Find insertion point (maintain sort: HP asc, then channel asc for ties)
-	const insertIndex = filtered.findIndex(
-		(ch) =>
-			ch.hp_percentage > hp_percentage ||
-			(ch.hp_percentage === hp_percentage && ch.channel > channel)
-	);
+	// Add new entry and re-sort to match get-mobs.ts logic
+	const updated = [...filtered, newEntry];
 
-	// Insert at correct position
-	const targetIndex = insertIndex === -1 ? filtered.length : insertIndex;
-	filtered.splice(targetIndex, 0, newEntry);
+	updated.sort((a, b) => {
+		const aIsDead = a.hp_percentage === 0;
+		const bIsDead = b.hp_percentage === 0;
 
-	// Keep only the latest channels (or less if we have fewer)
-	return filtered.slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
+		// Prioritize alive over dead
+		if (!aIsDead && bIsDead) return -1;
+		if (aIsDead && !bIsDead) return 1;
+
+		// For alive channels: sort by HP ascending, then most recent first
+		if (!aIsDead && !bIsDead) {
+			const hp_diff = a.hp_percentage - b.hp_percentage;
+			if (hp_diff !== 0) return hp_diff;
+			return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
+		}
+
+		// For dead channels: sort by most recent first
+		return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
+	});
+
+	return updated.slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
 }

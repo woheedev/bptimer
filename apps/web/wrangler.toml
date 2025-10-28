@@ -1,7 +1,12 @@
 name = "bptimer-panel"
-main = ".svelte-kit/cloudflare/_worker.js"
 compatibility_date = "2025-10-24"
-assets = { directory = ".svelte-kit/cloudflare/assets", binding = "ASSETS" }
+workers_dev = false
+preview_urls = false
+send_metrics = false
+
+[assets]
+directory = ".svelte-kit/cloudflare/"
+not_found_handling = "single-page-application"
 
 [placement]
 mode = "smart"
@@ -9,5 +14,5 @@ mode = "smart"
 [observability]
 [observability.logs]
 enabled = true
-head_sampling_rate = 1
+head_sampling_rate = 0.1
 invocation_logs = true

@@ -4,7 +4,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Toggle } from '$lib/components/ui/toggle';
-	import { DEAD_HP_VALUE, LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
+	import { LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
 	import { favoriteMobsStore } from '$lib/stores/favorite-mobs.svelte';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getMobImagePath } from '$lib/utils/mob-utils';
@@ -48,23 +48,20 @@
 
 	// Compute pills array
 	let channelPills = $derived.by(() => {
-		const activePills = latestChannels
-			.filter((channel) => channel.hp_percentage > DEAD_HP_VALUE) // Filter out dead channels (0 HP)
-			.map((channel) => ({
-				channelNumber: channel.channel,
-				status: channel.status,
-				hpPercentage: channel.hp_percentage
-			}));
+		const channelData = latestChannels.map((channel) => ({
+			channelNumber: channel.channel,
+			status: channel.status,
+			hpPercentage: channel.hp_percentage
+		}));
 
-		// Fill remaining slots with empty unknown pills
-		const emptySlots = LATEST_CHANNELS_DISPLAY_COUNT - activePills.length;
+		const emptySlots = LATEST_CHANNELS_DISPLAY_COUNT - channelData.length;
 		const emptyPills = Array.from({ length: Math.max(0, emptySlots) }, () => ({
 			channelNumber: 0,
 			status: 'unknown' as const,
 			hpPercentage: 0
 		}));
 
-		return [...activePills, ...emptyPills];
+		return [...channelData, ...emptyPills];
 	});
 
 	let isFavorited = $derived.by(() => favoriteMobsStore.favoriteMobs.has(mob.id));

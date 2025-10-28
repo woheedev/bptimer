@@ -37,7 +37,7 @@ export async function getChannels(bossId: string): Promise<
 					last_update: last_update
 				};
 			})
-			.filter((channel) => !isDataStale(channel.last_update)) // Exclude stale data
+			.filter((channel) => !isDataStale(channel.last_update, channel.hp_percentage)) // Exclude stale data
 			.sort((a, b) => a.hp_percentage - b.hp_percentage); // Sort by lowest HP first
 
 		return processed_channels;

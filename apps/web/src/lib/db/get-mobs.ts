@@ -71,13 +71,26 @@ async function getMobsByType(
 
 			// Apply filtering and sorting logic
 			const sorted_channels = channel_reports
-				.filter((channel) => !isDataStale(channel.last_updated)) // Exclude stale entries
+				.filter((channel) => !isDataStale(channel.last_updated, channel.hp_percentage))
 				.sort((a, b) => {
-					const hp_difference = a.hp_percentage - b.hp_percentage;
-					if (hp_difference !== 0) return hp_difference;
-					return a.channel - b.channel; // Sort by channel number ascending for ties
+					const aIsDead = a.hp_percentage === 0;
+					const bIsDead = b.hp_percentage === 0;
+
+					// Prioritize alive over dead
+					if (!aIsDead && bIsDead) return -1;
+					if (aIsDead && !bIsDead) return 1;
+
+					// For alive channels: sort by HP ascending, then most recent first
+					if (!aIsDead && !bIsDead) {
+						const hp_diff = a.hp_percentage - b.hp_percentage;
+						if (hp_diff !== 0) return hp_diff;
+						return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
+					}
+
+					// For dead channels: sort by most recent first
+					return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
 				})
-				.slice(0, LATEST_CHANNELS_DISPLAY_COUNT); // Limit to most relevant channels
+				.slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
 
 			return {
 				id: mob.id,
@@ -175,13 +188,26 @@ export async function getMobsByIds(
 
 			// Apply filtering and sorting logic
 			const sorted_channels = channel_reports
-				.filter((channel) => !isDataStale(channel.last_updated)) // Exclude stale entries
+				.filter((channel) => !isDataStale(channel.last_updated, channel.hp_percentage))
 				.sort((a, b) => {
-					const hp_difference = a.hp_percentage - b.hp_percentage;
-					if (hp_difference !== 0) return hp_difference;
-					return a.channel - b.channel; // Sort by channel number ascending for ties
+					const aIsDead = a.hp_percentage === 0;
+					const bIsDead = b.hp_percentage === 0;
+
+					// Prioritize alive over dead
+					if (!aIsDead && bIsDead) return -1;
+					if (aIsDead && !bIsDead) return 1;
+
+					// For alive channels: sort by HP ascending, then most recent first
+					if (!aIsDead && !bIsDead) {
+						const hp_diff = a.hp_percentage - b.hp_percentage;
+						if (hp_diff !== 0) return hp_diff;
+						return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
+					}
+
+					// For dead channels: sort by most recent first
+					return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
 				})
-				.slice(0, LATEST_CHANNELS_DISPLAY_COUNT); // Limit to most relevant channels
+				.slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
 
 			return {
 				id: mob.id,

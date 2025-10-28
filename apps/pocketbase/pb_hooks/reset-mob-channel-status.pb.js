@@ -6,9 +6,16 @@
  * This file handles automated mob respawn logic based on respawn_time values.
  *
  * Scenario 1: Reset mob_channel_status entries based on respawn_time
- * - If respawn_time is 0: Reset at the top of every hour
+ * - If respawn_time is 0: Reset at the top of every hour (for bosses)
  * - If respawn_time is 30: Reset at the 30-minute mark
+ * - For magical creatures: Reset at specific UTC hours (Lovely: 12,16,20; Breezy: 14,18,22)
  */
+
+// Reset hours for magical creatures (UTC times to avoid DST changes)
+const magicalCreatureResetHours = {
+  'Lovely Boarlet': [12, 16, 20],
+  'Breezy Boarlet': [14, 18, 22]
+};
 
 // Check for mob respawns every minute
 cronAdd('mobRespawn', '* * * * *', () => {
@@ -22,10 +29,9 @@ cronAdd('mobRespawn', '* * * * *', () => {
     );
 
     // Find mobs that should respawn at the current minute
-    // Only consider boss type mobs with respawn_time matching current minute
     const respawningMobs = $app.findRecordsByFilter(
       'mobs', // collection
-      `type = 'boss' && respawn_time = ${currentMinute}`, // filter
+      `respawn_time = ${currentMinute}`, // filter
       '', // sort
       0, // limit
       0 // offset
@@ -43,6 +49,19 @@ cronAdd('mobRespawn', '* * * * *', () => {
     for (const mob of respawningMobs) {
       const mobName = mob.get('name');
       const mobId = mob.id;
+      const mobType = mob.get('type');
+
+      // Determine if this mob should reset based on type and time
+      let shouldReset = false;
+      if (mobType === 'boss') {
+        shouldReset = true;
+      } else if (mobType === 'magical_creature') {
+        shouldReset = magicalCreatureResetHours[mobName]?.includes(currentHour);
+      }
+
+      if (!shouldReset) {
+        continue;
+      }
 
       try {
         // Find all channel status records for this mob
