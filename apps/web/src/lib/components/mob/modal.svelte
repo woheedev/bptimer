@@ -127,9 +127,9 @@
 		}
 	});
 
-	// Auto-refresh logic
+	// Auto-refresh logic - temporarily disabled
 	$effect(() => {
-		if (autoRefreshStore.enabled && open && mobId) {
+		if (false && autoRefreshStore.enabled && open && mobId) {
 			const interval = setInterval(() => {
 				handleRefresh(true);
 			}, AUTO_REFRESH_INTERVAL);
