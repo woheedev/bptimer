@@ -98,6 +98,7 @@ async function getMobsByType(
 				name: mob.name,
 				type: mob.type,
 				total_channels: mob.expand?.map?.total_channels || 0,
+				respawn_time: mob.respawn_time,
 				latestChannels: sorted_channels
 			};
 		});
@@ -215,6 +216,7 @@ export async function getMobsByIds(
 				name: mob.name,
 				type: mob.type,
 				total_channels: mob.expand?.map?.total_channels || 0,
+				respawn_time: mob.respawn_time,
 				latestChannels: sorted_channels
 			};
 		});

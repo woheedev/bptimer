@@ -32,6 +32,12 @@ export const LATEST_CHANNELS_DISPLAY_COUNT = 15;
 export const MAX_SEARCH_QUERY_LENGTH = 100;
 export const MOBILE_BREAKPOINT = 768; // px
 
+// Mob respawn constants
+export const MAGICAL_CREATURE_RESET_HOURS = {
+	'Lovely Boarlet': [12, 16, 20],
+	'Breezy Boarlet': [14, 18, 22]
+};
+
 // Storage keys
 export const AUTO_REFRESH_STORAGE_KEY = 'auto-refresh-enabled';
 export const FAVORITE_MOBS_STORAGE_KEY = 'favorite-mobs';

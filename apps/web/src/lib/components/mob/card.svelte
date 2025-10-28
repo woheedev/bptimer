@@ -3,10 +3,20 @@
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { Progress } from '$lib/components/ui/progress/index.js';
 	import { Toggle } from '$lib/components/ui/toggle';
-	import { LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
+	import {
+		LATEST_CHANNELS_DISPLAY_COUNT,
+		MAGICAL_CREATURE_RESET_HOURS,
+		SECOND
+	} from '$lib/constants';
 	import { favoriteMobsStore } from '$lib/stores/favorite-mobs.svelte';
-	import { getInitials } from '$lib/utils/general-utils';
+	import { formatCountdown } from '$lib/utils/event-timer';
+	import {
+		calculateRespawnProgress,
+		getInitials,
+		getNextRespawnTime
+	} from '$lib/utils/general-utils';
 	import { getMobImagePath } from '$lib/utils/mob-utils';
 	import Heart from '@lucide/svelte/icons/heart';
 
@@ -22,6 +32,7 @@
 			name: string;
 			uid: number;
 			total_channels: number;
+			respawn_time?: number;
 		};
 		latestChannels?: Array<{
 			channel: number;
@@ -65,6 +76,50 @@
 	});
 
 	let isFavorited = $derived.by(() => favoriteMobsStore.favoriteMobs.has(mob.id));
+
+	// Respawn countdown logic
+	let nextRespawnTime = $derived.by(() => {
+		if (
+			type === 'boss' ||
+			MAGICAL_CREATURE_RESET_HOURS[mob.name as keyof typeof MAGICAL_CREATURE_RESET_HOURS]
+		) {
+			return getNextRespawnTime({
+				name: mob.name,
+				type,
+				respawn_time: mob.respawn_time
+			});
+		}
+		return null;
+	});
+
+	let countdownText = $state('');
+	let progressValue = $state(0);
+
+	// Update countdown every second
+	$effect(() => {
+		if (nextRespawnTime) {
+			const updateCountdown = () => {
+				const now = Date.now();
+				const timeLeft = nextRespawnTime!.getTime() - now;
+
+				if (timeLeft <= 0) {
+					countdownText = 'Respawning...';
+					progressValue = 100;
+				} else {
+					countdownText = formatCountdown(timeLeft);
+					progressValue = calculateRespawnProgress(
+						nextRespawnTime!,
+						type as 'boss' | 'magical_creature',
+						mob.name
+					);
+				}
+			};
+
+			updateCountdown();
+			const interval = setInterval(updateCountdown, SECOND);
+			return () => clearInterval(interval);
+		}
+	});
 </script>
 
 <Card.Root class="@container/card flex h-full flex-col justify-between">
@@ -83,6 +138,19 @@
 	</Card.Header>
 
 	<Card.Content class="space-y-4">
+		<!-- Progress bar area -->
+		<div class="flex h-4 flex-col justify-end">
+			{#if nextRespawnTime}
+				<div class="space-y-2">
+					<div class="text-muted-foreground flex justify-between text-xs">
+						<span>Time Until Respawn</span>
+						<span>{countdownText}</span>
+					</div>
+					<Progress value={progressValue} class="h-2" />
+				</div>
+			{/if}
+		</div>
+
 		<!-- Latest 25 Reported Channels (5x5 Grid) -->
 		<div class="grid grid-cols-5 justify-center gap-2">
 			{#each channelPills as pill, index (index)}

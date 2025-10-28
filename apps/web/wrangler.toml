@@ -8,9 +8,6 @@ send_metrics = false
 directory = ".svelte-kit/cloudflare/"
 not_found_handling = "single-page-application"
 
-[placement]
-mode = "smart"
-
 [observability]
 [observability.logs]
 enabled = true

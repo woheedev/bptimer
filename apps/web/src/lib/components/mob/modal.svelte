@@ -8,11 +8,12 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
-	import { DEFAULT_HP_VALUE } from '$lib/constants';
+	import { AUTO_REFRESH_INTERVAL, DEFAULT_HP_VALUE } from '$lib/constants';
 	import { createReport } from '$lib/db/create-reports';
 	import { getChannels } from '$lib/db/get-channels';
 	import { getChannelReports, getLatestMobReports } from '$lib/db/get-reports';
 	import { pb } from '$lib/pocketbase';
+	import { autoRefreshStore } from '$lib/stores/auto-refresh.svelte';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getMobImagePath } from '$lib/utils/mob-utils';
@@ -126,8 +127,20 @@
 		}
 	});
 
-	async function fetchMobDetails() {
-		ui_state.isLoading = true;
+	// Auto-refresh logic
+	$effect(() => {
+		if (autoRefreshStore.enabled && open && mobId) {
+			const interval = setInterval(() => {
+				handleRefresh(true);
+			}, AUTO_REFRESH_INTERVAL);
+			return () => clearInterval(interval);
+		}
+	});
+
+	async function fetchMobDetails(skipLoading = false) {
+		if (!skipLoading) {
+			ui_state.isLoading = true;
+		}
 		try {
 			// Validate totalChannels is available
 			if (!totalChannels || totalChannels <= 0) {
@@ -174,15 +187,19 @@
 
 			data_state.channels = all_channels;
 
-			// Fetch latest 10 reports for this mob
-			data_state.reports = await getLatestMobReports(mobId, 10);
+			// Only fetch latest reports if no specific channel is selected
+			if (!initialSelectedChannel) {
+				data_state.reports = await getLatestMobReports(mobId, 10);
+			}
 		} catch (error) {
 			// Store error for display
 			const error_msg = error instanceof Error ? error.message : 'Failed to load mob details';
 			ui_state.errorMessage = error_msg;
 			ui_state.hasError = true;
 		} finally {
-			ui_state.isLoading = false;
+			if (!skipLoading) {
+				ui_state.isLoading = false;
+			}
 		}
 	}
 
@@ -254,13 +271,13 @@
 		fetchMobDetails();
 	}
 
-	async function handleRefresh() {
+	async function handleRefresh(skipLoading = false) {
 		// Always refresh channel grid
-		await fetchMobDetails();
+		await fetchMobDetails(skipLoading);
 
 		// If a channel is selected, also refresh its specific reports
 		if (submission_state.selectedChannel) {
-			await fetchChannelReports(submission_state.selectedChannel);
+			await fetchChannelReports(submission_state.selectedChannel, skipLoading);
 		}
 		// If no channel selected, fetchMobDetails already refreshed the latest reports
 	}
@@ -391,7 +408,7 @@
 							{/if}
 						</Toggle>
 						<Button
-							onclick={handleRefresh}
+							onclick={() => handleRefresh(false)}
 							variant="outline"
 							size="sm"
 							disabled={ui_state.isLoading}

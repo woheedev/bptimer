@@ -6,11 +6,11 @@ import { AUTO_REFRESH_STORAGE_KEY } from '$lib/constants';
  * Persists to localStorage
  */
 function createAutoRefreshStore() {
-	let enabled = $state(false);
+	let enabled = $state(true);
 
 	if (browser) {
 		const stored = localStorage.getItem(AUTO_REFRESH_STORAGE_KEY);
-		enabled = stored === 'true';
+		enabled = stored !== null ? stored === 'true' : true;
 	}
 
 	function setEnabled(value: boolean) {

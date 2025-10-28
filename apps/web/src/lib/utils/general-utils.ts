@@ -3,6 +3,7 @@ import {
 	HOUR,
 	HP_HIGH_THRESHOLD,
 	JUST_NOW_THRESHOLD,
+	MAGICAL_CREATURE_RESET_HOURS,
 	MAX_HP_VALUE,
 	MINUTE,
 	SECOND,
@@ -55,6 +56,7 @@ export function formatTimeAgo(dateString: string, now?: Date): string {
 
 /**
  * Determines if data is stale based on HP percentage
+ * - Dead mobs (0% HP) are never considered stale
  * - 100% HP: 10 minute timeout
  * - 80-99% HP: 7 minute timeout
  * - < 80% HP: 5 minute timeout
@@ -64,6 +66,11 @@ export function formatTimeAgo(dateString: string, now?: Date): string {
  * @returns True if the data is older than the timeout, false otherwise
  */
 export function isDataStale(last_updated: string, hp_percentage?: number): boolean {
+	// Dead mobs are never considered stale
+	if (hp_percentage === 0) {
+		return false;
+	}
+
 	let timeout = STALE_DATA_TIMEOUT; // Default 5 minutes
 
 	if (hp_percentage !== undefined) {
@@ -95,4 +102,120 @@ export function toSnakeCase(str: string): string {
 		.toLowerCase()
 		.replace(/\s+/g, '_') // Replace spaces with underscores
 		.replace(/[^a-z0-9_]/g, ''); // Remove any non-alphanumeric characters except underscores
+}
+
+/**
+ * Calculates the next respawn time for a mob based on its type and respawn_time
+ * @param mob - The mob object
+ * @returns Date object for next respawn, or null if no specific respawn schedule is found such as the nappos and gold boarlet
+ */
+export function getNextRespawnTime(mob: {
+	name: string;
+	type: string;
+	respawn_time?: number;
+}): Date | null {
+	const now = new Date();
+	const currentHour = now.getUTCHours();
+	const currentMinute = now.getUTCMinutes();
+
+	if (mob.type === 'boss') {
+		// Bosses respawn at :00 or :30 based on respawn_time
+		if (mob.respawn_time === undefined) {
+			throw new Error(`${mob.name} is missing a respawn_time`);
+		}
+		const targetMinute = mob.respawn_time;
+		const nextRespawn = new Date(now);
+
+		if (currentMinute < targetMinute) {
+			// Same hour
+			nextRespawn.setUTCMinutes(targetMinute, 0, 0);
+		} else {
+			// Next hour
+			nextRespawn.setUTCHours(currentHour + 1, targetMinute, 0, 0);
+		}
+
+		return nextRespawn;
+	} else if (mob.type === 'magical_creature') {
+		// Magical creatures have specific reset hours
+		const hours =
+			MAGICAL_CREATURE_RESET_HOURS[mob.name as keyof typeof MAGICAL_CREATURE_RESET_HOURS];
+		if (!hours) return null;
+
+		// Find next reset hour
+		let nextHour = hours.find((hour) => hour > currentHour);
+		if (!nextHour) {
+			// Wrap to next day
+			nextHour = hours[0];
+		}
+
+		const nextRespawn = new Date(now);
+		if (nextHour > currentHour) {
+			// Same day
+			nextRespawn.setUTCHours(nextHour, 0, 0, 0);
+		} else {
+			// Next day
+			nextRespawn.setUTCDate(nextRespawn.getUTCDate() + 1);
+			nextRespawn.setUTCHours(nextHour, 0, 0, 0);
+		}
+
+		return nextRespawn;
+	}
+
+	return null;
+}
+
+/**
+ * Gets the respawn cycle length in milliseconds for a mob
+ * @param type - The mob type
+ * @param mobName - The mob name (needed for magical creatures)
+ * @returns Cycle length in milliseconds
+ */
+function getRespawnCycleLength(type: 'boss' | 'magical_creature', mobName?: string): number {
+	if (type === 'boss') {
+		return HOUR;
+	}
+
+	// For magical creatures, calculate the actual cycle length
+	const hours = MAGICAL_CREATURE_RESET_HOURS[mobName as keyof typeof MAGICAL_CREATURE_RESET_HOURS];
+	if (!hours) return 0;
+
+	const currentHour = new Date().getUTCHours();
+	const nextHourIndex = hours.findIndex((hour) => hour > currentHour);
+	const nextHour = nextHourIndex >= 0 ? hours[nextHourIndex] : hours[0];
+
+	let prevHour: number;
+	let isNextDay = false;
+
+	if (nextHourIndex > 0) {
+		prevHour = hours[nextHourIndex - 1];
+	} else {
+		prevHour = hours[hours.length - 1];
+		isNextDay = true;
+	}
+
+	const cycleHours = isNextDay ? 24 - prevHour + nextHour : nextHour - prevHour;
+	return cycleHours * HOUR;
+}
+
+/**
+ * Calculates the progress percentage for a countdown timer
+ * @param nextRespawnTime - The next respawn time
+ * @param type - The mob type
+ * @param mobName - The mob name (needed for magical creatures)
+ * @returns Progress percentage (0-100, 100 = just respawned, 0 = about to respawn)
+ */
+export function calculateRespawnProgress(
+	nextRespawnTime: Date,
+	type: 'boss' | 'magical_creature',
+	mobName?: string
+): number {
+	const now = Date.now();
+	const timeLeft = nextRespawnTime.getTime() - now;
+
+	if (timeLeft <= 0) return 0;
+
+	const totalTime = getRespawnCycleLength(type, mobName);
+	if (totalTime === 0) return 0;
+
+	return Math.max(0, Math.min(100, (timeLeft / totalTime) * 100));
 }

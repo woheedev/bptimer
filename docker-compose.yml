@@ -20,6 +20,11 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: '3'
+        max-size: '10m'
   #cloudflare-tunnel:
   #  image: cloudflare/cloudflared:latest
   #  container_name: cloudflare-tunnel
@@ -27,3 +32,8 @@ services:
   #  command: tunnel run
   #  env_file:
   #    - ./apps/web/.env
+  #  logging:
+  #    driver: "json-file"
+  #    options:
+  #      max-file: "3"
+  #      max-size: "10m"

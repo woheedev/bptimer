@@ -1,4 +1,4 @@
-/// <reference path="../pb_data/types.d.ts"">
+/// <reference path="../pb_data/types.d.ts" />
 
 /**
  * Mob Respawn Cron Jobs
@@ -11,14 +11,14 @@
  * - For magical creatures: Reset at specific UTC hours (Lovely: 12,16,20; Breezy: 14,18,22)
  */
 
-// Reset hours for magical creatures (UTC times to avoid DST changes)
-const magicalCreatureResetHours = {
-  'Lovely Boarlet': [12, 16, 20],
-  'Breezy Boarlet': [14, 18, 22]
-};
-
 // Check for mob respawns every minute
 cronAdd('mobRespawn', '* * * * *', () => {
+  // Reset hours for magical creatures (UTC times to avoid DST changes)
+  const magicalCreatureResetHours = {
+    'Lovely Boarlet': [12, 16, 20],
+    'Breezy Boarlet': [14, 18, 22]
+  };
+
   try {
     const now = new Date();
     const currentMinute = now.getMinutes();

@@ -39,7 +39,7 @@
 </script>
 
 {#if clickable}
-	<Tooltip.Root>
+	<Tooltip.Root disableHoverableContent>
 		<Tooltip.Trigger {onclick}>
 			{#snippet child({ props })}
 				<button
@@ -63,7 +63,7 @@
 		</Tooltip.Content>
 	</Tooltip.Root>
 {:else}
-	<Tooltip.Root>
+	<Tooltip.Root disableHoverableContent>
 		<Tooltip.Trigger>
 			{#snippet child({ props })}
 				<div class="channel-pill px-2 py-1 text-xs font-medium" {...props}>

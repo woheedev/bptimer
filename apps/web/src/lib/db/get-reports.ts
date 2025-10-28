@@ -91,34 +91,23 @@ export async function getChannelReports(
 	}>
 > {
 	try {
-		// Try to get channel through mob-channel-status first
-		let status_record = null;
-		try {
-			status_record = await pb.collection('mob_channel_status').getFirstListItem(`
-				mob = "${mobId}" && channel.number = ${channelNumber}
-			`);
-		} catch {
-			// Silent fail - WIP
-		}
+		// First, get the mob to find its map
+		const mobRecord = await pb.collection('mobs').getOne(mobId);
+		const mapId = mobRecord.map;
 
-		// If we found a status record, get its channel ID
-		let channel_id = status_record?.channel || null;
+		// Find the channel record with the given number and map
+		const channel_record = await pb
+			.collection('channels')
+			.getFirstListItem(`number = ${channelNumber} && map = "${mapId}"`);
 
-		// If not found via status, try direct channel lookup
-		if (!channel_id && status_record?.channel) {
-			const status_expanded = await pb
-				.collection('mob_channel_status')
-				.getFirstListItem(`mob = "${mobId}" && channel.number = ${channelNumber}`, {
-					expand: 'channel'
-				});
-			channel_id = status_expanded?.expand?.channel?.id || null;
-		}
-
-		if (!channel_id) {
+		if (!channel_record) {
+			console.warn(`Channel ${channelNumber} not found for mob ${mobId}`);
 			return [];
 		}
 
-		// Fetch the latest 10 reports for this specific channel
+		const channel_id = channel_record.id;
+
+		// Fetch the latest 10 reports for this specific channel and mob
 		const reports = await pb.collection('hp_reports').getList(1, 10, {
 			filter: `mob = "${mobId}" && channel = "${channel_id}"`,
 			sort: '-created',
