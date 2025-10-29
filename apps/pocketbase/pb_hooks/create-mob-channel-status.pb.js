@@ -36,6 +36,35 @@ onRecordAfterCreateSuccess((e) => {
       statusRecord.set('last_update', new Date().toISOString());
       e.app.save(statusRecord);
     }
+
+    // Also update mob_channel_status_sse
+    try {
+      let statusSseRecord;
+      try {
+        statusSseRecord = e.app.findFirstRecordByFilter(
+          'mob_channel_status_sse',
+          `mob = "${mobId}" && channel_number = ${channelNumber}`
+        );
+      } catch {
+        // If record doesn't exist, create it
+        statusSseRecord = new Record(e.app.findCollectionByNameOrId('mob_channel_status_sse'), {
+          mob: mobId,
+          channel_number: channelNumber,
+          last_hp: hpPercentage,
+          last_update: new Date().toISOString()
+        });
+        e.app.save(statusSseRecord);
+      }
+
+      // Update record
+      if (statusSseRecord) {
+        statusSseRecord.set('last_hp', hpPercentage);
+        statusSseRecord.set('last_update', new Date().toISOString());
+        e.app.save(statusSseRecord);
+      }
+    } catch (error) {
+      console.error('Error in mob_channel_status_sse reports hook:', error);
+    }
   } catch (error) {
     console.error('Error in mob_channel_status reports hook:', error);
   }

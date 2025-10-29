@@ -1,7 +1,6 @@
 import { browser } from '$app/environment';
 import {
 	LATEST_CHANNELS_DISPLAY_COUNT,
-	MAGICAL_CREATURE_RESET_HOURS,
 	MAX_REALTIME_RETRIES,
 	REALTIME_DEBOUNCE_DELAY,
 	REALTIME_RETRY_BASE_DELAY
@@ -61,11 +60,20 @@ function createRealtimeMobsStore() {
 			});
 
 			// Subscribe to channel status changes (always needed for container)
-			pbRealtime.collection('mob_channel_status').subscribe('*', (data) => {
+			pbRealtime.collection('mob_channel_status_sse').subscribe('*', (data) => {
 				debouncedCallback({
 					action: data.action,
 					record: data.record,
-					collection: 'mob_channel_status'
+					collection: 'mob_channel_status_sse'
+				});
+			});
+
+			// Subscribe to mob reset events
+			pbRealtime.collection('mob_reset_events').subscribe('*', (data) => {
+				debouncedCallback({
+					action: data.action,
+					record: data.record,
+					collection: 'mob_reset_events'
 				});
 			});
 
@@ -79,7 +87,8 @@ function createRealtimeMobsStore() {
 				}
 				eventQueue = []; // Clear any pending events
 				pbRealtime.collection('mobs').unsubscribe();
-				pbRealtime.collection('mob_channel_status').unsubscribe();
+				pbRealtime.collection('mob_channel_status_sse').unsubscribe();
+				pbRealtime.collection('mob_reset_events').unsubscribe();
 				isConnected = false;
 			};
 		} catch (error) {
@@ -108,8 +117,10 @@ function createRealtimeMobsStore() {
 
 		if (collection === 'mobs') {
 			return handleMobUpdate(mobs, action, record, type, mobIds);
-		} else if (collection === 'mob_channel_status') {
+		} else if (collection === 'mob_channel_status_sse') {
 			return handleChannelStatusUpdate(mobs, action, record);
+		} else if (collection === 'mob_reset_events') {
+			return handleResetEvent(mobs, action, record);
 		}
 
 		return mobs;
@@ -220,6 +231,48 @@ function createRealtimeMobsStore() {
 	}
 
 	/**
+	 * Auto-resets a mob's channels to 100% HP when triggered by server reset event
+	 * Called when client receives SSE event indicating server has reset the mob
+	 * @param mob - The mob to reset
+	 * @returns Updated mob with all channels set to 100% HP
+	 */
+	function autoResetMob(mob: MobWithChannels): MobWithChannels {
+		const resetTime = new Date().toISOString();
+
+		const resetChannels: ChannelEntry[] = Array.from({ length: mob.total_channels }, (_, i) => ({
+			channel: i + 1,
+			hp_percentage: 100,
+			status: 'alive' as const,
+			last_updated: resetTime
+		}));
+
+		return {
+			...mob,
+			latestChannels: resetChannels
+		};
+	}
+
+	function handleResetEvent(
+		mobs: MobWithChannels[],
+		action: string,
+		record: Record<string, unknown>
+	): MobWithChannels[] {
+		if (action === 'create' && record.type === 'reset') {
+			const mobId = record.mob as string;
+			const mobIndex = mobs.findIndex((m) => m.id === mobId);
+			if (mobIndex !== -1) {
+				const mob = mobs[mobIndex];
+				const resetMob = autoResetMob(mob);
+				const updatedMobs = [...mobs];
+				updatedMobs[mobIndex] = resetMob;
+				return updatedMobs;
+			}
+		}
+
+		return mobs;
+	}
+
+	/**
 	 * Filters out stale channels from the current mobs array
 	 * This should be called periodically to remove channels that have become stale
 	 * @param mobs - Current mobs array
@@ -244,89 +297,13 @@ function createRealtimeMobsStore() {
 		});
 	}
 
-	/**
-	 * Checks if a mob should auto-reset based on current time
-	 * @param mob - The mob to check
-	 * @param now - Current date/time
-	 * @returns True if the mob should reset its channels to 100% HP
-	 */
-	function shouldAutoReset(mob: MobWithChannels, now: Date): boolean {
-		const currentMinute = now.getUTCMinutes();
-		const currentHour = now.getUTCHours();
-
-		if (mob.type === 'boss') {
-			return mob.respawn_time === currentMinute;
-		} else if (mob.type === 'magical_creature') {
-			// Magical creatures reset at :00 on specific hours
-			if (currentMinute !== 0) return false;
-
-			const resetHours =
-				MAGICAL_CREATURE_RESET_HOURS[mob.name as keyof typeof MAGICAL_CREATURE_RESET_HOURS];
-			return resetHours?.includes(currentHour) ?? false;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Auto-resets a mob's channels to 100% HP locally (client-side only)
-	 * @param mob - The mob to reset
-	 * @returns Updated mob with all channels set to 100% HP
-	 */
-	function autoResetMob(mob: MobWithChannels): MobWithChannels {
-		const resetTime = new Date().toISOString();
-
-		const resetChannels: ChannelEntry[] = Array.from({ length: mob.total_channels }, (_, i) => ({
-			channel: i + 1,
-			hp_percentage: 100,
-			status: 'alive' as const,
-			last_updated: resetTime
-		}));
-
-		return {
-			...mob,
-			latestChannels: resetChannels
-		};
-	}
-
-	/**
-	 * Checks all mobs for scheduled resets and auto-resets them locally
-	 * @param mobs - Current mobs array
-	 * @returns Updated mobs array with auto-reset mobs
-	 */
-	function checkAndAutoResetMobs(mobs: MobWithChannels[]): MobWithChannels[] {
-		const now = new Date();
-
-		return mobs.map((mob) => {
-			if (shouldAutoReset(mob, now)) {
-				/* Not used at the moment
-				// Check if any channel was updated recently - race check
-				const hasRecentUpdate = mob.latestChannels?.some((channel) => {
-					const lastUpdate = new Date(channel.last_updated).getTime();
-					const timeSinceUpdate = now.getTime() - lastUpdate;
-					return timeSinceUpdate < 60000; // 60 seconds
-				});
-
-				// Skip reset if we received a recent SSE update
-				if (hasRecentUpdate) {
-					return mob;
-				}
-				*/
-
-				return autoResetMob(mob);
-			}
-			return mob;
-		});
-	}
-
 	return {
 		get isConnected() {
 			return isConnected;
 		},
 		subscribeToMobs,
 		handleRealtimeUpdate,
-		filterStaleChannels,
-		checkAndAutoResetMobs
+		filterStaleChannels
 	};
 }
 

@@ -44,6 +44,7 @@ cronAdd('mobRespawn', '* * * * *', () => {
     }
 
     let totalResetCount = 0;
+    const resetMobs = [];
 
     // Reset each respawning mob's channel status
     for (const mob of respawningMobs) {
@@ -77,7 +78,7 @@ cronAdd('mobRespawn', '* * * * *', () => {
           continue;
         }
 
-        // Reset HP to 100% for all channel status records
+        // Reset HP to 100% for all channel status records individually
         for (const status of statusRecords) {
           status.set('last_hp', 100);
           status.set('last_update', new Date().toISOString());
@@ -85,11 +86,30 @@ cronAdd('mobRespawn', '* * * * *', () => {
           totalResetCount++;
         }
 
+        // Track this mob for event creation
+        resetMobs.push({ id: mobId, name: mobName });
+
         console.log(
           `[Mob Respawn] Reset ${statusRecords.length} channels for ${mobName} to 100% HP`
         );
       } catch (error) {
         console.error(`[Mob Respawn] Error resetting ${mobName}:`, error);
+      }
+    }
+
+    // Create reset events for all reset mobs
+    if (resetMobs.length > 0) {
+      try {
+        for (const mob of resetMobs) {
+          const eventRecord = new Record($app.findCollectionByNameOrId('mob_reset_events'));
+          eventRecord.set('mob', mob.id);
+          eventRecord.set('type', 'reset');
+          eventRecord.set('timestamp', new Date().toISOString());
+          $app.save(eventRecord);
+        }
+        console.log(`[Mob Respawn] Created ${resetMobs.length} reset events`);
+      } catch (error) {
+        console.error('[Mob Respawn] Error creating reset events:', error);
       }
     }
 

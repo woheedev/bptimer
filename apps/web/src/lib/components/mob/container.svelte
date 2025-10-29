@@ -129,9 +129,6 @@
 	$effect(() => {
 		const interval = setInterval(() => {
 			mobs = realtimeMobsStore.filterStaleChannels(mobs);
-
-			// Check for scheduled mob resets (client-side auto-reset)
-			mobs = realtimeMobsStore.checkAndAutoResetMobs(mobs);
 		}, STALE_DATA_CHECK_INTERVAL);
 
 		return () => clearInterval(interval);

@@ -10,7 +10,6 @@ export const DAY = 24 * HOUR;
 export const STALE_DATA_TIMEOUT = 5 * MINUTE; // Default timeout
 export const STALE_DATA_TIMEOUT_FULL_HP = 10 * MINUTE; // For 100% HP
 export const STALE_DATA_TIMEOUT_HIGH_HP = 7 * MINUTE; // For 80-99% HP
-export const AUTO_REFRESH_INTERVAL = 15 * SECOND;
 export const DPS_METER_TOAST_DURATION = 10 * SECOND;
 export const GAME_TIMEZONE_OFFSET = -2; // UTC-2
 export const DEBOUNCE_DELAY = 300; // ms
@@ -45,7 +44,6 @@ export const MAGICAL_CREATURE_RESET_HOURS = {
 };
 
 // Storage keys
-export const AUTO_REFRESH_STORAGE_KEY = 'auto-refresh-enabled';
 export const FAVORITE_MOBS_STORAGE_KEY = 'favorite-mobs';
 export const EVENT_TIMERS_COLLAPSED_STORAGE_KEY = 'event-timers-collapsed';
 
