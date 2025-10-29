@@ -1,6 +1,7 @@
 <script lang="ts">
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
+	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
 	import type { ComponentProps } from 'svelte';
@@ -15,7 +16,7 @@
 </script>
 
 <Sidebar.Root {collapsible} {...restProps}>
-	<Sidebar.Header class="border-sidebar-border h-16 border-b">
+	<Sidebar.Header class="border-sidebar-border h-16 justify-center border-b">
 		<NavigationUser />
 	</Sidebar.Header>
 	<Sidebar.Content>
@@ -25,6 +26,16 @@
 		<Sidebar.Group>
 			<Sidebar.GroupLabel>Partner Sites</Sidebar.GroupLabel>
 			<NavigationMain items={PARTNER_PAGES} />
+		</Sidebar.Group>
+		<Sidebar.Group class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
+			<div class="px-2 py-2">
+				<Alert.Root class="text-xs">
+					<Alert.Title class="text-xs">System Updates</Alert.Title>
+					<Alert.Description class="text-xs leading-relaxed">
+						Sorry for any temporary outages or delays as I work on implementing new features.
+					</Alert.Description>
+				</Alert.Root>
+			</div>
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer class="p-4 {sidebar.state === 'collapsed' ? 'hidden' : ''}">

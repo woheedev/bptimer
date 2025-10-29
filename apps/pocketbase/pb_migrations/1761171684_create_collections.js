@@ -1286,8 +1286,8 @@ migrate(
         viewRule: ''
       },
       {
-        createRule: 'user = @request.auth.id',
-        deleteRule: 'user = @request.auth.id',
+        createRule: null,
+        deleteRule: null,
         fields: [
           {
             autogeneratePattern: '[a-z0-9]{15}',

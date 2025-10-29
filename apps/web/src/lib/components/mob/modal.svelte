@@ -277,7 +277,22 @@
 	function handleBackToAllReports() {
 		submission_state.selectedChannel = null;
 		ui_state.showBackButton = false;
-		fetchMobDetails();
+
+		// Only refresh reports for all channels, don't refetch channel data
+		// Channel grid is already kept up-to-date via realtime updates
+		ui_state.isLoadingReports = true;
+		getLatestMobReports(mobId, 10)
+			.then((reports) => {
+				data_state.reports = reports;
+			})
+			.catch((error) => {
+				console.error('Error loading latest reports:', error);
+				ui_state.errorMessage = 'Failed to load latest reports';
+				ui_state.hasError = true;
+			})
+			.finally(() => {
+				ui_state.isLoadingReports = false;
+			});
 	}
 
 	async function handleRefreshReports(skipLoading = false) {
