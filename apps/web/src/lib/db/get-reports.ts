@@ -14,7 +14,7 @@ function validateHpReports(reports: Record<string, unknown>[]): void {
 export async function getReports(bossId: string): Promise<
 	Array<{
 		id: string;
-		channel: string;
+		channel: number;
 		hp_percentage: number;
 		user: { id: string; name: string; avatar: string };
 		create_time: string;
@@ -28,9 +28,11 @@ export async function getReports(bossId: string): Promise<
 			expand: 'reporter'
 		});
 
+		validateHpReports(reports.items);
+
 		return reports.items.map((report) => ({
 			id: report.id,
-			channel: report.channel,
+			channel: report.channel_number || 0,
 			hp_percentage: report.hp_percentage,
 			user: mapUserRecord(report.expand?.reporter as UserRecordModel),
 			create_time: report.created
@@ -55,11 +57,10 @@ export async function getLatestMobReports(
 > {
 	try {
 		// Fetch the latest X reports for this mob, sorted by newest
-		// Expand both reporter and channel to get channel number
 		const reports = await pb.collection('hp_reports').getList(1, reportCount, {
 			filter: `mob = "${mobId}"`,
 			sort: '-created',
-			expand: 'reporter,channel',
+			expand: 'reporter',
 			requestKey: `mob-reports-${mobId}` // Unique key per mob for parallel requests (prevent auto-cancellation)
 		});
 
@@ -67,7 +68,7 @@ export async function getLatestMobReports(
 
 		return reports.items.map((report) => ({
 			id: report.id,
-			channel: report.expand?.channel?.number || 0, // Use actual channel number from expanded channel relation
+			channel: report.channel_number || 0,
 			hp_percentage: report.hp_percentage,
 			user: mapUserRecord(report.expand?.reporter as UserRecordModel),
 			create_time: report.created
@@ -91,27 +92,11 @@ export async function getChannelReports(
 	}>
 > {
 	try {
-		// First, get the mob to find its map
-		const mobRecord = await pb.collection('mobs').getOne(mobId);
-		const mapId = mobRecord.map;
-
-		// Find the channel record with the given number and map
-		const channel_record = await pb
-			.collection('channels')
-			.getFirstListItem(`number = ${channelNumber} && map = "${mapId}"`);
-
-		if (!channel_record) {
-			console.warn(`Channel ${channelNumber} not found for mob ${mobId}`);
-			return [];
-		}
-
-		const channel_id = channel_record.id;
-
-		// Fetch the latest 10 reports for this specific channel and mob
+		// Query directly by channel number
 		const reports = await pb.collection('hp_reports').getList(1, 10, {
-			filter: `mob = "${mobId}" && channel = "${channel_id}"`,
+			filter: `mob = "${mobId}" && channel_number = ${channelNumber}`,
 			sort: '-created',
-			expand: 'reporter,channel',
+			expand: 'reporter',
 			requestKey: `channel-reports-${mobId}-${channelNumber}` // Unique key per channel
 		});
 
@@ -119,7 +104,7 @@ export async function getChannelReports(
 
 		return reports.items.map((report) => ({
 			id: report.id,
-			channel: report.expand?.channel?.number || channelNumber, // Fallback to input number
+			channel: report.channel_number || channelNumber,
 			hp_percentage: report.hp_percentage,
 			user: mapUserRecord(report.expand?.reporter as UserRecordModel),
 			create_time: report.created

@@ -15,8 +15,7 @@ export async function getChannels(bossId: string): Promise<
 	try {
 		// Fetch all mob_channel_status for this mob
 		const channels = await pb.collection('mob_channel_status').getFullList({
-			filter: `mob = "${bossId}"`,
-			expand: 'channel'
+			filter: `mob = "${bossId}"`
 		});
 
 		// Validate channel status records
@@ -31,14 +30,13 @@ export async function getChannels(bossId: string): Promise<
 				const last_hp = channel.last_hp || 0;
 
 				return {
-					channel: channel.expand?.channel?.number || 0,
+					channel: channel.channel_number || 0,
 					status: getMobStatus(last_hp, last_update),
 					hp_percentage: last_hp,
 					last_update: last_update
 				};
 			})
-			.filter((channel) => !isDataStale(channel.last_update, channel.hp_percentage)) // Exclude stale data
-			.sort((a, b) => a.hp_percentage - b.hp_percentage); // Sort by lowest HP first
+			.filter((channel) => !isDataStale(channel.last_update, channel.hp_percentage)); // Exclude stale data
 
 		return processed_channels;
 	} catch (error) {

@@ -8,25 +8,25 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
-	import { AUTO_REFRESH_INTERVAL, DEFAULT_HP_VALUE } from '$lib/constants';
+	import { DEFAULT_HP_VALUE } from '$lib/constants';
 	import { createReport } from '$lib/db/create-reports';
 	import { getChannels } from '$lib/db/get-channels';
 	import { getChannelReports, getLatestMobReports } from '$lib/db/get-reports';
 	import { pb } from '$lib/pocketbase';
-	import { autoRefreshStore } from '$lib/stores/auto-refresh.svelte';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getMobImagePath } from '$lib/utils/mob-utils';
 	import { mapUserRecord } from '$lib/utils/user-utils';
 	import Eye from '@lucide/svelte/icons/eye';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
-	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+	import { untrack } from 'svelte';
 
 	let {
 		open = false,
 		mobId,
 		mobName,
 		totalChannels,
+		liveChannels = [],
 		onClose,
 		onReportSubmitted,
 		type = 'boss',
@@ -36,6 +36,12 @@
 		mobId: string;
 		mobName: string;
 		totalChannels: number;
+		liveChannels?: Array<{
+			channel: number;
+			status: 'alive' | 'dead' | 'unknown';
+			hp_percentage: number;
+			last_updated: string;
+		}>;
 		onClose?: () => void;
 		onReportSubmitted?: (data: { mobId: string; channel: number; hp_percentage: number }) => void;
 		type?: 'boss' | 'magical_creature' | string;
@@ -54,6 +60,7 @@
 			channel: number;
 			status: 'alive' | 'dead' | 'unknown';
 			hp_percentage: number;
+			last_updated?: string;
 		}>,
 		reports: [] as Array<{
 			id: string;
@@ -127,14 +134,27 @@
 		}
 	});
 
-	// Auto-refresh logic - temporarily disabled
+	// Realtime subscription for channel grid updates
 	$effect(() => {
-		if (false && autoRefreshStore.enabled && open && mobId) {
-			const interval = setInterval(() => {
-				handleRefresh(true);
-			}, AUTO_REFRESH_INTERVAL);
-			return () => clearInterval(interval);
+		if (!browser || !open || !liveChannels.length) return;
+
+		// Use untrack to read current channels without making effect depend on it
+		// This prevents infinite loop
+		const currentChannels = untrack(() => data_state.channels);
+
+		// If no current channels loaded yet, initialize from liveChannels
+		if (currentChannels.length === 0) {
+			data_state.channels = liveChannels;
+			return;
 		}
+
+		// Merge live channel data with existing grid
+		const updated = currentChannels.map((ch) => {
+			const liveData = liveChannels.find((live) => live.channel === ch.channel);
+			return liveData || ch; // Use live data if available, otherwise keep existing
+		});
+
+		data_state.channels = updated;
 	});
 
 	async function fetchMobDetails(skipLoading = false) {
@@ -152,7 +172,7 @@
 			// Fetch existing channel statuses
 			const channel_statuses = await getChannels(mobId);
 
-			// Create a complete channel list with default values for missing ones
+			// Create a complete channel list (1 to totalChannels) with existing data or unknown status
 			const all_channels: Array<{
 				channel: number;
 				status: 'alive' | 'dead' | 'unknown';
@@ -173,17 +193,6 @@
 					});
 				}
 			}
-
-			// Sort channels by last_updated descending (most recent first), unknown channels at end
-			all_channels.sort((a, b) => {
-				const aTime = a.last_updated ? new Date(a.last_updated).getTime() : 0;
-				const bTime = b.last_updated ? new Date(b.last_updated).getTime() : 0;
-				if (aTime !== bTime) {
-					return bTime - aTime; // Descending
-				}
-				// If same time , sort by channel number
-				return a.channel - b.channel;
-			});
 
 			data_state.channels = all_channels;
 
@@ -271,15 +280,21 @@
 		fetchMobDetails();
 	}
 
-	async function handleRefresh(skipLoading = false) {
-		// Always refresh channel grid
-		await fetchMobDetails(skipLoading);
-
-		// If a channel is selected, also refresh its specific reports
+	async function handleRefreshReports(skipLoading = false) {
+		// ONLY refresh reports, not the channel grid (which updates via realtime)
 		if (submission_state.selectedChannel) {
 			await fetchChannelReports(submission_state.selectedChannel, skipLoading);
+		} else {
+			// Refresh latest reports for all channels
+			ui_state.isLoadingReports = true;
+			try {
+				data_state.reports = await getLatestMobReports(mobId, 10);
+			} catch (error) {
+				console.error('Error refreshing latest reports:', error);
+			} finally {
+				ui_state.isLoadingReports = false;
+			}
 		}
-		// If no channel selected, fetchMobDetails already refreshed the latest reports
 	}
 
 	async function handleSubmitReport() {
@@ -407,15 +422,6 @@
 								<EyeOff class="h-4 w-4" />
 							{/if}
 						</Toggle>
-						<Button
-							onclick={() => handleRefresh(false)}
-							variant="outline"
-							size="sm"
-							disabled={ui_state.isLoading}
-							title="Refresh data"
-						>
-							<RefreshCw class="h-4 w-4" />
-						</Button>
 					</div>
 				</div>
 				<div class="bg-background flex-1 overflow-y-auto rounded-lg border p-4 md:flex-1">
@@ -479,6 +485,7 @@
 								reports={data_state.reports}
 								isLoadingReports={ui_state.isLoadingReports}
 								selectedChannel={submission_state.selectedChannel}
+								onRefresh={() => handleRefreshReports(false)}
 							/>
 						</div>
 					</div>
@@ -508,6 +515,7 @@
 										reports={data_state.reports}
 										isLoadingReports={ui_state.isLoadingReports}
 										selectedChannel={submission_state.selectedChannel}
+										onRefresh={() => handleRefreshReports(false)}
 									/>
 								</div>
 							</Tabs.Content>

@@ -63,24 +63,6 @@ export const mapSchema = z.object({
 
 export type Map = z.infer<typeof mapSchema>;
 
-// Channel schema
-export const channelSchema = z.object({
-	id: z
-		.string()
-		.regex(/^[a-z0-9]+$/)
-		.min(15)
-		.max(15),
-	number: z.number().int().min(1).max(1000),
-	map: z
-		.string()
-		.regex(/^[a-z0-9]+$/)
-		.min(15)
-		.max(15), // Map relation ID
-	full: z.boolean().optional()
-});
-
-export type Channel = z.infer<typeof channelSchema>;
-
 // Mob schema
 export const mobSchema = z.object({
 	id: z
@@ -116,11 +98,7 @@ export const hpReportSchema = z.object({
 		.min(15)
 		.max(15),
 	hp_percentage: z.number().int().min(0).max(100),
-	channel: z
-		.string()
-		.regex(/^[a-z0-9]+$/)
-		.min(15)
-		.max(15),
+	channel_number: z.number().int().min(1).max(1000),
 	full: z.boolean().optional(),
 	reporter: z
 		.string()
@@ -169,25 +147,12 @@ export const mobChannelStatusSchema = z.object({
 		.regex(/^[a-z0-9]+$/)
 		.min(15)
 		.max(15),
-	channel: z
-		.string()
-		.regex(/^[a-z0-9]+$/)
-		.min(15)
-		.max(15),
+	channel_number: z.number().int().min(1).max(1000),
 	last_hp: z.number().int().min(0).max(100).nullable(),
 	last_update: z.string()
 });
 
 export type MobChannelStatus = z.infer<typeof mobChannelStatusSchema>;
-
-// Channel management schema
-export const channelStatusSchema = z.object({
-	map: z.string(),
-	channel: z.string(),
-	full: z.boolean()
-});
-
-export type ChannelStatusSchema = z.infer<typeof channelStatusSchema>;
 
 // Input validation schemas for frontend
 export const searchQuerySchema = z.string().min(0).max(MAX_SEARCH_QUERY_LENGTH).trim();

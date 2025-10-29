@@ -4,10 +4,14 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Empty } from '$lib/components/ui/empty';
 	import { Spinner } from '$lib/components/ui/spinner';
-	import { AUTO_REFRESH_INTERVAL, DEBOUNCE_DELAY } from '$lib/constants';
-	import { getBosses, getMagicalCreatures, getMobsByIds } from '$lib/db/get-mobs';
-	import { autoRefreshStore } from '$lib/stores/auto-refresh.svelte';
+	import {
+		DEBOUNCE_DELAY,
+		LATEST_CHANNELS_DISPLAY_COUNT,
+		STALE_DATA_CHECK_INTERVAL
+	} from '$lib/constants';
+	import { realtimeMobsStore } from '$lib/stores/realtime-mobs.svelte';
 	import type { MobWithChannels } from '$lib/types/mobs';
+	import { loadMobsData } from '$lib/utils/mob-filtering';
 	import { updateLatestChannels } from '$lib/utils/mob-utils';
 	import { createDebouncedSearch, filterMobsByName } from '$lib/utils/search.svelte';
 	import { onMount } from 'svelte';
@@ -34,7 +38,6 @@
 			channel: number;
 			status: 'alive' | 'dead' | 'unknown';
 			hp_percentage: number;
-			report_count: number;
 		}>;
 		reports: Array<{
 			id: string;
@@ -55,6 +58,13 @@
 	// Filtered mobs based on search query
 	let filteredMobs = $derived(filterMobsByName(mobs, searchQuery));
 
+	// Get live channels for the selected mob (updated via SSE)
+	let liveChannels = $derived.by(() => {
+		if (!selectedMob) return [];
+		const mob = mobs.find((m) => m.id === selectedMob!.id);
+		return mob?.latestChannels || [];
+	});
+
 	// Create debounced search function
 	export const search = createDebouncedSearch((query) => {
 		searchQuery = query;
@@ -67,20 +77,8 @@
 
 	async function loadMobs() {
 		try {
-			let response;
-			if (mobIds !== undefined) {
-				response = await getMobsByIds(mobIds);
-			} else if (type === 'boss') {
-				response = await getBosses();
-			} else {
-				response = await getMagicalCreatures();
-			}
-
-			if ('data' in response) {
-				mobs = response.data;
-			} else {
-				console.error(`Failed to fetch ${pluralName}:`, response.error);
-			}
+			const response = await loadMobsData(type, mobIds);
+			mobs = response.data;
 		} catch (error) {
 			console.error(`Error fetching ${pluralName}:`, error);
 		}
@@ -103,14 +101,40 @@
 		}
 	});
 
-	// Auto-refresh logic
+	// Realtime subscription
 	$effect(() => {
-		if (autoRefreshStore.enabled) {
-			const interval = setInterval(() => {
+		const cleanup = realtimeMobsStore.subscribeToMobs((events) => {
+			if (events && events.length > 0) {
+				// Process all events at once (batched)
+				let updatedMobs = mobs;
+				for (const eventData of events) {
+					updatedMobs = realtimeMobsStore.handleRealtimeUpdate(
+						updatedMobs,
+						eventData,
+						type,
+						mobIds
+					);
+				}
+				// Single state update after processing all events
+				mobs = updatedMobs;
+			} else {
+				// Fallback to HTTP request if no event data
 				loadMobs();
-			}, AUTO_REFRESH_INTERVAL);
-			return () => clearInterval(interval);
-		}
+			}
+		});
+		return cleanup;
+	});
+
+	// Periodic stale data cleanup for realtime
+	$effect(() => {
+		const interval = setInterval(() => {
+			mobs = realtimeMobsStore.filterStaleChannels(mobs);
+
+			// Check for scheduled mob resets (client-side auto-reset)
+			mobs = realtimeMobsStore.checkAndAutoResetMobs(mobs);
+		}, STALE_DATA_CHECK_INTERVAL);
+
+		return () => clearInterval(interval);
 	});
 
 	function handleViewDetails(
@@ -129,7 +153,7 @@
 			uid: mobUid,
 			type: mobType,
 			total_channels: totalChannels,
-			channels: [],
+			channels: mob?.latestChannels || [], // Pass SSE-updated channels to modal
 			reports: []
 		};
 		selectedChannel = channel || null;
@@ -208,7 +232,7 @@
 					{#each filteredMobs as mob (mob.id)}
 						<MobCard
 							{mob}
-							latestChannels={mob.latestChannels || []}
+							latestChannels={(mob.latestChannels || []).slice(0, LATEST_CHANNELS_DISPLAY_COUNT)}
 							onViewDetails={handleViewDetails}
 							onChannelClick={handleViewDetails}
 							type={isFavorites ? mob.type : type}
@@ -225,6 +249,7 @@
 					mobId={selectedMob.id}
 					mobName={selectedMob.name}
 					totalChannels={selectedMob.total_channels}
+					{liveChannels}
 					onClose={handleCloseModal}
 					onReportSubmitted={handleReportSubmitted}
 					type={selectedMob.type}

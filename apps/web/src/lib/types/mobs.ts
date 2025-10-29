@@ -13,5 +13,6 @@ export interface MobWithChannels {
 	name: string;
 	type: 'boss' | 'magical_creature';
 	total_channels: number;
+	respawn_time?: number;
 	latestChannels?: ChannelEntry[];
 }

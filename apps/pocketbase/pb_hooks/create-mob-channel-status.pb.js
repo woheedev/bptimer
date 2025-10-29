@@ -9,7 +9,7 @@ onRecordAfterCreateSuccess((e) => {
   try {
     const hpReport = e.record;
     const mobId = hpReport.get('mob');
-    const channelId = hpReport.get('channel');
+    const channelNumber = hpReport.get('channel_number');
     const hpPercentage = hpReport.get('hp_percentage');
 
     // Find existing mob_channel_status record
@@ -17,13 +17,13 @@ onRecordAfterCreateSuccess((e) => {
     try {
       statusRecord = e.app.findFirstRecordByFilter(
         'mob_channel_status',
-        `mob = "${mobId}" && channel = "${channelId}"`
+        `mob = "${mobId}" && channel_number = ${channelNumber}`
       );
     } catch {
       // If record doesn't exist, create it
       statusRecord = new Record(e.app.findCollectionByNameOrId('mob_channel_status'), {
         mob: mobId,
-        channel: channelId,
+        channel_number: channelNumber,
         last_hp: hpPercentage,
         last_update: new Date().toISOString()
       });

@@ -1,17 +1,9 @@
 <script lang="ts">
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
-	import { Label } from '$lib/components/ui/label/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { Switch } from '$lib/components/ui/switch/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
-	import { autoRefreshStore } from '$lib/stores/auto-refresh.svelte';
-	import { mode, toggleMode } from 'mode-watcher';
 	import type { ComponentProps } from 'svelte';
-
-	// Reactive store value
-	let isAutoRefreshEnabled = $derived(autoRefreshStore.enabled);
 
 	let {
 		ref = $bindable(null),
@@ -20,8 +12,6 @@
 	}: ComponentProps<typeof Sidebar.Root> = $props();
 
 	const sidebar = Sidebar.useSidebar();
-
-	let isDark = $derived(mode.current === 'dark');
 </script>
 
 <Sidebar.Root {collapsible} {...restProps}>
@@ -39,20 +29,30 @@
 	</Sidebar.Content>
 	<Sidebar.Footer class="p-4 {sidebar.state === 'collapsed' ? 'hidden' : ''}">
 		{#if sidebar.state !== 'collapsed'}
-			<div class="mb-4 flex items-center space-x-2">
-				<Switch
-					id="auto-refresh"
-					onCheckedChange={(checked) => autoRefreshStore.setEnabled(checked)}
-					checked={isAutoRefreshEnabled}
-				/>
-				<Label for="auto-refresh">Auto Refresh</Label>
+			<div class="mb-4">
+				<Sidebar.MenuButton
+					tooltipContent="Join Discord"
+					variant="outline"
+					href="https://discord.gg/3UTC4pfCyC"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="w-full justify-center"
+				>
+					<img src="https://cdn.simpleicons.org/discord/white" alt="Discord" class="h-4 w-4" />
+					<span>Join Discord</span>
+				</Sidebar.MenuButton>
 			</div>
-			<div class="mb-4 flex items-center space-x-2">
-				<Switch id="dark-mode" onCheckedChange={toggleMode} checked={isDark} />
-				<Label for="dark-mode">Dark Mode</Label>
-			</div>
-			<Separator class="mb-4" />
 			<p class="text-center text-sm">Made by Wohee with ❤️</p>
+			<p class="text-center text-xs">
+				<a
+					href="https://ko-fi.com/wohee"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="hover:underline"
+				>
+					Buy me a coffee ☕
+				</a>
+			</p>
 		{/if}
 	</Sidebar.Footer>
 	<Sidebar.Rail />

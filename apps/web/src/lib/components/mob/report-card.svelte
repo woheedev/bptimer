@@ -13,6 +13,7 @@
 			channel: number;
 			hp_percentage: number;
 			user: {
+				id: string;
 				name: string;
 				avatar?: string;
 			};
@@ -22,6 +23,15 @@
 
 	// Get user initials for avatar fallback
 	let user_initials = $derived(getInitials(report.user.name));
+
+	// Special user configuration
+	const specialUsers: Record<string, string> = {
+		fovkhat7zlite07: 'discord.gg/bpsrfarmers',
+		qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs'
+	};
+
+	let isSpecialUser = $derived(report.user.id in specialUsers);
+	let displayName = $derived(specialUsers[report.user.id] ?? report.user.name);
 
 	// Reactive time for live updates
 	let now = $state(Date.now());
@@ -39,7 +49,9 @@
 		<!-- Left side: Avatar + Info -->
 		<div class="flex min-w-0 flex-1 items-center space-x-2">
 			<Avatar.Root class="h-8 w-8 shrink-0">
-				<Avatar.Image src={report.user.avatar} alt={report.user.name} />
+				{#if !isSpecialUser}
+					<Avatar.Image src={report.user.avatar} alt={report.user.name} />
+				{/if}
 				<Avatar.Fallback class="text-sm">
 					{user_initials}
 				</Avatar.Fallback>
@@ -48,7 +60,7 @@
 				<p class="text-muted-foreground truncate text-sm font-medium">
 					Ch {report.channel} • {report.hp_percentage}% HP
 				</p>
-				<p class="truncate text-xs">{report.user.name}</p>
+				<p class="truncate text-xs">{displayName}</p>
 			</div>
 		</div>
 

@@ -219,3 +219,38 @@ export function calculateRespawnProgress(
 
 	return Math.max(0, Math.min(100, (timeLeft / totalTime) * 100));
 }
+
+/**
+ * Sorts channels for mob card display
+ * Priority: alive > dead, then by HP (low to high), then by channel number, dead by most recent
+ *
+ * @param channels - Array of channels to sort
+ * @returns Sorted array (does not mutate original)
+ */
+export function sortChannelsForMobCard<
+	T extends {
+		channel: number;
+		hp_percentage: number;
+		status: 'alive' | 'dead' | 'unknown';
+		last_updated: string;
+	}
+>(channels: T[]): T[] {
+	return [...channels].sort((a, b) => {
+		const aIsDead = a.hp_percentage === 0;
+		const bIsDead = b.hp_percentage === 0;
+
+		// Prioritize alive over dead
+		if (!aIsDead && bIsDead) return -1;
+		if (aIsDead && !bIsDead) return 1;
+
+		// For alive channels: sort by HP ascending, then by channel number
+		if (!aIsDead && !bIsDead) {
+			const hp_diff = a.hp_percentage - b.hp_percentage;
+			if (hp_diff !== 0) return hp_diff;
+			return a.channel - b.channel;
+		}
+
+		// For dead channels: sort by most recent first
+		return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
+	});
+}

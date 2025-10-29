@@ -34,18 +34,10 @@ export async function createReport(
 			);
 		}
 
-		// Find the channel record ID for this channel number and map
-		const channelRecord = await pb
-			.collection('channels')
-			.getFirstListItem(`map = "${boss.map}" && number = ${channel}`);
-		if (!channelRecord) {
-			throw new Error(`Channel ${channel} not found for this mob's map`);
-		}
-
 		// Create the HP report
 		const report = await pb.collection('hp_reports').create({
 			mob: boss_id,
-			channel: channelRecord.id,
+			channel_number: channel,
 			hp_percentage: hp_percentage,
 			reporter: reporter_id
 		});

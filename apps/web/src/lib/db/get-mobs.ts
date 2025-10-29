@@ -2,7 +2,7 @@ import { LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
 import { pb } from '$lib/pocketbase';
 import { mobChannelStatusSchema, mobSchema } from '$lib/schemas';
 import type { ChannelEntry, MobWithChannels } from '$lib/types/mobs';
-import { isDataStale } from '$lib/utils/general-utils';
+import { isDataStale, sortChannelsForMobCard } from '$lib/utils/general-utils';
 import { getMobStatus } from '$lib/utils/mob-utils';
 import { validateWithSchema } from '$lib/utils/validation';
 
@@ -30,7 +30,6 @@ async function getMobsByType(
 		const mob_ids = records.map((m) => m.id);
 		const all_channel_statuses = await pb.collection('mob_channel_status').getFullList({
 			filter: mob_ids.map((id) => `mob = "${id}"`).join(' || '),
-			expand: 'channel',
 			requestKey: `all-channel-statuses-${type}` // Unique request key
 		});
 
@@ -44,7 +43,7 @@ async function getMobsByType(
 
 		for (const status of all_channel_statuses) {
 			const mob_id = status.mob;
-			const channel_number = status.expand?.channel?.number || 0;
+			const channel_number = status.channel_number || 0;
 			const last_update = status.last_update || status.updated;
 
 			if (!statuses_by_mob.has(mob_id)) {
@@ -69,28 +68,14 @@ async function getMobsByType(
 				? Array.from(channel_statuses.values())
 				: [];
 
-			// Apply filtering and sorting logic
-			const sorted_channels = channel_reports
-				.filter((channel) => !isDataStale(channel.last_updated, channel.hp_percentage))
-				.sort((a, b) => {
-					const aIsDead = a.hp_percentage === 0;
-					const bIsDead = b.hp_percentage === 0;
-
-					// Prioritize alive over dead
-					if (!aIsDead && bIsDead) return -1;
-					if (aIsDead && !bIsDead) return 1;
-
-					// For alive channels: sort by HP ascending, then most recent first
-					if (!aIsDead && !bIsDead) {
-						const hp_diff = a.hp_percentage - b.hp_percentage;
-						if (hp_diff !== 0) return hp_diff;
-						return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
-					}
-
-					// For dead channels: sort by most recent first
-					return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
-				})
-				.slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
+			// Filter stale data, sort, and take top channels
+			const filtered_channels = channel_reports.filter(
+				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
+			);
+			const sorted_channels = sortChannelsForMobCard(filtered_channels).slice(
+				0,
+				LATEST_CHANNELS_DISPLAY_COUNT
+			);
 
 			return {
 				id: mob.id,
@@ -148,7 +133,6 @@ export async function getMobsByIds(
 		const mob_ids = records.map((m) => m.id);
 		const all_channel_statuses = await pb.collection('mob_channel_status').getFullList({
 			filter: mob_ids.map((id) => `mob = "${id}"`).join(' || '),
-			expand: 'channel',
 			requestKey: `all-channel-statuses-by-ids-${ids.join('-')}` // Unique request key
 		});
 
@@ -162,7 +146,7 @@ export async function getMobsByIds(
 
 		for (const status of all_channel_statuses) {
 			const mob_id = status.mob;
-			const channel_number = status.expand?.channel?.number || 0;
+			const channel_number = status.channel_number || 0;
 			const last_update = status.last_update || status.updated;
 
 			if (!statuses_by_mob.has(mob_id)) {
@@ -187,28 +171,14 @@ export async function getMobsByIds(
 				? Array.from(channel_statuses.values())
 				: [];
 
-			// Apply filtering and sorting logic
-			const sorted_channels = channel_reports
-				.filter((channel) => !isDataStale(channel.last_updated, channel.hp_percentage))
-				.sort((a, b) => {
-					const aIsDead = a.hp_percentage === 0;
-					const bIsDead = b.hp_percentage === 0;
-
-					// Prioritize alive over dead
-					if (!aIsDead && bIsDead) return -1;
-					if (aIsDead && !bIsDead) return 1;
-
-					// For alive channels: sort by HP ascending, then most recent first
-					if (!aIsDead && !bIsDead) {
-						const hp_diff = a.hp_percentage - b.hp_percentage;
-						if (hp_diff !== 0) return hp_diff;
-						return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
-					}
-
-					// For dead channels: sort by most recent first
-					return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
-				})
-				.slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
+			// Filter stale data, sort, and take top channels
+			const filtered_channels = channel_reports.filter(
+				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
+			);
+			const sorted_channels = sortChannelsForMobCard(filtered_channels).slice(
+				0,
+				LATEST_CHANNELS_DISPLAY_COUNT
+			);
 
 			return {
 				id: mob.id,

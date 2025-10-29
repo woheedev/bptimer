@@ -127,60 +127,33 @@ migrate(
       mobRecords.push(record);
     }
 
-    // Generate channels programmatically for each map (upsert)
-    const channelsCollection = app.findCollectionByNameOrId('channels');
-    const channelRecords = [];
-    let channelsCreated = 0;
-
-    for (const mapRecord of mapRecords) {
-      const totalChannels = mapRecord.getInt('total_channels');
-
-      for (let channelNum = 1; channelNum <= totalChannels; channelNum++) {
-        const existing = app.findRecordsByFilter(
-          channelsCollection,
-          `number = ${channelNum} && map = "${mapRecord.id}"`
-        );
-        let channelRecord;
-        if (existing.length === 0) {
-          channelRecord = new Record(channelsCollection);
-          channelRecord.load({
-            number: channelNum,
-            map: mapRecord.id,
-            full: false // Default to not full
-          });
-          app.save(channelRecord);
-          channelsCreated++;
-        } else {
-          channelRecord = existing[0];
-        }
-        channelRecords.push(channelRecord);
-      }
-    }
-
-    // Seed mob_channel_status
     const mobChannelStatusCollection = app.findCollectionByNameOrId('mob_channel_status');
     let mobChannelStatusCount = 0;
 
     for (const mobRecord of mobRecords) {
       const mobMapId = mobRecord.get('map');
 
-      // Find all channels for this mob's map
-      const channelsForMap = channelRecords.filter((channel) => channel.get('map') === mobMapId);
+      // Find the map record to get total_channels
+      const mapRecord = mapRecords.find((m) => m.id === mobMapId);
+      if (!mapRecord) continue;
 
-      for (const channelRecord of channelsForMap) {
+      const totalChannels = mapRecord.getInt('total_channels');
+
+      // Create mob_channel_status for each channel
+      for (let channelNum = 1; channelNum <= totalChannels; channelNum++) {
         // Check if entry already exists
         const existingRecords = app.findRecordsByFilter(
           mobChannelStatusCollection,
-          `mob = "${mobRecord.id}" && channel = "${channelRecord.id}"`
+          `mob = "${mobRecord.id}" && channel_number = ${channelNum}`
         );
 
         if (existingRecords.length === 0) {
           const statusRecord = new Record(mobChannelStatusCollection);
-          statusRecord.load({
-            mob: mobRecord.id,
-            channel: channelRecord.id,
-            last_hp: 100
-          });
+          statusRecord.set('mob', mobRecord.id);
+          statusRecord.set('channel_number', channelNum);
+          statusRecord.set('last_hp', 100);
+          app.save(statusRecord);
+          statusRecord.set('last_update', statusRecord.getDateTime('created'));
           app.save(statusRecord);
           mobChannelStatusCount++;
         }
@@ -188,14 +161,14 @@ migrate(
     }
 
     console.log(
-      `Created ${mapsCreated} maps, ${mobsCreated} mobs, ${channelsCreated} channels, and ${mobChannelStatusCount} mob_channel_status entries`
+      `Seeding complete: ${mapsCreated} new maps, ${mobsCreated} new mobs, and ${mobChannelStatusCount} mob_channel_status entries created.`
     );
   },
   (app) => {
     // Optional cleanup on down migration
     // Remove all seeded records
     try {
-      const collections = ['maps', 'mobs', 'channels', 'mob_channel_status'];
+      const collections = ['maps', 'mobs', 'mob_channel_status'];
       for (const collectionName of collections) {
         const collection = app.findCollectionByNameOrId(collectionName);
         const records = app.findRecordsByFilter(collection, "created >= '2025-01-01 00:00:00'");

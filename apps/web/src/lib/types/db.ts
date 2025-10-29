@@ -1,6 +1,5 @@
 import type {
 	ApiKey as BaseApiKey,
-	Channel as BaseChannel,
 	HpReport as BaseHpReport,
 	Map as BaseMap,
 	Mob as BaseMob,
@@ -13,7 +12,6 @@ import type {
 export type User = BaseUser;
 export type ApiKey = BaseApiKey;
 export type Map = BaseMap;
-export type Channel = BaseChannel;
 export type Mob = BaseMob;
 export type HpReport = BaseHpReport;
 export type Vote = BaseVote;

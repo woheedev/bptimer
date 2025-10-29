@@ -17,6 +17,12 @@ export const DEBOUNCE_DELAY = 300; // ms
 export const SMALL_DELAY = 100; // ms
 export const JUST_NOW_THRESHOLD = 15; // seconds
 
+// Realtime
+export const REALTIME_DEBOUNCE_DELAY = 100; // ms
+export const MAX_REALTIME_RETRIES = 3;
+export const REALTIME_RETRY_BASE_DELAY = 2 * SECOND;
+export const STALE_DATA_CHECK_INTERVAL = 30 * SECOND;
+
 // HP-related constants
 export const DEFAULT_HP_VALUE = 100;
 export const MAX_HP_VALUE = 100;

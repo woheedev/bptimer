@@ -158,20 +158,11 @@ routerAdd(
         throw new BadRequestError(`Channel must be between 1 and ${totalChannels} for this boss`);
       }
 
-      // Find channel record
-      const channel = e.app.findFirstRecordByFilter(
-        'channels',
-        `map = "${mapId}" && number = ${line}`
-      );
-      if (!channel) {
-        throw new NotFoundError(`Channel ${line} not found for this boss's map`);
-      }
-
       // Submit HP report
       const collection = e.app.findCollectionByNameOrId('hp_reports');
       const hpReport = new Record(collection, {
         mob: boss.id,
-        channel: channel.id,
+        channel_number: line,
         hp_percentage: hpPct,
         reporter: e.auth.id
       });

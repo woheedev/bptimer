@@ -820,71 +820,6 @@ migrate(
         viewRule: ''
       },
       {
-        createRule: null,
-        deleteRule: null,
-        fields: [
-          {
-            autogeneratePattern: '[a-z0-9]{15}',
-            hidden: false,
-            id: 'text3208210256',
-            max: 15,
-            min: 15,
-            name: 'id',
-            pattern: '^[a-z0-9]+$',
-            presentable: false,
-            primaryKey: true,
-            required: true,
-            system: true,
-            type: 'text'
-          },
-          {
-            hidden: false,
-            id: 'number2526027604',
-            max: 1000,
-            min: 1,
-            name: 'number',
-            onlyInt: true,
-            presentable: false,
-            required: true,
-            system: false,
-            type: 'number'
-          },
-          {
-            cascadeDelete: false,
-            collectionId: 'pbc_1612934933',
-            hidden: false,
-            id: 'relation2477632187',
-            maxSelect: 1,
-            minSelect: 0,
-            name: 'map',
-            presentable: false,
-            required: true,
-            system: false,
-            type: 'relation'
-          },
-          {
-            hidden: false,
-            id: 'bool3766473888',
-            name: 'full',
-            presentable: false,
-            required: false,
-            system: false,
-            type: 'bool'
-          }
-        ],
-        id: 'pbc_3009067695',
-        indexes: [
-          'CREATE INDEX `idx_F1juBm5Nz7` ON `channels` (`map`)',
-          'CREATE INDEX `idx_8L5EZ7cMBs` ON `channels` (`map`, `number`)'
-        ],
-        listRule: '',
-        name: 'channels',
-        system: false,
-        type: 'base',
-        updateRule: null,
-        viewRule: ''
-      },
-      {
         createRule: '@request.auth.id != ""',
         deleteRule: null,
         fields: [
@@ -928,17 +863,16 @@ migrate(
             type: 'number'
           },
           {
-            cascadeDelete: false,
-            collectionId: 'pbc_3009067695',
             hidden: false,
-            id: 'relation2734263879',
-            maxSelect: 1,
-            minSelect: 0,
-            name: 'channel',
+            id: 'number_channel',
+            max: 1000,
+            min: 1,
+            name: 'channel_number',
+            onlyInt: true,
             presentable: false,
             required: true,
             system: false,
-            type: 'relation'
+            type: 'number'
           },
           {
             hidden: false,
@@ -1009,9 +943,9 @@ migrate(
         ],
         id: 'pbc_3114863239',
         indexes: [
-          'CREATE INDEX `idx_hp_reports_mob_channel` ON `hp_reports` (\n  `mob`,\n  `channel`\n)',
+          'CREATE INDEX `idx_hp_reports_mob_channel_number` ON `hp_reports` (`mob`, `channel_number`)',
           'CREATE INDEX `idx_hp_reports_created` ON `hp_reports` (`created` DESC)',
-          'CREATE INDEX `idx_DI3AMx3Ugo` ON `hp_reports` (`mob`, `created` DESC)',
+          'CREATE INDEX `idx_hp_reports_mob_created` ON `hp_reports` (`mob`, `created` DESC)',
           'CREATE INDEX `idx_hp_reports_reporter` ON `hp_reports` (`reporter`)'
         ],
         listRule: '',
@@ -1119,17 +1053,16 @@ migrate(
             type: 'relation'
           },
           {
-            cascadeDelete: false,
-            collectionId: 'pbc_3009067695',
             hidden: false,
-            id: 'relation2734263879',
-            maxSelect: 1,
-            minSelect: 0,
-            name: 'channel',
+            id: 'number_channel',
+            max: 1000,
+            min: 1,
+            name: 'channel_number',
+            onlyInt: true,
             presentable: false,
             required: true,
             system: false,
-            type: 'relation'
+            type: 'number'
           },
           {
             hidden: false,
@@ -1156,8 +1089,9 @@ migrate(
         ],
         id: 'pbc_3682110470',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_Jny4iwGPbA` ON `mob_channel_status` (\n  `mob`,\n  `channel`\n)',
-          'CREATE INDEX `idx_AhwPEryjvS` ON `mob_channel_status` (`last_update` DESC)'
+          'CREATE UNIQUE INDEX `idx_mob_channel_status_unique` ON `mob_channel_status` (`mob`, `channel_number`)',
+          'CREATE INDEX `idx_mob_channel_status_last_update` ON `mob_channel_status` (`last_update` DESC)',
+          'CREATE INDEX `idx_mob_channel_status_mob` ON `mob_channel_status` (`mob`)'
         ],
         listRule: '',
         name: 'mob_channel_status',

@@ -151,7 +151,7 @@
 			{/if}
 		</div>
 
-		<!-- Latest 25 Reported Channels (5x5 Grid) -->
+		<!-- Latest 15 Reported Channels (5x3 Grid) -->
 		<div class="grid grid-cols-5 justify-center gap-2">
 			{#each channelPills as pill, index (index)}
 				<ChannelPill

@@ -3,16 +3,16 @@
 /**
  * HP Reports Cleanup Cron Job
  *
- * Deletes HP reports older than 1 hour every hour at the top of the hour.
+ * Deletes HP reports older than 4 hours every hour at the top of the hour.
  */
 
 cronAdd('cleanupHpReports', '0 * * * *', () => {
   try {
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
 
     const oldReports = $app.findRecordsByFilter(
       'hp_reports',
-      `created < "${oneHourAgo}"`,
+      `created < "${fourHoursAgo}"`,
       '', // sort
       0, // limit
       0 // offset

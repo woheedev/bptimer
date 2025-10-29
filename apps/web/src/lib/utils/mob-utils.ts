@@ -1,6 +1,6 @@
 import { DEAD_HP_VALUE, LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
 import type { ChannelEntry } from '$lib/types/mobs';
-import { isDataStale, toSnakeCase } from '$lib/utils/general-utils';
+import { isDataStale, sortChannelsForMobCard, toSnakeCase } from '$lib/utils/general-utils';
 
 /**
  * Determines mob status based on HP percentage and data freshness
@@ -74,24 +74,6 @@ export function updateLatestChannels(
 	// Add new entry and re-sort to match get-mobs.ts logic
 	const updated = [...filtered, newEntry];
 
-	updated.sort((a, b) => {
-		const aIsDead = a.hp_percentage === 0;
-		const bIsDead = b.hp_percentage === 0;
-
-		// Prioritize alive over dead
-		if (!aIsDead && bIsDead) return -1;
-		if (aIsDead && !bIsDead) return 1;
-
-		// For alive channels: sort by HP ascending, then most recent first
-		if (!aIsDead && !bIsDead) {
-			const hp_diff = a.hp_percentage - b.hp_percentage;
-			if (hp_diff !== 0) return hp_diff;
-			return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
-		}
-
-		// For dead channels: sort by most recent first
-		return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
-	});
-
-	return updated.slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
+	// Sort and take top channels
+	return sortChannelsForMobCard(updated).slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
 }
