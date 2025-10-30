@@ -15,6 +15,7 @@ export const GAME_TIMEZONE_OFFSET = -2; // UTC-2
 export const DEBOUNCE_DELAY = 300; // ms
 export const SMALL_DELAY = 100; // ms
 export const JUST_NOW_THRESHOLD = 15; // seconds
+export const LAUNCH_REFERENCE_DATE = '2025-10-09';
 
 // Realtime
 export const REALTIME_DEBOUNCE_DELAY = 100; // ms

@@ -71,7 +71,7 @@ cronAdd('mobRespawn', '* * * * *', () => {
       try {
         const placeholders = mobIds.map((_, i) => `{:mob${i}}`).join(',');
         const updateQuery = `UPDATE mob_channel_status SET last_hp = 100, last_update = {:timestamp} WHERE mob IN (${placeholders})`;
-        const bindObj = { timestamp: new Date().toISOString() };
+        const bindObj = { timestamp: new Date().toISOString().replace('T', ' ') };
         mobIds.forEach((id, i) => (bindObj[`mob${i}`] = id));
         $app.db().newQuery(updateQuery).bind(bindObj).execute();
 
@@ -88,7 +88,7 @@ cronAdd('mobRespawn', '* * * * *', () => {
           const eventRecord = new Record($app.findCollectionByNameOrId('mob_reset_events'));
           eventRecord.set('mob', mob.id);
           eventRecord.set('type', 'reset');
-          eventRecord.set('timestamp', new Date().toISOString());
+          eventRecord.set('timestamp', new Date().toISOString().replace('T', ' '));
           $app.save(eventRecord);
         }
         console.log(`[Mob Respawn] Created ${resetMobs.length} reset events`);

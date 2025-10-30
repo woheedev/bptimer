@@ -25,7 +25,7 @@ onRecordAfterCreateSuccess((e) => {
         mob: mobId,
         channel_number: channelNumber,
         last_hp: hpPercentage,
-        last_update: new Date().toISOString()
+        last_update: new Date().toISOString().replace('T', ' ')
       });
       e.app.save(statusRecord);
     }
@@ -33,7 +33,7 @@ onRecordAfterCreateSuccess((e) => {
     // Update record
     if (statusRecord) {
       statusRecord.set('last_hp', hpPercentage);
-      statusRecord.set('last_update', new Date().toISOString());
+      statusRecord.set('last_update', new Date().toISOString().replace('T', ' '));
       e.app.save(statusRecord);
     }
 
@@ -51,7 +51,7 @@ onRecordAfterCreateSuccess((e) => {
           mob: mobId,
           channel_number: channelNumber,
           last_hp: hpPercentage,
-          last_update: new Date().toISOString()
+          last_update: new Date().toISOString().replace('T', ' ')
         });
         e.app.save(statusSseRecord);
       }
@@ -59,7 +59,7 @@ onRecordAfterCreateSuccess((e) => {
       // Update record
       if (statusSseRecord) {
         statusSseRecord.set('last_hp', hpPercentage);
-        statusSseRecord.set('last_update', new Date().toISOString());
+        statusSseRecord.set('last_update', new Date().toISOString().replace('T', ' '));
         e.app.save(statusSseRecord);
       }
     } catch (error) {

@@ -449,7 +449,7 @@
       "CREATE INDEX `idx_hp_reports_mob_channel_number` ON `hp_reports` (`mob`, `channel_number`)",
       "CREATE INDEX `idx_hp_reports_created` ON `hp_reports` (`created` DESC)",
       "CREATE INDEX `idx_hp_reports_mob_created` ON `hp_reports` (`mob`, `created` DESC)",
-      "CREATE INDEX `idx_hp_reports_reporter` ON `hp_reports` (`reporter`)"
+      "CREATE INDEX `idx_hp_reports_reporter` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `hp_percentage`, `created`)"
     ],
     "system": false
   },

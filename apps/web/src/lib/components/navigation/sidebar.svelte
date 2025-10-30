@@ -1,4 +1,5 @@
 <script lang="ts">
+	import InGameDay from '$lib/components/navigation/ingame-day.svelte';
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
 	import * as Alert from '$lib/components/ui/alert/index.js';
@@ -22,6 +23,9 @@
 	<Sidebar.Content>
 		<Sidebar.Group>
 			<NavigationMain items={PAGES} />
+			<div class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
+				<InGameDay />
+			</div>
 		</Sidebar.Group>
 		<Sidebar.Group>
 			<Sidebar.GroupLabel>Partner Sites</Sidebar.GroupLabel>
