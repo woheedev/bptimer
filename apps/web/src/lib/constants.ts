@@ -38,6 +38,15 @@ export const LATEST_CHANNELS_DISPLAY_COUNT = 15;
 export const MAX_SEARCH_QUERY_LENGTH = 100;
 export const MOBILE_BREAKPOINT = 768; // px
 
+// Filter and sort settings defaults
+import type { FilterSortSettings } from '$lib/types/ui';
+export const DEFAULT_FILTER_SORT_SETTINGS: FilterSortSettings = {
+	sortField: 'channel',
+	sortDirection: 'ascending',
+	hpRange: [0, 100],
+	hideStaleChannels: false
+};
+
 // Mob respawn constants
 export const MAGICAL_CREATURE_RESET_HOURS = {
 	'Lovely Boarlet': [12, 16, 20],
@@ -47,6 +56,7 @@ export const MAGICAL_CREATURE_RESET_HOURS = {
 // Storage keys
 export const FAVORITE_MOBS_STORAGE_KEY = 'favorite-mobs';
 export const EVENT_TIMERS_COLLAPSED_STORAGE_KEY = 'event-timers-collapsed';
+export const FILTER_SORT_SETTINGS_STORAGE_KEY = 'filter-sort-settings';
 
 import { Download, Hammer, Heart, Map, Medal, Sparkles, Swords } from '@lucide/svelte/icons';
 

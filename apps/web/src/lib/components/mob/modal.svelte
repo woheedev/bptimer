@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import ChannelPill from '$lib/components/mob/channel-pill.svelte';
+	import FilterMenu from '$lib/components/mob/filter-menu.svelte';
 	import MobHpSubmit from '$lib/components/mob/hp-submit.svelte';
 	import MobLastReports from '$lib/components/mob/last-reports.svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
@@ -13,8 +14,10 @@
 	import { getChannels } from '$lib/db/get-channels';
 	import { getChannelReports, getLatestMobReports } from '$lib/db/get-reports';
 	import { pb } from '$lib/pocketbase';
+	import { filterSortSettingsStore } from '$lib/stores/filter-sort-settings.svelte';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { getInitials } from '$lib/utils/general-utils';
+	import { filterAndSortChannels } from '$lib/utils/mob-filtering';
 	import { getMobImagePath } from '$lib/utils/mob-utils';
 	import { mapUserRecord } from '$lib/utils/user-utils';
 	import Eye from '@lucide/svelte/icons/eye';
@@ -242,19 +245,37 @@
 		}`
 	);
 
-	// Create channel grid for all channels - memoized to only recalculate when channels or totalChannels change
+	// Create filtered and sorted channel grid
 	let channelGrid = $derived.by(() => {
 		if (!totalChannels || !data_state.channels.length) return [];
 
-		return Array.from({ length: totalChannels }, (_, i) => {
+		// Create complete channel list with all channels (1 to totalChannels)
+		const allChannels = Array.from({ length: totalChannels }, (_, i) => {
 			const channel_num = i + 1;
 			const channel_data = data_state.channels.find((c) => c.channel === channel_num);
 			return {
-				channelNumber: channel_num,
+				channel: channel_num,
 				status: channel_data?.status || 'unknown',
-				hpPercentage: channel_data?.hp_percentage || 0
+				hp_percentage: channel_data?.hp_percentage || 0,
+				last_updated: channel_data?.last_updated || ''
 			};
 		});
+
+		// Filter and sort the channels
+		const filteredSortedChannels = filterAndSortChannels(
+			allChannels,
+			filterSortSettingsStore.sortField,
+			filterSortSettingsStore.sortDirection,
+			filterSortSettingsStore.hpRange,
+			filterSortSettingsStore.hideStaleChannels
+		);
+
+		// Convert back to the format expected by the template
+		return filteredSortedChannels.map((channel) => ({
+			channelNumber: channel.channel,
+			status: channel.status,
+			hpPercentage: channel.hp_percentage
+		}));
 	});
 
 	function handleChannelClick(channelNumber: number) {
@@ -425,6 +446,12 @@
 								<span class="lg:hidden">← Back</span>
 							</Button>
 						{/if}
+						<FilterMenu
+							bind:sortField={filterSortSettingsStore.sortField}
+							bind:sortDirection={filterSortSettingsStore.sortDirection}
+							bind:hpRange={filterSortSettingsStore.hpRange}
+							bind:hideStaleChannels={filterSortSettingsStore.hideStaleChannels}
+						/>
 						<Toggle
 							bind:pressed={ui_state.isPanelVisible}
 							variant="outline"
@@ -432,9 +459,9 @@
 							title={ui_state.isPanelVisible ? 'Hide panel' : 'Show panel'}
 						>
 							{#if ui_state.isPanelVisible}
-								<Eye class="h-4 w-4" />
-							{:else}
 								<EyeOff class="h-4 w-4" />
+							{:else}
+								<Eye class="h-4 w-4" />
 							{/if}
 						</Toggle>
 					</div>

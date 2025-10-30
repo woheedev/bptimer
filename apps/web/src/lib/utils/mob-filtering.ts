@@ -1,3 +1,5 @@
+import type { HideStaleChannels, HpRange, SortDirection, SortField } from '$lib/types/ui';
+
 /**
  * Filters mobs based on current type and favorites filter
  * @param mob - The mob record to check
@@ -18,6 +20,61 @@ export function shouldIncludeMob(
 	if (mobIds !== undefined && !mobIds.includes(mob.id)) return false;
 
 	return true;
+}
+
+/**
+ * Filters and sorts channels based on user preferences
+ * @param channels - Array of channel objects to filter and sort
+ * @param sortField - Field to sort by ('channel' or 'hp')
+ * @param sortDirection - Sort direction ('ascending' or 'descending')
+ * @param hpRange - HP percentage range [min, max] to filter by
+ * @param hideStaleChannels - Whether to hide unknown/stale channels
+ * @returns Filtered and sorted array of channels
+ */
+export function filterAndSortChannels<
+	T extends {
+		channel: number;
+		hp_percentage: number;
+		status: 'alive' | 'dead' | 'unknown';
+		last_updated: string;
+	}
+>(
+	channels: T[],
+	sortField: SortField = 'channel',
+	sortDirection: SortDirection = 'ascending',
+	hpRange: HpRange = [0, 100],
+	hideStaleChannels: HideStaleChannels = false
+): T[] {
+	// Filter out stale/unknown channels
+	let filtered = channels;
+	if (hideStaleChannels) {
+		filtered = channels.filter((channel) => channel.status !== 'unknown');
+	}
+
+	// Filter by HP range
+	filtered = filtered.filter((channel) => {
+		// Unknown channels are not affected by HP range filter
+		if (channel.status === 'unknown') {
+			return true;
+		}
+		return channel.hp_percentage >= hpRange[0] && channel.hp_percentage <= hpRange[1];
+	});
+
+	// Sort by the specified field and direction
+	return [...filtered].sort((a, b) => {
+		let comparison = 0;
+
+		if (sortField === 'channel') {
+			comparison = a.channel - b.channel;
+		} else if (sortField === 'hp') {
+			// For HP sorting, treat unknown channels as having HP slightly above 0 but below alive
+			const aHp = a.status === 'unknown' ? 0.0001 : a.hp_percentage;
+			const bHp = b.status === 'unknown' ? 0.0001 : b.hp_percentage;
+			comparison = aHp - bHp;
+		}
+
+		return sortDirection === 'ascending' ? comparison : -comparison;
+	});
 }
 
 /**

@@ -32,10 +32,10 @@
 			{:else}
 				<ChevronUp class="h-4 w-4" />
 			{/if}
-			<span class="text-sm font-medium">Event Timers</span>
+			<span class="hidden text-sm font-medium sm:inline">Event Timers</span>
 		</Button>
 		<SearchForm {search} class="w-full sm:ml-auto sm:w-auto" />
-		<Button onclick={toggleMode} variant="outline" size="icon-sm" class="hidden sm:flex">
+		<Button onclick={toggleMode} variant="outline" size="icon-sm" class="flex">
 			<SunIcon class="scale-100 rotate-0 transition-all! dark:scale-0 dark:-rotate-90" />
 			<MoonIcon class="absolute scale-0 rotate-90 transition-all! dark:scale-100 dark:rotate-0" />
 			<span class="sr-only">Toggle theme</span>
@@ -44,7 +44,7 @@
 			href="https://github.com/woheedev/bptimer"
 			variant="outline"
 			size="icon-sm"
-			class="dark:text-foreground hidden sm:flex"
+			class="dark:text-foreground flex"
 			target="_blank"
 			rel="noopener noreferrer"
 		>

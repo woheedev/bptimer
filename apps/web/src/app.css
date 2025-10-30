@@ -164,6 +164,12 @@
 	--shadow-2xl: var(--shadow-2xl);
 }
 
+@keyframes gradient {
+	to {
+		background-position: var(--bg-size, 300%) 0;
+	}
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;

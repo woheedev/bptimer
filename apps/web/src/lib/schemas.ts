@@ -182,6 +182,16 @@ export const voteInputSchema = z.object({
 	voteType: z.enum(['up', 'down'])
 });
 
+// Filter sort settings schema
+export const filterSortSettingsSchema = z.object({
+	sortField: z.enum(['channel', 'hp']),
+	sortDirection: z.enum(['ascending', 'descending']),
+	hpRange: z.tuple([z.number().min(0).max(100), z.number().min(0).max(100)]),
+	hideStaleChannels: z.boolean()
+});
+
+export type FilterSortSettingsZod = z.infer<typeof filterSortSettingsSchema>;
+
 // Input types
 export type SearchQuery = z.infer<typeof searchQuerySchema>;
 export type HpReportInput = z.infer<typeof hpReportInputSchema>;

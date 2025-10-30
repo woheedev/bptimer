@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AnimatedGradientText from '$lib/components/animated-gradient-text.svelte';
 	import InGameDay from '$lib/components/navigation/ingame-day.svelte';
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
@@ -57,7 +58,13 @@
 					<span>Join Discord</span>
 				</Sidebar.MenuButton>
 			</div>
-			<p class="text-center text-sm">Made by Wohee with ❤️</p>
+			<p class="text-center text-sm">
+				Made by <a
+					href="https://discordredirect.discordsafe.com/users/107391298171891712"
+					target="_blank"
+					rel="noopener noreferrer"><AnimatedGradientText>Wohee</AnimatedGradientText></a
+				> with ❤️
+			</p>
 			<p class="text-center text-xs">
 				<a
 					href="https://ko-fi.com/wohee"
