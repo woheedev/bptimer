@@ -43,10 +43,10 @@ cronAdd('mobRespawn', '* * * * *', () => {
       return;
     }
 
-    let totalResetCount = 0;
     const resetMobs = [];
+    const mobIds = [];
 
-    // Reset each respawning mob's channel status
+    // Collect mob IDs that should reset
     for (const mob of respawningMobs) {
       const mobName = mob.get('name');
       const mobId = mob.id;
@@ -60,40 +60,24 @@ cronAdd('mobRespawn', '* * * * *', () => {
         shouldReset = magicalCreatureResetHours[mobName]?.includes(currentHour);
       }
 
-      if (!shouldReset) {
-        continue;
-      }
-
-      try {
-        // Find all channel status records for this mob
-        const statusRecords = $app.findRecordsByFilter(
-          'mob_channel_status', // collection
-          `mob = "${mobId}"`, // filter
-          '', // sort
-          0, // limit
-          0 // offset
-        );
-
-        if (!statusRecords || statusRecords.length === 0) {
-          continue;
-        }
-
-        // Reset HP to 100% for all channel status records individually
-        for (const status of statusRecords) {
-          status.set('last_hp', 100);
-          status.set('last_update', new Date().toISOString());
-          $app.save(status);
-          totalResetCount++;
-        }
-
-        // Track this mob for event creation
+      if (shouldReset) {
         resetMobs.push({ id: mobId, name: mobName });
+        mobIds.push(mobId);
+      }
+    }
 
-        console.log(
-          `[Mob Respawn] Reset ${statusRecords.length} channels for ${mobName} to 100% HP`
-        );
+    // Batch update all channel status records for resetting mobs
+    if (mobIds.length > 0) {
+      try {
+        const placeholders = mobIds.map((_, i) => `{:mob${i}}`).join(',');
+        const updateQuery = `UPDATE mob_channel_status SET last_hp = 100, last_update = {:timestamp} WHERE mob IN (${placeholders})`;
+        const bindObj = { timestamp: new Date().toISOString() };
+        mobIds.forEach((id, i) => (bindObj[`mob${i}`] = id));
+        $app.db().newQuery(updateQuery).bind(bindObj).execute();
+
+        console.log(`[Mob Respawn] Batch reset channels for ${mobIds.length} mobs to 100% HP`);
       } catch (error) {
-        console.error(`[Mob Respawn] Error resetting ${mobName}:`, error);
+        console.error('[Mob Respawn] Error in batch update:', error);
       }
     }
 
@@ -113,7 +97,7 @@ cronAdd('mobRespawn', '* * * * *', () => {
       }
     }
 
-    console.log(`[Mob Respawn] Completed: Reset ${totalResetCount} total channel status records`);
+    console.log(`[Mob Respawn] Completed: Reset ${resetMobs.length} total channel status records`);
   } catch (error) {
     console.error('[Mob Respawn] Unexpected error in respawn cron job:', error);
   }
