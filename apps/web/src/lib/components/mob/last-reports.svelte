@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import type { MobReport } from '$lib/types/db';
+	import type { UserVotesMap } from '$lib/types/db';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import { getLocationImagePath } from '$lib/utils/mob-utils';
 	import { SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS } from '$lib/constants';
@@ -13,7 +14,8 @@
 		selectedChannel,
 		onRefresh,
 		mobName,
-		mobType
+		mobType,
+		userVotesMap = new Map()
 	}: {
 		reports: MobReport[];
 		isLoadingReports: boolean;
@@ -21,6 +23,7 @@
 		onRefresh: () => void;
 		mobName: string;
 		mobType: 'boss' | 'magical_creature' | string;
+		userVotesMap?: UserVotesMap;
 	} = $props();
 
 	// Check if this is a special magical creature
@@ -73,7 +76,11 @@
 				</div>
 			{/if}
 			{#each reports as report (report.id)}
-				<ReportCard {report} reporterReputation={report.reporter_reputation} />
+				<ReportCard
+					{report}
+					reporterReputation={report.reporter_reputation}
+					userVote={userVotesMap.get(report.id)}
+				/>
 			{/each}
 		{:else}
 			<p class="text-muted-foreground py-4 text-center text-sm">No reports yet</p>

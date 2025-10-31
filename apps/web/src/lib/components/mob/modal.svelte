@@ -9,14 +9,20 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
-	import { DEFAULT_HP_VALUE, SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS } from '$lib/constants';
+	import {
+		DEFAULT_HP_VALUE,
+		SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS,
+		MAX_REPORTS_LIMIT
+	} from '$lib/constants';
 	import { createReport } from '$lib/db/create-reports';
 	import { getChannels } from '$lib/db/get-channels';
 	import { getChannelReports, getLatestMobReports } from '$lib/db/get-reports';
+	import { getUserVotesForReports } from '$lib/db/get-user-votes';
 	import { pb } from '$lib/pocketbase';
 	import { filterSortSettingsStore } from '$lib/stores/filter-sort-settings.svelte';
 	import type { MobReport } from '$lib/types/db';
 	import type { UserRecordModel } from '$lib/types/auth';
+	import type { UserVotesMap } from '$lib/types/db';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { filterAndSortChannels } from '$lib/utils/mob-filtering';
 	import { getMobImagePath, getMobMapPath } from '$lib/utils/mob-utils';
@@ -69,7 +75,8 @@
 			hp_percentage: number;
 			last_updated?: string;
 		}>,
-		reports: [] as MobReport[]
+		reports: [] as MobReport[],
+		user_votes_map: new Map() as UserVotesMap
 	});
 
 	let ui_state = $state({
@@ -196,7 +203,12 @@
 
 			// Only fetch latest reports if no specific channel is selected
 			if (!initialSelectedChannel) {
-				data_state.reports = await getLatestMobReports(mobId, 10);
+				data_state.reports = await getLatestMobReports(mobId, MAX_REPORTS_LIMIT);
+				// Fetch user votes for these reports
+				if (user && data_state.reports.length > 0) {
+					const reportIds = data_state.reports.map((r) => r.id);
+					data_state.user_votes_map = await getUserVotesForReports(reportIds, user.id);
+				}
 			}
 		} catch (error) {
 			// Store error for display
@@ -220,6 +232,12 @@
 			const reports_data = await getChannelReports(mobId, channelNumber);
 			// Force a fresh array assignment to ensure reactivity
 			data_state.reports = [...reports_data];
+
+			// Fetch user votes for these reports
+			if (user && reports_data.length > 0) {
+				const reportIds = reports_data.map((r) => r.id);
+				data_state.user_votes_map = await getUserVotesForReports(reportIds, user.id);
+			}
 
 			// Set default location image from most recent report if available
 			if (isSpecialMagicalCreature && reports_data.length > 0) {
@@ -318,9 +336,14 @@
 		// Only refresh reports for all channels, don't refetch channel data
 		// Channel grid is already kept up-to-date via realtime updates
 		ui_state.isLoadingReports = true;
-		getLatestMobReports(mobId, 10)
-			.then((reports) => {
+		getLatestMobReports(mobId, MAX_REPORTS_LIMIT)
+			.then(async (reports) => {
 				data_state.reports = reports;
+				// Fetch user votes
+				if (user && reports.length > 0) {
+					const reportIds = reports.map((r) => r.id);
+					data_state.user_votes_map = await getUserVotesForReports(reportIds, user.id);
+				}
 			})
 			.catch((error) => {
 				console.error('Error loading latest reports:', error);
@@ -340,7 +363,12 @@
 			// Refresh latest reports for all channels
 			ui_state.isLoadingReports = true;
 			try {
-				data_state.reports = await getLatestMobReports(mobId, 10);
+				data_state.reports = await getLatestMobReports(mobId, MAX_REPORTS_LIMIT);
+				// Fetch user votes
+				if (user && data_state.reports.length > 0) {
+					const reportIds = data_state.reports.map((r) => r.id);
+					data_state.user_votes_map = await getUserVotesForReports(reportIds, user.id);
+				}
 			} catch (error) {
 				console.error('Error refreshing latest reports:', error);
 			} finally {
@@ -544,6 +572,7 @@
 								onRefresh={() => handleRefreshReports(false)}
 								{mobName}
 								mobType={type}
+								userVotesMap={data_state.user_votes_map}
 							/>
 						</div>
 					</div>
@@ -578,6 +607,7 @@
 										onRefresh={() => handleRefreshReports(false)}
 										{mobName}
 										mobType={type}
+										userVotesMap={data_state.user_votes_map}
 									/>
 								</div>
 							</Tabs.Content>

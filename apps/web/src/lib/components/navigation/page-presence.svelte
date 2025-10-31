@@ -45,7 +45,7 @@
 		{#if state.loading}
 			<span class="opacity-50">...</span>
 		{:else}
-			{state.activeUsers} {state.activeUsers === 1 ? 'user' : 'users'} online
+			{state.activeUsers} {state.activeUsers === 1 ? 'User' : 'Users'} Online
 		{/if}
 	</Badge>
 </div>

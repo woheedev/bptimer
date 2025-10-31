@@ -1481,7 +1481,7 @@ migrate(
             minSelect: 0,
             name: 'user',
             presentable: false,
-            required: true,
+            required: false,
             system: false,
             type: 'relation'
           },
@@ -1495,12 +1495,26 @@ migrate(
             required: true,
             system: false,
             type: 'date'
+          },
+          {
+            autogeneratePattern: '',
+            hidden: false,
+            id: 'text1631579359',
+            max: 50,
+            min: 0,
+            name: 'session_id',
+            pattern: '',
+            presentable: false,
+            primaryKey: false,
+            required: false,
+            system: false,
+            type: 'text'
           }
         ],
         id: 'pbc_14482932',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_srbKKMIwkY` ON `page_presence` (`user`)',
-          'CREATE INDEX `idx_Sq15baJnT6` ON `page_presence` (`last_seen` DESC)'
+          'CREATE INDEX `idx_Sq15baJnT6` ON `page_presence` (`last_seen` DESC)',
+          'CREATE INDEX `idx_I3ezck9YGp` ON `page_presence` (`session_id`)'
         ],
         listRule: '',
         name: 'page_presence',

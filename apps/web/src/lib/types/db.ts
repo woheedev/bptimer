@@ -15,3 +15,10 @@ export interface MobReport {
 	reporter_reputation: number;
 	location_image?: number;
 }
+
+export type UserVoteInfo = {
+	id: string;
+	vote_type: 'up' | 'down';
+};
+
+export type UserVotesMap = Map<string, UserVoteInfo>;

@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { PRESENCE_ACTIVE_THRESHOLD, PRESENCE_HEARTBEAT_INTERVAL } from '$lib/constants';
 import { pb } from '$lib/pocketbase';
+import { presenceSessionIdStore } from '$lib/stores/presence-session-id.svelte';
 
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -9,24 +10,42 @@ export async function updatePresence(): Promise<void> {
 
 	try {
 		const user = pb.authStore.record;
-		if (!user) return;
 
-		// Check for existing record for this user
-		const existing = await pb.collection('page_presence').getList(1, 1, {
-			filter: `user = "${user.id}"`
-		});
+		if (user) {
+			// Authenticated user: use user ID
+			try {
+				const existing = await pb
+					.collection('page_presence')
+					.getFirstListItem(`user = "${user.id}"`, { fields: 'id' });
 
-		if (existing.items.length > 0) {
-			// Update existing record timestamp
-			await pb.collection('page_presence').update(existing.items[0].id, {
-				last_seen: new Date().toISOString()
-			});
+				await pb.collection('page_presence').update(existing.id, {
+					last_seen: new Date().toISOString()
+				});
+			} catch {
+				// Record doesn't exist, create new one
+				await pb.collection('page_presence').create({
+					user: user.id,
+					last_seen: new Date().toISOString()
+				});
+			}
 		} else {
-			// Create new record
-			await pb.collection('page_presence').create({
-				user: user.id,
-				last_seen: new Date().toISOString()
-			});
+			// Anonymous user: use session ID
+			const sessionId = presenceSessionIdStore.sessionId;
+			try {
+				const existing = await pb
+					.collection('page_presence')
+					.getFirstListItem(`session_id = "${sessionId}"`, { fields: 'id' });
+
+				await pb.collection('page_presence').update(existing.id, {
+					last_seen: new Date().toISOString()
+				});
+			} catch {
+				// Record doesn't exist, create new one
+				await pb.collection('page_presence').create({
+					session_id: sessionId,
+					last_seen: new Date().toISOString()
+				});
+			}
 		}
 	} catch (error) {
 		// Silently fail - presence is non-critical

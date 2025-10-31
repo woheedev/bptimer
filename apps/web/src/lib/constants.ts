@@ -40,6 +40,7 @@ export const HP_HIGH_THRESHOLD = 80; // %
 
 // UI constants
 export const LATEST_CHANNELS_DISPLAY_COUNT = 15;
+export const MAX_REPORTS_LIMIT = 10;
 export const MAX_SEARCH_QUERY_LENGTH = 100;
 export const MOBILE_BREAKPOINT = 768; // px
 
@@ -93,6 +94,7 @@ export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 export const FAVORITE_MOBS_STORAGE_KEY = 'favorite-mobs';
 export const EVENT_TIMERS_COLLAPSED_STORAGE_KEY = 'event-timers-collapsed';
 export const FILTER_SORT_SETTINGS_STORAGE_KEY = 'filter-sort-settings';
+export const PRESENCE_SESSION_ID_STORAGE_KEY = 'presence-session-id';
 
 import { Download, Hammer, Heart, Map, Medal, Sparkles, Swords } from '@lucide/svelte/icons';
 

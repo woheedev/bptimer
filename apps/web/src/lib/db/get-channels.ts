@@ -15,7 +15,8 @@ export async function getChannels(bossId: string): Promise<
 	try {
 		// Fetch all mob_channel_status for this mob
 		const channels = await pb.collection('mob_channel_status').getFullList({
-			filter: `mob = "${bossId}"`
+			filter: `mob = "${bossId}"`,
+			skipTotal: true
 		});
 
 		// Validate channel status records

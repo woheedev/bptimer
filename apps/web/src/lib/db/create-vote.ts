@@ -14,7 +14,9 @@ export async function createVote(reportId: string, voteType: 'up' | 'down') {
 		try {
 			const existingVote = await pb
 				.collection('votes')
-				.getFirstListItem(`report = "${reportId}" && voter = "${pb.authStore.record?.id}"`);
+				.getFirstListItem(`report = "${reportId}" && voter = "${pb.authStore.record?.id}"`, {
+					fields: 'id'
+				});
 
 			// If vote exists, update it instead
 			await pb.collection('votes').update(existingVote.id, {

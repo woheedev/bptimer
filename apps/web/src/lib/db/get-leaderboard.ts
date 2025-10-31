@@ -34,7 +34,8 @@ export async function getLeaderboard(
 	try {
 		const records = await pb.collection('users').getList(1, limit, {
 			sort: '-reputation',
-			filter: 'verified = true'
+			filter: 'verified = true',
+			skipTotal: true
 		});
 
 		const entries = records.items.map(mapRecordToLeaderboardEntry);

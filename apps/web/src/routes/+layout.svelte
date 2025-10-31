@@ -55,15 +55,13 @@
 	});
 
 	$effect(() => {
-		if (browser && !page.route.id) {
+		if (!browser || page.url.pathname !== '/') {
 			return;
 		}
-		if (browser) {
-			toast(DpsMeterToast, {
-				duration: DPS_METER_TOAST_DURATION,
-				position: 'bottom-right'
-			});
-		}
+		toast(DpsMeterToast, {
+			duration: DPS_METER_TOAST_DURATION,
+			position: 'bottom-right'
+		});
 	});
 
 	setContext('token', getToken);

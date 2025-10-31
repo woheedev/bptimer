@@ -1,4 +1,5 @@
 import { pb } from '$lib/pocketbase';
+import { MAX_REPORTS_LIMIT } from '$lib/constants';
 import { hpReportSchema } from '$lib/schemas';
 import type { MobReport } from '$lib/types/db';
 import type { UserRecordModel } from '$lib/types/auth';
@@ -41,6 +42,7 @@ export async function getLatestMobReports(
 			filter: `mob = "${mobId}"`,
 			sort: '-created',
 			expand: 'reporter',
+			skipTotal: true,
 			requestKey: `mob-reports-${mobId}` // Unique key per mob for parallel requests (prevent auto-cancellation)
 		});
 
@@ -62,10 +64,11 @@ export async function getChannelReports(
 ): Promise<MobReport[]> {
 	try {
 		// Query directly by channel number
-		const reports = await pb.collection('hp_reports').getList(1, 10, {
+		const reports = await pb.collection('hp_reports').getList(1, MAX_REPORTS_LIMIT, {
 			filter: `mob = "${mobId}" && channel_number = ${channelNumber}`,
 			sort: '-created',
 			expand: 'reporter',
+			skipTotal: true,
 			requestKey: `channel-reports-${mobId}-${channelNumber}` // Unique key per channel
 		});
 

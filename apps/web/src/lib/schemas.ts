@@ -221,7 +221,9 @@ export const pagePresenceSchema = z.object({
 		.string()
 		.regex(/^[a-z0-9]+$/)
 		.min(15)
-		.max(15),
+		.max(15)
+		.optional(),
+	session_id: z.string().max(50).optional(),
 	last_seen: z.string()
 });
 

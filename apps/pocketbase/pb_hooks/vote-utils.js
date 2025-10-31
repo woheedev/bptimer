@@ -28,7 +28,7 @@ function updateReportVoteCounts(app, reportId) {
     app
       .db()
       .newQuery(
-        'SELECT COUNT(*) as count FROM votes WHERE report = {:reportId} && vote_type = "up"'
+        'SELECT COUNT(*) as count FROM votes WHERE report = {:reportId} AND vote_type = "up"'
       )
       .bind({ reportId: reportId })
       .one(upvoteResult);
@@ -37,7 +37,7 @@ function updateReportVoteCounts(app, reportId) {
     app
       .db()
       .newQuery(
-        'SELECT COUNT(*) as count FROM votes WHERE report = {:reportId} && vote_type = "down"'
+        'SELECT COUNT(*) as count FROM votes WHERE report = {:reportId} AND vote_type = "down"'
       )
       .bind({ reportId: reportId })
       .one(downvoteResult);

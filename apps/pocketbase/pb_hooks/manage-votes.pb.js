@@ -28,8 +28,6 @@ onRecordCreate((e) => {
         `Voting period has expired. You can only vote within ${VOTE_TIME_WINDOW / 60000} minutes of the report.`
       );
     }
-
-    console.log(`[VOTES] validated report=${voteRecord.get('report')}`);
   } catch (error) {
     if (error instanceof BadRequestError) {
       throw error;
@@ -62,25 +60,14 @@ onRecordAfterCreateSuccess((e) => {
 }, 'votes');
 
 // After vote is updated, adjust reputation and report counts
-onRecordUpdate((e) => {
+onRecordAfterUpdateSuccess((e) => {
   const { updateReputation, updateReportVoteCounts } = require(`${__hooks}/vote-utils.js`);
 
   try {
     const voteRecord = e.record;
-    const newVoteType = voteRecord.get('vote_type');
-    const oldRecord = e.app.findRecordById('votes', voteRecord.id);
-    const oldVoteType = oldRecord.get('vote_type');
-
-    if (newVoteType === oldVoteType) {
-      return e.next();
-    }
-
     const reportId = voteRecord.get('report');
-    const report = e.app.findRecordById('hp_reports', reportId);
-    const reporterId = report.get('reporter');
 
-    updateReputation(e.app, reporterId, oldVoteType, -1);
-    updateReputation(e.app, reporterId, newVoteType, 1);
+    // Recalculate vote counts from database
     updateReportVoteCounts(e.app, reportId);
   } catch (error) {
     console.error(`[VOTES] update error:`, error);
@@ -90,7 +77,7 @@ onRecordUpdate((e) => {
 }, 'votes');
 
 // After vote is deleted, remove reputation impact and update counts
-onRecordDelete((e) => {
+onRecordAfterDeleteSuccess((e) => {
   const { updateReputation, updateReportVoteCounts } = require(`${__hooks}/vote-utils.js`);
 
   try {
@@ -103,7 +90,7 @@ onRecordDelete((e) => {
     updateReputation(e.app, reporterId, voteType, -1);
     updateReportVoteCounts(e.app, reportId);
   } catch (error) {
-    console.error(`[VOTES] delete error:`, error);
+    console.error(`[VOTES] delete after success error:`, error);
   }
 
   return e.next();
