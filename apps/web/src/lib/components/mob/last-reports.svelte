@@ -79,7 +79,7 @@
 				<ReportCard
 					{report}
 					reporterReputation={report.reporter_reputation}
-					userVote={userVotesMap.get(report.id)}
+					userVote={userVotesMap.get(report.id) ?? null}
 				/>
 			{/each}
 		{:else}

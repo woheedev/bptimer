@@ -1514,7 +1514,8 @@ migrate(
         id: 'pbc_14482932',
         indexes: [
           'CREATE INDEX `idx_Sq15baJnT6` ON `page_presence` (`last_seen` DESC)',
-          'CREATE INDEX `idx_I3ezck9YGp` ON `page_presence` (`session_id`)'
+          'CREATE INDEX `idx_I3ezck9YGp` ON `page_presence` (`session_id`)',
+          'CREATE INDEX `idx_user_lookup` ON `page_presence` (`user`)'
         ],
         listRule: '',
         name: 'page_presence',

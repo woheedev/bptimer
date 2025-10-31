@@ -13,7 +13,6 @@
 	} from '$lib/constants';
 	import { createVote } from '$lib/db/create-vote';
 	import { deleteVote } from '$lib/db/delete-vote';
-	import { pb } from '$lib/pocketbase';
 	import type { MobReport } from '$lib/types/db';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import type { UserVoteInfo } from '$lib/types/db';
@@ -23,11 +22,11 @@
 	let {
 		report,
 		reporterReputation = 0,
-		userVote: passedUserVote
+		userVote: passedUserVote = null
 	}: {
 		report: MobReport;
 		reporterReputation?: number;
-		userVote?: UserVoteInfo | null | undefined;
+		userVote?: UserVoteInfo | null;
 	} = $props();
 
 	// Get current user from context
@@ -59,32 +58,21 @@
 	});
 
 	// User's current vote
-	let user_vote = $state<UserVoteInfo | null | undefined>(passedUserVote);
+	let user_vote = $state<UserVoteInfo | null>(passedUserVote);
 	let is_voting = $state(false);
-
-	// Sync user_vote when prop changes
-	$effect(() => {
-		if (passedUserVote !== undefined) {
-			user_vote = passedUserVote;
-		}
-	});
 
 	// Optimistic local vote counts
 	let local_upvotes = $state(report.upvotes);
 	let local_downvotes = $state(report.downvotes);
 	let last_report_id = $state(report.id);
 
-	// Sync counts only when report ID changes (new report) or on explicit refresh
+	// Sync counts when report changes or votes update
 	$effect(() => {
 		if (report.id !== last_report_id) {
 			last_report_id = report.id;
-			local_upvotes = report.upvotes;
-			local_downvotes = report.downvotes;
-		} else if (passedUserVote !== undefined) {
-			// Update counts to match server state
-			local_upvotes = report.upvotes;
-			local_downvotes = report.downvotes;
 		}
+		local_upvotes = report.upvotes;
+		local_downvotes = report.downvotes;
 	});
 
 	// Vote button disabled state
@@ -94,21 +82,6 @@
 
 	// Vote button hover enabled state
 	const canHoverVote = $derived(currentUser !== null && report.reporter_id !== currentUser.id);
-
-	// Fetch user's vote on this report
-	async function fetchUserVote() {
-		if (!currentUser) return;
-		try {
-			const vote = await pb
-				.collection('votes')
-				.getFirstListItem(`report = "${report.id}" && voter = "${currentUser.id}"`, {
-					fields: 'id,vote_type'
-				});
-			user_vote = { id: vote.id, vote_type: vote.vote_type };
-		} catch {
-			user_vote = null;
-		}
-	}
 
 	// Handle vote action
 	async function handleVote(voteType: 'up' | 'down') {
@@ -179,13 +152,6 @@
 				? 'border-red-900/60'
 				: 'border-border'
 	);
-
-	// Only fetch user's vote if not passed in as a prop
-	$effect(() => {
-		if (passedUserVote === undefined && currentUser && report.id) {
-			fetchUserVote();
-		}
-	});
 </script>
 
 <div class="relative shrink-0 rounded-lg border p-3 {borderClass}">
