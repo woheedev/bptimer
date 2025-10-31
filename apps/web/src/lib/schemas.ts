@@ -106,7 +106,11 @@ export const hpReportSchema = z.object({
 		.min(15)
 		.max(15),
 	upvotes: z.number().int().min(0).optional().default(0),
-	downvotes: z.number().int().min(0).optional().default(0)
+	downvotes: z.number().int().min(0).optional().default(0),
+	location_image: z
+		.union([z.number().int().min(1).max(20), z.literal(0), z.literal(null)])
+		.optional()
+		.transform((val) => (val === 0 || val === null ? undefined : val))
 });
 
 export type HpReport = z.infer<typeof hpReportSchema>;
@@ -182,15 +186,46 @@ export const voteInputSchema = z.object({
 	voteType: z.enum(['up', 'down'])
 });
 
+// Leaderboard
+export const leaderboardEntrySchema = z.object({
+	id: z
+		.string()
+		.regex(/^[a-z0-9]+$/)
+		.min(15)
+		.max(15),
+	username: z.string().min(1).max(100),
+	avatar: z.string().optional(),
+	reputation: z.number().int().optional().default(0)
+});
+
+export type LeaderboardEntry = z.infer<typeof leaderboardEntrySchema>;
+
 // Filter sort settings schema
 export const filterSortSettingsSchema = z.object({
-	sortField: z.enum(['channel', 'hp']),
+	sortField: z.enum(['channel', 'hp', 'report_time']),
 	sortDirection: z.enum(['ascending', 'descending']),
 	hpRange: z.tuple([z.number().min(0).max(100), z.number().min(0).max(100)]),
 	hideStaleChannels: z.boolean()
 });
 
-export type FilterSortSettingsZod = z.infer<typeof filterSortSettingsSchema>;
+export type FilterSortSettings = z.infer<typeof filterSortSettingsSchema>;
+
+// Page presence schema
+export const pagePresenceSchema = z.object({
+	id: z
+		.string()
+		.regex(/^[a-z0-9]+$/)
+		.min(15)
+		.max(15),
+	user: z
+		.string()
+		.regex(/^[a-z0-9]+$/)
+		.min(15)
+		.max(15),
+	last_seen: z.string()
+});
+
+export type PagePresence = z.infer<typeof pagePresenceSchema>;
 
 // Input types
 export type SearchQuery = z.infer<typeof searchQuerySchema>;

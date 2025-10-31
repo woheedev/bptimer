@@ -32,7 +32,8 @@
 
 	const sortFieldOptions: SortFieldOption[] = [
 		{ value: 'channel', label: 'Line Number' },
-		{ value: 'hp', label: 'HP' }
+		{ value: 'hp', label: 'HP' },
+		{ value: 'report_time', label: 'Report Time' }
 	];
 
 	const sortDirectionOptions: SortDirectionOption[] = [
@@ -40,11 +41,11 @@
 		{ value: 'descending', label: 'Descending' }
 	];
 
-	let sortFieldTriggerContent = $derived(
+	const sortFieldTriggerContent = $derived(
 		sortFieldOptions.find((option) => option.value === sortField)?.label ?? 'Line Number'
 	);
 
-	let sortDirectionTriggerContent = $derived(
+	const sortDirectionTriggerContent = $derived(
 		sortDirectionOptions.find((option) => option.value === sortDirection)?.label ?? 'Ascending'
 	);
 </script>

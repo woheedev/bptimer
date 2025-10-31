@@ -17,8 +17,12 @@ onRecordAfterCreateSuccess((e) => {
     try {
       statusRecord = e.app.findFirstRecordByFilter(
         'mob_channel_status',
-        `mob = "${mobId}" && channel_number = ${channelNumber}`
+        'mob = {:mobId} && channel_number = {:channelNumber}',
+        { mobId: mobId, channelNumber: channelNumber }
       );
+      statusRecord.set('last_hp', hpPercentage);
+      statusRecord.set('last_update', new Date().toISOString().replace('T', ' '));
+      e.app.save(statusRecord);
     } catch {
       // If record doesn't exist, create it
       statusRecord = new Record(e.app.findCollectionByNameOrId('mob_channel_status'), {
@@ -30,21 +34,18 @@ onRecordAfterCreateSuccess((e) => {
       e.app.save(statusRecord);
     }
 
-    // Update record
-    if (statusRecord) {
-      statusRecord.set('last_hp', hpPercentage);
-      statusRecord.set('last_update', new Date().toISOString().replace('T', ' '));
-      e.app.save(statusRecord);
-    }
-
     // Also update mob_channel_status_sse
     try {
       let statusSseRecord;
       try {
         statusSseRecord = e.app.findFirstRecordByFilter(
           'mob_channel_status_sse',
-          `mob = "${mobId}" && channel_number = ${channelNumber}`
+          'mob = {:mobId} && channel_number = {:channelNumber}',
+          { mobId: mobId, channelNumber: channelNumber }
         );
+        statusSseRecord.set('last_hp', hpPercentage);
+        statusSseRecord.set('last_update', new Date().toISOString().replace('T', ' '));
+        e.app.save(statusSseRecord);
       } catch {
         // If record doesn't exist, create it
         statusSseRecord = new Record(e.app.findCollectionByNameOrId('mob_channel_status_sse'), {
@@ -55,19 +56,14 @@ onRecordAfterCreateSuccess((e) => {
         });
         e.app.save(statusSseRecord);
       }
-
-      // Update record
-      if (statusSseRecord) {
-        statusSseRecord.set('last_hp', hpPercentage);
-        statusSseRecord.set('last_update', new Date().toISOString().replace('T', ' '));
-        e.app.save(statusSseRecord);
-      }
     } catch (error) {
-      console.error('Error in mob_channel_status_sse reports hook:', error);
+      console.error(`[CHANNEL_STATUS] sse error:`, error);
     }
   } catch (error) {
-    console.error('Error in mob_channel_status reports hook:', error);
+    console.error(`[CHANNEL_STATUS] error:`, error);
   }
 
   return e.next();
 }, 'hp_reports');
+
+console.log('[CHANNEL_STATUS] hooks registered');

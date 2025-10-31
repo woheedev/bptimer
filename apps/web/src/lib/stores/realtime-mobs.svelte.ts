@@ -9,6 +9,7 @@ import { pbRealtime } from '$lib/pocketbase';
 import type { ChannelEntry, MobWithChannels } from '$lib/types/mobs';
 import { isDataStale, sortChannelsForMobCard } from '$lib/utils/general-utils';
 import { shouldIncludeMob } from '$lib/utils/mob-filtering';
+import { getMobStatus } from '$lib/utils/mob-utils';
 
 type MobUpdateCallback = (events: RealtimeEventData[]) => void;
 type RealtimeEventData = {
@@ -188,11 +189,12 @@ function createRealtimeMobsStore() {
 		if (action === 'create' || action === 'update') {
 			const recordLastHp = record.last_hp as number;
 			const recordLastUpdate = record.last_update as string;
+			const lastUpdated = recordLastUpdate || new Date().toISOString();
 			const statusData: ChannelEntry = {
 				channel: channelNumber,
-				status: recordLastHp > 0 ? 'alive' : 'dead',
+				status: getMobStatus(recordLastHp, lastUpdated),
 				hp_percentage: recordLastHp,
-				last_updated: recordLastUpdate || new Date().toISOString()
+				last_updated: lastUpdated
 			};
 
 			let updatedChannels;
@@ -205,11 +207,11 @@ function createRealtimeMobsStore() {
 				updatedChannels = [...(mob.latestChannels || []), statusData];
 			}
 
-			// Filter stale data, sort, and take top channels
-			const filtered = updatedChannels.filter(
-				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
+			// Sort and take top channels (don't filter stale here - let periodic cleanup handle it)
+			updatedChannels = sortChannelsForMobCard(updatedChannels).slice(
+				0,
+				LATEST_CHANNELS_DISPLAY_COUNT
 			);
-			updatedChannels = sortChannelsForMobCard(filtered).slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
 
 			const updatedMob = { ...mob, latestChannels: updatedChannels };
 			const updatedMobs = [...mobs];

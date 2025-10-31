@@ -922,6 +922,18 @@ migrate(
           },
           {
             hidden: false,
+            id: 'number3009495418',
+            max: 20,
+            min: 1,
+            name: 'location_image',
+            onlyInt: true,
+            presentable: false,
+            required: false,
+            system: false,
+            type: 'number'
+          },
+          {
+            hidden: false,
             id: 'autodate_created',
             name: 'created',
             onCreate: true,
@@ -946,7 +958,7 @@ migrate(
           'CREATE INDEX `idx_hp_reports_mob_channel_number` ON `hp_reports` (`mob`, `channel_number`)',
           'CREATE INDEX `idx_hp_reports_created` ON `hp_reports` (`created` DESC)',
           'CREATE INDEX `idx_hp_reports_mob_created` ON `hp_reports` (`mob`, `created` DESC)',
-          'CREATE INDEX `idx_hp_reports_reporter` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `hp_percentage`, `created`)'
+          'CREATE INDEX `idx_SpmvrpqL6w` ON `hp_reports` (\n  `reporter`,\n  `mob`,\n  `channel_number`,\n  `hp_percentage`,\n  `created`\n)'
         ],
         listRule: '',
         name: 'hp_reports',
@@ -977,7 +989,7 @@ migrate(
             cascadeDelete: false,
             collectionId: 'pbc_1470589867',
             hidden: false,
-            id: 'relation1056859706',
+            id: 'relation4271371901',
             maxSelect: 1,
             minSelect: 0,
             name: 'mob',
@@ -988,7 +1000,7 @@ migrate(
           },
           {
             hidden: false,
-            id: 'number_channel',
+            id: 'number1760765226',
             max: 1000,
             min: 1,
             name: 'channel_number',
@@ -1021,11 +1033,11 @@ migrate(
             type: 'autodate'
           }
         ],
-        id: 'pbc_9876543210',
+        id: 'pbc_3303527663',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_mob_channel_status_sse_unique` ON `mob_channel_status_sse` (`mob`, `channel_number`)',
-          'CREATE INDEX `idx_mob_channel_status_sse_last_update` ON `mob_channel_status_sse` (`last_update` DESC)',
-          'CREATE INDEX `idx_mob_channel_status_sse_mob` ON `mob_channel_status_sse` (`mob`)'
+          'CREATE UNIQUE INDEX `idx_fDPJ9fS3fc` ON `mob_channel_status_sse` (\n  `mob`,\n  `channel_number`\n)',
+          'CREATE INDEX `idx_7oZFxWsLjC` ON `mob_channel_status_sse` (`last_update` DESC)',
+          'CREATE INDEX `idx_uRyIEbzajB` ON `mob_channel_status_sse` (`mob`)'
         ],
         listRule: '',
         name: 'mob_channel_status_sse',
@@ -1441,6 +1453,61 @@ migrate(
         type: 'base',
         updateRule: null,
         viewRule: 'user = @request.auth.id'
+      },
+      {
+        createRule: 'user = @request.auth.id',
+        deleteRule: 'user = @request.auth.id',
+        fields: [
+          {
+            autogeneratePattern: '[a-z0-9]{15}',
+            hidden: false,
+            id: 'text3208210256',
+            max: 15,
+            min: 15,
+            name: 'id',
+            pattern: '^[a-z0-9]+$',
+            presentable: false,
+            primaryKey: true,
+            required: true,
+            system: true,
+            type: 'text'
+          },
+          {
+            cascadeDelete: false,
+            collectionId: '_pb_users_auth_',
+            hidden: false,
+            id: 'relation2375276105',
+            maxSelect: 1,
+            minSelect: 0,
+            name: 'user',
+            presentable: false,
+            required: true,
+            system: false,
+            type: 'relation'
+          },
+          {
+            hidden: false,
+            id: 'date846843460',
+            max: '',
+            min: '',
+            name: 'last_seen',
+            presentable: false,
+            required: true,
+            system: false,
+            type: 'date'
+          }
+        ],
+        id: 'pbc_14482932',
+        indexes: [
+          'CREATE UNIQUE INDEX `idx_srbKKMIwkY` ON `page_presence` (`user`)',
+          'CREATE INDEX `idx_Sq15baJnT6` ON `page_presence` (`last_seen` DESC)'
+        ],
+        listRule: '',
+        name: 'page_presence',
+        system: false,
+        type: 'base',
+        updateRule: 'user = @request.auth.id',
+        viewRule: ''
       },
       {
         createRule: null,

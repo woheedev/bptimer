@@ -7,18 +7,22 @@
  * Also prevents submissions with HP higher than the user's previous report for the same mob/channel.
  */
 onRecordCreate((e) => {
+  const { DUPLICATE_CHECK_WINDOW } = require(`${__hooks}/constants.js`);
+
   const hpReport = e.record;
   const reporterId = hpReport.get('reporter');
   const mobId = hpReport.get('mob');
   const channelNumber = hpReport.get('channel_number');
   const hpPercentage = hpReport.get('hp_percentage');
 
-  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString().replace('T', ' ');
+  const duplicateCheckCutoff = new Date(Date.now() - DUPLICATE_CHECK_WINDOW)
+    .toISOString()
+    .replace('T', ' ');
 
   // Check for exact duplicate
   try {
     const duplicateResult = new DynamicModel({ count: 0 });
-    $app
+    e.app
       .db()
       .newQuery(
         'SELECT COUNT(*) as count FROM hp_reports WHERE reporter = {:reporter} AND mob = {:mob} AND channel_number = {:channel} AND hp_percentage = {:hp} AND created > {:cutoff}'
@@ -28,7 +32,7 @@ onRecordCreate((e) => {
         mob: mobId,
         channel: channelNumber,
         hp: hpPercentage,
-        cutoff: fiveMinutesAgo
+        cutoff: duplicateCheckCutoff
       })
       .one(duplicateResult);
 
@@ -36,16 +40,16 @@ onRecordCreate((e) => {
       throw new BadRequestError('You have already reported this HP percentage');
     }
   } catch (error) {
-    if (error.message.includes('already reported this HP')) {
+    if (error instanceof BadRequestError) {
       throw error;
     }
-    console.log(`[HP] Duplicate check error: ${error.message}`);
+    console.error(`[HP] duplicateCheck error:`, error);
   }
 
   // Check for higher HP within time window
   try {
     const lastHpResult = new DynamicModel({ hp_percentage: 0 });
-    $app
+    e.app
       .db()
       .newQuery(
         'SELECT hp_percentage FROM hp_reports WHERE reporter = {:reporter} AND mob = {:mob} AND channel_number = {:channel} AND created > {:cutoff} ORDER BY created DESC LIMIT 1'
@@ -54,7 +58,7 @@ onRecordCreate((e) => {
         reporter: reporterId,
         mob: mobId,
         channel: channelNumber,
-        cutoff: fiveMinutesAgo
+        cutoff: duplicateCheckCutoff
       })
       .one(lastHpResult);
 
@@ -62,13 +66,12 @@ onRecordCreate((e) => {
       throw new BadRequestError('HP percentage can only decrease');
     }
   } catch (error) {
-    if (error.message.includes('can only decrease')) {
+    if (error instanceof BadRequestError) {
       throw error;
     }
-    // No previous report in window or query error (expected)
   }
 
   e.next();
 }, 'hp_reports');
 
-console.log('[Prevent Duplicate HP Reports] Hook registered for hp_reports collection');
+console.log('[HP] hooks registered');

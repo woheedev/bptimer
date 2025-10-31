@@ -7,7 +7,13 @@ import type { UserRecordModel } from '$lib/types/auth';
  * @param model - The user model with avatar field
  * @returns The avatar URL or undefined if no avatar
  */
-export function getAvatarUrl(model: UserRecordModel | null): string | undefined {
+export function getAvatarUrl(
+	model:
+		| UserRecordModel
+		| { id: string; avatar?: string; collectionName?: string }
+		| null
+		| undefined
+): string | undefined {
 	if (!model) return undefined;
 	if (typeof model.avatar !== 'string' || !model.avatar) return undefined;
 
@@ -17,6 +23,11 @@ export function getAvatarUrl(model: UserRecordModel | null): string | undefined 
 	}
 
 	// Otherwise, generate PocketBase file URL
+	// Support both full record models and simple objects with id/avatar/collectionName
+	if ('collectionName' in model && model.collectionName) {
+		return pb.files.getURL({ id: model.id, collectionName: model.collectionName }, model.avatar);
+	}
+
 	return pb.files.getURL(model, model.avatar);
 }
 

@@ -11,11 +11,8 @@
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getAvatarUrl } from '$lib/utils/user-utils';
-	import BellIcon from '@lucide/svelte/icons/bell';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
-	import SettingsIcon from '@lucide/svelte/icons/settings';
-	import UserIcon from '@lucide/svelte/icons/user';
 	import { getContext } from 'svelte';
 
 	const sidebar = useSidebar();
@@ -33,12 +30,10 @@
 		}
 	});
 
-	let initials = $derived(getInitials(user?.username || ''));
+	const initials = $derived(getInitials(user?.username || ''));
 
 	// Construct avatar URL for PocketBase file field
-	let avatarUrl = $derived(() => {
-		return browser && user ? getAvatarUrl(user) || '' : '';
-	});
+	const avatarUrl = $derived(browser && user ? getAvatarUrl(user) || '' : '');
 
 	async function handleSignIn(): Promise<void> {
 		await signIn();
@@ -70,7 +65,7 @@
 							{...props}
 						>
 							<Avatar.Root class="size-8 rounded-lg">
-								<Avatar.Image src={avatarUrl()} alt="Avatar" />
+								<Avatar.Image src={avatarUrl} alt="Avatar" />
 								<Avatar.Fallback class="rounded-lg">{initials}</Avatar.Fallback>
 							</Avatar.Root>
 							<div class="grid flex-1 text-left text-sm leading-tight">
@@ -90,7 +85,7 @@
 					<DropdownMenu.Label class="p-0 font-normal">
 						<div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 							<Avatar.Root class="size-8 rounded-lg">
-								<Avatar.Image src={avatarUrl()} alt="Avatar" />
+								<Avatar.Image src={avatarUrl} alt="Avatar" />
 								<Avatar.Fallback class="rounded-lg">{initials}</Avatar.Fallback>
 							</Avatar.Root>
 							<div class="grid flex-1 text-left text-sm leading-tight">
@@ -100,8 +95,8 @@
 						</div>
 					</DropdownMenu.Label>
 					<DropdownMenu.Separator />
+					<!-- TODO
 					<DropdownMenu.Group>
-						<!-- TODO -->
 						<DropdownMenu.Item disabled={true}>
 							<UserIcon />
 							Profile
@@ -116,6 +111,7 @@
 						</DropdownMenu.Item>
 					</DropdownMenu.Group>
 					<DropdownMenu.Separator />
+					-->
 					<DropdownMenu.Item onclick={handleSignOut}>
 						<LogOutIcon />
 						Log out

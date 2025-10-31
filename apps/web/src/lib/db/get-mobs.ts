@@ -133,7 +133,7 @@ export async function getMobsByIds(
 		const mob_ids = records.map((m) => m.id);
 		const all_channel_statuses = await pb.collection('mob_channel_status').getFullList({
 			filter: mob_ids.map((id) => `mob = "${id}"`).join(' || '),
-			requestKey: `all-channel-statuses-by-ids-${ids.join('-')}` // Unique request key
+			requestKey: `all-channel-statuses-by-ids-${[...ids].sort().join('-')}` // Unique request key (sorted for consistency, non-mutating)
 		});
 
 		// Validate channel status records

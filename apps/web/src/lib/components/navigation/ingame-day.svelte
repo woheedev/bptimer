@@ -17,6 +17,6 @@
 	const days = calculateGameDay();
 </script>
 
-<div class="px-2 py-2">
+<div>
 	<Badge variant="secondary">Day {days}</Badge>
 </div>

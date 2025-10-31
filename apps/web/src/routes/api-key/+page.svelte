@@ -6,32 +6,34 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import { Switch } from '$lib/components/ui/switch';
+	import { browser } from '$app/environment';
 	import { signInAPI, signOut } from '$lib/oauth';
 	import { pb } from '$lib/pocketbase';
 	import type { UserRecordModel } from '$lib/types/auth';
-	import { onMount } from 'svelte';
+	import { showToast } from '$lib/utils/toast';
 
 	let currentUser = $state<UserRecordModel | null>(null);
 	let apiKey = $state<string>('');
 	let isEnabled = $state<boolean>(false);
 	let isGenerating = $state<boolean>(false);
 	let isDeleting = $state<boolean>(false);
-	let error = $state<string>('');
 
-	// Check if user is authenticated on mount
-	onMount(async () => {
-		if (pb.authStore.isValid) {
+	// Check if user is authenticated and load API key
+	$effect(() => {
+		if (browser && pb.authStore.isValid) {
 			currentUser = pb.authStore.record as UserRecordModel;
 			// Load existing API key
-			try {
-				const records = await pb.collection('api_keys').getList(1, 1);
-				if (records.items.length > 0) {
-					apiKey = records.items[0].api_key;
-				}
-				isEnabled = !!apiKey;
-			} catch (err) {
-				console.error('Failed to load API key:', err);
-			}
+			pb.collection('api_keys')
+				.getList(1, 1)
+				.then((records) => {
+					if (records.items.length > 0) {
+						apiKey = records.items[0].api_key;
+					}
+					isEnabled = !!apiKey;
+				})
+				.catch((err) => {
+					console.error('Failed to load API key:', err);
+				});
 		}
 	});
 
@@ -39,7 +41,6 @@
 		if (!currentUser || isGenerating) return;
 
 		isGenerating = true;
-		error = '';
 
 		try {
 			// Delete existing API key record for the user
@@ -51,9 +52,11 @@
 			const result = await pb.collection('api_keys').create({ user: currentUser.id });
 			apiKey = result.api_key;
 			isEnabled = true;
+			showToast.success('API key generated successfully');
 		} catch (err: unknown) {
-			error = err instanceof Error ? err.message : 'Failed to generate API key';
+			const errorMsg = err instanceof Error ? err.message : 'Failed to generate API key';
 			isEnabled = false; // Reset since generation failed
+			showToast.error(errorMsg);
 		} finally {
 			isGenerating = false;
 		}
@@ -63,7 +66,6 @@
 		if (!currentUser || isDeleting) return;
 
 		isDeleting = true;
-		error = '';
 
 		try {
 			// Delete existing API key record for the user
@@ -73,9 +75,11 @@
 			}
 			apiKey = '';
 			isEnabled = false;
+			showToast.success('API key deleted successfully');
 		} catch (err: unknown) {
-			error = err instanceof Error ? err.message : 'Failed to delete API key';
+			const errorMsg = err instanceof Error ? err.message : 'Failed to delete API key';
 			isEnabled = true; // Reset since deletion failed
+			showToast.error(errorMsg);
 		} finally {
 			isDeleting = false;
 		}
@@ -97,7 +101,8 @@
 			// After sign in, set user
 			currentUser = pb.authStore.record as UserRecordModel;
 		} catch (err: unknown) {
-			error = err instanceof Error ? err.message : 'Sign in failed';
+			const errorMsg = err instanceof Error ? err.message : 'Sign in failed';
+			showToast.error(errorMsg);
 		}
 	}
 
@@ -107,9 +112,14 @@
 		window.location.href = deepLink;
 	}
 
-	function copyKeyToClipboard() {
+	async function copyKeyToClipboard() {
 		if (!apiKey) return;
-		navigator.clipboard.writeText(apiKey);
+		try {
+			await navigator.clipboard.writeText(apiKey);
+			showToast.success('API key copied to clipboard');
+		} catch {
+			showToast.error('Failed to copy API key');
+		}
 	}
 
 	function signOutAndRedirect() {
@@ -133,15 +143,12 @@
 						<Button onclick={handleSignIn} class="mx-auto w-full max-w-sm"
 							>Sign in with Discord</Button
 						>
-						{#if error}
-							<p class="text-destructive text-sm">{error}</p>
-							<button
-								class="text-sm text-blue-600 hover:underline"
-								onclick={() => goto(resolve('/'))}
-							>
-								← Back home
-							</button>
-						{/if}
+						<button
+							class="text-sm text-blue-600 hover:underline"
+							onclick={() => goto(resolve('/'))}
+						>
+							← Back home
+						</button>
 					</div>
 				</div>
 			{:else}
@@ -215,10 +222,6 @@
 								<Button onclick={signOutAndRedirect} variant="ghost" size="sm">Sign out</Button>
 							</div>
 						</div>
-					{/if}
-
-					{#if error}
-						<p class="text-destructive mt-4 text-sm">{error}</p>
 					{/if}
 				</div>
 			{/if}

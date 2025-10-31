@@ -1,18 +1,17 @@
-import type {
-	ApiKey as BaseApiKey,
-	HpReport as BaseHpReport,
-	Map as BaseMap,
-	Mob as BaseMob,
-	MobChannelStatus as BaseMobChannelStatus,
-	User as BaseUser,
-	Vote as BaseVote
-} from '$lib/schemas';
-
-// Database Base Types
-export type User = BaseUser;
-export type ApiKey = BaseApiKey;
-export type Map = BaseMap;
-export type Mob = BaseMob;
-export type HpReport = BaseHpReport;
-export type Vote = BaseVote;
-export type MobChannelStatus = BaseMobChannelStatus;
+// Transformed types
+export interface MobReport {
+	id: string;
+	channel: number;
+	hp_percentage: number;
+	user: {
+		id: string;
+		name: string;
+		avatar?: string;
+	};
+	create_time: string;
+	upvotes: number;
+	downvotes: number;
+	reporter_id: string;
+	reporter_reputation: number;
+	location_image?: number;
+}

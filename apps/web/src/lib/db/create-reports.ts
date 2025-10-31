@@ -1,12 +1,14 @@
 import { pb } from '$lib/pocketbase';
-import { hpReportInputSchema } from '$lib/schemas';
-import type { HpReport } from '$lib/types/db';
+import { hpReportInputSchema, hpReportSchema } from '$lib/schemas';
+import type { HpReport } from '$lib/schemas';
+import { validateWithSchema } from '$lib/utils/validation';
 
 export async function createReport(
 	boss_id: string,
 	channel: number,
 	hp_percentage: number,
-	reporter_id: string
+	reporter_id: string,
+	locationImage?: number | null
 ): Promise<HpReport> {
 	try {
 		// Validate input with Zod
@@ -35,14 +37,21 @@ export async function createReport(
 		}
 
 		// Create the HP report
-		const report = await pb.collection('hp_reports').create({
+		const reportData: Record<string, unknown> = {
 			mob: boss_id,
 			channel_number: channel,
 			hp_percentage: hp_percentage,
 			reporter: reporter_id
-		});
+		};
 
-		return report as unknown as HpReport;
+		// Add location image number if provided and valid
+		if (locationImage !== null && locationImage !== undefined && locationImage >= 1) {
+			reportData.location_image = locationImage;
+		}
+
+		const report = await pb.collection('hp_reports').create(reportData);
+
+		return validateWithSchema(hpReportSchema, report, 'HP report');
 	} catch (error) {
 		console.error('Error creating HP report:', error);
 		throw error;

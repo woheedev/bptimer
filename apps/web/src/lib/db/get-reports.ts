@@ -1,5 +1,6 @@
 import { pb } from '$lib/pocketbase';
 import { hpReportSchema } from '$lib/schemas';
+import type { MobReport } from '$lib/types/db';
 import type { UserRecordModel } from '$lib/types/auth';
 import { mapUserRecord } from '$lib/utils/user-utils';
 import { validateWithSchema } from '$lib/utils/validation';
@@ -11,50 +12,29 @@ function validateHpReports(reports: Record<string, unknown>[]): void {
 	}
 }
 
-export async function getReports(bossId: string): Promise<
-	Array<{
-		id: string;
-		channel: number;
-		hp_percentage: number;
-		user: { id: string; name: string; avatar: string };
-		create_time: string;
-	}>
-> {
-	try {
-		// Fetch recent reports for this boss
-		const reports = await pb.collection('hp_reports').getList(1, 10, {
-			filter: `mob = "${bossId}"`,
-			sort: '-created',
-			expand: 'reporter'
-		});
-
-		validateHpReports(reports.items);
-
-		return reports.items.map((report) => ({
-			id: report.id,
-			channel: report.channel_number || 0,
-			hp_percentage: report.hp_percentage,
-			user: mapUserRecord(report.expand?.reporter as UserRecordModel),
-			create_time: report.created
-		}));
-	} catch (error) {
-		console.error('Error fetching boss reports:', error);
-		return [];
-	}
+// Map report record to MobReport type
+function mapReportToMobReport(
+	report: Record<string, unknown>,
+	reporter: UserRecordModel | undefined
+): MobReport {
+	return {
+		id: report.id as string,
+		channel: (report.channel_number as number) || 0,
+		hp_percentage: report.hp_percentage as number,
+		user: mapUserRecord(reporter),
+		create_time: report.created as string,
+		upvotes: (report.upvotes as number) || 0,
+		downvotes: (report.downvotes as number) || 0,
+		reporter_id: report.reporter as string,
+		reporter_reputation: reporter?.reputation ?? 0,
+		location_image: report.location_image as number | undefined
+	};
 }
 
 export async function getLatestMobReports(
 	mobId: string,
 	reportCount: number
-): Promise<
-	Array<{
-		id: string;
-		channel: number;
-		hp_percentage: number;
-		user: { id: string; name: string; avatar: string };
-		create_time: string;
-	}>
-> {
+): Promise<MobReport[]> {
 	try {
 		// Fetch the latest X reports for this mob, sorted by newest
 		const reports = await pb.collection('hp_reports').getList(1, reportCount, {
@@ -66,13 +46,10 @@ export async function getLatestMobReports(
 
 		validateHpReports(reports.items);
 
-		return reports.items.map((report) => ({
-			id: report.id,
-			channel: report.channel_number || 0,
-			hp_percentage: report.hp_percentage,
-			user: mapUserRecord(report.expand?.reporter as UserRecordModel),
-			create_time: report.created
-		}));
+		return reports.items.map((report) => {
+			const reporter = report.expand?.reporter as UserRecordModel;
+			return mapReportToMobReport(report, reporter);
+		});
 	} catch (error) {
 		console.error('Error fetching latest mob reports:', error);
 		return [];
@@ -82,15 +59,7 @@ export async function getLatestMobReports(
 export async function getChannelReports(
 	mobId: string,
 	channelNumber: number
-): Promise<
-	Array<{
-		id: string;
-		channel: number;
-		hp_percentage: number;
-		user: { id: string; name: string; avatar: string };
-		create_time: string;
-	}>
-> {
+): Promise<MobReport[]> {
 	try {
 		// Query directly by channel number
 		const reports = await pb.collection('hp_reports').getList(1, 10, {
@@ -102,13 +71,10 @@ export async function getChannelReports(
 
 		validateHpReports(reports.items);
 
-		return reports.items.map((report) => ({
-			id: report.id,
-			channel: report.channel_number || channelNumber,
-			hp_percentage: report.hp_percentage,
-			user: mapUserRecord(report.expand?.reporter as UserRecordModel),
-			create_time: report.created
-		}));
+		return reports.items.map((report) => {
+			const reporter = report.expand?.reporter as UserRecordModel;
+			return mapReportToMobReport(report, reporter);
+		});
 	} catch (error) {
 		console.error('Error fetching channel reports:', error);
 		return [];

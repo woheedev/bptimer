@@ -7,7 +7,7 @@
 	import { favoriteMobsStore } from '$lib/stores/favorite-mobs.svelte';
 
 	let mobs_data: MobContainer | undefined = $state();
-	let mobIds = $derived(Array.from(favoriteMobsStore.favoriteMobs));
+	const mobIds = $derived(Array.from(favoriteMobsStore.favoriteMobs));
 </script>
 
 <svelte:boundary>

@@ -13,8 +13,8 @@
 	import type { MobWithChannels } from '$lib/types/mobs';
 	import { loadMobsData } from '$lib/utils/mob-filtering';
 	import { updateLatestChannels } from '$lib/utils/mob-utils';
+	import { browser } from '$app/environment';
 	import { createDebouncedSearch, filterMobsByName } from '$lib/utils/search.svelte';
-	import { onMount } from 'svelte';
 
 	let {
 		type = 'boss',
@@ -56,10 +56,10 @@
 	let loading = $state(true);
 
 	// Filtered mobs based on search query
-	let filteredMobs = $derived(filterMobsByName(mobs, searchQuery));
+	const filteredMobs = $derived(filterMobsByName(mobs, searchQuery));
 
 	// Get live channels for the selected mob (updated via SSE)
-	let liveChannels = $derived.by(() => {
+	const liveChannels = $derived.by(() => {
 		if (!selectedMob) return [];
 		const mob = mobs.find((m) => m.id === selectedMob!.id);
 		return mob?.latestChannels || [];
@@ -71,9 +71,9 @@
 	}, DEBOUNCE_DELAY);
 
 	// Get singular and plural names based on type
-	let isFavorites = $derived(mobIds !== undefined);
-	let singularName = $derived(isFavorites ? 'mob' : type === 'boss' ? 'boss' : 'creature');
-	let pluralName = $derived(isFavorites ? 'mobs' : type === 'boss' ? 'bosses' : 'creatures');
+	const isFavorites = $derived(mobIds !== undefined);
+	const singularName = $derived(isFavorites ? 'mob' : type === 'boss' ? 'boss' : 'creature');
+	const pluralName = $derived(isFavorites ? 'mobs' : type === 'boss' ? 'bosses' : 'creatures');
 
 	async function loadMobs() {
 		try {
@@ -84,10 +84,13 @@
 		}
 	}
 
-	onMount(async () => {
+	// Initial load on mount
+	$effect(() => {
+		if (!browser) return;
 		if (mobIds === undefined) {
-			await loadMobs();
-			loading = false;
+			loadMobs().then(() => {
+				loading = false;
+			});
 		}
 	});
 

@@ -1,30 +1,44 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Slider } from '$lib/components/ui/slider/index.js';
-	import { HP_SLIDER_STEP, MAX_HP_VALUE, MIN_HP_VALUE } from '$lib/constants';
+	import {
+		HP_SLIDER_STEP,
+		MAX_HP_VALUE,
+		MIN_HP_VALUE,
+		SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS
+	} from '$lib/constants';
 	import { hpSubmissionInputSchema } from '$lib/schemas';
 	import type { UserRecordModel } from '$lib/types/auth';
+	import { showToast } from '$lib/utils/toast';
+	import Skull from '@lucide/svelte/icons/skull';
+	import LocationImageSelector from '$lib/components/mob/location-image-selector.svelte';
 
 	let {
 		selectedChannel,
 		user,
+		mobName,
+		mobType,
 		hpValue = $bindable(100),
-		fullVoteCount = $bindable(0),
+		locationImage = $bindable<number | null>(null),
 		isSubmitting,
 		onSubmit
 	}: {
 		selectedChannel: number | null;
 		user: UserRecordModel | null;
+		mobName: string;
+		mobType: 'boss' | 'magical_creature' | string;
 		hpValue: number;
-		fullVoteCount: number;
+		locationImage?: number | null;
 		isSubmitting: boolean;
 		onSubmit: () => void;
 	} = $props();
 
 	let validationError = $state<string>('');
+
+	// Check if this is a special magical creature
+	const requiresLocation = $derived(mobName in SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS);
 
 	// Validate HP value changes
 	$effect(() => {
@@ -41,6 +55,12 @@
 	function handleSubmit() {
 		if (!selectedChannel || !user || validationError) return;
 
+		// Validate location image for magical creatures
+		if (requiresLocation && locationImage === null) {
+			showToast.error('Please select a location image for this magical creature');
+			return;
+		}
+
 		try {
 			// Validate the submission input before submission
 			hpSubmissionInputSchema.parse({
@@ -50,7 +70,8 @@
 			onSubmit();
 		} catch (error) {
 			console.error('Validation failed:', error);
-			// Could show error to user here
+			const errorMsg = error instanceof Error ? error.message : 'Invalid input';
+			showToast.error(errorMsg);
 		}
 	}
 </script>
@@ -58,7 +79,10 @@
 {#if selectedChannel && user}
 	<Card.Root>
 		<Card.Header>
-			<Card.Title class="text-base">Report HP - Channel {selectedChannel}</Card.Title>
+			<div class="flex items-center justify-between">
+				<Card.Title class="text-base">Report HP</Card.Title>
+				<span class="text-muted-foreground text-sm">Line {selectedChannel}</span>
+			</div>
 		</Card.Header>
 		<Card.Content class="space-y-4">
 			<div class="space-y-2">
@@ -76,30 +100,33 @@
 					<p class="text-destructive text-sm">{validationError}</p>
 				{/if}
 			</div>
-			<div class="flex w-full gap-2">
-				<Button onclick={() => (hpValue = 0)} size="sm" variant="destructive" class="flex-1"
-					>Dead</Button
+			{#if requiresLocation}
+				<LocationImageSelector
+					{mobName}
+					{mobType}
+					bind:selectedLocation={locationImage}
+					required={true}
+				/>
+			{/if}
+			<div class="flex gap-2">
+				<Button
+					onclick={() => (hpValue = 0)}
+					size="icon"
+					variant="destructive"
+					class="px-2"
+					title="Set HP to 0"
 				>
-				<Button onclick={() => fullVoteCount++} size="sm" variant="outline" class="relative flex-1">
-					Full
-					{#if fullVoteCount > 0}
-						<Badge
-							variant="default"
-							class="absolute -top-1 -right-1 h-5 min-w-5 rounded-full px-1 text-[10px]"
-						>
-							{fullVoteCount}
-						</Badge>
-					{/if}
+					<Skull class="h-4 w-4" />
+				</Button>
+				<Button
+					onclick={handleSubmit}
+					disabled={isSubmitting || !!validationError}
+					class="flex-1"
+					variant="default"
+				>
+					{isSubmitting ? 'Submitting...' : 'Submit Report'}
 				</Button>
 			</div>
-			<Button
-				onclick={handleSubmit}
-				disabled={isSubmitting || !!validationError}
-				class="w-full"
-				variant="default"
-			>
-				{isSubmitting ? 'Submitting...' : 'Submit Report'}
-			</Button>
 		</Card.Content>
 	</Card.Root>
 {:else if selectedChannel && !user}

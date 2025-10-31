@@ -55,10 +55,10 @@
 		onViewDetails?.(mob.id, mob.name, mob.uid, mob.total_channels);
 	}
 
-	let initials = $derived.by(() => getInitials(mob.name));
+	const initials = $derived.by(() => getInitials(mob.name));
 
 	// Compute pills array
-	let channelPills = $derived.by(() => {
+	const channelPills = $derived.by(() => {
 		const channelData = latestChannels.map((channel) => ({
 			channelNumber: channel.channel,
 			status: channel.status,
@@ -75,10 +75,10 @@
 		return [...channelData, ...emptyPills];
 	});
 
-	let isFavorited = $derived.by(() => favoriteMobsStore.favoriteMobs.has(mob.id));
+	const isFavorited = $derived.by(() => favoriteMobsStore.favoriteMobs.has(mob.id));
 
 	// Respawn countdown logic
-	let nextRespawnTime = $derived.by(() => {
+	const nextRespawnTime = $derived.by(() => {
 		if (
 			type === 'boss' ||
 			MAGICAL_CREATURE_RESET_HOURS[mob.name as keyof typeof MAGICAL_CREATURE_RESET_HOURS]

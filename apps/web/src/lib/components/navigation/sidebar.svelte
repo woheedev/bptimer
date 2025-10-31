@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AnimatedGradientText from '$lib/components/animated-gradient-text.svelte';
 	import InGameDay from '$lib/components/navigation/ingame-day.svelte';
+	import PagePresence from '$lib/components/navigation/page-presence.svelte';
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
 	import * as Alert from '$lib/components/ui/alert/index.js';
@@ -25,7 +26,11 @@
 		<Sidebar.Group>
 			<NavigationMain items={PAGES} />
 			<div class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
-				<InGameDay />
+				<div class="flex items-center gap-2 px-2 py-2">
+					<InGameDay />
+					<div class="bg-sidebar-border h-4 w-px"></div>
+					<PagePresence />
+				</div>
 			</div>
 		</Sidebar.Group>
 		<Sidebar.Group>

@@ -2,36 +2,46 @@
 	import ReportCard from '$lib/components/mob/report-card.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import type { MobReport } from '$lib/types/db';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+	import { getLocationImagePath } from '$lib/utils/mob-utils';
+	import { SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS } from '$lib/constants';
 
 	let {
 		reports,
 		isLoadingReports,
 		selectedChannel,
-		onRefresh
+		onRefresh,
+		mobName,
+		mobType
 	}: {
-		reports: Array<{
-			id: string;
-			channel: number;
-			hp_percentage: number;
-			user: {
-				id: string;
-				name: string;
-				avatar?: string;
-			};
-			create_time: string;
-		}>;
+		reports: MobReport[];
 		isLoadingReports: boolean;
 		selectedChannel: number | null;
 		onRefresh: () => void;
+		mobName: string;
+		mobType: 'boss' | 'magical_creature' | string;
 	} = $props();
+
+	// Check if this is a special magical creature
+	const isSpecialMagicalCreature = $derived(mobName in SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS);
+
+	// Get most recent location image
+	const mostRecentLocationImage = $derived(
+		selectedChannel !== null &&
+			isSpecialMagicalCreature &&
+			reports.length > 0 &&
+			reports[0].location_image
+			? getLocationImagePath(mobName, mobType, reports[0].location_image)
+			: null
+	);
 </script>
 
 <!-- Reports Section -->
 <Card.Root class="flex h-full min-h-0 flex-1 flex-col">
 	<Card.Header class="flex flex-row items-center justify-between pb-2">
 		<Card.Title class="text-base">
-			{selectedChannel ? `Channel ${selectedChannel} Reports` : 'Latest Reports'}
+			{selectedChannel ? `Line ${selectedChannel} Reports` : 'Latest Reports'}
 		</Card.Title>
 		<Button
 			variant="ghost"
@@ -50,8 +60,20 @@
 				<p class="text-muted-foreground ml-3 text-sm">Loading reports...</p>
 			</div>
 		{:else if reports.length > 0}
+			{#if mostRecentLocationImage}
+				<div class="mb-2 overflow-hidden rounded-md border">
+					<img
+						src={mostRecentLocationImage}
+						alt="Most recent location"
+						class="h-auto w-full max-w-full object-contain"
+						onerror={(e) => {
+							(e.target as HTMLImageElement).style.display = 'none';
+						}}
+					/>
+				</div>
+			{/if}
 			{#each reports as report (report.id)}
-				<ReportCard {report} />
+				<ReportCard {report} reporterReputation={report.reporter_reputation} />
 			{/each}
 		{:else}
 			<p class="text-muted-foreground py-4 text-center text-sm">No reports yet</p>

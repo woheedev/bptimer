@@ -26,8 +26,8 @@
 	}
 
 	// Calculate fill width
-	let hpColorClass = $derived(getHPColorClass(hpPercentage, status));
-	let fillWidth = $derived(
+	const hpColorClass = $derived(getHPColorClass(hpPercentage, status));
+	const fillWidth = $derived(
 		status === 'alive' && hpPercentage > 0
 			? `${hpPercentage}%`
 			: status === 'dead'
@@ -59,7 +59,9 @@
 			{/snippet}
 		</Tooltip.Trigger>
 		<Tooltip.Content>
-			<p>{status === 'alive' ? `${hpPercentage}% HP` : status === 'dead' ? 'Dead' : 'Unknown'}</p>
+			<p>
+				{status === 'alive' ? `${hpPercentage}% HP` : status === 'dead' ? 'Dead' : 'Unknown'}
+			</p>
 		</Tooltip.Content>
 	</Tooltip.Root>
 {:else}

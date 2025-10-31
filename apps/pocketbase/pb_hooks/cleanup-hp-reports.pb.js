@@ -7,31 +7,34 @@
  */
 
 cronAdd('cleanupHpReports', '20 * * * *', () => {
+  const { HP_REPORTS_CLEANUP_WINDOW } = require(`${__hooks}/constants.js`);
+
   try {
-    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString().replace('T', ' ');
+    const cutoffTime = new Date(Date.now() - HP_REPORTS_CLEANUP_WINDOW)
+      .toISOString()
+      .replace('T', ' ');
 
     const countResult = new DynamicModel({ count: 0 });
     $app
       .db()
       .newQuery('SELECT COUNT(*) as count FROM hp_reports WHERE created < {:cutoff}')
-      .bind({ cutoff: twoHoursAgo })
+      .bind({ cutoff: cutoffTime })
       .one(countResult);
 
     const count = countResult.count;
 
     if (count > 0) {
-      // Batch delete old reports
       $app
         .db()
         .newQuery('DELETE FROM hp_reports WHERE created < {:cutoff}')
-        .bind({ cutoff: twoHoursAgo })
+        .bind({ cutoff: cutoffTime })
         .execute();
 
-      console.log(`[HP Reports Cleanup] Deleted ${count} old HP reports`);
+      console.log(`[CLEANUP] hp_reports deleted=${count}`);
     }
   } catch (error) {
-    console.error('[HP Reports Cleanup] Unexpected error:', error);
+    console.error(`[CLEANUP] hp_reports error:`, error);
   }
 });
 
-console.log('[HP Reports Cleanup] Cron job registered: cleanupHpReports every hour');
+console.log('[CLEANUP] hp_reports hooks registered');

@@ -9,19 +9,23 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
-	import { DEFAULT_HP_VALUE } from '$lib/constants';
+	import { DEFAULT_HP_VALUE, SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS } from '$lib/constants';
 	import { createReport } from '$lib/db/create-reports';
 	import { getChannels } from '$lib/db/get-channels';
 	import { getChannelReports, getLatestMobReports } from '$lib/db/get-reports';
 	import { pb } from '$lib/pocketbase';
 	import { filterSortSettingsStore } from '$lib/stores/filter-sort-settings.svelte';
+	import type { MobReport } from '$lib/types/db';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { filterAndSortChannels } from '$lib/utils/mob-filtering';
-	import { getMobImagePath } from '$lib/utils/mob-utils';
+	import { getMobImagePath, getMobMapPath } from '$lib/utils/mob-utils';
 	import { mapUserRecord } from '$lib/utils/user-utils';
+	import { showToast } from '$lib/utils/toast';
+	import * as Drawer from '$lib/components/ui/drawer/index.js';
 	import Eye from '@lucide/svelte/icons/eye';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
+	import MapPin from '@lucide/svelte/icons/map-pin';
 	import { untrack } from 'svelte';
 
 	let {
@@ -54,8 +58,8 @@
 	let submission_state = $state({
 		selectedChannel: null as number | null,
 		hpValue: DEFAULT_HP_VALUE,
-		fullVoteCount: 0,
-		isSubmitting: false
+		isSubmitting: false,
+		locationImage: null as number | null
 	});
 
 	let data_state = $state({
@@ -65,17 +69,7 @@
 			hp_percentage: number;
 			last_updated?: string;
 		}>,
-		reports: [] as Array<{
-			id: string;
-			channel: number;
-			hp_percentage: number;
-			user: {
-				id: string;
-				name: string;
-				avatar?: string;
-			};
-			create_time: string;
-		}>
+		reports: [] as MobReport[]
 	});
 
 	let ui_state = $state({
@@ -88,11 +82,12 @@
 	});
 
 	let activeTab = $state('submit');
+	let mapOpen = $state(false);
 
 	let initialChannelHandled = $state(false);
 
 	// Get user from context
-	let user = $derived.by(() => pb.authStore.record as UserRecordModel);
+	const user = $derived.by(() => pb.authStore.record as UserRecordModel);
 
 	// Reset modal state when opening
 	$effect(() => {
@@ -100,8 +95,8 @@
 			// Reset all modal state
 			submission_state.selectedChannel = null;
 			submission_state.hpValue = DEFAULT_HP_VALUE;
-			submission_state.fullVoteCount = 0;
 			submission_state.isSubmitting = false;
+			submission_state.locationImage = null;
 			data_state.channels = [];
 			data_state.reports = [];
 			ui_state.isLoading = false;
@@ -225,6 +220,15 @@
 			const reports_data = await getChannelReports(mobId, channelNumber);
 			// Force a fresh array assignment to ensure reactivity
 			data_state.reports = [...reports_data];
+
+			// Set default location image from most recent report if available
+			if (isSpecialMagicalCreature && reports_data.length > 0) {
+				// Reports are already sorted by -created, so first report is most recent
+				const mostRecentReport = reports_data[0];
+				if (mostRecentReport?.location_image) {
+					submission_state.locationImage = mostRecentReport.location_image;
+				}
+			}
 		} catch (error) {
 			const error_msg = error instanceof Error ? error.message : 'Failed to load channel reports';
 			ui_state.errorMessage = error_msg;
@@ -236,17 +240,20 @@
 		}
 	}
 
-	let initials = $derived(getInitials(mobName));
+	const initials = $derived(getInitials(mobName));
+
+	// Check if this is a special magical creature requiring location images (random/rotating locations)
+	const isSpecialMagicalCreature = $derived(mobName in SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS);
 
 	// Dynamic class for left section based on panel visibility
-	let leftSectionClass = $derived(
+	const leftSectionClass = $derived(
 		`flex flex-1 flex-col overflow-hidden pr-0 lg:flex-none lg:pr-2 ${
 			ui_state.isPanelVisible ? 'lg:w-3/4' : 'lg:w-full'
 		}`
 	);
 
 	// Create filtered and sorted channel grid
-	let channelGrid = $derived.by(() => {
+	const channelGrid = $derived.by(() => {
 		if (!totalChannels || !data_state.channels.length) return [];
 
 		// Create complete channel list with all channels (1 to totalChannels)
@@ -286,11 +293,15 @@
 		data_state.reports = [];
 		ui_state.isLoadingReports = true;
 
+		// Reset location image
+		if (isSpecialMagicalCreature) {
+			submission_state.locationImage = null;
+		}
+
 		// Set HP value to current channel's HP if available
 		const channel = data_state.channels.find((c) => c.channel === channelNumber);
 		submission_state.hpValue =
 			channel && channel.hp_percentage > 0 ? channel.hp_percentage : DEFAULT_HP_VALUE;
-		submission_state.fullVoteCount = 0;
 
 		fetchChannelReports(channelNumber);
 	}
@@ -298,6 +309,11 @@
 	function handleBackToAllReports() {
 		submission_state.selectedChannel = null;
 		ui_state.showBackButton = false;
+
+		// Reset location image when going back to all reports
+		if (isSpecialMagicalCreature) {
+			submission_state.locationImage = null;
+		}
 
 		// Only refresh reports for all channels, don't refetch channel data
 		// Channel grid is already kept up-to-date via realtime updates
@@ -338,6 +354,7 @@
 
 		submission_state.isSubmitting = true;
 		const previous_reports = data_state.reports;
+		const previous_channels = [...data_state.channels];
 
 		try {
 			// Optimistic update
@@ -346,7 +363,11 @@
 				channel: submission_state.selectedChannel,
 				hp_percentage: submission_state.hpValue,
 				user: mapUserRecord(user),
-				create_time: new Date().toISOString()
+				create_time: new Date().toISOString(),
+				upvotes: 0,
+				downvotes: 0,
+				reporter_id: user?.id || '',
+				reporter_reputation: user?.reputation ?? 0
 			};
 
 			// Prepend to show immediately
@@ -369,7 +390,8 @@
 				mobId,
 				submission_state.selectedChannel,
 				submission_state.hpValue,
-				user.id
+				user.id,
+				submission_state.locationImage
 			);
 
 			// Call callback to parent for optimistic updates
@@ -378,21 +400,14 @@
 				channel: submission_state.selectedChannel,
 				hp_percentage: submission_state.hpValue
 			});
-
-			// Small delay to ensure database write is complete
-			await new Promise((resolve) => setTimeout(resolve, 100));
-
-			// Fetch fresh data from server (will replace optimistic report)
-			if (submission_state.selectedChannel) {
-				await fetchChannelReports(submission_state.selectedChannel, true);
-			}
 		} catch (error) {
 			// Rollback to previous state on error
 			data_state.reports = previous_reports;
+			data_state.channels = previous_channels;
 
 			const error_msg = error instanceof Error ? error.message : 'Failed to submit report';
-			ui_state.errorMessage = error_msg;
-			ui_state.hasError = true;
+
+			showToast.error(error_msg);
 		} finally {
 			submission_state.isSubmitting = false;
 		}
@@ -419,7 +434,6 @@
 				</Avatar.Root>
 				<div>
 					<Dialog.Title class="text-lg font-bold lg:text-xl">{mobName}</Dialog.Title>
-					<p class="text-muted-foreground text-xs lg:text-sm">{totalChannels} channels total</p>
 				</div>
 			</div>
 		</Dialog.Header>
@@ -428,11 +442,25 @@
 		<div class="flex h-[calc(95vh-140px)] flex-col gap-4 lg:h-[calc(90vh-140px)] lg:flex-row">
 			<!-- Left section: Channel Grid (3/4 width on desktop when panel visible, full width when hidden) -->
 			<div class={leftSectionClass}>
-				<div class="mb-4 flex items-center justify-between">
-					<h3 class="text-lg font-semibold">
+				<div class="relative mb-4 flex items-center justify-between">
+					{#if !isSpecialMagicalCreature}
+						<Button
+							onclick={() => (mapOpen = true)}
+							variant="outline"
+							size="sm"
+							class="flex"
+							title="View map location"
+						>
+							<MapPin class="h-4 w-4" />
+							<span class="ml-2 hidden lg:inline">Map</span>
+						</Button>
+					{:else}
+						<div></div>
+					{/if}
+					<h3 class="absolute left-1/2 -translate-x-1/2 text-lg font-semibold">
 						{submission_state.selectedChannel
-							? `Channel ${submission_state.selectedChannel} Details`
-							: 'All Channels'}
+							? `Line ${submission_state.selectedChannel}`
+							: 'All Lines'}
 					</h3>
 					<div class="flex items-center gap-1 lg:gap-2">
 						{#if ui_state.showBackButton}
@@ -472,22 +500,6 @@
 							<div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
 							<p class="text-muted-foreground ml-3 text-sm">Loading mob data...</p>
 						</div>
-					{:else if ui_state.hasError}
-						<div class="py-8 text-center text-red-500">
-							<p class="font-semibold">Error Loading Mob Data</p>
-							<p class="text-sm">{ui_state.errorMessage}</p>
-							<Button
-								onclick={() => {
-									ui_state.hasError = false;
-									ui_state.errorMessage = null;
-									fetchMobDetails();
-								}}
-								variant="destructive"
-								class="mt-4"
-							>
-								Retry
-							</Button>
-						</div>
 					{:else if channelGrid.length > 0}
 						<div class="grid grid-cols-5 gap-1 lg:grid-cols-10">
 							{#each channelGrid as channel (channel.channelNumber)}
@@ -515,8 +527,10 @@
 						<MobHpSubmit
 							selectedChannel={submission_state.selectedChannel}
 							{user}
+							{mobName}
+							mobType={type}
 							bind:hpValue={submission_state.hpValue}
-							bind:fullVoteCount={submission_state.fullVoteCount}
+							bind:locationImage={submission_state.locationImage}
 							isSubmitting={submission_state.isSubmitting}
 							onSubmit={handleSubmitReport}
 						/>
@@ -528,6 +542,8 @@
 								isLoadingReports={ui_state.isLoadingReports}
 								selectedChannel={submission_state.selectedChannel}
 								onRefresh={() => handleRefreshReports(false)}
+								{mobName}
+								mobType={type}
 							/>
 						</div>
 					</div>
@@ -544,8 +560,10 @@
 									<MobHpSubmit
 										selectedChannel={submission_state.selectedChannel}
 										{user}
+										{mobName}
+										mobType={type}
 										bind:hpValue={submission_state.hpValue}
-										bind:fullVoteCount={submission_state.fullVoteCount}
+										bind:locationImage={submission_state.locationImage}
 										isSubmitting={submission_state.isSubmitting}
 										onSubmit={handleSubmitReport}
 									/>
@@ -558,6 +576,8 @@
 										isLoadingReports={ui_state.isLoadingReports}
 										selectedChannel={submission_state.selectedChannel}
 										onRefresh={() => handleRefreshReports(false)}
+										{mobName}
+										mobType={type}
 									/>
 								</div>
 							</Tabs.Content>
@@ -568,3 +588,25 @@
 		</div>
 	</Dialog.Content>
 </Dialog.Root>
+
+<!-- Map Location Drawer -->
+{#if !isSpecialMagicalCreature}
+	<Drawer.Root bind:open={mapOpen}>
+		<Drawer.Content class="max-h-[85vh]">
+			<Drawer.Header>
+				<Drawer.Title>{mobName} - Map Location</Drawer.Title>
+			</Drawer.Header>
+			<div class="flex items-center justify-center p-4">
+				<img
+					src={getMobMapPath(type, mobName)}
+					alt={`${mobName} map location`}
+					class="max-h-[70vh] w-full rounded-lg object-contain"
+					onerror={() => {
+						showToast.error('Map image not found');
+						mapOpen = false;
+					}}
+				/>
+			</div>
+		</Drawer.Content>
+	</Drawer.Root>
+{/if}

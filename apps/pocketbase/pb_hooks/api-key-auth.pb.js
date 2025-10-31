@@ -21,3 +21,5 @@ routerUse((e) => {
 
   return e.next();
 });
+
+console.log('[API_KEY] hooks registered');

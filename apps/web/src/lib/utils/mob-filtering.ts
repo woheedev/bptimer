@@ -71,6 +71,11 @@ export function filterAndSortChannels<
 			const aHp = a.status === 'unknown' ? 0.0001 : a.hp_percentage;
 			const bHp = b.status === 'unknown' ? 0.0001 : b.hp_percentage;
 			comparison = aHp - bHp;
+		} else if (sortField === 'report_time') {
+			// Sort by last_updated time
+			const aTime = a.last_updated ? new Date(a.last_updated).getTime() : 0;
+			const bTime = b.last_updated ? new Date(b.last_updated).getTime() : 0;
+			comparison = aTime - bTime;
 		}
 
 		return sortDirection === 'ascending' ? comparison : -comparison;

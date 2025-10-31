@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 	import DpsMeterToast from '$lib/components/dps-meter-toast.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { DPS_METER_TOAST_DURATION } from '$lib/constants';
@@ -17,6 +18,8 @@
 		browser ? (pb.authStore.record as UserRecordModel) : null
 	);
 
+	let authRefreshRan = $state(false);
+
 	const getUser = () => user;
 	const getToken = () => token;
 
@@ -26,6 +29,8 @@
 			user = model as UserRecordModel;
 			if (model) {
 				localStorage.setItem('hasSignedIn', 'true');
+			} else {
+				localStorage.removeItem('hasSignedIn');
 			}
 		}, true);
 		return () => {
@@ -33,9 +38,31 @@
 		};
 	});
 
+	// Refresh auth on mount to get latest user data
+	// Also handles session expiration
 	$effect(() => {
+		if (!browser || !pb.authStore.isValid || authRefreshRan) return;
+
+		authRefreshRan = true;
+		pb.collection('users')
+			.authRefresh()
+			.catch((error) => {
+				console.error('Auth refresh failed:', error);
+				if (error?.status === 401 || error?.status === 403) {
+					pb.authStore.clear();
+				}
+			});
+	});
+
+	$effect(() => {
+		if (browser && !page.route.id) {
+			return;
+		}
 		if (browser) {
-			toast(DpsMeterToast, { duration: DPS_METER_TOAST_DURATION });
+			toast(DpsMeterToast, {
+				duration: DPS_METER_TOAST_DURATION,
+				position: 'bottom-right'
+			});
 		}
 	});
 
@@ -53,6 +80,6 @@
 <!-- Page content -->
 <main class="flex-1">
 	<ModeWatcher defaultMode="dark" />
-	<Toaster />
+	<Toaster position="top-center" />
 	{@render children()}
 </main>

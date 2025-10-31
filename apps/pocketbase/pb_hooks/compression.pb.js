@@ -6,4 +6,4 @@
 
 routerUse($apis.gzip());
 
-console.log('[Compression] Gzip compression middleware enabled for all routes');
+console.log('[COMPRESSION] hooks registered');

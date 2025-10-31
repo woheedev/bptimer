@@ -1,4 +1,8 @@
-import { DEAD_HP_VALUE, LATEST_CHANNELS_DISPLAY_COUNT } from '$lib/constants';
+import {
+	DEAD_HP_VALUE,
+	LATEST_CHANNELS_DISPLAY_COUNT,
+	SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS
+} from '$lib/constants';
 import type { ChannelEntry } from '$lib/types/mobs';
 import { isDataStale, sortChannelsForMobCard, toSnakeCase } from '$lib/utils/general-utils';
 
@@ -47,6 +51,81 @@ export function getMobImagePath(
 	const folder = type === 'boss' ? 'bosses' : 'magical-creatures';
 
 	return `/images/${folder}/${imageName}.webp`;
+}
+
+/**
+ * Gets the location count for a magical creature
+ *
+ * @param mobName - The name of the mob
+ * @returns Number of locations for this magical creature otherwise 0
+ */
+export function getLocationCount(mobName: string): number {
+	return (
+		SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS[
+			mobName as keyof typeof SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS
+		] ?? 0
+	);
+}
+
+/**
+ * Gets the location image path for a specific location number
+ *
+ * @param mobName - The name of the mob
+ * @param mobType - The type of mob ('boss' or 'magical_creature')
+ * @param locationNumber - The location number (1-based)
+ * @returns The image path for the location
+ */
+export function getLocationImagePath(
+	mobName: string,
+	mobType: 'boss' | 'magical_creature' | string,
+	locationNumber: number
+): string {
+	const imageName = toSnakeCase(mobName);
+	const folder = mobType === 'boss' ? 'bosses' : 'magical-creatures';
+	return `/images/${folder}/locations/${imageName}_${locationNumber}.webp`;
+}
+
+/**
+ * Gets all location image paths for a magical creature
+ * Returns array of predetermined location image paths
+ *
+ * @param mobName - The name of the mob
+ * @param mobType - The type of mob ('boss' or 'magical_creature')
+ * @returns Array of image paths for location options
+ */
+export function getLocationImagePaths(
+	mobName: string,
+	mobType: 'boss' | 'magical_creature' | string
+): string[] {
+	const locationCount = getLocationCount(mobName);
+	if (locationCount === 0) return [];
+
+	const paths: string[] = [];
+	for (let i = 1; i <= locationCount; i++) {
+		paths.push(getLocationImagePath(mobName, mobType, i));
+	}
+	return paths;
+}
+
+/**
+ * Gets the full map image path for a mob based on its type and name
+ *
+ * @param type - The type of mob ('boss' or 'magical_creature')
+ * @param mobName - The name of the mob (will be converted to snake_case)
+ * @returns The map image path, or empty string if invalid
+ */
+export function getMobMapPath(
+	type: 'boss' | 'magical_creature' | string,
+	mobName?: string
+): string {
+	if (!mobName) {
+		return '';
+	}
+
+	const imageName = toSnakeCase(mobName);
+	const folder = type === 'boss' ? 'bosses' : 'magical-creatures';
+
+	return `/images/${folder}/maps/${imageName}.webp`;
 }
 
 /**

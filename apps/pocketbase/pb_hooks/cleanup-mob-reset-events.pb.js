@@ -22,20 +22,17 @@ cronAdd('cleanupMobResetEvents', '15 */6 * * *', () => {
     const count = countResult.count;
 
     if (count > 0) {
-      // Batch delete old events
       $app
         .db()
         .newQuery('DELETE FROM mob_reset_events WHERE timestamp < {:cutoff}')
         .bind({ cutoff: cutoffIso })
         .execute();
 
-      console.log(`[Mob Reset Events Cleanup] Deleted ${count} old mob reset events`);
+      console.log(`[CLEANUP] mob_reset_events deleted=${count}`);
     }
   } catch (error) {
-    console.error('[Mob Reset Events Cleanup] Unexpected error:', error);
+    console.error(`[CLEANUP] mob_reset_events error:`, error);
   }
 });
 
-console.log(
-  '[Mob Reset Events Cleanup] Cron job registered: cleanupMobResetEvents every 6 hours at 15 minutes past the hour'
-);
+console.log('[CLEANUP] mob_reset_events hooks registered');

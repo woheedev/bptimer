@@ -1,13 +1,8 @@
 import { browser } from '$app/environment';
 import { DEFAULT_FILTER_SORT_SETTINGS, FILTER_SORT_SETTINGS_STORAGE_KEY } from '$lib/constants';
 import { filterSortSettingsSchema } from '$lib/schemas';
-import type {
-	FilterSortSettings,
-	HideStaleChannels,
-	HpRange,
-	SortDirection,
-	SortField
-} from '$lib/types/ui';
+import type { FilterSortSettings } from '$lib/schemas';
+import type { HideStaleChannels, HpRange, SortDirection, SortField } from '$lib/types/ui';
 
 function loadFromLocalStorage(): FilterSortSettings {
 	if (!browser) return DEFAULT_FILTER_SORT_SETTINGS;
