@@ -23,11 +23,6 @@ export const MAX_REALTIME_RETRIES = 3;
 export const REALTIME_RETRY_BASE_DELAY = 2 * SECOND;
 export const STALE_DATA_CHECK_INTERVAL = 30 * SECOND;
 
-// Page presence
-export const PRESENCE_HEARTBEAT_INTERVAL = 60 * SECOND;
-export const PRESENCE_ACTIVE_THRESHOLD = 3 * MINUTE;
-export const PRESENCE_COUNT_UPDATE_INTERVAL = 30 * SECOND;
-
 // HP-related constants
 export const DEFAULT_HP_VALUE = 100;
 export const MAX_HP_VALUE = 100;
@@ -94,7 +89,6 @@ export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 export const FAVORITE_MOBS_STORAGE_KEY = 'favorite-mobs';
 export const EVENT_TIMERS_COLLAPSED_STORAGE_KEY = 'event-timers-collapsed';
 export const FILTER_SORT_SETTINGS_STORAGE_KEY = 'filter-sort-settings';
-export const PRESENCE_SESSION_ID_STORAGE_KEY = 'presence-session-id';
 
 import { Download, Hammer, Heart, Map, Medal, Sparkles, Swords } from '@lucide/svelte/icons';
 

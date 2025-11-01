@@ -27,7 +27,6 @@ const BYPASS_VOTE_USER_IDS_SET = new Set(BYPASS_VOTE_USER_IDS);
 // Time windows for duplicate checks and cleanup
 const DUPLICATE_CHECK_WINDOW = 5 * MINUTE;
 const HP_REPORTS_CLEANUP_WINDOW = 2 * HOUR;
-const PRESENCE_STALE_THRESHOLD = 3 * MINUTE;
 
 // Boss game id to boss name mapping
 const BOSS_MAPPING = {
@@ -128,7 +127,6 @@ module.exports = {
 
   DUPLICATE_CHECK_WINDOW,
   HP_REPORTS_CLEANUP_WINDOW,
-  PRESENCE_STALE_THRESHOLD,
 
   BOSS_MAPPING
 };

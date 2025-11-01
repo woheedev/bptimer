@@ -207,11 +207,11 @@ function createRealtimeMobsStore() {
 				updatedChannels = [...(mob.latestChannels || []), statusData];
 			}
 
-			// Sort and take top channels (don't filter stale here - let periodic cleanup handle it)
-			updatedChannels = sortChannelsForMobCard(updatedChannels).slice(
-				0,
-				LATEST_CHANNELS_DISPLAY_COUNT
+			// Filter stale data, sort, and take top channels
+			const filtered = updatedChannels.filter(
+				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
 			);
+			updatedChannels = sortChannelsForMobCard(filtered).slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
 
 			const updatedMob = { ...mob, latestChannels: updatedChannels };
 			const updatedMobs = [...mobs];

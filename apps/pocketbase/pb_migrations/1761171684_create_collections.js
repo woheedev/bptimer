@@ -398,7 +398,7 @@ migrate(
         ],
         id: 'pbc_4275539003',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_authOrigins_unique_pairs` ON `_authOrigins` (collectionRef, recordRef, fingerprint)'
+          'CREATE UNIQUE INDEX `idx_authOrigins_collectionRef_recordRef_fingerprint` ON `_authOrigins` (collectionRef, recordRef, fingerprint)'
         ],
         listRule:
           "@request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId",
@@ -527,8 +527,8 @@ migrate(
         },
         id: 'pbc_3142635823',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_tokenKey_pbc_3142635823` ON `_superusers` (`tokenKey`)',
-          "CREATE UNIQUE INDEX `idx_email_pbc_3142635823` ON `_superusers` (`email`) WHERE `email` != ''"
+          'CREATE UNIQUE INDEX `idx_superusers_tokenKey` ON `_superusers` (`tokenKey`)',
+          "CREATE UNIQUE INDEX `idx_superusers_email` ON `_superusers` (`email`) WHERE `email` != ''"
         ],
         listRule: null,
         manageRule: null,
@@ -765,10 +765,10 @@ migrate(
         },
         id: '_pb_users_auth_',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)',
-          "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''",
-          'CREATE INDEX idx_users_reputation ON _pb_users_auth_ (reputation DESC)',
-          'CREATE UNIQUE INDEX `idx_eKEcsot3Y8` ON `users` (`snowflake`)'
+          'CREATE UNIQUE INDEX `idx_users_tokenKey` ON `users` (`tokenKey`)',
+          "CREATE UNIQUE INDEX `idx_users_email` ON `users` (`email`) WHERE `email` != ''",
+          'CREATE INDEX `idx_users_reputation` ON `users` (`reputation` DESC)',
+          'CREATE UNIQUE INDEX `idx_users_snowflake` ON `users` (`snowflake`)'
         ],
         listRule: '',
         manageRule: null,
@@ -958,7 +958,7 @@ migrate(
           'CREATE INDEX `idx_hp_reports_mob_channel_number` ON `hp_reports` (`mob`, `channel_number`)',
           'CREATE INDEX `idx_hp_reports_created` ON `hp_reports` (`created` DESC)',
           'CREATE INDEX `idx_hp_reports_mob_created` ON `hp_reports` (`mob`, `created` DESC)',
-          'CREATE INDEX `idx_SpmvrpqL6w` ON `hp_reports` (\n  `reporter`,\n  `mob`,\n  `channel_number`,\n  `hp_percentage`,\n  `created`\n)'
+          'CREATE INDEX `idx_hp_reports_reporter_mob_channel` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `hp_percentage`, `created`)'
         ],
         listRule: '',
         name: 'hp_reports',
@@ -1035,9 +1035,9 @@ migrate(
         ],
         id: 'pbc_3303527663',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_fDPJ9fS3fc` ON `mob_channel_status_sse` (\n  `mob`,\n  `channel_number`\n)',
-          'CREATE INDEX `idx_7oZFxWsLjC` ON `mob_channel_status_sse` (`last_update` DESC)',
-          'CREATE INDEX `idx_uRyIEbzajB` ON `mob_channel_status_sse` (`mob`)'
+          'CREATE UNIQUE INDEX `idx_mob_channel_status_sse_mob_channel` ON `mob_channel_status_sse` (`mob`, `channel_number`)',
+          'CREATE INDEX `idx_mob_channel_status_sse_last_update` ON `mob_channel_status_sse` (`last_update` DESC)',
+          'CREATE INDEX `idx_mob_channel_status_sse_mob` ON `mob_channel_status_sse` (`mob`)'
         ],
         listRule: '',
         name: 'mob_channel_status_sse',
@@ -1104,7 +1104,7 @@ migrate(
           }
         ],
         id: 'pbc_1612934933',
-        indexes: ['CREATE UNIQUE INDEX `idx_f4ZxJtn0jy` ON `maps` (`uid`)'],
+        indexes: ['CREATE UNIQUE INDEX `idx_maps_uid` ON `maps` (`uid`)'],
         listRule: '',
         name: 'maps',
         system: false,
@@ -1180,7 +1180,7 @@ migrate(
         ],
         id: 'pbc_3682110470',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_mob_channel_status_unique` ON `mob_channel_status` (`mob`, `channel_number`)',
+          'CREATE UNIQUE INDEX `idx_mob_channel_status_mob_channel` ON `mob_channel_status` (`mob`, `channel_number`)',
           'CREATE INDEX `idx_mob_channel_status_last_update` ON `mob_channel_status` (`last_update` DESC)',
           'CREATE INDEX `idx_mob_channel_status_mob` ON `mob_channel_status` (`mob`)'
         ],
@@ -1276,8 +1276,8 @@ migrate(
         indexes: [
           'CREATE UNIQUE INDEX `idx_mobs_name` ON `mobs` (`name`)',
           'CREATE INDEX `idx_mobs_map` ON `mobs` (`map`)',
-          'CREATE UNIQUE INDEX `idx_8RzFGY6aeQ` ON `mobs` (`uid`)',
-          'CREATE INDEX `idx_R7hOZ09G6X` ON `mobs` (`type`)'
+          'CREATE UNIQUE INDEX `idx_mobs_uid` ON `mobs` (`uid`)',
+          'CREATE INDEX `idx_mobs_type` ON `mobs` (`type`)'
         ],
         listRule: '',
         name: 'mobs',
@@ -1364,10 +1364,11 @@ migrate(
         ],
         id: 'pbc_547380029',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_votes_unique_vote` ON `votes` (\n  `report`,\n  `voter`\n)',
+          'CREATE UNIQUE INDEX `idx_votes_report_voter` ON `votes` (`report`, `voter`)',
           'CREATE INDEX `idx_votes_report` ON `votes` (`report`)',
           'CREATE INDEX `idx_votes_voter` ON `votes` (`voter`)',
-          'CREATE INDEX `idx_votes_created` ON `votes` (`created` DESC)'
+          'CREATE INDEX `idx_votes_created` ON `votes` (`created` DESC)',
+          'CREATE INDEX `idx_votes_report_vote_type` ON `votes` (`report`, `vote_type`)'
         ],
         listRule: '',
         name: 'votes',
@@ -1444,8 +1445,8 @@ migrate(
         ],
         id: 'pbc_3577178630',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_uhKOGklQ0i` ON `api_keys` (`api_key`)',
-          'CREATE UNIQUE INDEX `idx_zu7znqJ4EC` ON `api_keys` (`user`)'
+          'CREATE UNIQUE INDEX `idx_api_keys_api_key` ON `api_keys` (`api_key`)',
+          'CREATE UNIQUE INDEX `idx_api_keys_user` ON `api_keys` (`user`)'
         ],
         listRule: 'user = @request.auth.id',
         name: 'api_keys',
@@ -1453,76 +1454,6 @@ migrate(
         type: 'base',
         updateRule: null,
         viewRule: 'user = @request.auth.id'
-      },
-      {
-        createRule: 'user = @request.auth.id',
-        deleteRule: 'user = @request.auth.id',
-        fields: [
-          {
-            autogeneratePattern: '[a-z0-9]{15}',
-            hidden: false,
-            id: 'text3208210256',
-            max: 15,
-            min: 15,
-            name: 'id',
-            pattern: '^[a-z0-9]+$',
-            presentable: false,
-            primaryKey: true,
-            required: true,
-            system: true,
-            type: 'text'
-          },
-          {
-            cascadeDelete: false,
-            collectionId: '_pb_users_auth_',
-            hidden: false,
-            id: 'relation2375276105',
-            maxSelect: 1,
-            minSelect: 0,
-            name: 'user',
-            presentable: false,
-            required: false,
-            system: false,
-            type: 'relation'
-          },
-          {
-            hidden: false,
-            id: 'date846843460',
-            max: '',
-            min: '',
-            name: 'last_seen',
-            presentable: false,
-            required: true,
-            system: false,
-            type: 'date'
-          },
-          {
-            autogeneratePattern: '',
-            hidden: false,
-            id: 'text1631579359',
-            max: 50,
-            min: 0,
-            name: 'session_id',
-            pattern: '',
-            presentable: false,
-            primaryKey: false,
-            required: false,
-            system: false,
-            type: 'text'
-          }
-        ],
-        id: 'pbc_14482932',
-        indexes: [
-          'CREATE INDEX `idx_Sq15baJnT6` ON `page_presence` (`last_seen` DESC)',
-          'CREATE INDEX `idx_I3ezck9YGp` ON `page_presence` (`session_id`)',
-          'CREATE INDEX `idx_user_lookup` ON `page_presence` (`user`)'
-        ],
-        listRule: '',
-        name: 'page_presence',
-        system: false,
-        type: 'base',
-        updateRule: 'user = @request.auth.id',
-        viewRule: ''
       },
       {
         createRule: null,
@@ -1579,8 +1510,8 @@ migrate(
         ],
         id: 'pbc_1788492300',
         indexes: [
-          'CREATE INDEX `idx_xQC2ktHohU` ON `mob_reset_events` (`timestamp` DESC)',
-          'CREATE INDEX `idx_0fQrhcq9kY` ON `mob_reset_events` (\n  `mob`,\n  `timestamp` DESC\n)'
+          'CREATE INDEX `idx_mob_reset_events_timestamp` ON `mob_reset_events` (`timestamp` DESC)',
+          'CREATE INDEX `idx_mob_reset_events_mob_timestamp` ON `mob_reset_events` (`mob`, `timestamp` DESC)'
         ],
         listRule: '',
         name: 'mob_reset_events',

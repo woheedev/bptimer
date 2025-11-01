@@ -210,25 +210,6 @@ export const filterSortSettingsSchema = z.object({
 
 export type FilterSortSettings = z.infer<typeof filterSortSettingsSchema>;
 
-// Page presence schema
-export const pagePresenceSchema = z.object({
-	id: z
-		.string()
-		.regex(/^[a-z0-9]+$/)
-		.min(15)
-		.max(15),
-	user: z
-		.string()
-		.regex(/^[a-z0-9]+$/)
-		.min(15)
-		.max(15)
-		.optional(),
-	session_id: z.string().max(50).optional(),
-	last_seen: z.string()
-});
-
-export type PagePresence = z.infer<typeof pagePresenceSchema>;
-
 // Input types
 export type SearchQuery = z.infer<typeof searchQuerySchema>;
 export type HpReportInput = z.infer<typeof hpReportInputSchema>;
