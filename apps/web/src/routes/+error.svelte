@@ -7,7 +7,8 @@
 </script>
 
 <svelte:head>
-	<title>{page.status} - {page.error?.message || 'Error'}</title>
+	<title>{page.status} - {page.error?.message || 'Error'} | BP Timer</title>
+	<meta name="robots" content="noindex, follow" />
 </svelte:head>
 
 <div class="flex min-h-screen items-center justify-center p-4">

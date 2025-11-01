@@ -169,10 +169,10 @@
       }
     ],
     "indexes": [
-      "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
-      "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''",
-      "CREATE INDEX idx_users_reputation ON _pb_users_auth_ (reputation DESC)",
-      "CREATE UNIQUE INDEX `idx_eKEcsot3Y8` ON `users` (`snowflake`)"
+      "CREATE UNIQUE INDEX `idx_users_tokenKey` ON `users` (`tokenKey`)",
+      "CREATE UNIQUE INDEX `idx_users_email` ON `users` (`email`) WHERE `email` != ''",
+      "CREATE INDEX `idx_users_reputation` ON `users` (`reputation` DESC)",
+      "CREATE UNIQUE INDEX `idx_users_snowflake` ON `users` (`snowflake`)"
     ],
     "system": false,
     "authRule": "",
@@ -461,7 +461,8 @@
       "CREATE INDEX `idx_hp_reports_mob_channel_number` ON `hp_reports` (`mob`, `channel_number`)",
       "CREATE INDEX `idx_hp_reports_created` ON `hp_reports` (`created` DESC)",
       "CREATE INDEX `idx_hp_reports_mob_created` ON `hp_reports` (`mob`, `created` DESC)",
-      "CREATE INDEX `idx_SpmvrpqL6w` ON `hp_reports` (\n  `reporter`,\n  `mob`,\n  `channel_number`,\n  `hp_percentage`,\n  `created`\n)"
+      "CREATE INDEX `idx_hp_reports_reporter_mob_channel` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `hp_percentage`, `created`)",
+      "CREATE INDEX `idx_hp_reports_reporter_created` ON `hp_reports` (`reporter`, `created` DESC)"
     ],
     "system": false
   },
@@ -528,7 +529,7 @@
         "type": "number"
       }
     ],
-    "indexes": ["CREATE UNIQUE INDEX `idx_f4ZxJtn0jy` ON `maps` (`uid`)"],
+    "indexes": ["CREATE UNIQUE INDEX `idx_maps_uid` ON `maps` (`uid`)"],
     "system": false
   },
   {
@@ -604,9 +605,8 @@
       }
     ],
     "indexes": [
-      "CREATE UNIQUE INDEX `idx_mob_channel_status_unique` ON `mob_channel_status` (`mob`, `channel_number`)",
-      "CREATE INDEX `idx_mob_channel_status_last_update` ON `mob_channel_status` (`last_update` DESC)",
-      "CREATE INDEX `idx_mob_channel_status_mob` ON `mob_channel_status` (`mob`)"
+      "CREATE UNIQUE INDEX `idx_mob_channel_status_mob_channel` ON `mob_channel_status` (`mob`, `channel_number`)",
+      "CREATE INDEX `idx_mob_channel_status_last_update` ON `mob_channel_status` (`last_update` DESC)"
     ],
     "system": false
   },
@@ -683,9 +683,8 @@
       }
     ],
     "indexes": [
-      "CREATE UNIQUE INDEX `idx_fDPJ9fS3fc` ON `mob_channel_status_sse` (\n  `mob`,\n  `channel_number`\n)",
-      "CREATE INDEX `idx_7oZFxWsLjC` ON `mob_channel_status_sse` (`last_update` DESC)",
-      "CREATE INDEX `idx_uRyIEbzajB` ON `mob_channel_status_sse` (`mob`)"
+      "CREATE UNIQUE INDEX `idx_mob_channel_status_sse_mob_channel` ON `mob_channel_status_sse` (`mob`, `channel_number`)",
+      "CREATE INDEX `idx_mob_channel_status_sse_last_update` ON `mob_channel_status_sse` (`last_update` DESC)"
     ],
     "system": false
   },
@@ -932,7 +931,7 @@
       }
     ],
     "indexes": [
-      "CREATE UNIQUE INDEX `idx_votes_unique_vote` ON `votes` (\n  `report`,\n  `voter`\n)",
+      "CREATE UNIQUE INDEX `idx_votes_report_voter` ON `votes` (`report`, `voter`)",
       "CREATE INDEX `idx_votes_report` ON `votes` (`report`)",
       "CREATE INDEX `idx_votes_voter` ON `votes` (`voter`)",
       "CREATE INDEX `idx_votes_created` ON `votes` (`created` DESC)",

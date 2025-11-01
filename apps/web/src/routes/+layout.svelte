@@ -69,10 +69,17 @@
 </script>
 
 <svelte:head>
+	<!-- Default meta tags -->
 	<meta
 		name="description"
-		content="Blue Protocol Timer - Track boss spawns, magical creature spawns, and event timers in real-time. Powered by winj's DPS Meter and community data."
+		content="Track boss spawns, magical creature spawns, and event timers in Blue Protocol: Star Resonance. Real-time community-driven tracking powered by winj's DPS Meter."
 	/>
+	<meta
+		name="keywords"
+		content="blue protocol, blue protocol timer, boss timer, spawn tracker, BPSR, Blue Protocol Star Resonance, mob tracker, event timer, magical creatures"
+	/>
+	<meta name="author" content="Wohee" />
+	<meta name="robots" content="index, follow" />
 </svelte:head>
 
 <!-- Page content -->

@@ -12,11 +12,15 @@ export async function createVote(reportId: string, voteType: 'up' | 'down') {
 	try {
 		// Check if user already voted on this report
 		try {
-			const existingVote = await pb
-				.collection('votes')
-				.getFirstListItem(`report = "${reportId}" && voter = "${pb.authStore.record?.id}"`, {
+			const existingVote = await pb.collection('votes').getFirstListItem(
+				pb.filter('report = {:reportId} && voter = {:voterId}', {
+					reportId,
+					voterId: pb.authStore.record?.id
+				}),
+				{
 					fields: 'id'
-				});
+				}
+			);
 
 			// If vote exists, update it instead
 			await pb.collection('votes').update(existingVote.id, {

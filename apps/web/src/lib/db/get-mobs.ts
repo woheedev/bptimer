@@ -12,7 +12,7 @@ async function getMobsByType(
 	try {
 		// Fetch all mobs of the specified type from PocketBase with map expansion
 		const records = await pb.collection('mobs').getFullList({
-			filter: `type = "${type}"`,
+			filter: pb.filter('type = {:type}', { type }),
 			sort: 'uid',
 			expand: 'map'
 		});
@@ -28,8 +28,10 @@ async function getMobsByType(
 
 		// Fetch all mob_channel_status for all mobs in a single query
 		const mob_ids = records.map((m) => m.id);
+		const orConditions = mob_ids.map((_, i) => `mob = {:id${i}}`).join(' || ');
+		const params = Object.fromEntries(mob_ids.map((id, i) => [`id${i}`, id]));
 		const all_channel_statuses = await pb.collection('mob_channel_status').getFullList({
-			filter: mob_ids.map((id) => `mob = "${id}"`).join(' || '),
+			filter: pb.filter(orConditions, params),
 			skipTotal: true,
 			requestKey: `all-channel-statuses-${type}` // Unique request key
 		});
@@ -114,9 +116,10 @@ export async function getMobsByIds(
 	}
 	try {
 		// Fetch mobs by ids
-		const filter = ids.map((id) => `id = "${id}"`).join(' || ');
+		const mobOrConditions = ids.map((_, i) => `id = {:id${i}}`).join(' || ');
+		const mobParams = Object.fromEntries(ids.map((id, i) => [`id${i}`, id]));
 		const records = await pb.collection('mobs').getFullList({
-			filter,
+			filter: pb.filter(mobOrConditions, mobParams),
 			sort: 'uid',
 			expand: 'map'
 		});
@@ -132,8 +135,10 @@ export async function getMobsByIds(
 
 		// Fetch all mob_channel_status for all mobs in a single query
 		const mob_ids = records.map((m) => m.id);
+		const statusOrConditions = mob_ids.map((_, i) => `mob = {:id${i}}`).join(' || ');
+		const statusParams = Object.fromEntries(mob_ids.map((id, i) => [`id${i}`, id]));
 		const all_channel_statuses = await pb.collection('mob_channel_status').getFullList({
-			filter: mob_ids.map((id) => `mob = "${id}"`).join(' || '),
+			filter: pb.filter(statusOrConditions, statusParams),
 			skipTotal: true,
 			requestKey: `all-channel-statuses-by-ids-${[...ids].sort().join('-')}` // Unique request key (sorted for consistency, non-mutating)
 		});

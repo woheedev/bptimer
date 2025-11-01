@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -11,6 +12,8 @@
 	import { pb } from '$lib/pocketbase';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { showToast } from '$lib/utils/toast';
+
+	const canonicalUrl = `https://bptimer.com${page.url.pathname}`;
 
 	let currentUser = $state<UserRecordModel | null>(null);
 	let apiKey = $state<string>('');
@@ -127,6 +130,35 @@
 		goto(resolve('/'));
 	}
 </script>
+
+<svelte:head>
+	<title>API Key Management | BP Timer</title>
+	<meta
+		name="description"
+		content="Generate and manage your API key to connect community data with BP Timer. Secure authentication for automatic boss spawn reporting."
+	/>
+	<meta
+		name="keywords"
+		content="blue protocol api key, dps meter api, BPSR api integration, boss tracking api, dps meter"
+	/>
+	<meta name="robots" content="noindex, follow" />
+
+	<meta property="og:title" content="API Key Management | BP Timer" />
+	<meta
+		property="og:description"
+		content="Generate and manage your API key to connect community data with BP Timer. Secure authentication for automatic boss spawn reporting."
+	/>
+	<meta property="og:url" content={canonicalUrl} />
+	<meta property="og:type" content="website" />
+
+	<meta name="twitter:title" content="API Key Management | BP Timer" />
+	<meta
+		name="twitter:description"
+		content="Generate and manage your API key to connect community data with BP Timer."
+	/>
+
+	<link rel="canonical" href={canonicalUrl} />
+</svelte:head>
 
 <div class="flex h-screen items-center justify-center px-4">
 	<Card.Root class="mx-auto w-full max-w-2xl">

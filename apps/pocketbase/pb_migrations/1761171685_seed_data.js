@@ -16,7 +16,9 @@ migrate(
     const mapRecords = [];
     let mapsCreated = 0;
     for (const data of mapsData) {
-      const existing = app.findRecordsByFilter(mapsCollection, `uid = ${data.uid}`);
+      const existing = app.findRecordsByFilter(mapsCollection, 'uid = {:uid}', '', 1, 0, {
+        uid: data.uid
+      });
       let record;
       if (existing.length === 0) {
         record = new Record(mapsCollection);
@@ -103,7 +105,9 @@ migrate(
     const mobRecords = [];
     let mobsCreated = 0;
     for (const data of mobsData) {
-      const existing = app.findRecordsByFilter(mobsCollection, `uid = ${data.uid}`);
+      const existing = app.findRecordsByFilter(mobsCollection, 'uid = {:uid}', '', 1, 0, {
+        uid: data.uid
+      });
       let record;
       if (existing.length === 0) {
         record = new Record(mobsCollection);
@@ -144,7 +148,11 @@ migrate(
         // Check if entry already exists
         const existingRecords = app.findRecordsByFilter(
           mobChannelStatusCollection,
-          `mob = "${mobRecord.id}" && channel_number = ${channelNum}`
+          'mob = {:mobId} && channel_number = {:channelNum}',
+          '',
+          1,
+          0,
+          { mobId: mobRecord.id, channelNum: channelNum }
         );
 
         if (existingRecords.length === 0) {
@@ -177,7 +185,11 @@ migrate(
         // Check if entry already exists
         const existingRecords = app.findRecordsByFilter(
           mobChannelStatusSseCollection,
-          `mob = "${mobRecord.id}" && channel_number = ${channelNum}`
+          'mob = {:mobId} && channel_number = {:channelNum}',
+          '',
+          1,
+          0,
+          { mobId: mobRecord.id, channelNum: channelNum }
         );
 
         if (existingRecords.length === 0) {

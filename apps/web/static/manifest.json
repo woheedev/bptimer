@@ -1,0 +1,45 @@
+{
+	"name": "Blue Protocol Timer",
+	"short_name": "BP Timer",
+	"description": "Track boss spawns, magical creature spawns, and event timers in Blue Protocol: Star Resonance. Real-time community-driven tracking powered by winj's DPS Meter.",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#020817",
+	"theme_color": "#3b82f6",
+	"orientation": "portrait-primary",
+	"scope": "/",
+	"icons": [
+		{
+			"src": "/favicon.ico",
+			"sizes": "48x48",
+			"type": "image/x-icon"
+		},
+		{
+			"src": "/web-app-manifest-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "/web-app-manifest-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any maskable"
+		}
+	],
+	"categories": ["games", "utilities", "productivity"],
+	"screenshots": [
+		{
+			"src": "/screenshot-wide.png",
+			"sizes": "1280x720",
+			"type": "image/png",
+			"form_factor": "wide"
+		},
+		{
+			"src": "/screenshot-mobile.png",
+			"sizes": "750x1334",
+			"type": "image/png",
+			"form_factor": "narrow"
+		}
+	]
+}

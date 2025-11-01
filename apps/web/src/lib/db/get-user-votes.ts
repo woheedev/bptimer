@@ -16,8 +16,10 @@ export async function getUserVotesForReports(
 
 	try {
 		// Build filter for all report IDs
-		const reportFilters = reportIds.map((id) => `report = "${id}"`).join(' || ');
-		const filter = `(${reportFilters}) && voter = "${userId}"`;
+		const orConditions = reportIds.map((_, i) => `report = {:reportId${i}}`).join(' || ');
+		const params = Object.fromEntries(reportIds.map((id, i) => [`reportId${i}`, id]));
+		params.userId = userId;
+		const filter = pb.filter(`(${orConditions}) && voter = {:userId}`, params);
 
 		const votes = await pb.collection('votes').getList(1, reportIds.length, {
 			filter,

@@ -204,8 +204,8 @@
 			{/if}
 
 			{#if loading}
-				<div class="flex min-h-screen flex-col items-center justify-center space-y-4">
-					<Spinner class="size-8" />
+				<div class="flex h-screen items-center justify-center">
+					<Spinner class="size-16" />
 				</div>
 			{:else if isFavorites && filteredMobs.length === 0}
 				<!-- Empty state for no favorites -->

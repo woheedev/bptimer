@@ -39,7 +39,7 @@ export async function getLatestMobReports(
 	try {
 		// Fetch the latest X reports for this mob, sorted by newest
 		const reports = await pb.collection('hp_reports').getList(1, reportCount, {
-			filter: `mob = "${mobId}"`,
+			filter: pb.filter('mob = {:mobId}', { mobId }),
 			sort: '-created',
 			expand: 'reporter',
 			skipTotal: true,
@@ -64,8 +64,12 @@ export async function getChannelReports(
 ): Promise<MobReport[]> {
 	try {
 		// Query directly by channel number
+		// Using pb.filter() for safe parameter binding
 		const reports = await pb.collection('hp_reports').getList(1, MAX_REPORTS_LIMIT, {
-			filter: `mob = "${mobId}" && channel_number = ${channelNumber}`,
+			filter: pb.filter('mob = {:mobId} && channel_number = {:channelNumber}', {
+				mobId,
+				channelNumber
+			}),
 			sort: '-created',
 			expand: 'reporter',
 			skipTotal: true,

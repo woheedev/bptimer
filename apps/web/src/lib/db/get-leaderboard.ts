@@ -34,7 +34,6 @@ export async function getLeaderboard(
 	try {
 		const records = await pb.collection('users').getList(1, limit, {
 			sort: '-reputation',
-			filter: 'verified = true',
 			skipTotal: true
 		});
 
@@ -54,9 +53,11 @@ export async function getUserLeaderboardRank(
 		const record = await pb.collection('users').getOne(userId);
 		const entry = mapRecordToLeaderboardEntry(record);
 
-		// Count verified users with higher reputation (reputation is sanitized from DB)
+		// Count users with higher reputation
 		const higherRankedCount = await pb.collection('users').getList(1, 1, {
-			filter: `verified = true && reputation > ${entry.reputation}`,
+			filter: pb.filter('reputation > {:reputation}', {
+				reputation: entry.reputation
+			}),
 			skipTotal: false
 		});
 

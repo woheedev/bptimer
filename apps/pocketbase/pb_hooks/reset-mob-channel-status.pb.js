@@ -22,10 +22,11 @@ cronAdd('mobRespawn', '* * * * *', () => {
 
     const respawningMobs = $app.findRecordsByFilter(
       'mobs',
-      `respawn_time = ${currentMinute}`,
+      'respawn_time = {:currentMinute}',
       '',
       0,
-      0
+      0,
+      { currentMinute: currentMinute }
     );
 
     if (!respawningMobs || respawningMobs.length === 0) {

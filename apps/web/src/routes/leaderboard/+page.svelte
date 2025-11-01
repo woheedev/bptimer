@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 	import { TrophyIcon } from '@lucide/svelte/icons';
 	import NavigationHeader from '$lib/components/navigation/header.svelte';
 	import NavigationSidebar from '$lib/components/navigation/sidebar.svelte';
@@ -16,10 +17,13 @@
 	import type { LeaderboardEntry } from '$lib/schemas';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getAvatarUrl } from '$lib/utils/user-utils';
+	import { Spinner } from '$lib/components/ui/spinner';
 
 	let leaderboard = $state<LeaderboardEntry[]>([]);
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
+
+	const canonicalUrl = `https://bptimer.com${page.url.pathname}`;
 
 	$effect(() => {
 		if (browser) {
@@ -53,11 +57,31 @@
 </script>
 
 <svelte:head>
-	<title>Leaderboard - BPSR Timer</title>
+	<title>Leaderboard | BP Timer</title>
 	<meta
 		name="description"
-		content="Top contributors to the BPSR boss tracking community ranked by reputation."
+		content="Top contributors to the Blue Protocol boss tracking community ranked by reputation. See who's helping the community track boss spawns and magical creatures in BPSR."
 	/>
+	<meta
+		name="keywords"
+		content="blue protocol leaderboard, BPSR contributors, boss tracker reputation, community rankings, top trackers"
+	/>
+
+	<meta property="og:title" content="Leaderboard | BP Timer" />
+	<meta
+		property="og:description"
+		content="Top contributors to the Blue Protocol boss tracking community ranked by reputation. See who's helping the community track boss spawns."
+	/>
+	<meta property="og:url" content={canonicalUrl} />
+	<meta property="og:type" content="website" />
+
+	<meta name="twitter:title" content="Leaderboard | BP Timer" />
+	<meta
+		name="twitter:description"
+		content="Top contributors to the Blue Protocol boss tracking community ranked by reputation."
+	/>
+
+	<link rel="canonical" href={canonicalUrl} />
 </svelte:head>
 
 <svelte:boundary>
@@ -75,8 +99,8 @@
 				</div>
 
 				{#if isLoading}
-					<div class="flex items-center justify-center py-12">
-						<div class="text-muted-foreground">Loading leaderboard...</div>
+					<div class="flex h-screen items-center justify-center">
+						<Spinner class="size-16" />
 					</div>
 				{:else if error}
 					<div class="rounded-lg border border-red-500 bg-red-50 p-4 dark:bg-red-950">

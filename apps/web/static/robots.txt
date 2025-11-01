@@ -1,0 +1,10 @@
+# Blue Protocol Timer - Additional robots.txt directives
+# Note: Cloudflare prepends their managed AI bot blocking content above this
+
+# Sitemap location
+Sitemap: https://bptimer.com/sitemap.xml
+
+# Block specific paths
+Disallow: /api/
+Disallow: /_app/
+

@@ -958,7 +958,8 @@ migrate(
           'CREATE INDEX `idx_hp_reports_mob_channel_number` ON `hp_reports` (`mob`, `channel_number`)',
           'CREATE INDEX `idx_hp_reports_created` ON `hp_reports` (`created` DESC)',
           'CREATE INDEX `idx_hp_reports_mob_created` ON `hp_reports` (`mob`, `created` DESC)',
-          'CREATE INDEX `idx_hp_reports_reporter_mob_channel` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `hp_percentage`, `created`)'
+          'CREATE INDEX `idx_hp_reports_reporter_mob_channel` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `hp_percentage`, `created`)',
+          'CREATE INDEX `idx_hp_reports_reporter_created` ON `hp_reports` (`reporter`, `created` DESC)'
         ],
         listRule: '',
         name: 'hp_reports',
@@ -1036,8 +1037,7 @@ migrate(
         id: 'pbc_3303527663',
         indexes: [
           'CREATE UNIQUE INDEX `idx_mob_channel_status_sse_mob_channel` ON `mob_channel_status_sse` (`mob`, `channel_number`)',
-          'CREATE INDEX `idx_mob_channel_status_sse_last_update` ON `mob_channel_status_sse` (`last_update` DESC)',
-          'CREATE INDEX `idx_mob_channel_status_sse_mob` ON `mob_channel_status_sse` (`mob`)'
+          'CREATE INDEX `idx_mob_channel_status_sse_last_update` ON `mob_channel_status_sse` (`last_update` DESC)'
         ],
         listRule: '',
         name: 'mob_channel_status_sse',
@@ -1181,8 +1181,7 @@ migrate(
         id: 'pbc_3682110470',
         indexes: [
           'CREATE UNIQUE INDEX `idx_mob_channel_status_mob_channel` ON `mob_channel_status` (`mob`, `channel_number`)',
-          'CREATE INDEX `idx_mob_channel_status_last_update` ON `mob_channel_status` (`last_update` DESC)',
-          'CREATE INDEX `idx_mob_channel_status_mob` ON `mob_channel_status` (`mob`)'
+          'CREATE INDEX `idx_mob_channel_status_last_update` ON `mob_channel_status` (`last_update` DESC)'
         ],
         listRule: '',
         name: 'mob_channel_status',
