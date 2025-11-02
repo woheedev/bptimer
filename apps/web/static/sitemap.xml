@@ -5,24 +5,40 @@
   <url>
     <loc>https://bptimer.com/</loc>
     <lastmod>2025-11-01</lastmod>
-    <changefreq>hourly</changefreq>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-  
+
   <!-- Magical Creatures -->
   <url>
     <loc>https://bptimer.com/magical-creatures</loc>
     <lastmod>2025-11-01</lastmod>
-    <changefreq>hourly</changefreq>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-  
+
+  <!-- Tools & Resources -->
+  <url>
+    <loc>https://bptimer.com/tools</loc>
+    <lastmod>2025-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Leaderboard -->
   <url>
     <loc>https://bptimer.com/leaderboard</loc>
     <lastmod>2025-11-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
+  </url>
+
+  <!-- Favorites -->
+  <url>
+    <loc>https://bptimer.com/favorites</loc>
+    <lastmod>2025-11-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>
 

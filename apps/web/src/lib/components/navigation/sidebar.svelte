@@ -6,6 +6,8 @@
 	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
+	import Construction from '@lucide/svelte/icons/construction';
+	import HeartHandshake from '@lucide/svelte/icons/heart-handshake';
 	import type { ComponentProps } from 'svelte';
 
 	let {
@@ -21,31 +23,40 @@
 	<Sidebar.Header class="border-sidebar-border h-16 justify-center border-b">
 		<NavigationUser />
 	</Sidebar.Header>
-	<Sidebar.Content>
-		<Sidebar.Group>
+	<Sidebar.Content class="gap-0">
+		<Sidebar.Group class="pb-0">
 			<NavigationMain items={PAGES} />
 			<div class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
-				<div class="flex items-center gap-2 px-2 py-2">
+				<div class="flex items-center gap-2 py-2">
 					<InGameDay />
 				</div>
 			</div>
 		</Sidebar.Group>
-		<Sidebar.Group>
+		<Sidebar.Group class="py-0">
 			<Sidebar.GroupLabel>Partner Sites</Sidebar.GroupLabel>
 			<NavigationMain items={PARTNER_PAGES} />
 		</Sidebar.Group>
 		<Sidebar.Group class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
-			<div class="px-2 py-2">
+			<div class="flex flex-col gap-2 p-0">
 				<Alert.Root class="text-xs">
-					<Alert.Title class="text-xs">System Updates</Alert.Title>
-					<Alert.Description class="text-xs leading-relaxed">
-						Sorry for any temporary outages or delays as I work on implementing new features.
+					<Construction />
+					<Alert.Title class="text-sm font-bold">System Updates</Alert.Title>
+					<Alert.Description class="text-xs">
+						Sorry for any temporary outages or delays while I work on implementing new features.
+					</Alert.Description>
+				</Alert.Root>
+				<Alert.Root class="text-xs">
+					<HeartHandshake />
+					<Alert.Title class="text-sm font-bold">Looking to Collaborate?</Alert.Title>
+					<Alert.Description class="text-xs">
+						We're welcoming developers and partners to help grow the project. Join our Discord to
+						get involved.
 					</Alert.Description>
 				</Alert.Root>
 			</div>
 		</Sidebar.Group>
 	</Sidebar.Content>
-	<Sidebar.Footer class="p-4 {sidebar.state === 'collapsed' ? 'hidden' : ''}">
+	<Sidebar.Footer class="px-2 pt-2 pb-4 {sidebar.state === 'collapsed' ? 'hidden' : ''}">
 		{#if sidebar.state !== 'collapsed'}
 			<div class="mb-4">
 				<Sidebar.MenuButton

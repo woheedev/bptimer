@@ -1,8 +1,13 @@
 <script lang="ts">
 	import * as Carousel from '$lib/components/ui/carousel/index.js';
+	import type { CarouselAPI } from '$lib/components/ui/carousel/context.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { getLocationImagePath, getLocationImagePaths } from '$lib/utils/mob-utils';
+	import {
+		getLocationImagePath,
+		getLocationImagePaths,
+		getLocationName
+	} from '$lib/utils/mob-utils';
 	import MapPin from '@lucide/svelte/icons/map-pin';
 
 	let {
@@ -29,15 +34,33 @@
 	});
 
 	let popoverOpen = $state(false);
+	let carouselApi = $state<CarouselAPI | undefined>(undefined);
 
 	function handleLocationSelect(locationNumber: number) {
 		selectedLocation = locationNumber;
 		popoverOpen = false;
 	}
 
+	// Reset API reference when popover closes to prevent stale references
+	$effect(() => {
+		if (!popoverOpen) {
+			carouselApi = undefined;
+		}
+	});
+
+	// Scroll to selected location when carousel API becomes available and popover is open
+	$effect(() => {
+		if (popoverOpen && carouselApi && selectedLocation !== null) {
+			const index = selectedLocation - 1;
+			queueMicrotask(() => {
+				carouselApi?.scrollTo(index, true);
+			});
+		}
+	});
+
 	// Get display text for selected location
 	const selectedLocationText = $derived(
-		selectedLocation !== null ? `Location ${selectedLocation}` : 'Select location'
+		selectedLocation !== null ? getLocationName(mobName, selectedLocation) : 'Select location'
 	);
 </script>
 
@@ -50,12 +73,19 @@
 					{selectedLocationText}
 				</Button>
 			</Popover.Trigger>
-			<Popover.Content class="w-auto max-w-none p-4">
-				<Carousel.Root class="relative w-full">
+			<Popover.Content class="w-auto max-w-xs p-4">
+				<Carousel.Root
+					class="relative w-full"
+					opts={{ loop: true }}
+					setApi={(api) => {
+						carouselApi = api;
+					}}
+				>
 					<Carousel.Content>
 						{#each Array.from({ length: locationCount }, (_, i) => i) as index (index)}
 							{@const locationNumber = index + 1}
 							{@const locationPath = getLocationImagePath(mobName, mobType, locationNumber)}
+							{@const locationName = getLocationName(mobName, locationNumber)}
 							<Carousel.Item>
 								<div class="p-1">
 									<button
@@ -65,13 +95,13 @@
 										locationNumber
 											? 'border-primary ring-primary ring-2 ring-offset-2'
 											: 'border-border hover:border-primary/50'}"
-										aria-label="Select location {locationNumber}"
+										aria-label="Select {locationName}"
 										aria-pressed={selectedLocation === locationNumber}
 									>
-										<div class="bg-muted relative aspect-video overflow-hidden">
+										<div class="bg-muted relative aspect-square overflow-hidden">
 											<img
 												src={locationPath}
-												alt="Location {locationNumber}"
+												alt={locationName}
 												class="h-full w-full object-contain"
 												onerror={(e) => {
 													(e.target as HTMLImageElement).style.display = 'none';

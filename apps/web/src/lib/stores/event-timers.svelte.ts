@@ -27,12 +27,13 @@ function createEventTimersStore() {
 			const status = getEventStatus(config);
 			const nextEventTime = calculateNextEventTime(config);
 
-			let targetTime: Date;
-			if (active && config.schedule.durationHours) {
-				targetTime = calculateCurrentEventEnd(config)!;
-			} else {
-				targetTime = nextEventTime;
-			}
+			const targetTime: Date = config.schedule.inverted
+				? active
+					? nextEventTime
+					: calculateCurrentEventEnd(config)!
+				: active && config.schedule.durationHours
+					? calculateCurrentEventEnd(config)!
+					: nextEventTime;
 
 			const timeUntil = targetTime.getTime() - now.getTime();
 			const countdown = formatCountdown(timeUntil);

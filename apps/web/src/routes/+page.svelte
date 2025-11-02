@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import ErrorBoundary from '$lib/components/error-boundary.svelte';
 	import MobContainer from '$lib/components/mob/container.svelte';
 	import NavigationHeader from '$lib/components/navigation/header.svelte';
 	import NavigationSidebar from '$lib/components/navigation/sidebar.svelte';
-	import { Button } from '$lib/components/ui/button';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
 	let mobs_data: MobContainer;
@@ -49,14 +49,6 @@
 	</Sidebar.Provider>
 
 	{#snippet failed(error, reset)}
-		<div class="flex min-h-screen items-center justify-center p-4">
-			<div class="text-center">
-				<h1 class="text-destructive mb-4 text-2xl font-bold">Something went wrong</h1>
-				<p class="text-muted-foreground mb-4">
-					{error instanceof Error ? error.message : 'An unexpected error occurred'}
-				</p>
-				<Button onclick={reset}>Try again</Button>
-			</div>
-		</div>
+		<ErrorBoundary {error} {reset} />
 	{/snippet}
 </svelte:boundary>

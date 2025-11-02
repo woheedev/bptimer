@@ -45,7 +45,8 @@ export const EVENT_CONFIGS: EventConfig[] = [
 			minute: 0,
 			durationHours: 3,
 			intervalWeeks: 2,
-			referenceDate: '2025-10-20'
+			referenceDate: '2025-10-20',
+			inverted: true
 		}
 	},
 	{
@@ -202,13 +203,15 @@ export function isEventActive(config: EventConfig): boolean {
 	const todayEnd = new Date(todayStart);
 	todayEnd.setUTCHours(todayEnd.getUTCHours() + config.schedule.durationHours);
 
+	let isCurrentlyActive = false;
+
 	if (
 		config.schedule.days?.includes(currentDay) &&
 		isValidIntervalWeek(config, todayStart) &&
 		now >= todayStart &&
 		now < todayEnd
 	) {
-		return true;
+		isCurrentlyActive = true;
 	}
 
 	const previousDay = (currentDay - 1 + 7) % 7;
@@ -224,11 +227,11 @@ export function isEventActive(config: EventConfig): boolean {
 			now >= yesterdayStart &&
 			now < yesterdayEnd
 		) {
-			return true;
+			isCurrentlyActive = true;
 		}
 	}
 
-	return false;
+	return config.schedule.inverted ? !isCurrentlyActive : isCurrentlyActive;
 }
 
 export function getEventStatus(config: EventConfig): EventStatus {

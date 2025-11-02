@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
-	import { TrophyIcon } from '@lucide/svelte/icons';
+	import ErrorBoundary from '$lib/components/error-boundary.svelte';
 	import NavigationHeader from '$lib/components/navigation/header.svelte';
 	import NavigationSidebar from '$lib/components/navigation/sidebar.svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
-	import { Button } from '$lib/components/ui/button';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { Spinner } from '$lib/components/ui/spinner';
 	import {
 		LEADERBOARD_LIMIT,
 		REPUTATION_GOOD_THRESHOLD,
@@ -17,7 +17,7 @@
 	import type { LeaderboardEntry } from '$lib/schemas';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getAvatarUrl } from '$lib/utils/user-utils';
-	import { Spinner } from '$lib/components/ui/spinner';
+	import { TrophyIcon } from '@lucide/svelte/icons';
 
 	let leaderboard = $state<LeaderboardEntry[]>([]);
 	let isLoading = $state(true);
@@ -171,14 +171,6 @@
 	</Sidebar.Provider>
 
 	{#snippet failed(error, reset)}
-		<div class="flex min-h-screen items-center justify-center p-4">
-			<div class="text-center">
-				<h1 class="text-destructive mb-4 text-2xl font-bold">Something went wrong</h1>
-				<p class="text-muted-foreground mb-4">
-					{error instanceof Error ? error.message : 'An unexpected error occurred'}
-				</p>
-				<Button onclick={reset}>Try again</Button>
-			</div>
-		</div>
+		<ErrorBoundary {error} {reset} />
 	{/snippet}
 </svelte:boundary>

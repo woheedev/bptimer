@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Slider } from '$lib/components/ui/slider/index.js';
 	import {
 		HP_SLIDER_STEP,
 		MAX_HP_VALUE,
 		MIN_HP_VALUE,
-		SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS
+		SPECIAL_MAGICAL_CREATURES
 	} from '$lib/constants';
 	import { hpSubmissionInputSchema } from '$lib/schemas';
 	import type { UserRecordModel } from '$lib/types/auth';
@@ -38,7 +39,7 @@
 	let validationError = $state<string>('');
 
 	// Check if this is a special magical creature
-	const requiresLocation = $derived(mobName in SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS);
+	const requiresLocation = $derived(mobName in SPECIAL_MAGICAL_CREATURES);
 
 	// Validate HP value changes
 	$effect(() => {
@@ -78,15 +79,12 @@
 
 {#if selectedChannel && user}
 	<Card.Root>
-		<Card.Header>
-			<div class="flex items-center justify-between">
-				<Card.Title class="text-base">Report HP</Card.Title>
-				<span class="text-muted-foreground text-sm">Line {selectedChannel}</span>
-			</div>
-		</Card.Header>
 		<Card.Content class="space-y-4">
-			<div class="space-y-2">
-				<Label for="hp-slider" class="text-sm font-medium">HP: {hpValue}%</Label>
+			<div class="space-y-4">
+				<div class="flex items-center justify-between">
+					<Label for="hp-slider" class="text-sm font-medium">HP: {hpValue}%</Label>
+					<Badge variant="destructive" class="text-xs">Line {selectedChannel}</Badge>
+				</div>
 				<Slider
 					id="hp-slider"
 					bind:value={hpValue}
@@ -130,21 +128,9 @@
 		</Card.Content>
 	</Card.Root>
 {:else if selectedChannel && !user}
-	<Card.Root>
-		<Card.Header>
-			<Card.Title class="text-base">Report HP</Card.Title>
-		</Card.Header>
-		<Card.Content class="py-4 text-center">
-			<p class="text-muted-foreground mb-3 text-sm">Please sign in to report HP</p>
-		</Card.Content>
-	</Card.Root>
-{:else}
-	<Card.Root>
-		<Card.Header>
-			<Card.Title class="text-base">Select a Channel</Card.Title>
-		</Card.Header>
-		<Card.Content>
-			<p class="text-muted-foreground text-sm">Click on any channel to submit an HP report</p>
+	<Card.Root class="py-4">
+		<Card.Content class="text-center">
+			<p class="text-muted-foreground text-sm">Sign in to submit reports</p>
 		</Card.Content>
 	</Card.Root>
 {/if}

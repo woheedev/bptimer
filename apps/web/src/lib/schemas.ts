@@ -210,6 +210,31 @@ export const filterSortSettingsSchema = z.object({
 
 export type FilterSortSettings = z.infer<typeof filterSortSettingsSchema>;
 
+// Tools & Resources schemas
+export const toolCardSchema = z.object({
+	title: z.string().min(1).max(100),
+	description: z.string().min(1).max(500),
+	author: z.string().min(1).max(100).optional(),
+	badge: z.string().min(1).max(50).optional(),
+	badgeVariant: z.enum(['default', 'secondary', 'destructive', 'outline']).optional(),
+	npcap: z.boolean().optional(),
+	tags: z.string().optional(),
+	previewImage: z.url().optional(),
+	url: z.url()
+});
+
+export const toolsSectionSchema = z.object({
+	title: z.string().min(1).max(100),
+	subtitle: z.string().min(1).max(200).optional(),
+	cards: z.array(toolCardSchema)
+});
+
+export const toolsSectionsSchema = z.record(z.string(), toolsSectionSchema);
+
+export type ToolCard = z.infer<typeof toolCardSchema>;
+export type ToolsSection = z.infer<typeof toolsSectionSchema>;
+export type ToolsSections = z.infer<typeof toolsSectionsSchema>;
+
 // Input types
 export type SearchQuery = z.infer<typeof searchQuerySchema>;
 export type HpReportInput = z.infer<typeof hpReportInputSchema>;

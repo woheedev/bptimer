@@ -3,20 +3,21 @@
 	import ChannelPill from '$lib/components/mob/channel-pill.svelte';
 	import FilterMenu from '$lib/components/mob/filter-menu.svelte';
 	import MobHpSubmit from '$lib/components/mob/hp-submit.svelte';
+	import LocationImageViewer from '$lib/components/mob/location-image-viewer.svelte';
 	import MobLastReports from '$lib/components/mob/last-reports.svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
-	import {
-		DEFAULT_HP_VALUE,
-		SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS,
-		MAX_REPORTS_LIMIT
-	} from '$lib/constants';
+	import { DEFAULT_HP_VALUE, SPECIAL_MAGICAL_CREATURES, MAX_REPORTS_LIMIT } from '$lib/constants';
 	import { createReport } from '$lib/db/create-reports';
 	import { getChannels } from '$lib/db/get-channels';
-	import { getChannelReports, getLatestMobReports } from '$lib/db/get-reports';
+	import {
+		getChannelReports,
+		getLatestMobReports,
+		getMostRecentLocationImage
+	} from '$lib/db/get-reports';
 	import { getUserVotesForReports } from '$lib/db/get-user-votes';
 	import { pb } from '$lib/pocketbase';
 	import { filterSortSettingsStore } from '$lib/stores/filter-sort-settings.svelte';
@@ -76,7 +77,8 @@
 			last_updated?: string;
 		}>,
 		reports: [] as MobReport[],
-		user_votes_map: new Map() as UserVotesMap
+		user_votes_map: new Map() as UserVotesMap,
+		mostRecentLocationImage: null as number | null
 	});
 
 	let ui_state = $state({
@@ -229,9 +231,16 @@
 		ui_state.errorMessage = null;
 		ui_state.hasError = false;
 		try {
-			const reports_data = await getChannelReports(mobId, channelNumber);
+			const [reports_data, locationImageNumber] = await Promise.all([
+				getChannelReports(mobId, channelNumber),
+				isSpecialMagicalCreature
+					? getMostRecentLocationImage(mobId, channelNumber)
+					: Promise.resolve(null)
+			]);
+
 			// Force a fresh array assignment to ensure reactivity
 			data_state.reports = [...reports_data];
+			data_state.mostRecentLocationImage = locationImageNumber;
 
 			// Fetch user votes for these reports
 			if (user && reports_data.length > 0) {
@@ -239,13 +248,9 @@
 				data_state.user_votes_map = await getUserVotesForReports(reportIds, user.id);
 			}
 
-			// Set default location image from most recent report if available
-			if (isSpecialMagicalCreature && reports_data.length > 0) {
-				// Reports are already sorted by -created, so first report is most recent
-				const mostRecentReport = reports_data[0];
-				if (mostRecentReport?.location_image) {
-					submission_state.locationImage = mostRecentReport.location_image;
-				}
+			// Set default location image for submission from most recent location image
+			if (isSpecialMagicalCreature && locationImageNumber) {
+				submission_state.locationImage = locationImageNumber;
 			}
 		} catch (error) {
 			const error_msg = error instanceof Error ? error.message : 'Failed to load channel reports';
@@ -261,7 +266,7 @@
 	const initials = $derived(getInitials(mobName));
 
 	// Check if this is a special magical creature requiring location images (random/rotating locations)
-	const isSpecialMagicalCreature = $derived(mobName in SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS);
+	const isSpecialMagicalCreature = $derived(mobName in SPECIAL_MAGICAL_CREATURES);
 
 	// Dynamic class for left section based on panel visibility
 	const leftSectionClass = $derived(
@@ -471,20 +476,16 @@
 			<!-- Left section: Channel Grid (3/4 width on desktop when panel visible, full width when hidden) -->
 			<div class={leftSectionClass}>
 				<div class="relative mb-4 flex items-center justify-between">
-					{#if !isSpecialMagicalCreature}
-						<Button
-							onclick={() => (mapOpen = true)}
-							variant="outline"
-							size="sm"
-							class="flex"
-							title="View map location"
-						>
-							<MapPin class="h-4 w-4" />
-							<span class="ml-2 hidden lg:inline">Map</span>
-						</Button>
-					{:else}
-						<div></div>
-					{/if}
+					<Button
+						onclick={() => (mapOpen = true)}
+						variant="outline"
+						size="sm"
+						class="flex"
+						title="View map location"
+					>
+						<MapPin class="h-4 w-4" />
+						<span class="ml-2 hidden lg:inline">Map</span>
+					</Button>
 					<h3 class="absolute left-1/2 -translate-x-1/2 text-lg font-semibold">
 						{submission_state.selectedChannel
 							? `Line ${submission_state.selectedChannel}`
@@ -563,6 +564,15 @@
 							onSubmit={handleSubmitReport}
 						/>
 
+						<!-- Location Image Viewer -->
+						{#if submission_state.selectedChannel && data_state.mostRecentLocationImage !== null}
+							<LocationImageViewer
+								{mobName}
+								mobType={type}
+								locationImageNumber={data_state.mostRecentLocationImage}
+							/>
+						{/if}
+
 						<!-- Reports Section -->
 						<div class="flex-1 overflow-hidden">
 							<MobLastReports
@@ -570,8 +580,6 @@
 								isLoadingReports={ui_state.isLoadingReports}
 								selectedChannel={submission_state.selectedChannel}
 								onRefresh={() => handleRefreshReports(false)}
-								{mobName}
-								mobType={type}
 								userVotesMap={data_state.user_votes_map}
 							/>
 						</div>
@@ -599,14 +607,21 @@
 								</div>
 							</Tabs.Content>
 							<Tabs.Content value="reports" class="mt-4">
-								<div class="max-h-[35vh] overflow-y-auto">
+								<div class="max-h-[35vh] space-y-2 overflow-y-auto">
+									<!-- Location Image Viewer -->
+									{#if submission_state.selectedChannel && data_state.mostRecentLocationImage !== null}
+										<LocationImageViewer
+											{mobName}
+											mobType={type}
+											locationImageNumber={data_state.mostRecentLocationImage}
+										/>
+									{/if}
+
 									<MobLastReports
 										reports={data_state.reports}
 										isLoadingReports={ui_state.isLoadingReports}
 										selectedChannel={submission_state.selectedChannel}
 										onRefresh={() => handleRefreshReports(false)}
-										{mobName}
-										mobType={type}
 										userVotesMap={data_state.user_votes_map}
 									/>
 								</div>
@@ -620,23 +635,21 @@
 </Dialog.Root>
 
 <!-- Map Location Drawer -->
-{#if !isSpecialMagicalCreature}
-	<Drawer.Root bind:open={mapOpen}>
-		<Drawer.Content class="max-h-[85vh]">
-			<Drawer.Header>
-				<Drawer.Title>{mobName} - Map Location</Drawer.Title>
-			</Drawer.Header>
-			<div class="flex items-center justify-center p-4">
-				<img
-					src={getMobMapPath(type, mobName)}
-					alt={`${mobName} map location`}
-					class="max-h-[70vh] w-full rounded-lg object-contain"
-					onerror={() => {
-						showToast.error('Map image not found');
-						mapOpen = false;
-					}}
-				/>
-			</div>
-		</Drawer.Content>
-	</Drawer.Root>
-{/if}
+<Drawer.Root bind:open={mapOpen}>
+	<Drawer.Content class="max-h-[85vh]">
+		<Drawer.Header>
+			<Drawer.Title>{mobName} - Map Location</Drawer.Title>
+		</Drawer.Header>
+		<div class="flex items-center justify-center p-4">
+			<img
+				src={getMobMapPath(type, mobName)}
+				alt={`${mobName} map location`}
+				class="max-h-[70vh] w-full rounded-lg object-contain"
+				onerror={() => {
+					showToast.error('Map image not found');
+					mapOpen = false;
+				}}
+			/>
+		</div>
+	</Drawer.Content>
+</Drawer.Root>

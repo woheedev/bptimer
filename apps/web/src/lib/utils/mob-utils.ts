@@ -1,7 +1,7 @@
 import {
 	DEAD_HP_VALUE,
 	LATEST_CHANNELS_DISPLAY_COUNT,
-	SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS
+	SPECIAL_MAGICAL_CREATURES
 } from '$lib/constants';
 import type { ChannelEntry } from '$lib/types/mobs';
 import { isDataStale, sortChannelsForMobCard, toSnakeCase } from '$lib/utils/general-utils';
@@ -60,11 +60,20 @@ export function getMobImagePath(
  * @returns Number of locations for this magical creature otherwise 0
  */
 export function getLocationCount(mobName: string): number {
-	return (
-		SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS[
-			mobName as keyof typeof SPECIAL_MAGICAL_CREATURE_LOCATION_COUNTS
-		] ?? 0
-	);
+	const locations = SPECIAL_MAGICAL_CREATURES[mobName as keyof typeof SPECIAL_MAGICAL_CREATURES];
+	return locations ? Object.keys(locations).length : 0;
+}
+
+/**
+ * Gets the display name for a location of a magical creature
+ *
+ * @param mobName - The name of the mob
+ * @param locationNumber - The location number (1-based)
+ * @returns The display name for the location, or fallback to "Location {number}" if not found
+ */
+export function getLocationName(mobName: string, locationNumber: number): string {
+	const locations = SPECIAL_MAGICAL_CREATURES[mobName as keyof typeof SPECIAL_MAGICAL_CREATURES];
+	return locations?.[locationNumber] ?? `Location ${locationNumber}`;
 }
 
 /**

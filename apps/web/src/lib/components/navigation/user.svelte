@@ -11,8 +11,9 @@
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getAvatarUrl } from '$lib/utils/user-utils';
-	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
-	import LogOutIcon from '@lucide/svelte/icons/log-out';
+	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
+	import LogIn from '@lucide/svelte/icons/log-in';
+	import LogOut from '@lucide/svelte/icons/log-out';
 	import { getContext } from 'svelte';
 
 	const sidebar = useSidebar();
@@ -72,7 +73,7 @@
 								<span class="truncate font-medium">{user.username}</span>
 								<span class="truncate text-xs">Rep: {user.reputation ?? 0}</span>
 							</div>
-							<ChevronsUpDownIcon class="ml-auto size-4" />
+							<ChevronsUpDown class="ml-auto size-4" />
 						</Sidebar.MenuButton>
 					{/snippet}
 				</DropdownMenu.Trigger>
@@ -113,7 +114,7 @@
 					<DropdownMenu.Separator />
 					-->
 					<DropdownMenu.Item onclick={handleSignOut}>
-						<LogOutIcon />
+						<LogOut />
 						Log out
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>
@@ -125,7 +126,10 @@
 				onclick={handleSignIn}
 				class="bg-muted/50 justify-center"
 			>
-				<span class="font-medium">Login</span>
+				<LogIn />
+				{#if sidebar.state !== 'collapsed'}
+					<span class="font-bold">Login</span>
+				{/if}
 			</Sidebar.MenuButton>
 		{/if}
 	</Sidebar.MenuItem>
