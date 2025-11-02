@@ -8,6 +8,7 @@ export type PageItem = {
 	comingSoon?: boolean;
 	external?: boolean;
 	variant?: 'default' | 'outline' | 'primary';
+	badge?: string;
 };
 
 // Filter and Sort Types

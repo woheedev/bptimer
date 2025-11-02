@@ -155,14 +155,15 @@ export const PAGES = [
 		icon: Heart
 	},
 	{
-		title: 'Leaderboard',
+		title: 'Rep Leaderboard',
 		url: '/leaderboard',
 		icon: Medal
 	},
 	{
 		title: 'Tools & Resources',
 		url: '/tools',
-		icon: Hammer
+		icon: Hammer,
+		badge: 'New'
 	}
 ];
 
@@ -226,7 +227,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				url: 'https://github.com/ssalihsrz/InfamousBPSRDPSMeter'
 			},
 			{
-				title: 'Star Resonance DPS',
+				title: 'Star Resonance DPS EN',
 				description:
 					'Star Resonance DPS is a fork of the original Star Resonance Damage Counter with Chinese translation support, offering real-time combat statistics for Blue Protocol: Star Resonance.',
 				author: 'DannyDog',

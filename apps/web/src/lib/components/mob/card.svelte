@@ -122,7 +122,7 @@
 	});
 </script>
 
-<Card.Root class="@container/card flex h-full flex-col justify-between">
+<Card.Root class="@container/card flex h-full flex-col justify-between gap-3">
 	<Card.Header>
 		<Card.Title class="text-xl font-semibold tabular-nums @[250px]/card:text-2xl">
 			{mob.name}
@@ -139,7 +139,7 @@
 
 	<Card.Content class="space-y-4">
 		<!-- Progress bar area -->
-		<div class="flex h-4 flex-col justify-end">
+		<div class="mt-2 flex h-6 flex-col justify-end">
 			{#if nextRespawnTime}
 				<div class="space-y-2">
 					<div class="text-muted-foreground flex justify-between text-xs">

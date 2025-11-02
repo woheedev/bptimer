@@ -27,7 +27,7 @@
 							? 'border-green-500 bg-green-500/10'
 							: 'border-red-500 bg-red-500/10'}"
 				>
-					<img src={timer.icon} alt={timer.name} class="h-auto w-6 shrink-0" />
+					<img src={timer.icon} alt={timer.name} class="h-auto w-6 shrink-0 invert dark:invert-0" />
 					<div class="flex min-w-0 flex-col">
 						<span class="truncate text-xs font-medium">{timer.name}</span>
 						<span

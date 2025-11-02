@@ -3,14 +3,16 @@
 	import ChannelPill from '$lib/components/mob/channel-pill.svelte';
 	import FilterMenu from '$lib/components/mob/filter-menu.svelte';
 	import MobHpSubmit from '$lib/components/mob/hp-submit.svelte';
-	import LocationImageViewer from '$lib/components/mob/location-image-viewer.svelte';
 	import MobLastReports from '$lib/components/mob/last-reports.svelte';
+	import LocationImageViewer from '$lib/components/mob/location-image-viewer.svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import * as Drawer from '$lib/components/ui/drawer/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
-	import { DEFAULT_HP_VALUE, SPECIAL_MAGICAL_CREATURES, MAX_REPORTS_LIMIT } from '$lib/constants';
+	import { DEFAULT_HP_VALUE, MAX_REPORTS_LIMIT, SPECIAL_MAGICAL_CREATURES } from '$lib/constants';
 	import { createReport } from '$lib/db/create-reports';
 	import { getChannels } from '$lib/db/get-channels';
 	import {
@@ -21,15 +23,13 @@
 	import { getUserVotesForReports } from '$lib/db/get-user-votes';
 	import { pb } from '$lib/pocketbase';
 	import { filterSortSettingsStore } from '$lib/stores/filter-sort-settings.svelte';
-	import type { MobReport } from '$lib/types/db';
 	import type { UserRecordModel } from '$lib/types/auth';
-	import type { UserVotesMap } from '$lib/types/db';
+	import type { MobReport, UserVotesMap } from '$lib/types/db';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { filterAndSortChannels } from '$lib/utils/mob-filtering';
 	import { getMobImagePath, getMobMapPath } from '$lib/utils/mob-utils';
-	import { mapUserRecord } from '$lib/utils/user-utils';
 	import { showToast } from '$lib/utils/toast';
-	import * as Drawer from '$lib/components/ui/drawer/index.js';
+	import { mapUserRecord } from '$lib/utils/user-utils';
 	import Eye from '@lucide/svelte/icons/eye';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import MapPin from '@lucide/svelte/icons/map-pin';
@@ -523,28 +523,30 @@
 						</Toggle>
 					</div>
 				</div>
-				<div class="bg-background flex-1 overflow-y-auto rounded-lg border p-4 md:flex-1">
-					{#if ui_state.isLoading}
-						<div class="flex h-32 items-center justify-center">
-							<div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
-							<p class="text-muted-foreground ml-3 text-sm">Loading mob data...</p>
-						</div>
-					{:else if channelGrid.length > 0}
-						<div class="grid grid-cols-5 gap-1 lg:grid-cols-10">
-							{#each channelGrid as channel (channel.channelNumber)}
-								<ChannelPill
-									channelNumber={channel.channelNumber}
-									status={channel.status}
-									hpPercentage={channel.hpPercentage}
-									clickable={true}
-									onclick={() => handleChannelClick(channel.channelNumber)}
-								/>
-							{/each}
-						</div>
-					{:else}
-						<p class="text-muted-foreground py-8 text-center">No channel data available</p>
-					{/if}
-				</div>
+				<Card.Root class="flex-1 gap-0 overflow-y-auto p-0 md:flex-1">
+					<Card.Content class="p-2">
+						{#if ui_state.isLoading}
+							<div class="flex h-32 items-center justify-center">
+								<div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+								<p class="text-muted-foreground ml-3 text-sm">Loading mob data...</p>
+							</div>
+						{:else if channelGrid.length > 0}
+							<div class="grid grid-cols-5 gap-1 lg:grid-cols-10">
+								{#each channelGrid as channel (channel.channelNumber)}
+									<ChannelPill
+										channelNumber={channel.channelNumber}
+										status={channel.status}
+										hpPercentage={channel.hpPercentage}
+										clickable={true}
+										onclick={() => handleChannelClick(channel.channelNumber)}
+									/>
+								{/each}
+							</div>
+						{:else}
+							<p class="text-muted-foreground py-8 text-center">No channel data available</p>
+						{/if}
+					</Card.Content>
+				</Card.Root>
 			</div>
 
 			<!-- Right section: HP Reporting and Reports (1/4 width on desktop, full width on mobile/tablet) -->

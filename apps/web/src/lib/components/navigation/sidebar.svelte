@@ -8,7 +8,14 @@
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
 	import Construction from '@lucide/svelte/icons/construction';
 	import HeartHandshake from '@lucide/svelte/icons/heart-handshake';
+	import { mode } from 'mode-watcher';
 	import type { ComponentProps } from 'svelte';
+
+	let discordIconSrc = $derived(
+		mode.current === 'dark'
+			? 'https://cdn.simpleicons.org/discord/white'
+			: 'https://cdn.simpleicons.org/discord/black'
+	);
 
 	let {
 		ref = $bindable(null),
@@ -67,7 +74,7 @@
 					rel="noopener noreferrer"
 					class="w-full justify-center"
 				>
-					<img src="https://cdn.simpleicons.org/discord/white" alt="Discord" class="h-4 w-4" />
+					<img src={discordIconSrc} alt="Discord" class="h-4 w-4" />
 					<span>Join Discord</span>
 				</Sidebar.MenuButton>
 			</div>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { Badge } from '$lib/components/ui/badge/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { PageItem } from '$lib/types/ui';
 
@@ -32,7 +33,12 @@
 					{#if item.icon}
 						<item.icon />
 					{/if}
-					<span>{item.title}</span>
+					<span class="flex-1">{item.title}</span>
+					{#if item.badge}
+						<Badge variant="default" class="ml-2 text-xs">
+							{item.badge}
+						</Badge>
+					{/if}
 				</Sidebar.MenuButton>
 			</Sidebar.MenuItem>
 		{/each}
