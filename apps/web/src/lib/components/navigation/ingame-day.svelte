@@ -11,7 +11,7 @@
 		const gameNow = now + GAME_TIMEZONE_OFFSET * HOUR - RESET_OFFSET;
 		const gameLaunch = launchTime + GAME_TIMEZONE_OFFSET * HOUR - RESET_OFFSET;
 
-		return Math.floor((gameNow - gameLaunch) / DAY);
+		return Math.floor((gameNow - gameLaunch) / DAY) + 1;
 	}
 
 	const days = calculateGameDay();

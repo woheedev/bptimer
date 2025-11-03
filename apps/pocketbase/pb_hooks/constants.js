@@ -10,16 +10,18 @@ const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 
 // Reputation and voting constants
-const REPUTATION_UPVOTE_GAIN = 5;
+const REPUTATION_UPVOTE_GAIN = 3;
 const REPUTATION_DOWNVOTE_LOSS = 2;
 const VOTE_TIME_WINDOW = 1 * MINUTE;
-const BAD_REPORT_THRESHOLD = -20; // Rate limit threshold
+const RATE_LIMIT_THRESHOLD = -10; // Rate limit threshold
+const BLOCKED_THRESHOLD = -20; // Complete block threshold
 const RATE_LIMITED_COOLDOWN = 5 * MINUTE;
 
 // API users (bypass users for vote and rate limiting)
 const API_USERS = {
   fovkhat7zlite07: 'discord.gg/bpsrfarmers',
-  qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs'
+  qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs',
+  ku99bl6jmjbijj4: 'tinyurl.com/bpsr-meter'
 };
 const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 const BYPASS_VOTE_USER_IDS_SET = new Set(BYPASS_VOTE_USER_IDS);
@@ -118,7 +120,8 @@ module.exports = {
   REPUTATION_UPVOTE_GAIN,
   REPUTATION_DOWNVOTE_LOSS,
   VOTE_TIME_WINDOW,
-  BAD_REPORT_THRESHOLD,
+  RATE_LIMIT_THRESHOLD,
+  BLOCKED_THRESHOLD,
   RATE_LIMITED_COOLDOWN,
 
   API_USERS,

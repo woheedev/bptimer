@@ -2,7 +2,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import type { ToolCard } from '$lib/schemas';
+	import type { ToolCard } from '$lib/types/ui';
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 
 	let {
@@ -12,7 +12,7 @@
 		author,
 		badge,
 		badgeVariant = 'secondary',
-		npcap = false,
+		driver,
 		tags,
 		previewImage
 	}: ToolCard = $props();
@@ -39,17 +39,19 @@
 		<p class="text-muted-foreground text-xs">{description}</p>
 	</Card.Content>
 	<Card.Footer class="flex flex-col gap-2">
-		{#if npcap}
+		{#if driver === 'npcap'}
 			<a
 				href="https://npcap.com/#download"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="self-start"
 			>
-				<Badge variant="destructive" class="hover:bg-accent cursor-pointer text-xs">
-					Requires Npcap
-				</Badge>
+				<Badge variant="destructive" class="text-xs">Requires Npcap</Badge>
 			</a>
+		{:else if driver === 'windivert'}
+			<Badge variant="destructive" class="self-start text-xs">Uses WinDivert</Badge>
+		{:else if driver === 'both'}
+			<Badge variant="destructive" class="self-start text-xs">WinDivert / Npcap</Badge>
 		{/if}
 		{#if tags}
 			<div class="flex flex-wrap gap-1">

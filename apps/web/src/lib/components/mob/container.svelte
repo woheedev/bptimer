@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import MobCard from '$lib/components/mob/card.svelte';
 	import MobModal from '$lib/components/mob/modal.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -13,7 +14,6 @@
 	import type { MobWithChannels } from '$lib/types/mobs';
 	import { loadMobsData } from '$lib/utils/mob-filtering';
 	import { updateLatestChannels } from '$lib/utils/mob-utils';
-	import { browser } from '$app/environment';
 	import { createDebouncedSearch, filterMobsByName } from '$lib/utils/search.svelte';
 
 	let {

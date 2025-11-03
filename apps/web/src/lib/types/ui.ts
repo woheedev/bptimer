@@ -26,3 +26,25 @@ export interface SortDirectionOption {
 	value: SortDirection;
 	label: string;
 }
+
+// Tools & Resources Types
+export interface ToolCard {
+	title: string;
+	description: string;
+	author?: string;
+	badge?: string;
+	badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline';
+	driver?: 'npcap' | 'windivert' | 'both';
+	tags?: string;
+	previewImage?: string;
+	url: string;
+}
+
+export interface ToolsSection {
+	title: string;
+	shortTitle: string;
+	subtitle?: string;
+	cards: ToolCard[];
+}
+
+export type ToolsSections = Record<string, ToolsSection>;

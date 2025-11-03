@@ -1,6 +1,10 @@
 import { PUBLIC_POCKETBASE_BASE_URL } from '$env/static/public';
 import PocketBase from 'pocketbase';
 
+if (!PUBLIC_POCKETBASE_BASE_URL) {
+	throw new Error('PUBLIC_POCKETBASE_BASE_URL is not configured');
+}
+
 // Main PocketBase client for HTTP requests
 // Keep auto-cancellation enabled (default) to prevent memory leaks
 export const pb = new PocketBase(PUBLIC_POCKETBASE_BASE_URL);

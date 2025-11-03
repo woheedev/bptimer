@@ -3,7 +3,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { searchQuerySchema } from '$lib/schemas';
 	import type { WithElementRef } from '$lib/utils.js';
-	import SearchIcon from '@lucide/svelte/icons/search';
+	import Search from '@lucide/svelte/icons/search';
 	import type { HTMLFormAttributes } from 'svelte/elements';
 
 	let {
@@ -38,7 +38,7 @@
 			class="h-8 pl-7"
 			oninput={handleInput}
 		/>
-		<SearchIcon
+		<Search
 			class="pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2 opacity-50 select-none"
 		/>
 	</div>

@@ -15,7 +15,7 @@ export const GAME_TIMEZONE_OFFSET = -2; // UTC-2
 export const DEBOUNCE_DELAY = 300; // ms
 export const SMALL_DELAY = 100; // ms
 export const JUST_NOW_THRESHOLD = 15; // seconds
-export const LAUNCH_REFERENCE_DATE = '2025-10-08';
+export const LAUNCH_REFERENCE_DATE = '2025-10-09';
 
 // Realtime
 export const REALTIME_DEBOUNCE_DELAY = 100; // ms
@@ -97,21 +97,17 @@ export const SPECIAL_MAGICAL_CREATURES_REQUIRING_LOCATION = Object.keys(
 
 // Reputation and voting constants
 export const VOTE_TIME_WINDOW = 1 * MINUTE;
-export const REPUTATION_UPVOTE_GAIN = 5;
-export const REPUTATION_DOWNVOTE_LOSS = 2;
 export const REPUTATION_GOOD_THRESHOLD = 100;
 export const REPUTATION_HIGH_THRESHOLD = 50;
 export const REPUTATION_MEDIUM_THRESHOLD = 20;
 export const REPUTATION_BAD_DISPLAY_THRESHOLD = -10;
-export const BAD_REPORT_THRESHOLD = -20; // Rate limit threshold
-export const BANNED_REPORT_THRESHOLD = -50;
-export const RATE_LIMITED_COOLDOWN = 5 * MINUTE;
 export const LEADERBOARD_LIMIT = 50;
 
 // API users
 export const API_USERS: Record<string, string> = {
 	fovkhat7zlite07: 'discord.gg/bpsrfarmers',
-	qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs'
+	qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs', // winjwinj
+	ku99bl6jmjbijj4: 'tinyurl.com/bpsr-meter' // geonode
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 
@@ -119,8 +115,12 @@ export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 export const FAVORITE_MOBS_STORAGE_KEY = 'favorite-mobs';
 export const EVENT_TIMERS_COLLAPSED_STORAGE_KEY = 'event-timers-collapsed';
 export const FILTER_SORT_SETTINGS_STORAGE_KEY = 'filter-sort-settings';
+export const MODULES_OPTIMIZER_MODULES_STORAGE_KEY = 'modules-optimizer-modules';
+export const MODULES_OPTIMIZER_PRIORITY_EFFECTS_STORAGE_KEY = 'modules-optimizer-priority-effects';
+export const MODULES_OPTIMIZER_NUM_SLOTS_STORAGE_KEY = 'modules-optimizer-num-slots';
 
 import {
+	Calculator,
 	Download,
 	Hammer,
 	Heart,
@@ -160,6 +160,12 @@ export const PAGES = [
 		icon: Medal
 	},
 	{
+		title: 'Modules Optimizer',
+		url: '/modules-optimizer',
+		icon: Calculator,
+		badge: 'New'
+	},
+	{
 		title: 'Tools & Resources',
 		url: '/tools',
 		icon: Hammer,
@@ -182,27 +188,88 @@ export const PARTNER_PAGES = [
 	}
 ];
 
-import type { ToolsSections } from '$lib/schemas';
+// Module Optimizer constants
+export const MODULE_MAX_PRIORITY_EFFECTS = 5;
+export const MODULE_EFFECTS_PER_MODULE = 3; // 2 for purple, 3 for gold
+export const MODULE_EFFECT_MAX_LEVEL = 10; // 1-10
+export const MODULE_THIRD_EFFECT_MAX_LEVEL = 5; // 1-5 for 3rd effect
+export const MODULE_DEFAULT_NAME_PREFIX = 'Module';
+export const MODULE_AVAILABLE_EFFECTS = [
+	'Agile',
+	'Agility Boost',
+	'Armor',
+	'Attack SPD',
+	'Cast Focus',
+	'Crit Focus',
+	'DMG Stack',
+	'Elite Strike',
+	'Final Protection',
+	'First Aid',
+	'Healing Boost',
+	'Healing Enhance',
+	'Intellect Boost',
+	'Life Condense',
+	'Life Steal',
+	'Life Wave',
+	'Luck Focus',
+	'Resistance',
+	'Special Attack',
+	'Strength Boost',
+	'Team Luck & Crit'
+] as const;
+
+export const MODULE_SLOTS = [
+	{ value: 2, label: '2 Slots' },
+	{ value: 3, label: '3 Slots' },
+	{ value: 4, label: '4 Slots' }
+] as const;
+
+export const MODULE_TIER_THRESHOLDS = [
+	{ threshold: 20, score: 20 },
+	{ threshold: 16, score: 16 },
+	{ threshold: 12, score: 12 },
+	{ threshold: 8, score: 8 },
+	{ threshold: 4, score: 4 },
+	{ threshold: 1, score: 1 }
+] as const;
+
+export const MODULE_PRIORITY_MULTIPLIERS = [10, 7, 5, 3, 2];
+
+// Tools & Resources constants
+import type { ToolsSections } from '$lib/types/ui';
 export const TOOLS_SECTIONS: ToolsSections = {
 	officialTools: {
 		title: 'DPS Meters',
+		shortTitle: 'Meters',
 		cards: [
 			{
 				title: 'BPSR Logs',
 				description:
 					'BPSR Logs is a "blazingly fast" open source Blue Protocol: Star Resonance DPS meter, written in Rust by winj. It is heavily inspired by loa-logs, and uses reverse engineering work done by StarResonanceDamageCounter and @Yuerino.',
 				author: 'winjwinj',
-				badge: 'BPTimer Supported',
+				badge: 'BPTimer',
 				badgeVariant: 'default',
+				driver: 'windivert',
 				tags: 'EN|Rust|Svelte|Tauri|WinDivert|Windows',
 				url: 'https://github.com/winjwinj/bpsr-logs'
 			},
 			{
 				title: 'BPSR Meter',
+				description:
+					"BPSR Meter is yet another fork of NeRooNx's BPSR Meter which is a fork of MrSnakke BPSR-Meter which is a customized version of Dimole's Star Resonance counter.",
+				author: 'geonode',
+				badge: 'BPTimer',
+				badgeVariant: 'default',
+				driver: 'both',
+				tags: 'EN|React|Electron|JavaScript|Node.js|Express|Socket.IO',
+				url: 'https://github.com/Fremy-Speeddraw/BPSR-Meter/'
+			},
+			{
+				title: 'BPSR-Meter',
 				description: 'Real-time combat statistics and performance tracking tool.',
 				author: 'mrsnakke',
 				badge: 'Fork',
-				npcap: true,
+				driver: 'npcap',
 				tags: 'EN|Electron|JavaScript|Node.js|Express|Socket.IO',
 				url: 'https://github.com/mrsnakke/BPSR-Meter'
 			},
@@ -212,7 +279,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 					'BPSR-PSO-SX is an overlay / monitoring tool for Blue Protocol that tracks player performance metrics such as DPS/HPS on a per-second basis and provides extended functionality over the original toolset.',
 				author: 'Sola-Ray',
 				badge: 'Fork',
-				npcap: true,
+				driver: 'npcap',
 				tags: 'EN|Electron|JavaScript|Node.js|Express|Socket.IO',
 				url: 'https://github.com/Sola-Ray/BPSR-PSO-SX'
 			},
@@ -222,7 +289,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 					'The Ultimate Blue Protocol Combat Tracker - Real-time DPS/HPS analysis with modern UI',
 				author: 'ssalihsrz',
 				badge: 'Fork',
-				npcap: true,
+				driver: 'npcap',
 				tags: 'EN|AI|Electron|JavaScript|Node.js|Express|Socket.IO',
 				url: 'https://github.com/ssalihsrz/InfamousBPSRDPSMeter'
 			},
@@ -232,7 +299,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 					'Star Resonance DPS is a fork of the original Star Resonance Damage Counter with Chinese translation support, offering real-time combat statistics for Blue Protocol: Star Resonance.',
 				author: 'DannyDog',
 				badge: 'Fork',
-				npcap: true,
+				driver: 'npcap',
 				tags: 'CN|EN-Translated|C#|.NET|WPF|Windows',
 				url: 'https://github.com/DannyDog/StarResonanceDps'
 			},
@@ -242,7 +309,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 					'Star Resonance Toolbox is a comprehensive DPS statistics tool for Blue Protocol: Star Resonance, featuring real-time combat analysis and performance tracking.',
 				author: 'anying1073',
 				badge: 'Original',
-				npcap: true,
+				driver: 'npcap',
 				tags: 'CN|EN-Translated|C#|.NET|WPF|Windows',
 				url: 'https://github.com/anying1073/StarResonanceDps'
 			},
@@ -252,7 +319,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 					'Star Resonance Damage Counter is a real-time combat data tool for Blue Protocol: Star Resonance, providing detailed damage and healing statistics through packet interception.',
 				author: 'dmlgzs',
 				badge: 'Original',
-				npcap: true,
+				driver: 'npcap',
 				tags: 'CN|EN-Translated|JavaScript|Node.js|Express|Socket.IO',
 				url: 'https://github.com/dmlgzs/StarResonanceDamageCounter'
 			}
@@ -260,6 +327,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 	},
 	communityDiscords: {
 		title: 'Community Discords',
+		shortTitle: 'Discords',
 		cards: [
 			{
 				title: 'Official BPSR Discord',
@@ -277,7 +345,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 			{
 				title: 'BPSR Devs',
 				description: "Developer community for BPSR. Home to winj's DPS Meter and BP Timer.",
-				badge: 'BP Timer Discord',
+				badge: 'BP Timer',
 				badgeVariant: 'default',
 				url: 'https://discord.gg/3UTC4pfCyC'
 			}
@@ -285,6 +353,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 	},
 	communityWebsites: {
 		title: 'Community Websites',
+		shortTitle: 'Websites',
 		cards: [
 			{
 				title: 'Star Resonance Interactive Maps',

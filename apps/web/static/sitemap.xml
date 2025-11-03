@@ -25,6 +25,14 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Modules Optimizer -->
+  <url>
+    <loc>https://bptimer.com/modules-optimizer</loc>
+    <lastmod>2025-11-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Leaderboard -->
   <url>
     <loc>https://bptimer.com/leaderboard</loc>

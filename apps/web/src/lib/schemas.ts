@@ -210,30 +210,42 @@ export const filterSortSettingsSchema = z.object({
 
 export type FilterSortSettings = z.infer<typeof filterSortSettingsSchema>;
 
-// Tools & Resources schemas
-export const toolCardSchema = z.object({
-	title: z.string().min(1).max(100),
-	description: z.string().min(1).max(500),
-	author: z.string().min(1).max(100).optional(),
-	badge: z.string().min(1).max(50).optional(),
-	badgeVariant: z.enum(['default', 'secondary', 'destructive', 'outline']).optional(),
-	npcap: z.boolean().optional(),
-	tags: z.string().optional(),
-	previewImage: z.url().optional(),
-	url: z.url()
+// Module schemas
+export const moduleEffectSchema = z
+	.object({
+		name: z.string().min(1).max(100),
+		level: z.number().int().min(1).max(10)
+	})
+	.refine(
+		(effect) => {
+			if (!effect.name || effect.level < 1) return false;
+			return true;
+		},
+		{ message: 'Effects 1 and 2 must have a name and level 1-10' }
+	);
+
+// Third effect (gold modules only) - optional, limited to level 1-5
+export const moduleThirdEffectSchema = z
+	.object({
+		name: z.string().min(0).max(100),
+		level: z.number().int().min(0).max(5)
+	})
+	.refine(
+		(effect) => {
+			if (effect.name && effect.level === 0) return false;
+			if (!effect.name && effect.level > 0) return false;
+			return true;
+		},
+		{ message: 'Third effect level must be 1-5 when effect name is set' }
+	);
+
+export const moduleSchema = z.object({
+	id: z.string().min(1).max(50),
+	effects: z.tuple([moduleEffectSchema, moduleEffectSchema, moduleThirdEffectSchema])
 });
 
-export const toolsSectionSchema = z.object({
-	title: z.string().min(1).max(100),
-	subtitle: z.string().min(1).max(200).optional(),
-	cards: z.array(toolCardSchema)
-});
-
-export const toolsSectionsSchema = z.record(z.string(), toolsSectionSchema);
-
-export type ToolCard = z.infer<typeof toolCardSchema>;
-export type ToolsSection = z.infer<typeof toolsSectionSchema>;
-export type ToolsSections = z.infer<typeof toolsSectionsSchema>;
+export type ModuleEffect = z.infer<typeof moduleEffectSchema>;
+export type Module = z.infer<typeof moduleSchema>;
 
 // Input types
 export type SearchQuery = z.infer<typeof searchQuerySchema>;

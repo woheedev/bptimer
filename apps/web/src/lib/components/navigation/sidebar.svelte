@@ -6,8 +6,7 @@
 	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
-	import Construction from '@lucide/svelte/icons/construction';
-	import HeartHandshake from '@lucide/svelte/icons/heart-handshake';
+	import { Construction, HeartHandshake } from '@lucide/svelte/icons';
 	import { mode } from 'mode-watcher';
 	import type { ComponentProps } from 'svelte';
 

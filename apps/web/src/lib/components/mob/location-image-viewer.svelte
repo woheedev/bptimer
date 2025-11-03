@@ -1,6 +1,6 @@
 <script lang="ts">
-	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { getLocationImagePath, getLocationName } from '$lib/utils/mob-utils';
 	import MapPin from '@lucide/svelte/icons/map-pin';
 

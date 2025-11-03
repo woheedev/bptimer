@@ -30,9 +30,7 @@
 	import { getMobImagePath, getMobMapPath } from '$lib/utils/mob-utils';
 	import { showToast } from '$lib/utils/toast';
 	import { mapUserRecord } from '$lib/utils/user-utils';
-	import Eye from '@lucide/svelte/icons/eye';
-	import EyeOff from '@lucide/svelte/icons/eye-off';
-	import MapPin from '@lucide/svelte/icons/map-pin';
+	import { Eye, EyeOff, MapPin } from '@lucide/svelte/icons';
 	import { untrack } from 'svelte';
 
 	let {

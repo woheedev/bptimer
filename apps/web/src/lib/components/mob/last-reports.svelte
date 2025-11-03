@@ -2,8 +2,7 @@
 	import ReportCard from '$lib/components/mob/report-card.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import type { MobReport } from '$lib/types/db';
-	import type { UserVotesMap } from '$lib/types/db';
+	import type { MobReport, UserVotesMap } from '$lib/types/db';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 
 	let {

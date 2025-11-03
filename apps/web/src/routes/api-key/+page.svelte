@@ -1,13 +1,14 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import SeoHead from '$lib/components/seo-head.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import { Switch } from '$lib/components/ui/switch';
-	import { browser } from '$app/environment';
 	import { signInAPI, signOut } from '$lib/oauth';
 	import { pb } from '$lib/pocketbase';
 	import type { UserRecordModel } from '$lib/types/auth';
@@ -131,33 +132,15 @@
 	}
 </script>
 
+<SeoHead
+	title="API Key Management | BP Timer"
+	description="Generate and manage your API key to connect community data with BP Timer. Secure authentication for automatic boss spawn reporting."
+	keywords="blue protocol api key, dps meter api, BPSR api integration, boss tracking api, dps meter"
+	{canonicalUrl}
+/>
+
 <svelte:head>
-	<title>API Key Management | BP Timer</title>
-	<meta
-		name="description"
-		content="Generate and manage your API key to connect community data with BP Timer. Secure authentication for automatic boss spawn reporting."
-	/>
-	<meta
-		name="keywords"
-		content="blue protocol api key, dps meter api, BPSR api integration, boss tracking api, dps meter"
-	/>
 	<meta name="robots" content="noindex, follow" />
-
-	<meta property="og:title" content="API Key Management | BP Timer" />
-	<meta
-		property="og:description"
-		content="Generate and manage your API key to connect community data with BP Timer. Secure authentication for automatic boss spawn reporting."
-	/>
-	<meta property="og:url" content={canonicalUrl} />
-	<meta property="og:type" content="website" />
-
-	<meta name="twitter:title" content="API Key Management | BP Timer" />
-	<meta
-		name="twitter:description"
-		content="Generate and manage your API key to connect community data with BP Timer."
-	/>
-
-	<link rel="canonical" href={canonicalUrl} />
 </svelte:head>
 
 <div class="flex h-screen items-center justify-center px-4">

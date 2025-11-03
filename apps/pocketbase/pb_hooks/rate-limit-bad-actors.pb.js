@@ -1,13 +1,17 @@
 /// <reference path="../pb_data/types.d.ts" />
 
 /**
- * Rate limit users with bad reputation
- * Checks if user has low reputation and enforces cooldown between reports
+ * Rate limit and block users with bad reputation
+ * -10 reputation: Rate limited (5 min cooldown between reports)
+ * -20 reputation: Completely blocked from submitting reports
  */
 onRecordCreate((e) => {
-  const { BAD_REPORT_THRESHOLD, RATE_LIMITED_COOLDOWN, BYPASS_VOTE_USER_IDS_SET } = require(
-    `${__hooks}/constants.js`
-  );
+  const {
+    RATE_LIMIT_THRESHOLD,
+    BLOCKED_THRESHOLD,
+    RATE_LIMITED_COOLDOWN,
+    BYPASS_VOTE_USER_IDS_SET
+  } = require(`${__hooks}/constants.js`);
 
   try {
     const reporterId = e.record.get('reporter');
@@ -19,7 +23,13 @@ onRecordCreate((e) => {
     const reporter = e.app.findRecordById('users', reporterId);
     const reputation = reporter.getInt('reputation') || 0;
 
-    if (reputation < BAD_REPORT_THRESHOLD) {
+    if (reputation <= BLOCKED_THRESHOLD) {
+      throw new BadRequestError(
+        `Your reporting privileges have been revoked due to very low reputation (${reputation}). Please contact Wohee if you believe this is an error.`
+      );
+    }
+
+    if (reputation <= RATE_LIMIT_THRESHOLD) {
       const recentReports = e.app.findRecordsByFilter(
         'hp_reports',
         'reporter = {:reporterId}',

@@ -1,23 +1,21 @@
 <script lang="ts">
-	import ThumbsDownIcon from '@lucide/svelte/icons/thumbs-down';
-	import ThumbsUpIcon from '@lucide/svelte/icons/thumbs-up';
-	import { getContext } from 'svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import {
 		API_USERS,
-		REPUTATION_BAD_DISPLAY_THRESHOLD,
 		BYPASS_VOTE_USER_IDS,
+		REPUTATION_BAD_DISPLAY_THRESHOLD,
 		REPUTATION_GOOD_THRESHOLD,
 		SECOND,
 		VOTE_TIME_WINDOW
 	} from '$lib/constants';
 	import { createVote } from '$lib/db/create-vote';
 	import { deleteVote } from '$lib/db/delete-vote';
-	import type { MobReport } from '$lib/types/db';
 	import type { UserRecordModel } from '$lib/types/auth';
-	import type { UserVoteInfo } from '$lib/types/db';
+	import type { MobReport, UserVoteInfo } from '$lib/types/db';
 	import { formatTimeAgo, getInitials } from '$lib/utils/general-utils';
 	import { showToast } from '$lib/utils/toast';
+	import { ThumbsDown, ThumbsUp } from '@lucide/svelte/icons';
+	import { getContext } from 'svelte';
 
 	let {
 		report,
@@ -34,7 +32,7 @@
 	const currentUser = $derived(getUser());
 
 	// Get user initials for avatar fallback
-	const user_initials = $derived(getInitials(report.user.name));
+	const userInitials = $derived(getInitials(report.user.name));
 
 	// Special user configuration
 	const isSpecialUser = $derived(BYPASS_VOTE_USER_IDS.includes(report.user.id));
@@ -58,26 +56,26 @@
 	});
 
 	// User's current vote
-	let user_vote = $state<UserVoteInfo | null>(passedUserVote);
-	let is_voting = $state(false);
+	let userVote = $state<UserVoteInfo | null>(passedUserVote);
+	let isVoting = $state(false);
 
 	// Optimistic local vote counts
-	let local_upvotes = $state(report.upvotes);
-	let local_downvotes = $state(report.downvotes);
-	let last_report_id = $state(report.id);
+	let localUpvotes = $state(report.upvotes);
+	let localDownvotes = $state(report.downvotes);
+	let lastReportId = $state(report.id);
 
 	// Sync counts when report changes or votes update
 	$effect(() => {
-		if (report.id !== last_report_id) {
-			last_report_id = report.id;
+		if (report.id !== lastReportId) {
+			lastReportId = report.id;
 		}
-		local_upvotes = report.upvotes;
-		local_downvotes = report.downvotes;
+		localUpvotes = report.upvotes;
+		localDownvotes = report.downvotes;
 	});
 
 	// Vote button disabled state
 	const isVoteDisabled = $derived(
-		is_voting || report.reporter_id === currentUser?.id || !currentUser
+		isVoting || report.reporter_id === currentUser?.id || !currentUser
 	);
 
 	// Vote button hover enabled state
@@ -85,58 +83,58 @@
 
 	// Handle vote action
 	async function handleVote(voteType: 'up' | 'down') {
-		if (!currentUser || is_voting) return;
+		if (!currentUser || isVoting) return;
 
-		is_voting = true;
+		isVoting = true;
 
-		const previous_vote = user_vote;
-		const previous_upvotes = local_upvotes;
-		const previous_downvotes = local_downvotes;
+		const previousVote = userVote;
+		const previousUpvotes = localUpvotes;
+		const previousDownvotes = localDownvotes;
 
 		try {
-			if (user_vote?.vote_type === voteType) {
+			if (userVote?.vote_type === voteType) {
 				// Remove vote
 				if (voteType === 'up') {
-					local_upvotes--;
+					localUpvotes--;
 				} else {
-					local_downvotes--;
+					localDownvotes--;
 				}
-				user_vote = null;
-				if (previous_vote) {
-					await deleteVote(previous_vote.id);
+				userVote = null;
+				if (previousVote) {
+					await deleteVote(previousVote.id);
 				}
-			} else if (user_vote && user_vote.vote_type !== voteType) {
+			} else if (userVote && userVote.vote_type !== voteType) {
 				// Change vote type
-				if (user_vote.vote_type === 'up') {
-					local_upvotes--;
-					local_downvotes++;
+				if (userVote.vote_type === 'up') {
+					localUpvotes--;
+					localDownvotes++;
 				} else {
-					local_downvotes--;
-					local_upvotes++;
+					localDownvotes--;
+					localUpvotes++;
 				}
-				await deleteVote(user_vote.id);
+				await deleteVote(userVote.id);
 				const voteId = await createVote(report.id, voteType);
-				user_vote = { id: voteId, vote_type: voteType };
+				userVote = { id: voteId, vote_type: voteType };
 			} else {
 				// Create new vote
 				if (voteType === 'up') {
-					local_upvotes++;
+					localUpvotes++;
 				} else {
-					local_downvotes++;
+					localDownvotes++;
 				}
 				const voteId = await createVote(report.id, voteType);
-				user_vote = { id: voteId, vote_type: voteType };
+				userVote = { id: voteId, vote_type: voteType };
 			}
 		} catch (error) {
 			console.error('Error voting:', error);
 			const errorMsg = error instanceof Error ? error.message : 'Failed to submit vote';
 			showToast.error(errorMsg);
 			// Revert optimistic update
-			user_vote = previous_vote;
-			local_upvotes = previous_upvotes;
-			local_downvotes = previous_downvotes;
+			userVote = previousVote;
+			localUpvotes = previousUpvotes;
+			localDownvotes = previousDownvotes;
 		} finally {
-			is_voting = false;
+			isVoting = false;
 		}
 	}
 
@@ -177,7 +175,7 @@
 					<Avatar.Image src={report.user.avatar} alt={report.user.name} />
 				{/if}
 				<Avatar.Fallback class="text-sm">
-					{user_initials}
+					{userInitials}
 				</Avatar.Fallback>
 			</Avatar.Root>
 			<div class="min-w-0 flex-1">
@@ -197,27 +195,27 @@
 			{:else}
 				<button
 					class="flex items-center gap-1 rounded-md px-2 py-1 transition-colors disabled:opacity-50"
-					class:text-green-600={user_vote?.vote_type === 'up'}
-					class:font-semibold={user_vote?.vote_type === 'up'}
-					class:hover:text-green-500={user_vote?.vote_type !== 'up' && canHoverVote}
+					class:text-green-600={userVote?.vote_type === 'up'}
+					class:font-semibold={userVote?.vote_type === 'up'}
+					class:hover:text-green-500={userVote?.vote_type !== 'up' && canHoverVote}
 					aria-label="Upvote"
 					disabled={isVoteDisabled}
 					onclick={() => handleVote('up')}
 				>
-					<ThumbsUpIcon class="h-4 w-4" />
-					<span class="text-xs">{local_upvotes}</span>
+					<ThumbsUp class="h-4 w-4" />
+					<span class="text-xs">{localUpvotes}</span>
 				</button>
 				<button
 					class="flex items-center gap-1 rounded-md px-2 py-1 transition-colors disabled:opacity-50"
-					class:text-red-600={user_vote?.vote_type === 'down'}
-					class:font-semibold={user_vote?.vote_type === 'down'}
-					class:hover:text-red-500={user_vote?.vote_type !== 'down' && canHoverVote}
+					class:text-red-600={userVote?.vote_type === 'down'}
+					class:font-semibold={userVote?.vote_type === 'down'}
+					class:hover:text-red-500={userVote?.vote_type !== 'down' && canHoverVote}
 					aria-label="Downvote"
 					disabled={isVoteDisabled}
 					onclick={() => handleVote('down')}
 				>
-					<ThumbsDownIcon class="h-4 w-4" />
-					<span class="text-xs">{local_downvotes}</span>
+					<ThumbsDown class="h-4 w-4" />
+					<span class="text-xs">{localDownvotes}</span>
 				</button>
 			{/if}
 		</div>

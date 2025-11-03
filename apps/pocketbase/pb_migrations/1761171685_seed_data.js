@@ -4,13 +4,13 @@ migrate(
     // Seed maps first (upsert)
     const mapsCollection = app.findCollectionByNameOrId('maps');
     const mapsData = [
-      { uid: 1, name: 'Asterleeds', total_channels: 400 },
-      { uid: 2, name: 'Underground District', total_channels: 100 },
-      { uid: 3, name: 'Asteria Plains', total_channels: 450 },
-      { uid: 4, name: 'Windhowl Canyon', total_channels: 150 },
+      { uid: 1, name: 'Asterleeds', total_channels: 200 },
+      { uid: 2, name: 'Underground District', total_channels: 50 },
+      { uid: 3, name: 'Asteria Plains', total_channels: 200 },
+      { uid: 4, name: 'Windhowl Canyon', total_channels: 50 },
       { uid: 5, name: "Skimmer's Lair", total_channels: 150 },
-      { uid: 6, name: 'Duskdye Woods', total_channels: 150 },
-      { uid: 7, name: 'Everfall Forest', total_channels: 150 }
+      { uid: 6, name: 'Duskdye Woods', total_channels: 120 },
+      { uid: 7, name: 'Everfall Forest', total_channels: 200 }
     ];
 
     const mapRecords = [];

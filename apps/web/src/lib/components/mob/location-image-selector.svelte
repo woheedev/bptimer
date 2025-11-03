@@ -1,8 +1,8 @@
 <script lang="ts">
-	import * as Carousel from '$lib/components/ui/carousel/index.js';
-	import type { CarouselAPI } from '$lib/components/ui/carousel/context.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import type { CarouselAPI } from '$lib/components/ui/carousel/context.js';
+	import * as Carousel from '$lib/components/ui/carousel/index.js';
+	import * as Popover from '$lib/components/ui/popover/index.js';
 	import {
 		getLocationImagePath,
 		getLocationImagePaths,

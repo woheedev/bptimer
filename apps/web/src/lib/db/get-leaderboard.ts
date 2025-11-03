@@ -1,6 +1,6 @@
 import { pb } from '$lib/pocketbase';
-import { leaderboardEntrySchema } from '$lib/schemas';
 import type { LeaderboardEntry } from '$lib/schemas';
+import { leaderboardEntrySchema } from '$lib/schemas';
 import { validateWithSchema } from '$lib/utils/validation';
 
 function mapToLeaderboardEntry(record: {

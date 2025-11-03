@@ -1,7 +1,8 @@
 <script lang="ts">
+	import LocationImageSelector from '$lib/components/mob/location-image-selector.svelte';
+	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Slider } from '$lib/components/ui/slider/index.js';
 	import {
@@ -14,7 +15,6 @@
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { showToast } from '$lib/utils/toast';
 	import Skull from '@lucide/svelte/icons/skull';
-	import LocationImageSelector from '$lib/components/mob/location-image-selector.svelte';
 
 	let {
 		selectedChannel,

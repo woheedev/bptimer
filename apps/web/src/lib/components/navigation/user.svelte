@@ -11,9 +11,7 @@
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getAvatarUrl } from '$lib/utils/user-utils';
-	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
-	import LogIn from '@lucide/svelte/icons/log-in';
-	import LogOut from '@lucide/svelte/icons/log-out';
+	import { ChevronsUpDown, LogIn, LogOut } from '@lucide/svelte/icons';
 	import { getContext } from 'svelte';
 
 	const sidebar = useSidebar();

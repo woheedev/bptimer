@@ -2,7 +2,9 @@
 
 // Validate vote time window before creating votes
 onRecordCreate((e) => {
-  const { VOTE_TIME_WINDOW, BYPASS_VOTE_USER_IDS_SET } = require(`${__hooks}/constants.js`);
+  const { VOTE_TIME_WINDOW, RATE_LIMIT_THRESHOLD, BYPASS_VOTE_USER_IDS_SET } = require(
+    `${__hooks}/constants.js`
+  );
 
   const voteRecord = e.record;
   const voterId = voteRecord.get('voter');
@@ -17,6 +19,18 @@ onRecordCreate((e) => {
 
     if (BYPASS_VOTE_USER_IDS_SET.has(reporterId)) {
       throw new BadRequestError('Cannot vote on reports from this user');
+    }
+
+    // Block voting for rate-limited users
+    if (!BYPASS_VOTE_USER_IDS_SET.has(voterId)) {
+      const voter = e.app.findRecordById('users', voterId);
+      const voterReputation = voter.getInt('reputation') || 0;
+
+      if (voterReputation <= RATE_LIMIT_THRESHOLD) {
+        throw new BadRequestError(
+          `Your voting privileges are suspended due to low reputation (${voterReputation}). Improve your report quality to restore voting rights.`
+        );
+      }
     }
 
     const reportCreatedTime = new Date(report.get('created')).getTime();

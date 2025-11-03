@@ -4,6 +4,8 @@
 	import ErrorBoundary from '$lib/components/error-boundary.svelte';
 	import NavigationHeader from '$lib/components/navigation/header.svelte';
 	import NavigationSidebar from '$lib/components/navigation/sidebar.svelte';
+	import PageHeader from '$lib/components/page-header.svelte';
+	import SeoHead from '$lib/components/seo-head.svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { Spinner } from '$lib/components/ui/spinner';
@@ -17,7 +19,7 @@
 	import type { LeaderboardEntry } from '$lib/schemas';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { getAvatarUrl } from '$lib/utils/user-utils';
-	import { TrophyIcon } from '@lucide/svelte/icons';
+	import Trophy from '@lucide/svelte/icons/trophy';
 
 	let leaderboard = $state<LeaderboardEntry[]>([]);
 	let isLoading = $state(true);
@@ -56,33 +58,12 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Leaderboard | BP Timer</title>
-	<meta
-		name="description"
-		content="Top contributors to the Blue Protocol boss tracking community ranked by reputation. See who's helping the community track boss spawns and magical creatures in BPSR."
-	/>
-	<meta
-		name="keywords"
-		content="blue protocol leaderboard, BPSR contributors, boss tracker reputation, community rankings, top trackers"
-	/>
-
-	<meta property="og:title" content="Leaderboard | BP Timer" />
-	<meta
-		property="og:description"
-		content="Top contributors to the Blue Protocol boss tracking community ranked by reputation. See who's helping the community track boss spawns."
-	/>
-	<meta property="og:url" content={canonicalUrl} />
-	<meta property="og:type" content="website" />
-
-	<meta name="twitter:title" content="Leaderboard | BP Timer" />
-	<meta
-		name="twitter:description"
-		content="Top contributors to the Blue Protocol boss tracking community ranked by reputation."
-	/>
-
-	<link rel="canonical" href={canonicalUrl} />
-</svelte:head>
+<SeoHead
+	title="Leaderboard | BP Timer"
+	description="Top contributors to the Blue Protocol boss tracking community ranked by reputation. See who's helping the community track boss spawns and magical creatures in BPSR."
+	keywords="blue protocol leaderboard, BPSR contributors, boss tracker reputation, community rankings, top trackers"
+	{canonicalUrl}
+/>
 
 <svelte:boundary>
 	<Sidebar.Provider>
@@ -90,13 +71,11 @@
 		<Sidebar.Inset>
 			<NavigationHeader />
 			<div class="container mx-auto space-y-6 p-4">
-				<div class="flex items-center gap-3">
-					<TrophyIcon class="h-8 w-8" />
-					<div>
-						<h1 class="text-3xl font-bold">Leaderboard</h1>
-						<p class="text-muted-foreground">Top contributors ranked by reputation</p>
-					</div>
-				</div>
+				<PageHeader
+					icon={Trophy}
+					title="Leaderboard"
+					subtitle="Top contributors ranked by reputation"
+				/>
 
 				{#if isLoading}
 					<div class="flex h-screen items-center justify-center">
@@ -137,7 +116,7 @@
 								<!-- Rank -->
 								<div class="relative flex w-16 shrink-0 items-center gap-2">
 									{#if rank <= 3}
-										<TrophyIcon class="h-6 w-6 {getRankColor(rank)}" />
+										<Trophy class="h-6 w-6 {getRankColor(rank)}" />
 									{/if}
 									<span class="text-lg font-bold {getRankColor(rank)}">#{rank}</span>
 								</div>
