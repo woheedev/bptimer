@@ -1,22 +1,23 @@
-FROM alpine:3 AS downloader
+FROM golang:alpine as builder
 
-ARG TARGETOS
-ARG TARGETARCH
-ARG TARGETVARIANT
-ARG VERSION
+RUN mkdir -p /bptimer
+WORKDIR /bptimer
 
-ENV BUILDX_ARCH="${TARGETOS:-linux}_${TARGETARCH:-amd64}${TARGETVARIANT}"
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
-RUN wget https://github.com/pocketbase/pocketbase/releases/download/v${VERSION}/pocketbase_${VERSION}_${BUILDX_ARCH}.zip \
-  && unzip pocketbase_${VERSION}_${BUILDX_ARCH}.zip \
-  && chmod +x /pocketbase
+COPY . .
+
+WORKDIR /bptimer/apps/pocketbase
+RUN go build -o /bptimer/pocketbase .
 
 FROM alpine:3
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
-COPY ./pb_migrations /pb_migrations
+COPY ./apps/pocketbase/pb_migrations /pb_migrations
 
 EXPOSE 8090
 
-COPY --from=downloader /pocketbase /usr/local/bin/pocketbase
+COPY --from=builder /bptimer/pocketbase /usr/local/bin/pocketbase
 ENTRYPOINT ["/usr/local/bin/pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb_data", "--migrationsDir=/pb_migrations", "--publicDir=/pb_public", "--hooksDir=/pb_hooks"]
