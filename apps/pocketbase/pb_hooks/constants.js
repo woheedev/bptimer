@@ -21,7 +21,7 @@ const RATE_LIMITED_COOLDOWN = 5 * MINUTE;
 const API_USERS = {
   fovkhat7zlite07: 'discord.gg/bpsrfarmers',
   qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs',
-  ku99bl6jmjbijj4: 'tinyurl.com/bpsr-meter'
+  ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr'
 };
 const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 const BYPASS_VOTE_USER_IDS_SET = new Set(BYPASS_VOTE_USER_IDS);

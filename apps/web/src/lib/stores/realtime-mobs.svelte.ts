@@ -8,14 +8,12 @@ import {
 import { pbRealtime } from '$lib/pocketbase';
 import type { ChannelEntry, MobWithChannels } from '$lib/types/mobs';
 import { isDataStale, sortChannelsForMobCard } from '$lib/utils/general-utils';
-import { shouldIncludeMob } from '$lib/utils/mob-filtering';
 import { getMobStatus } from '$lib/utils/mob-utils';
 
 type MobUpdateCallback = (events: RealtimeEventData[]) => void;
 type RealtimeEventData = {
-	action: string;
 	record: Record<string, unknown>;
-	collection: string;
+	type: 'hp_update' | 'reset';
 };
 
 function createRealtimeMobsStore() {
@@ -51,31 +49,34 @@ function createRealtimeMobsStore() {
 		};
 
 		try {
-			// Subscribe to mob changes
-			pbRealtime.collection('mobs').subscribe('*', (data) => {
+			// Subscribe to HP updates topic
+			// Format: [mobId, channel, hp]
+			pbRealtime.realtime.subscribe('mob_hp_updates', (e) => {
+				const data = typeof e === 'string' ? JSON.parse(e) : e;
+				const [mobId, channel, hp] = data;
+				
 				debouncedCallback({
-					action: data.action,
-					record: data.record,
-					collection: 'mobs'
+					record: { 
+						mob: mobId, 
+						channel_number: channel, 
+						last_hp: hp,
+						last_update: new Date().toISOString()
+					},
+					type: 'hp_update'
 				});
 			});
 
-			// Subscribe to channel status changes (always needed for container)
-			pbRealtime.collection('mob_channel_status_sse').subscribe('*', (data) => {
-				debouncedCallback({
-					action: data.action,
-					record: data.record,
-					collection: 'mob_channel_status_sse'
-				});
-			});
-
-			// Subscribe to mob reset events
-			pbRealtime.collection('mob_reset_events').subscribe('*', (data) => {
-				debouncedCallback({
-					action: data.action,
-					record: data.record,
-					collection: 'mob_reset_events'
-				});
+			// Subscribe to reset events topic
+			// Format: array of mobIds
+			pbRealtime.realtime.subscribe('mob_resets', (e) => {
+				const mobIds = typeof e === 'string' ? JSON.parse(e) : e;
+				
+				for (const mobId of mobIds) {
+					debouncedCallback({
+						record: { mob: mobId },
+						type: 'reset'
+					});
+				}
 			});
 
 			isConnected = true;
@@ -87,9 +88,8 @@ function createRealtimeMobsStore() {
 					debounceTimer = null;
 				}
 				eventQueue = []; // Clear any pending events
-				pbRealtime.collection('mobs').unsubscribe();
-				pbRealtime.collection('mob_channel_status_sse').unsubscribe();
-				pbRealtime.collection('mob_reset_events').unsubscribe();
+				pbRealtime.realtime.unsubscribe('mob_hp_updates');
+				pbRealtime.realtime.unsubscribe('mob_resets');
 				isConnected = false;
 			};
 		} catch (error) {
@@ -110,58 +110,14 @@ function createRealtimeMobsStore() {
 
 	function handleRealtimeUpdate(
 		mobs: MobWithChannels[],
-		eventData: RealtimeEventData,
-		type: 'boss' | 'magical_creature',
-		mobIds?: string[]
+		eventData: RealtimeEventData
 	): MobWithChannels[] {
-		const { action, record, collection } = eventData;
+		const { record, type } = eventData;
 
-		if (collection === 'mobs') {
-			return handleMobUpdate(mobs, action, record, type, mobIds);
-		} else if (collection === 'mob_channel_status_sse') {
-			return handleChannelStatusUpdate(mobs, action, record);
-		} else if (collection === 'mob_reset_events') {
-			return handleResetEvent(mobs, action, record);
-		}
-
-		return mobs;
-	}
-
-	function handleMobUpdate(
-		mobs: MobWithChannels[],
-		action: string,
-		record: Record<string, unknown>,
-		type: 'boss' | 'magical_creature',
-		mobIds?: string[]
-	): MobWithChannels[] {
-		const mobRecord = record as { id: string; type: string };
-
-		if (action === 'create') {
-			// Add new mob if it matches current filter
-			if (shouldIncludeMob(mobRecord, type, mobIds)) {
-				return [...mobs, record as unknown as MobWithChannels];
-			}
-		} else if (action === 'update') {
-			// Update existing mob
-			const recordId = record.id as string;
-			const index = mobs.findIndex((m) => m.id === recordId);
-			if (index !== -1) {
-				if (shouldIncludeMob(mobRecord, type, mobIds)) {
-					const updatedMobs = [...mobs];
-					updatedMobs[index] = { ...updatedMobs[index], ...record } as MobWithChannels;
-					return updatedMobs;
-				} else {
-					// Remove mob if it no longer matches filter
-					return mobs.filter((m) => m.id !== recordId);
-				}
-			} else if (shouldIncludeMob(mobRecord, type, mobIds)) {
-				// Add mob if it now matches filter
-				return [...mobs, record as unknown as MobWithChannels];
-			}
-		} else if (action === 'delete') {
-			// Remove deleted mob
-			const recordId = record.id as string;
-			return mobs.filter((m) => m.id !== recordId);
+		if (type === 'hp_update') {
+			return handleChannelStatusUpdate(mobs, record);
+		} else if (type === 'reset') {
+			return handleResetEvent(mobs, record);
 		}
 
 		return mobs;
@@ -169,10 +125,8 @@ function createRealtimeMobsStore() {
 
 	function handleChannelStatusUpdate(
 		mobs: MobWithChannels[],
-		action: string,
 		record: Record<string, unknown>
 	): MobWithChannels[] {
-		// Find the mob this status belongs to
 		const recordMob = record.mob as string;
 		const mobIndex = mobs.findIndex((m) => m.id === recordMob);
 		if (mobIndex === -1) return mobs;
@@ -183,53 +137,40 @@ function createRealtimeMobsStore() {
 		if (channelNumber === undefined) {
 			return mobs;
 		}
+
 		const channelIndex =
 			mob.latestChannels?.findIndex((c: ChannelEntry) => c.channel === channelNumber) ?? -1;
 
-		if (action === 'create' || action === 'update') {
-			const recordLastHp = record.last_hp as number;
-			const recordLastUpdate = record.last_update as string;
-			const lastUpdated = recordLastUpdate || new Date().toISOString();
-			const statusData: ChannelEntry = {
-				channel: channelNumber,
-				status: getMobStatus(recordLastHp, lastUpdated),
-				hp_percentage: recordLastHp,
-				last_updated: lastUpdated
-			};
+		const recordLastHp = record.last_hp as number;
+		const recordLastUpdate = record.last_update as string;
+		const lastUpdated = recordLastUpdate || new Date().toISOString();
+		const statusData: ChannelEntry = {
+			channel: channelNumber,
+			status: getMobStatus(recordLastHp, lastUpdated),
+			hp_percentage: recordLastHp,
+			last_updated: lastUpdated
+		};
 
-			let updatedChannels;
-			if (channelIndex !== -1) {
-				// Update existing channel
-				updatedChannels = [...(mob.latestChannels || [])];
-				updatedChannels[channelIndex] = statusData;
-			} else {
-				// Add new channel
-				updatedChannels = [...(mob.latestChannels || []), statusData];
-			}
-
-			// Filter stale data, sort, and take top channels
-			const filtered = updatedChannels.filter(
-				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
-			);
-			updatedChannels = sortChannelsForMobCard(filtered).slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
-
-			const updatedMob = { ...mob, latestChannels: updatedChannels };
-			const updatedMobs = [...mobs];
-			updatedMobs[mobIndex] = updatedMob;
-			return updatedMobs;
-		} else if (action === 'delete') {
-			// Remove channel status
-			if (channelIndex !== -1) {
-				const updatedChannels = [...(mob.latestChannels || [])];
-				updatedChannels.splice(channelIndex, 1);
-				const updatedMob = { ...mob, latestChannels: updatedChannels };
-				const updatedMobs = [...mobs];
-				updatedMobs[mobIndex] = updatedMob;
-				return updatedMobs;
-			}
+		let updatedChannels;
+		if (channelIndex !== -1) {
+			// Update existing channel
+			updatedChannels = [...(mob.latestChannels || [])];
+			updatedChannels[channelIndex] = statusData;
+		} else {
+			// Add new channel
+			updatedChannels = [...(mob.latestChannels || []), statusData];
 		}
 
-		return mobs;
+		// Filter stale data, sort, and take top channels
+		const filtered = updatedChannels.filter(
+			(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
+		);
+		updatedChannels = sortChannelsForMobCard(filtered).slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
+
+		const updatedMob = { ...mob, latestChannels: updatedChannels };
+		const updatedMobs = [...mobs];
+		updatedMobs[mobIndex] = updatedMob;
+		return updatedMobs;
 	}
 
 	/**
@@ -256,22 +197,17 @@ function createRealtimeMobsStore() {
 
 	function handleResetEvent(
 		mobs: MobWithChannels[],
-		action: string,
 		record: Record<string, unknown>
 	): MobWithChannels[] {
-		if (action === 'create' && record.type === 'reset') {
-			const mobId = record.mob as string;
-			const mobIndex = mobs.findIndex((m) => m.id === mobId);
-			if (mobIndex !== -1) {
-				const mob = mobs[mobIndex];
-				const resetMob = autoResetMob(mob);
-				const updatedMobs = [...mobs];
-				updatedMobs[mobIndex] = resetMob;
-				return updatedMobs;
-			}
-		}
+		const mobId = record.mob as string;
+		const mobIndex = mobs.findIndex((m) => m.id === mobId);
+		if (mobIndex === -1) return mobs;
 
-		return mobs;
+		const mob = mobs[mobIndex];
+		const resetMob = autoResetMob(mob);
+		const updatedMobs = [...mobs];
+		updatedMobs[mobIndex] = resetMob;
+		return updatedMobs;
 	}
 
 	/**

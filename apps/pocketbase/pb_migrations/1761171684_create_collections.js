@@ -956,91 +956,12 @@ migrate(
         id: 'pbc_3114863239',
         indexes: [
           'CREATE INDEX `idx_hp_reports_mob_channel_number` ON `hp_reports` (`mob`, `channel_number`)',
-          'CREATE INDEX `idx_hp_reports_created` ON `hp_reports` (`created` DESC)',
           'CREATE INDEX `idx_hp_reports_mob_created` ON `hp_reports` (`mob`, `created` DESC)',
-          'CREATE INDEX `idx_hp_reports_reporter_mob_channel` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `hp_percentage`, `created`)',
-          'CREATE INDEX `idx_hp_reports_reporter_created` ON `hp_reports` (`reporter`, `created` DESC)'
+          'CREATE INDEX `idx_hp_reports_reporter_created` ON `hp_reports` (`reporter`, `created` DESC)',
+          'CREATE INDEX `idx_hp_reports_mob_channel_created` ON `hp_reports` (`mob`, `channel_number`, `created` DESC)'
         ],
         listRule: '',
         name: 'hp_reports',
-        system: false,
-        type: 'base',
-        updateRule: null,
-        viewRule: ''
-      },
-      {
-        createRule: null,
-        deleteRule: null,
-        fields: [
-          {
-            autogeneratePattern: '[a-z0-9]{15}',
-            hidden: false,
-            id: 'text3208210256',
-            max: 15,
-            min: 15,
-            name: 'id',
-            pattern: '^[a-z0-9]+$',
-            presentable: false,
-            primaryKey: true,
-            required: true,
-            system: true,
-            type: 'text'
-          },
-          {
-            cascadeDelete: false,
-            collectionId: 'pbc_1470589867',
-            hidden: false,
-            id: 'relation4271371901',
-            maxSelect: 1,
-            minSelect: 0,
-            name: 'mob',
-            presentable: false,
-            required: true,
-            system: false,
-            type: 'relation'
-          },
-          {
-            hidden: false,
-            id: 'number1760765226',
-            max: 1000,
-            min: 1,
-            name: 'channel_number',
-            onlyInt: true,
-            presentable: false,
-            required: true,
-            system: false,
-            type: 'number'
-          },
-          {
-            hidden: false,
-            id: 'number3527176666',
-            max: 100,
-            min: 0,
-            name: 'last_hp',
-            onlyInt: true,
-            presentable: false,
-            required: false,
-            system: false,
-            type: 'number'
-          },
-          {
-            hidden: false,
-            id: 'autodate304265122',
-            name: 'last_update',
-            onCreate: false,
-            onUpdate: true,
-            presentable: false,
-            system: false,
-            type: 'autodate'
-          }
-        ],
-        id: 'pbc_3303527663',
-        indexes: [
-          'CREATE UNIQUE INDEX `idx_mob_channel_status_sse_mob_channel` ON `mob_channel_status_sse` (`mob`, `channel_number`)',
-          'CREATE INDEX `idx_mob_channel_status_sse_last_update` ON `mob_channel_status_sse` (`last_update` DESC)'
-        ],
-        listRule: '',
-        name: 'mob_channel_status_sse',
         system: false,
         type: 'base',
         updateRule: null,
@@ -1180,8 +1101,7 @@ migrate(
         ],
         id: 'pbc_3682110470',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_mob_channel_status_mob_channel` ON `mob_channel_status` (`mob`, `channel_number`)',
-          'CREATE INDEX `idx_mob_channel_status_last_update` ON `mob_channel_status` (`last_update` DESC)'
+          'CREATE UNIQUE INDEX `idx_mob_channel_status_mob_channel` ON `mob_channel_status` (`mob`, `channel_number`)'
         ],
         listRule: '',
         name: 'mob_channel_status',
@@ -1274,9 +1194,9 @@ migrate(
         id: 'pbc_1470589867',
         indexes: [
           'CREATE UNIQUE INDEX `idx_mobs_name` ON `mobs` (`name`)',
-          'CREATE INDEX `idx_mobs_map` ON `mobs` (`map`)',
           'CREATE UNIQUE INDEX `idx_mobs_uid` ON `mobs` (`uid`)',
-          'CREATE INDEX `idx_mobs_type` ON `mobs` (`type`)'
+          'CREATE INDEX `idx_mobs_type` ON `mobs` (`type`)',
+          'CREATE INDEX `idx_mobs_respawn_time` ON `mobs` (`respawn_time`)'
         ],
         listRule: '',
         name: 'mobs',
@@ -1364,10 +1284,7 @@ migrate(
         id: 'pbc_547380029',
         indexes: [
           'CREATE UNIQUE INDEX `idx_votes_report_voter` ON `votes` (`report`, `voter`)',
-          'CREATE INDEX `idx_votes_report` ON `votes` (`report`)',
-          'CREATE INDEX `idx_votes_voter` ON `votes` (`voter`)',
-          'CREATE INDEX `idx_votes_created` ON `votes` (`created` DESC)',
-          'CREATE INDEX `idx_votes_report_vote_type` ON `votes` (`report`, `vote_type`)'
+          'CREATE INDEX `idx_votes_voter` ON `votes` (`voter`)'
         ],
         listRule: '',
         name: 'votes',
@@ -1453,71 +1370,6 @@ migrate(
         type: 'base',
         updateRule: null,
         viewRule: 'user = @request.auth.id'
-      },
-      {
-        createRule: null,
-        deleteRule: null,
-        fields: [
-          {
-            autogeneratePattern: '[a-z0-9]{15}',
-            hidden: false,
-            id: 'text3208210256',
-            max: 15,
-            min: 15,
-            name: 'id',
-            pattern: '^[a-z0-9]+$',
-            presentable: false,
-            primaryKey: true,
-            required: true,
-            system: true,
-            type: 'text'
-          },
-          {
-            cascadeDelete: false,
-            collectionId: 'pbc_1470589867',
-            hidden: false,
-            id: 'relation4271371901',
-            maxSelect: 1,
-            minSelect: 0,
-            name: 'mob',
-            presentable: false,
-            required: true,
-            system: false,
-            type: 'relation'
-          },
-          {
-            hidden: false,
-            id: 'select2363381545',
-            maxSelect: 1,
-            name: 'type',
-            presentable: false,
-            required: true,
-            system: false,
-            type: 'select',
-            values: ['reset']
-          },
-          {
-            hidden: false,
-            id: 'autodate2782324286',
-            name: 'timestamp',
-            onCreate: true,
-            onUpdate: false,
-            presentable: false,
-            system: false,
-            type: 'autodate'
-          }
-        ],
-        id: 'pbc_1788492300',
-        indexes: [
-          'CREATE INDEX `idx_mob_reset_events_timestamp` ON `mob_reset_events` (`timestamp` DESC)',
-          'CREATE INDEX `idx_mob_reset_events_mob_timestamp` ON `mob_reset_events` (`mob`, `timestamp` DESC)'
-        ],
-        listRule: '',
-        name: 'mob_reset_events',
-        system: false,
-        type: 'base',
-        updateRule: null,
-        viewRule: ''
       }
     ];
 

@@ -111,12 +111,7 @@
 				// Process all events at once (batched)
 				let updatedMobs = mobs;
 				for (const eventData of events) {
-					updatedMobs = realtimeMobsStore.handleRealtimeUpdate(
-						updatedMobs,
-						eventData,
-						type,
-						mobIds
-					);
+					updatedMobs = realtimeMobsStore.handleRealtimeUpdate(updatedMobs, eventData);
 				}
 				// Single state update after processing all events
 				mobs = updatedMobs;

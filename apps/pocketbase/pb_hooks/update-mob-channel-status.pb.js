@@ -3,7 +3,7 @@
 /**
  * HP Reports Hook
  *
- * Automatically creates/updates mob_channel_status records when HP reports are created.
+ * Automatically creates/updates mob_channel_status records and broadcasts realtime updates when HP reports are created.
  */
 onRecordAfterCreateSuccess((e) => {
   try {
@@ -34,30 +34,21 @@ onRecordAfterCreateSuccess((e) => {
       e.app.save(statusRecord);
     }
 
-    // Also update mob_channel_status_sse
+    // Broadcast via custom topic
     try {
-      let statusSseRecord;
-      try {
-        statusSseRecord = e.app.findFirstRecordByFilter(
-          'mob_channel_status_sse',
-          'mob = {:mobId} && channel_number = {:channelNumber}',
-          { mobId: mobId, channelNumber: channelNumber }
-        );
-        statusSseRecord.set('last_hp', hpPercentage);
-        statusSseRecord.set('last_update', new Date().toISOString().replace('T', ' '));
-        e.app.save(statusSseRecord);
-      } catch {
-        // If record doesn't exist, create it
-        statusSseRecord = new Record(e.app.findCollectionByNameOrId('mob_channel_status_sse'), {
-          mob: mobId,
-          channel_number: channelNumber,
-          last_hp: hpPercentage,
-          last_update: new Date().toISOString().replace('T', ' ')
-        });
-        e.app.save(statusSseRecord);
+      const message = new SubscriptionMessage({
+        name: "mob_hp_updates",
+        data: JSON.stringify([mobId, channelNumber, hpPercentage])
+      });
+
+      const clients = e.app.subscriptionsBroker().clients();
+      for (let clientId in clients) {
+        if (clients[clientId].hasSubscription("mob_hp_updates")) {
+          clients[clientId].send(message);
+        }
       }
     } catch (error) {
-      console.error(`[CHANNEL_STATUS] sse error:`, error);
+      console.error(`[CHANNEL_STATUS] broadcast error:`, error);
     }
   } catch (error) {
     console.error(`[CHANNEL_STATUS] error:`, error);

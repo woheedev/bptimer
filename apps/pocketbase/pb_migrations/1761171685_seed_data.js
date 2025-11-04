@@ -168,52 +168,15 @@ migrate(
       }
     }
 
-    const mobChannelStatusSseCollection = app.findCollectionByNameOrId('mob_channel_status_sse');
-    let mobChannelStatusSseCount = 0;
-
-    for (const mobRecord of mobRecords) {
-      const mobMapId = mobRecord.get('map');
-
-      // Find the map record to get total_channels
-      const mapRecord = mapRecords.find((m) => m.id === mobMapId);
-      if (!mapRecord) continue;
-
-      const totalChannels = mapRecord.getInt('total_channels');
-
-      // Create mob_channel_status_sse for each channel
-      for (let channelNum = 1; channelNum <= totalChannels; channelNum++) {
-        // Check if entry already exists
-        const existingRecords = app.findRecordsByFilter(
-          mobChannelStatusSseCollection,
-          'mob = {:mobId} && channel_number = {:channelNum}',
-          '',
-          1,
-          0,
-          { mobId: mobRecord.id, channelNum: channelNum }
-        );
-
-        if (existingRecords.length === 0) {
-          const statusRecord = new Record(mobChannelStatusSseCollection);
-          statusRecord.set('mob', mobRecord.id);
-          statusRecord.set('channel_number', channelNum);
-          statusRecord.set('last_hp', 100);
-          app.save(statusRecord);
-          statusRecord.set('last_update', statusRecord.getDateTime('created'));
-          app.save(statusRecord);
-          mobChannelStatusSseCount++;
-        }
-      }
-    }
-
     console.log(
-      `Seeding complete: ${mapsCreated} new maps, ${mobsCreated} new mobs, ${mobChannelStatusCount} mob_channel_status entries created, and ${mobChannelStatusSseCount} mob_channel_status_sse entries created.`
+      `Seeding complete: ${mapsCreated} new maps, ${mobsCreated} new mobs, ${mobChannelStatusCount} mob_channel_status entries created.`
     );
   },
   (app) => {
     // Optional cleanup on down migration
     // Remove all seeded records
     try {
-      const collections = ['maps', 'mobs', 'mob_channel_status', 'mob_channel_status_sse'];
+      const collections = ['maps', 'mobs', 'mob_channel_status'];
       for (const collectionName of collections) {
         const collection = app.findCollectionByNameOrId(collectionName);
         const records = app.findRecordsByFilter(collection, "created >= '2025-01-01 00:00:00'");

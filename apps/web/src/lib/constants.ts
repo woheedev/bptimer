@@ -107,7 +107,7 @@ export const LEADERBOARD_LIMIT = 50;
 export const API_USERS: Record<string, string> = {
 	fovkhat7zlite07: 'discord.gg/bpsrfarmers',
 	qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs', // winjwinj
-	ku99bl6jmjbijj4: 'tinyurl.com/bpsr-meter' // geonode
+	ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr' // geonode
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 
@@ -262,7 +262,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				badgeVariant: 'default',
 				driver: 'both',
 				tags: 'EN|React|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/Fremy-Speeddraw/BPSR-Meter/'
+				url: 'https://github.com/Denoder/BPSR-Meter'
 			},
 			{
 				title: 'BPSR-Meter',

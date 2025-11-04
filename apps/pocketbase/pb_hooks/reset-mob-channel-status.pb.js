@@ -72,25 +72,24 @@ cronAdd('mobRespawn', '* * * * *', () => {
       }
     }
 
-    // Create reset events for all reset mobs
+    // Broadcast reset events via custom topic
     if (resetMobs.length > 0) {
       try {
-        const timestamp = new Date().toISOString().replace('T', ' ');
-        const collection = $app.findCollectionByNameOrId('mob_reset_events');
-
-        $app.runInTransaction((txApp) => {
-          for (const mob of resetMobs) {
-            const eventRecord = new Record(collection);
-            eventRecord.set('mob', mob.id);
-            eventRecord.set('type', 'reset');
-            eventRecord.set('timestamp', timestamp);
-            txApp.save(eventRecord);
-          }
+        const message = new SubscriptionMessage({
+          name: "mob_resets",
+          data: JSON.stringify(resetMobs.map(m => m.id))
         });
 
-        console.log(`[MOB_RESPAWN] events created=${resetMobs.length}`);
+        const clients = $app.subscriptionsBroker().clients();
+        for (let clientId in clients) {
+          if (clients[clientId].hasSubscription("mob_resets")) {
+            clients[clientId].send(message);
+          }
+        }
+
+        console.log(`[MOB_RESPAWN] broadcast sent=${resetMobs.length}`);
       } catch (error) {
-        console.error(`[MOB_RESPAWN] events error:`, error);
+        console.error(`[MOB_RESPAWN] broadcast error:`, error);
       }
     }
   } catch (error) {
