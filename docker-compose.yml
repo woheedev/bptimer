@@ -2,8 +2,7 @@ services:
   pocketbase:
     build:
       context: ./apps/pocketbase
-      args:
-        - VERSION=0.30.4
+      dockerfile: Dockerfile
     container_name: pocketbase
     restart: unless-stopped
     ports:
@@ -12,7 +11,6 @@ services:
       - ./apps/pocketbase/pb_data:/pb_data
       - ./apps/pocketbase/pb_migrations:/pb_migrations
       - ./apps/pocketbase/pb_hooks:/pb_hooks
-      # - ./apps/pocketbase/pb_public:/pb_public
     env_file:
       - ./apps/web/.env
     healthcheck:

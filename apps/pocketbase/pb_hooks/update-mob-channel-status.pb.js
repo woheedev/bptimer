@@ -37,13 +37,13 @@ onRecordAfterCreateSuccess((e) => {
     // Broadcast via custom topic
     try {
       const message = new SubscriptionMessage({
-        name: "mob_hp_updates",
+        name: 'mob_hp_updates',
         data: JSON.stringify([mobId, channelNumber, hpPercentage])
       });
 
       const clients = e.app.subscriptionsBroker().clients();
       for (let clientId in clients) {
-        if (clients[clientId].hasSubscription("mob_hp_updates")) {
+        if (clients[clientId].hasSubscription('mob_hp_updates')) {
           clients[clientId].send(message);
         }
       }
