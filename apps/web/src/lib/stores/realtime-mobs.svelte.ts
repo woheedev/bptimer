@@ -54,11 +54,11 @@ function createRealtimeMobsStore() {
 			pbRealtime.realtime.subscribe('mob_hp_updates', (e) => {
 				const data = typeof e === 'string' ? JSON.parse(e) : e;
 				const [mobId, channel, hp] = data;
-				
+
 				debouncedCallback({
-					record: { 
-						mob: mobId, 
-						channel_number: channel, 
+					record: {
+						mob: mobId,
+						channel_number: channel,
 						last_hp: hp,
 						last_update: new Date().toISOString()
 					},
@@ -70,7 +70,7 @@ function createRealtimeMobsStore() {
 			// Format: array of mobIds
 			pbRealtime.realtime.subscribe('mob_resets', (e) => {
 				const mobIds = typeof e === 'string' ? JSON.parse(e) : e;
-				
+
 				for (const mobId of mobIds) {
 					debouncedCallback({
 						record: { mob: mobId },

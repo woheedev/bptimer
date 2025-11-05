@@ -15,7 +15,7 @@
     "deploy": "turbo run deploy",
     "dev": "turbo run dev",
     "cleanup": "node ./scripts/cleanup.mjs",
-    "format": "prettier --write .",
+    "format": "prettier --write . && cd apps/pocketbase && go fmt ./...",
     "lint": "turbo run lint",
     "uiadd": "cd apps/web && bunx shadcn-svelte@latest add"
   },

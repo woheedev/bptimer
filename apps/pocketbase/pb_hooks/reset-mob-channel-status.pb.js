@@ -76,13 +76,13 @@ cronAdd('mobRespawn', '* * * * *', () => {
     if (resetMobs.length > 0) {
       try {
         const message = new SubscriptionMessage({
-          name: "mob_resets",
-          data: JSON.stringify(resetMobs.map(m => m.id))
+          name: 'mob_resets',
+          data: JSON.stringify(resetMobs.map((m) => m.id))
         });
 
         const clients = $app.subscriptionsBroker().clients();
         for (let clientId in clients) {
-          if (clients[clientId].hasSubscription("mob_resets")) {
+          if (clients[clientId].hasSubscription('mob_resets')) {
             clients[clientId].send(message);
           }
         }

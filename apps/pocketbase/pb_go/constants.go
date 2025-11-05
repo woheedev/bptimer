@@ -1,7 +1,7 @@
-package pbgo
+package pb_go
 
 // Boss game id to boss name mapping
-var bossMapping = map[int]string{
+var BOSS_MAPPING = map[int]string{
 	80006:   "Golden Juggernaut",
 	10032:   "Golden Juggernaut",
 	108:     "Frost Ogre",
