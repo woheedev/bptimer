@@ -35,7 +35,7 @@
 					{/if}
 					<span class="flex-1">{item.title}</span>
 					{#if item.badge}
-						<Badge variant="default" class="ml-2 text-xs">
+						<Badge variant={item.badgeVariant || 'default'} class="ml-2 text-xs">
 							{item.badge}
 						</Badge>
 					{/if}

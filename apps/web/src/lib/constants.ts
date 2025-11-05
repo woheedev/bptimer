@@ -2,6 +2,8 @@
  * Constants for common values used throughout the app
  */
 
+import type { PageItem, ToolsSections } from '$lib/types/ui';
+
 // Time constants
 export const SECOND = 1000;
 export const MINUTE = 60 * SECOND;
@@ -96,7 +98,7 @@ export const SPECIAL_MAGICAL_CREATURES_REQUIRING_LOCATION = Object.keys(
 ) as (keyof typeof SPECIAL_MAGICAL_CREATURES)[];
 
 // Reputation and voting constants
-export const VOTE_TIME_WINDOW = 1 * MINUTE;
+export const VOTE_TIME_WINDOW = 2 * MINUTE;
 export const REPUTATION_GOOD_THRESHOLD = 100;
 export const REPUTATION_HIGH_THRESHOLD = 50;
 export const REPUTATION_MEDIUM_THRESHOLD = 20;
@@ -107,7 +109,8 @@ export const LEADERBOARD_LIMIT = 50;
 export const API_USERS: Record<string, string> = {
 	fovkhat7zlite07: 'discord.gg/bpsrfarmers',
 	qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs', // winjwinj
-	ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr' // geonode
+	ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr', // geonode
+	gw8hsqxlvvbok37: 'BPTL - blueprotocol.fr' // kaws & solaray
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 
@@ -128,16 +131,17 @@ import {
 	Medal,
 	Sparkles,
 	Swords,
-	Tractor
+	Tractor,
+	Trophy
 } from '@lucide/svelte/icons';
 
-export const PAGES = [
+export const PAGES: PageItem[] = [
 	{
 		title: 'Download DPS Meter',
 		url: 'https://github.com/winjwinj/bpsr-logs/releases/latest',
 		icon: Download,
 		external: true,
-		variant: 'primary' as const
+		variant: 'primary'
 	},
 	{
 		title: 'Bosses',
@@ -155,25 +159,23 @@ export const PAGES = [
 		icon: Heart
 	},
 	{
-		title: 'Rep Leaderboard',
-		url: '/leaderboard',
-		icon: Medal
-	},
-	{
 		title: 'Modules Optimizer',
 		url: '/modules-optimizer',
-		icon: Calculator,
-		badge: 'New'
+		icon: Calculator
 	},
 	{
 		title: 'Tools & Resources',
 		url: '/tools',
-		icon: Hammer,
-		badge: 'New'
+		icon: Hammer
+	},
+	{
+		title: 'Rep Leaderboard',
+		url: '/leaderboard',
+		icon: Trophy
 	}
 ];
 
-export const PARTNER_PAGES = [
+export const PARTNER_PAGES: PageItem[] = [
 	{
 		title: 'Interactive Maps',
 		url: 'https://starresonance.th.gl',
@@ -184,6 +186,12 @@ export const PARTNER_PAGES = [
 		title: 'BP:SR Farmers',
 		url: 'https://discord.gg/bpsrfarmers',
 		icon: Tractor,
+		external: true
+	},
+	{
+		title: 'BP Raid Leaderboard',
+		url: 'https://blueprotocol.fr',
+		icon: Medal,
 		external: true
 	}
 ];
@@ -236,7 +244,6 @@ export const MODULE_TIER_THRESHOLDS = [
 export const MODULE_PRIORITY_MULTIPLIERS = [10, 7, 5, 3, 2];
 
 // Tools & Resources constants
-import type { ToolsSections } from '$lib/types/ui';
 export const TOOLS_SECTIONS: ToolsSections = {
 	officialTools: {
 		title: 'DPS Meters',
@@ -364,6 +371,15 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				url: 'https://starresonance.th.gl/'
 			},
 			{
+				title: 'Blue Protocol Leaderboard',
+				description:
+					'Automatic leaderboard based on DPS application. All displayed times are real session times, not game times, to ensure fairplay.',
+				badge: 'Partner',
+				author: 'Kaws & Solaray',
+				tags: 'FR|Closed Source',
+				url: 'https://blueprotocol.fr/'
+			},
+			{
 				title: 'Maxroll',
 				description:
 					"Maxroll's Build Guides, Community Builds, Tier Lists, Resources, Items, Tools, Database and much more for Blue Protocol: Star Resonance",
@@ -385,13 +401,6 @@ export const TOOLS_SECTIONS: ToolsSections = {
 					'Blue Protocol player database and statistics tracker with live player rankings and class distributions',
 				author: 'Lunixx',
 				url: 'https://blueprotocol.lunixx.de/'
-			},
-			{
-				title: 'Blue Protocol Leaderboard',
-				description:
-					'Automatic leaderboard based on DPS application. All displayed times are real session times, not game times, to ensure fairplay.',
-				author: 'Kaws & Solaray',
-				url: 'https://blueprotocol.fr/'
 			},
 			{
 				title: 'Blue Protocol Global Timers',

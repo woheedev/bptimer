@@ -54,7 +54,7 @@
 			<Badge variant="destructive" class="self-start text-xs">WinDivert / Npcap</Badge>
 		{/if}
 		{#if tags}
-			<div class="flex flex-wrap gap-1">
+			<div class="flex flex-wrap gap-1 self-start">
 				{#each tags.split('|') as tag (tag.trim())}
 					<Badge variant="secondary" class="text-xs">{tag.trim()}</Badge>
 				{/each}

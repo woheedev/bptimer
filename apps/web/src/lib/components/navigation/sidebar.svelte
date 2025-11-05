@@ -6,7 +6,7 @@
 	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
-	import { Construction, HeartHandshake } from '@lucide/svelte/icons';
+	import { HeartHandshake } from '@lucide/svelte/icons';
 	import { mode } from 'mode-watcher';
 	import type { ComponentProps } from 'svelte';
 
@@ -44,6 +44,7 @@
 		</Sidebar.Group>
 		<Sidebar.Group class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
 			<div class="flex flex-col gap-2 p-0">
+				<!-- Downtime Alert
 				<Alert.Root class="text-xs">
 					<Construction />
 					<Alert.Title class="text-sm font-bold">System Updates</Alert.Title>
@@ -51,6 +52,7 @@
 						Sorry for any temporary outages or delays while I work on implementing new features.
 					</Alert.Description>
 				</Alert.Root>
+				-->
 				<Alert.Root class="text-xs">
 					<HeartHandshake />
 					<Alert.Title class="text-sm font-bold">Looking to Collaborate?</Alert.Title>
@@ -91,7 +93,7 @@
 					rel="noopener noreferrer"
 					class="hover:underline"
 				>
-					Buy me a coffee ☕ | v0.10.0
+					Buy me a coffee ☕ | v0.10.1
 				</a>
 			</p>
 		{/if}

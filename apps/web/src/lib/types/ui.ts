@@ -9,6 +9,7 @@ export type PageItem = {
 	external?: boolean;
 	variant?: 'default' | 'outline' | 'primary';
 	badge?: string;
+	badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline';
 };
 
 // Filter and Sort Types
