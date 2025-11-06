@@ -1,8 +1,11 @@
 import {
+	DAILY_RESET_HOUR,
 	DAY,
+	GAME_TIMEZONE_OFFSET,
 	HOUR,
 	HP_HIGH_THRESHOLD,
 	JUST_NOW_THRESHOLD,
+	LAUNCH_REFERENCE_DATE,
 	MAGICAL_CREATURE_RESET_HOURS,
 	MAX_HP_VALUE,
 	MINUTE,
@@ -253,4 +256,17 @@ export function sortChannelsForMobCard<
 		// For dead channels: sort by most recent first
 		return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
 	});
+}
+
+/**
+ * Calculates the current game day based on launch date and daily reset time
+ * Daily reset is at 5AM UTC-2
+ *
+ * @returns The current game day number
+ */
+export function calculateGameDay(): number {
+	const gameLaunch = new Date(LAUNCH_REFERENCE_DATE);
+	gameLaunch.setUTCHours(DAILY_RESET_HOUR - GAME_TIMEZONE_OFFSET, 0, 0, 0);
+	const gameNow = new Date(Date.now() + GAME_TIMEZONE_OFFSET * HOUR);
+	return Math.floor((gameNow.getTime() - gameLaunch.getTime()) / DAY) + 1;
 }

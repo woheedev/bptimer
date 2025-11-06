@@ -1,0 +1,21 @@
+name: Question
+description: Ask a question about the project
+title: '[Question]: '
+labels: ['question']
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: Please provide a clear and detailed question.
+      placeholder: What would you like to know?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Provide any relevant context or background information that might help answer your question.
+      placeholder: Any additional details that might be helpful
+    validations:
+      required: false
