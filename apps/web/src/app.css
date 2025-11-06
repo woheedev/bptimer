@@ -105,10 +105,10 @@
 
 	--channel-pill-bg: var(--secondary);
 	--channel-pill-text: white;
-	--hp-dead: #ef4444;
-	--hp-critical: #f97316;
-	--hp-low: #eab308;
-	--hp-healthy: #22c55e;
+	--hp-dead: #b91c1c;
+	--hp-critical: #c2410c;
+	--hp-low: #a16207;
+	--hp-healthy: #15803d;
 	--hp-unknown: var(--secondary);
 }
 
