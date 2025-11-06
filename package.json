@@ -1,6 +1,6 @@
 {
   "name": "bpsr-timer",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "author": "Wohee",
   "description": "A timer panel to keep track of mobs for Blue Protocol SR",
   "license": "AGPL-3.0-or-later",
