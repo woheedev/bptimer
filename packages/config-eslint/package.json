@@ -6,7 +6,7 @@
   "license": "AGPL-3.0-or-later",
   "private": true,
   "type": "module",
-  "main": "index.ts",
+  "main": "index.js",
   "dependencies": {
     "@eslint/compat": "^1.4.1",
     "@eslint/js": "^9.38.0",

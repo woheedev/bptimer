@@ -17,9 +17,9 @@ import (
  *
  * Request body:
  * {
- *   monster_id: number - Boss meter ID (From game)
- *   hp_pct: number - HP percentage (0-100)
- *   line: number - Line number (1-1000)
+ *   monster_id: integer - Mob meter ID (From game)
+ *   hp_pct: integer - HP percentage (0-100)
+ *   line: integer - Line number
  * }
  *
  * Requires X-API-Key header for authentication
@@ -27,7 +27,9 @@ import (
 func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 	collection, err := app.FindCollectionByNameOrId("hp_reports")
 	if err != nil {
-		panic(fmt.Sprintf("Failed to find hp_reports collection: %v", err))
+		return func(e *core.RequestEvent) error {
+			return fmt.Errorf("Failed to find hp_reports collection: %w", err)
+		}
 	}
 
 	// Pre-allocate success response
@@ -40,55 +42,60 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			return e.BadRequestError("Invalid request body", err)
 		}
 
+		if e.Auth == nil {
+			return e.UnauthorizedError("Authentication required", nil)
+		}
+
 		if data.MonsterID == 0 {
 			return e.BadRequestError("Missing or invalid monster_id", nil)
 		}
 		if data.HPPct < 0 || data.HPPct > 100 {
 			return e.BadRequestError("HP percentage must be between 0 and 100", nil)
 		}
-		if data.Channel < 1 || data.Channel > 1000 {
-			return e.BadRequestError("Line number must be between 1 and 1000", nil)
-		}
 
-		// Map game monster ID to boss name
-		bossName, ok := BOSS_MAPPING[data.MonsterID]
+		// Map game monster ID to mob name
+		mobName, ok := MOB_MAPPING[data.MonsterID]
 		if !ok {
 			return e.BadRequestError(fmt.Sprintf("Unknown monster ID: %d", data.MonsterID), nil)
 		}
 
-		// Find boss record (indexed on name)
-		boss, err := e.App.FindFirstRecordByFilter(
+		// Find mob record (indexed on name)
+		mob, err := e.App.FindFirstRecordByFilter(
 			"mobs",
-			"name = {:bossName}",
+			"name = {:mobName}",
 			map[string]any{
-				"bossName": bossName,
+				"mobName": mobName,
 			},
 		)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return e.NotFoundError(fmt.Sprintf("Boss '%s' not found in database", bossName), nil)
+				return e.NotFoundError(fmt.Sprintf("Mob '%s' not found in database", mobName), nil)
 			}
-			return e.InternalServerError("Database error finding boss", err)
+			return e.InternalServerError("Database error finding mob", err)
 		}
 
 		// Expand map relation
-		if errs := e.App.ExpandRecord(boss, []string{"map"}, nil); len(errs) > 0 {
+		if errs := e.App.ExpandRecord(mob, []string{"map"}, nil); len(errs) > 0 {
 			return e.InternalServerError("Failed to expand map relation", errs["map"])
 		}
 
-		mapRecord := boss.ExpandedOne("map")
+		mapRecord := mob.ExpandedOne("map")
 		if mapRecord == nil {
-			return e.NotFoundError("Map not found for this boss", nil)
+			return e.NotFoundError("Map not found for this mob", nil)
 		}
 
 		// PocketBase returns all number fields as float64, even integers
-		totalChannels := int(mapRecord.Get("total_channels").(float64))
-		if data.Channel > totalChannels {
-			return e.BadRequestError(fmt.Sprintf("Line must be between 1 and %d for this boss", totalChannels), nil)
+		totalChannelsFloat, ok := mapRecord.Get("total_channels").(float64)
+		if !ok {
+			return e.InternalServerError("Invalid total_channels value", nil)
+		}
+		totalChannels := int(totalChannelsFloat)
+		if data.Channel < 1 || data.Channel > totalChannels {
+			return e.BadRequestError(fmt.Sprintf("Line must be between 1 and %d for this mob", totalChannels), nil)
 		}
 
 		hpReport := core.NewRecord(collection)
-		hpReport.Set("mob", boss.Id)
+		hpReport.Set("mob", mob.Id)
 		hpReport.Set("channel_number", data.Channel)
 		hpReport.Set("hp_percentage", data.HPPct)
 		hpReport.Set("reporter", e.Auth.Id)

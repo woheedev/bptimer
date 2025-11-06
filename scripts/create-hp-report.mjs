@@ -1,4 +1,4 @@
-const MONSTER_ID = 80004; // Inferno Ogre
+const MONSTER_ID = 10018; // Inferno Ogre
 const HP_PCT = 20; // HP percentage (0-100)
 const LINE = 10; // Line number (1-XXX)
 

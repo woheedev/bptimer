@@ -350,6 +350,12 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				url: 'https://discord.gg/bpsrfarmers'
 			},
 			{
+				title: 'BPSR Rarefarmers',
+				description:
+					'Specialized community dedicated to hunting magical creatures (Boarlets and Nappos).',
+				url: 'https://discord.gg/xYeZx28Jc3'
+			},
+			{
 				title: 'BPSR Devs',
 				description: "Developer community for BPSR. Home to winj's DPS Meter and BP Timer.",
 				badge: 'BP Timer',
@@ -378,6 +384,13 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				author: 'Kaws & Solaray',
 				tags: 'FR|Closed Source',
 				url: 'https://blueprotocol.fr/'
+			},
+			{
+				title: 'Blue Protocol: Star Resonance Checklist',
+				description:
+					'A simple, responsive web-based checklist for tracking daily and weekly tasks for Blue Protocol: Star Resonance. Built with HTML, CSS, and JavaScript. No external dependencies beyond confetti.js for celebrations.',
+				author: 'Teawase',
+				url: 'https://teawase.github.io/blue-protocol-checklist/'
 			},
 			{
 				title: 'Maxroll',
