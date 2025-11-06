@@ -1,13 +1,21 @@
-import { CACHE_EXPIRY_MS, HP_REPORT_INTERVAL, MOB_MAPPING } from './constants';
-import type { CacheEntry, ClientConfig, LogLevel, ReportPayload, ReportResponse } from './types';
+import { CACHE_EXPIRY_MS, HP_REPORT_INTERVAL, MOB_MAPPING } from './constants.js';
+import type {
+  CacheEntry,
+  ClientConfig,
+  Logger,
+  LogLevel,
+  ReportPayload,
+  ReportResponse
+} from './types.js';
 
-export * from './constants';
-export * from './types';
+export * from './constants.js';
+export * from './types.js';
 
 export class BPTimerClient {
   private api_url: string;
   private api_key: string;
   private enabled: boolean;
+  private logger: Logger;
   private log_level: LogLevel;
   private cache = new Map<string, CacheEntry>();
 
@@ -16,12 +24,16 @@ export class BPTimerClient {
     this.api_key = config.api_key;
     this.enabled = config.enabled ?? true;
     this.log_level = config.log_level ?? 'info';
+    this.logger = config.logger || {
+      info: (message: string) => console.log('[INFO]', message),
+      debug: (message: string) => console.log('[DEBUG]', message)
+    };
   }
 
   private log(level: 'info' | 'debug', message: string): void {
     if (this.log_level === 'silent') return;
     if (level === 'debug' && this.log_level !== 'debug') return;
-    console.log(`[BPTimer] ${message}`);
+    this.logger[level](`[BPTimer] ${message}`);
   }
 
   async reportHP(

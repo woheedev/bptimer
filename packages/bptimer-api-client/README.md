@@ -1,11 +1,17 @@
-# @repo/bptimer-api-client
+# @woheedev/bptimer-api-client
 
 Simple API client for submitting boss HP data to bptimer.com.
+
+## Installation
+
+```bash
+npm install @woheedev/bptimer-api-client
+```
 
 ## Usage
 
 ```typescript
-import { BPTimerClient } from '@repo/bptimer-api-client';
+import { BPTimerClient } from '@woheedev/bptimer-api-client';
 
 // Initialize once at startup (don't call this in a loop!)
 const bptimer = new BPTimerClient({
@@ -24,7 +30,25 @@ await bptimer.reportHP(monster_id, hp_pct, line, {
 });
 
 // Optional helpers
+bptimer.testConnection(); // Check connection to api_url with api_key
 bptimer.setEnabled(false); // Disable reporting
 bptimer.resetMonster(monster_id, line); // Force reset cache
 bptimer.clearAll(); // Clear all cache
+```
+
+## Custom Logging
+
+By default, the client uses `console` for logging. You can provide your own logger object with `info` and `debug` methods, and control what gets logged via `log_level`.
+
+```typescript
+// Using your existing logger
+this.bpTimerClient = new BPTimerClient({
+  api_url: DB_URL,
+  api_key: API_KEY,
+  logger: {
+    info: (message: string) => this.logger.info(message),
+    debug: (message: string) => this.logger.debug(message)
+  },
+  log_level: 'info'
+});
 ```

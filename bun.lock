@@ -54,12 +54,10 @@
       },
     },
     "packages/bptimer-api-client": {
-      "name": "@repo/bptimer-api-client",
-      "version": "0.0.1",
+      "name": "@woheedev/bptimer-api-client",
+      "version": "0.0.5",
       "devDependencies": {
-        "@repo/eslint-config": "workspace:*",
         "@types/node": "^20.19.24",
-        "eslint": "^9.39.1",
         "typescript": "^5.9.3",
       },
     },
@@ -251,8 +249,6 @@
 
     "@poppinss/exception": ["@poppinss/exception@1.2.2", "", {}, "sha512-m7bpKCD4QMlFCjA/nKTs23fuvoVFoA83brRKmObCUNmi/9tVu8Ve3w4YQAnJu4q3Tjf5fr685HYIC/IA2zHRSg=="],
 
-    "@repo/bptimer-api-client": ["@repo/bptimer-api-client@workspace:packages/bptimer-api-client"],
-
     "@repo/eslint-config": ["@repo/eslint-config@workspace:packages/config-eslint"],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.52.5", "", { "os": "android", "cpu": "arm" }, "sha512-8c1vW4ocv3UOMp9K+gToY5zL2XiiVw3k7f1ksf4yO1FlDFQ1C2u72iACFnSOceJFsWskc2WZNqeRhFRPzv+wtQ=="],
@@ -394,6 +390,8 @@
     "@vitest/spy": ["@vitest/spy@4.0.7", "", {}, "sha512-FW4X8hzIEn4z+HublB4hBF/FhCVaXfIHm8sUfvlznrcy1MQG7VooBgZPMtVCGZtHi0yl3KESaXTqsKh16d8cFg=="],
 
     "@vitest/utils": ["@vitest/utils@4.0.7", "", { "dependencies": { "@vitest/pretty-format": "4.0.7", "tinyrainbow": "^3.0.3" } }, "sha512-HNrg9CM/Z4ZWB6RuExhuC6FPmLipiShKVMnT9JlQvfhwR47JatWLChA6mtZqVHqypE6p/z6ofcjbyWpM7YLxPQ=="],
+
+    "@woheedev/bptimer-api-client": ["@woheedev/bptimer-api-client@workspace:packages/bptimer-api-client"],
 
     "acorn": ["acorn@8.15.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg=="],
 

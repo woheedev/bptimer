@@ -15,6 +15,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check changed files
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62
+        id: changed-files
+        with:
+          files: |
+            apps/web/**
+            .github/workflows/cd.yml
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -50,6 +60,7 @@ jobs:
         run: bun install -g wrangler@latest
 
       - name: Deploy to Cloudflare
+        if: steps.changed-files.outputs.any_changed == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

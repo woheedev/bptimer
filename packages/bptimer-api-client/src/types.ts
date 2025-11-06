@@ -1,9 +1,15 @@
 export type LogLevel = 'silent' | 'info' | 'debug';
 
+export interface Logger {
+  info: (message: string) => void;
+  debug: (message: string) => void;
+}
+
 export interface ClientConfig {
   api_url: string;
   api_key: string;
   enabled?: boolean;
+  logger?: Logger;
   log_level?: LogLevel;
 }
 
