@@ -1,7 +1,6 @@
 import {
 	DAILY_RESET_HOUR,
 	DAY,
-	GAME_TIMEZONE_OFFSET,
 	HOUR,
 	HP_HIGH_THRESHOLD,
 	JUST_NOW_THRESHOLD,
@@ -139,7 +138,7 @@ export function getNextRespawnTime(mob: {
 
 		return nextRespawn;
 	} else if (mob.type === 'magical_creature') {
-		// Magical creatures have specific reset hours
+		// Magical creatures have specific reset hours (in UTC)
 		const hours =
 			MAGICAL_CREATURE_RESET_HOURS[mob.name as keyof typeof MAGICAL_CREATURE_RESET_HOURS];
 		if (!hours) return null;
@@ -178,24 +177,30 @@ function getRespawnCycleLength(type: 'boss' | 'magical_creature', mobName?: stri
 		return HOUR;
 	}
 
-	// For magical creatures, calculate the actual cycle length
+	// For magical creatures, calculate the actual cycle length between last and next spawn
 	const hours = MAGICAL_CREATURE_RESET_HOURS[mobName as keyof typeof MAGICAL_CREATURE_RESET_HOURS];
 	if (!hours) return 0;
 
 	const currentHour = new Date().getUTCHours();
-	const nextHourIndex = hours.findIndex((hour) => hour > currentHour);
-	const nextHour = nextHourIndex >= 0 ? hours[nextHourIndex] : hours[0];
+	const sortedHours = [...hours].sort((a, b) => a - b);
 
+	// Find the next spawn hour
+	const nextHourIndex = sortedHours.findIndex((hour) => hour > currentHour);
+	const nextHour = nextHourIndex >= 0 ? sortedHours[nextHourIndex] : sortedHours[0];
+
+	// Find the previous spawn hour
 	let prevHour: number;
 	let isNextDay = false;
 
 	if (nextHourIndex > 0) {
-		prevHour = hours[nextHourIndex - 1];
+		prevHour = sortedHours[nextHourIndex - 1];
 	} else {
-		prevHour = hours[hours.length - 1];
+		// Next spawn is tomorrow, so previous spawn was the last one in the array
+		prevHour = sortedHours[sortedHours.length - 1];
 		isNextDay = true;
 	}
 
+	// Calculate the actual cycle length between previous and next spawn
 	const cycleHours = isNextDay ? 24 - prevHour + nextHour : nextHour - prevHour;
 	return cycleHours * HOUR;
 }
@@ -260,13 +265,13 @@ export function sortChannelsForMobCard<
 
 /**
  * Calculates the current game day based on launch date and daily reset time
- * Daily reset is at 5AM UTC-2
+ * Daily reset is at 7AM UTC (5AM UTC-2)
  *
  * @returns The current game day number
  */
 export function calculateGameDay(): number {
 	const gameLaunch = new Date(LAUNCH_REFERENCE_DATE);
-	gameLaunch.setUTCHours(DAILY_RESET_HOUR - GAME_TIMEZONE_OFFSET, 0, 0, 0);
-	const gameNow = new Date(Date.now() + GAME_TIMEZONE_OFFSET * HOUR);
+	gameLaunch.setUTCHours(DAILY_RESET_HOUR, 0, 0, 0);
+	const gameNow = new Date();
 	return Math.floor((gameNow.getTime() - gameLaunch.getTime()) / DAY) + 1;
 }

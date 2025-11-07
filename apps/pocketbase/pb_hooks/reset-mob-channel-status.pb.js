@@ -6,20 +6,19 @@
  * This file handles automated mob respawn logic based on respawn_time values.
  * - If respawn_time is 0: Reset at the top of every hour (for bosses)
  * - If respawn_time is 30: Reset at the 30-minute mark
- * - For magical creatures: Reset at specific UTC-2 hours (Lovely: 12,16,20; Breezy: 14,18,22)
+ * - For magical creatures: Reset at specific UTC hours
  */
 
 // Check for mob respawns every minute
 cronAdd('mobRespawn', '* * * * *', () => {
   const magicalCreatureResetHours = {
-    'Lovely Boarlet': [12, 16, 20],
-    'Breezy Boarlet': [14, 18, 22]
+    'Lovely Boarlet': [12, 16, 20], // 10AM, 2PM, 6PM UTC-2
+    'Breezy Boarlet': [14, 18, 22] // 12PM, 4PM, 8PM UTC-2
   };
   try {
     const now = new Date();
     const currentMinute = now.getUTCMinutes();
-    const utcHour = now.getUTCHours();
-    const currentHour = (utcHour - 2 + 24) % 24;
+    const currentHour = now.getUTCHours();
 
     const respawningMobs = $app.findRecordsByFilter(
       'mobs',

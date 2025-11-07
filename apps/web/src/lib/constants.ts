@@ -13,8 +13,8 @@ export const STALE_DATA_TIMEOUT = 2 * MINUTE; // Default timeout
 export const STALE_DATA_TIMEOUT_FULL_HP = 5 * MINUTE; // For 100% HP
 export const STALE_DATA_TIMEOUT_HIGH_HP = 3 * MINUTE; // For 80-99% HP
 export const DPS_METER_TOAST_DURATION = 10 * SECOND;
-export const GAME_TIMEZONE_OFFSET = -2; // UTC-2
-export const DAILY_RESET_HOUR = 5; // 5AM UTC-2
+export const GAME_TIMEZONE_OFFSET = -2; // UTC-2 (deprecated)
+export const DAILY_RESET_HOUR = 7; // 5AM UTC-2 = 7AM UTC
 export const DEBOUNCE_DELAY = 300; // ms
 export const SMALL_DELAY = 100; // ms
 export const JUST_NOW_THRESHOLD = 15; // seconds
@@ -51,10 +51,10 @@ export const DEFAULT_FILTER_SORT_SETTINGS: FilterSortSettings = {
 	hideStaleChannels: false
 };
 
-// Mob respawn constants
+// Mob respawn constants (all times in UTC)
 export const MAGICAL_CREATURE_RESET_HOURS = {
-	'Lovely Boarlet': [12, 16, 20],
-	'Breezy Boarlet': [14, 18, 22]
+	'Lovely Boarlet': [12, 16, 20], // 10AM, 2PM, 6PM UTC-2
+	'Breezy Boarlet': [14, 18, 22] // 12PM, 4PM, 8PM UTC-2
 };
 
 // Special magical creatures with location mappings

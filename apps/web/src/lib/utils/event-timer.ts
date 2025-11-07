@@ -1,4 +1,4 @@
-import { DAY, GAME_TIMEZONE_OFFSET, HOUR, MINUTE, SECOND } from '$lib/constants';
+import { DAY, HOUR, MINUTE, SECOND } from '$lib/constants';
 import type { EventConfig, EventStatus } from '$lib/types/events';
 
 export const EVENT_CONFIGS: EventConfig[] = [
@@ -8,7 +8,7 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		icon: '/images/events/guild-hunt.webp',
 		schedule: {
 			days: [5, 6, 0],
-			hour: 14,
+			hour: 16, // 2PM UTC-2
 			minute: 0,
 			durationHours: 14
 		}
@@ -19,7 +19,7 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		icon: '/images/events/world-boss.webp',
 		schedule: {
 			days: [0, 1, 2, 3, 4, 5, 6],
-			hour: 16,
+			hour: 18, // 4PM UTC-2
 			minute: 0,
 			durationHours: 6
 		}
@@ -30,7 +30,7 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		icon: '/images/events/guild-dance.webp',
 		schedule: {
 			days: [5],
-			hour: 15,
+			hour: 17, // 3PM UTC-2
 			minute: 30,
 			durationHours: 12
 		}
@@ -41,7 +41,7 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		icon: '/images/events/stimen-vault.webp',
 		schedule: {
 			days: [1],
-			hour: 2,
+			hour: 4, // 2AM UTC-2
 			minute: 0,
 			durationHours: 3,
 			intervalWeeks: 2,
@@ -55,7 +55,7 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		icon: '/images/events/daily-reset.webp',
 		schedule: {
 			days: [0, 1, 2, 3, 4, 5, 6],
-			hour: 5,
+			hour: 7, // 5AM UTC-2
 			minute: 0
 		}
 	},
@@ -65,7 +65,7 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		icon: '/images/events/weekly-reset.webp',
 		schedule: {
 			days: [1],
-			hour: 5,
+			hour: 7, // 5AM UTC-2
 			minute: 0
 		}
 	}
@@ -106,12 +106,8 @@ export function formatCountdown(milliseconds: number): string {
 	}
 }
 
-function getGameTime(): Date {
-	return new Date(Date.now() + GAME_TIMEZONE_OFFSET * HOUR);
-}
-
 export function calculateNextEventTime(config: EventConfig): Date {
-	const now = getGameTime();
+	const now = new Date();
 	const currentDay = now.getUTCDay();
 	const currentHour = now.getUTCHours();
 	const currentMinute = now.getUTCMinutes();
@@ -155,7 +151,7 @@ export function calculateNextEventTime(config: EventConfig): Date {
 export function calculateCurrentEventEnd(config: EventConfig): Date | null {
 	if (!config.schedule.durationHours) return null;
 
-	const now = getGameTime();
+	const now = new Date();
 	const currentDay = now.getUTCDay();
 
 	const todayStart = new Date(now);
@@ -195,7 +191,7 @@ export function calculateCurrentEventEnd(config: EventConfig): Date | null {
 export function isEventActive(config: EventConfig): boolean {
 	if (!config.schedule.durationHours) return false;
 
-	const now = getGameTime();
+	const now = new Date();
 	const currentDay = now.getUTCDay();
 
 	const todayStart = new Date(now);
