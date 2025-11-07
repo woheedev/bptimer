@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 
 	"github.com/pocketbase/pocketbase"
@@ -18,6 +20,14 @@ func main() {
 	// ---------------------------------------------------------------
 	// Optional plugin flags:
 	// ---------------------------------------------------------------
+
+	var pprofAddr string
+	app.RootCmd.PersistentFlags().StringVar(
+		&pprofAddr,
+		"pprof",
+		"",
+		"the ip:port address to bind pprof to (optional)",
+	)
 
 	var hooksDir string
 	app.RootCmd.PersistentFlags().StringVar(
@@ -79,6 +89,16 @@ func main() {
 		Automigrate:  automigrate,
 		Dir:          migrationsDir,
 	})
+
+	// Start pprof server if address is specified
+	if pprofAddr != "" {
+		go func() {
+			log.Println("pprof started at:", "http://"+pprofAddr+"/debug/pprof/")
+			if err := http.ListenAndServe(pprofAddr, nil); err != nil {
+				log.Printf("pprof server error: %v", err)
+			}
+		}()
+	}
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		se.Router.POST("/api/create-hp-report", pb_go.CreateHPReportHandler(se.App)).Bind(apis.RequireAuth())
