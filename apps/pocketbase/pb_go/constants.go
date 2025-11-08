@@ -1,5 +1,11 @@
 package pb_go
 
+import "time"
+
+const MOB_CACHE_TTL_MINUTES = 60
+
+var mobCacheTTL = time.Duration(MOB_CACHE_TTL_MINUTES) * time.Minute
+
 // Boss game id to boss name mapping
 var MOB_MAPPING = map[int]string{
 	10007: "Storm Goblin King",

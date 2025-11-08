@@ -21,6 +21,16 @@ onRecordCreate((e) => {
       throw new BadRequestError('Cannot vote on reports from this user');
     }
 
+    const reportCreatedTime = new Date(report.get('created')).getTime();
+    const now = Date.now();
+    const timeSinceReport = now - reportCreatedTime;
+
+    if (timeSinceReport > VOTE_TIME_WINDOW) {
+      throw new BadRequestError(
+        `Voting period has expired. You can only vote within ${VOTE_TIME_WINDOW / 60000} minutes of the report.`
+      );
+    }
+
     // Block voting for rate-limited users
     if (!BYPASS_VOTE_USER_IDS_SET.has(voterId)) {
       const voter = e.app.findRecordById('users', voterId);
@@ -31,16 +41,6 @@ onRecordCreate((e) => {
           `Your voting privileges are suspended due to low reputation (${voterReputation}). Improve your report quality to restore voting rights.`
         );
       }
-    }
-
-    const reportCreatedTime = new Date(report.get('created')).getTime();
-    const now = Date.now();
-    const timeSinceReport = now - reportCreatedTime;
-
-    if (timeSinceReport > VOTE_TIME_WINDOW) {
-      throw new BadRequestError(
-        `Voting period has expired. You can only vote within ${VOTE_TIME_WINDOW / 60000} minutes of the report.`
-      );
     }
   } catch (error) {
     if (error instanceof BadRequestError) {

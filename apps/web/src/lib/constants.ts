@@ -108,7 +108,7 @@ export const LEADERBOARD_LIMIT = 50;
 
 // API users
 export const API_USERS: Record<string, string> = {
-	fovkhat7zlite07: 'discord.gg/bpsrfarmers',
+	d7v77edry2kmhp5: 'discord.gg/bpsrfarmers',
 	qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs', // winjwinj
 	ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr', // geonode
 	gw8hsqxlvvbok37: 'BPTL - blueprotocol.fr' // kaws & solaray

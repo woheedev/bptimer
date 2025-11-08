@@ -37,7 +37,7 @@ onRecordCreate((e) => {
       .one(duplicateResult);
 
     if (duplicateResult.count > 0) {
-      throw new BadRequestError('You have already reported this HP percentage');
+      throw new BadRequestError('You have already reported this HP percentage.');
     }
   } catch (error) {
     if (error instanceof BadRequestError) {
@@ -63,7 +63,7 @@ onRecordCreate((e) => {
       .one(lastHpResult);
 
     if (hpPercentage > lastHpResult.hp_percentage) {
-      throw new BadRequestError('HP percentage can only decrease');
+      throw new BadRequestError('HP percentage can only decrease.');
     }
   } catch (error) {
     if (error instanceof BadRequestError) {

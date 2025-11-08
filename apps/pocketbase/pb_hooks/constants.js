@@ -19,7 +19,7 @@ const RATE_LIMITED_COOLDOWN = 5 * MINUTE;
 
 // API users (bypass users for vote and rate limiting)
 const API_USERS = {
-  fovkhat7zlite07: 'discord.gg/bpsrfarmers',
+  d7v77edry2kmhp5: 'discord.gg/bpsrfarmers',
   qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs',
   ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr',
   gw8hsqxlvvbok37: 'BPTL - blueprotocol.fr'

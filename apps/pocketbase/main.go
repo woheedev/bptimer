@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/pocketbase/pocketbase"
-	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
@@ -101,8 +100,37 @@ func main() {
 	}
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
-		se.Router.POST("/api/create-hp-report", pb_go.CreateHPReportHandler(se.App)).Bind(apis.RequireAuth())
+		if err := pb_go.InitMobCache(se.App); err != nil {
+			log.Printf("Failed to initialize mob cache: %v", err)
+		}
+		se.Router.POST("/api/create-hp-report", pb_go.CreateHPReportHandler(se.App))
 		return se.Next()
+	})
+
+	// Filter specific expected errors from logs to reduce noise
+	app.OnModelCreate(core.LogsTableName).BindFunc(func(e *core.ModelEvent) error {
+		l := e.Model.(*core.Log)
+
+		// Only filter error logs (level 8)
+		if l.Level != 8 {
+			return e.Next()
+		}
+
+		// Error messages that should not be logged
+		filteredErrors := []string{
+			"You have already reported this HP percentage.",
+			"failed to save hp report: You have already reported this HP percentage.",
+		}
+
+		if errorMsg, ok := l.Data["error"].(string); ok {
+			for _, filteredErr := range filteredErrors {
+				if errorMsg == filteredErr {
+					return nil
+				}
+			}
+		}
+
+		return e.Next()
 	})
 
 	if err := app.Start(); err != nil {
