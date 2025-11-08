@@ -958,7 +958,9 @@ migrate(
           'CREATE INDEX `idx_hp_reports_mob_channel_number` ON `hp_reports` (`mob`, `channel_number`)',
           'CREATE INDEX `idx_hp_reports_mob_created` ON `hp_reports` (`mob`, `created` DESC)',
           'CREATE INDEX `idx_hp_reports_reporter_created` ON `hp_reports` (`reporter`, `created` DESC)',
-          'CREATE INDEX `idx_hp_reports_mob_channel_created` ON `hp_reports` (`mob`, `channel_number`, `created` DESC)'
+          'CREATE INDEX `idx_hp_reports_mob_channel_created` ON `hp_reports` (`mob`, `channel_number`, `created` DESC)',
+          'CREATE INDEX `idx_hp_reports_reporter_mob_channel_hp_created` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `hp_percentage`, `created` DESC)',
+          'CREATE INDEX `idx_hp_reports_reporter_mob_channel_created` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `created` DESC)'
         ],
         listRule: '',
         name: 'hp_reports',
@@ -1284,7 +1286,8 @@ migrate(
         id: 'pbc_547380029',
         indexes: [
           'CREATE UNIQUE INDEX `idx_votes_report_voter` ON `votes` (`report`, `voter`)',
-          'CREATE INDEX `idx_votes_voter` ON `votes` (`voter`)'
+          'CREATE INDEX `idx_votes_voter` ON `votes` (`voter`)',
+          'CREATE INDEX `idx_votes_report_vote_type` ON `votes` (`report`, `vote_type`)'
         ],
         listRule: '',
         name: 'votes',

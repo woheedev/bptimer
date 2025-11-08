@@ -142,16 +142,15 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			return e.BadRequestError("HP percentage must be between 0 and 100", nil)
 		}
 
-		// Authenticate via API key
-		apiKey := e.Request.Header.Get("X-Api-Key")
-		if apiKey == "" {
-			return e.UnauthorizedError("API key required", nil)
+		// Authentication is handled by api-key-auth.pb.js middleware
+		if e.Auth == nil {
+			return e.UnauthorizedError("Authentication required", nil)
 		}
 
-		// Attach X-Api-Key and endpoint to logger
+		// Attach endpoint and user to logger
 		logger := app.Logger().With(
 			"endpoint", "/api/create-hp-report",
-			"api_key", apiKey,
+			"user_id", e.Auth.Id,
 		)
 
 		// Map game monster ID to mob name
@@ -160,23 +159,6 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			logger.Error("Unknown monster ID", "monster_id", data.MonsterID)
 			return e.BadRequestError(fmt.Sprintf("Unknown monster ID: %d", data.MonsterID), nil)
 		}
-
-		apiKeyRecord, err := app.FindFirstRecordByFilter(
-			"api_keys",
-			"api_key = {:apiKey}",
-			map[string]any{"apiKey": apiKey},
-		)
-		if err != nil {
-			logger.Error("Invalid API key", "error", err) // May remove log
-			return e.UnauthorizedError("Invalid API key", nil)
-		}
-
-		user, err := app.FindRecordById("users", apiKeyRecord.GetString("user"))
-		if err != nil {
-			return e.UnauthorizedError("Invalid API key", nil)
-		}
-
-		e.Auth = user
 
 		// Get mob data from cache (auto-refreshes if expired)
 		mobID, totalChannels, err := getCachedMob(e.App, mobName)
@@ -198,6 +180,13 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		if err := e.App.Save(hpReport); err != nil {
 			return fmt.Errorf("failed to save hp report: %w", err)
 		}
+
+		logger.Info("HP report saved",
+			"mob", mobName,
+			"channel", data.Channel,
+			"hp_pct", data.HPPct,
+			"ip", e.RealIP(),
+		)
 
 		return e.JSON(http.StatusOK, successResponse)
 	}
