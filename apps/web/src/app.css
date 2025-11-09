@@ -208,11 +208,16 @@
 	position: relative;
 	z-index: 2;
 	color: var(--channel-pill-text);
-	font-weight: 500;
+	font-weight: 600;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	text-align: center;
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.dark .channel-pill .pill-text {
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
 }
 
 /* HP color coding */

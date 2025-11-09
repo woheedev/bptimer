@@ -35,6 +35,7 @@
 					size="sm"
 					onclick={onRemove}
 					class="text-destructive hover:text-destructive"
+					aria-label="Remove {module.id}"
 				>
 					<Trash class="h-4 w-4" />
 				</Button>

@@ -34,8 +34,8 @@
 							class="font-mono text-xs {timer.id === 'daily-reset' || timer.id === 'weekly-reset'
 								? 'text-muted-foreground'
 								: timer.isActive
-									? 'text-green-600'
-									: 'text-red-600'}"
+									? 'text-green-800 dark:text-green-400'
+									: 'text-red-800 dark:text-red-400'}"
 						>
 							{timer.countdown}{#if timer.isActive && timer.id !== 'daily-reset' && timer.id !== 'weekly-reset'}&nbsp;left{/if}
 						</span>

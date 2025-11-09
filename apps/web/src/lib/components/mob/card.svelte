@@ -146,7 +146,7 @@
 						<span>Time Until Respawn</span>
 						<span>{countdownText}</span>
 					</div>
-					<Progress value={progressValue} class="h-2" />
+					<Progress value={progressValue} class="h-2" aria-label="Time until {mob.name} respawn" />
 				</div>
 			{/if}
 		</div>
@@ -178,6 +178,9 @@
 			variant="outline"
 			size="sm"
 			class="p-2"
+			aria-label={isFavorited
+				? `Remove ${mob.name} from favorites`
+				: `Add ${mob.name} to favorites`}
 		>
 			<Heart
 				class={isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}

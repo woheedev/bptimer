@@ -64,7 +64,7 @@
 							{...props}
 						>
 							<Avatar.Root class="size-8 rounded-lg">
-								<Avatar.Image src={avatarUrl} alt="Avatar" />
+								<Avatar.Image src={avatarUrl} alt={`${user.username}'s avatar`} />
 								<Avatar.Fallback class="rounded-lg">{initials}</Avatar.Fallback>
 							</Avatar.Root>
 							<div class="grid flex-1 text-left text-sm leading-tight">
@@ -80,11 +80,12 @@
 					side={sidebar.isMobile ? 'bottom' : 'right'}
 					align="end"
 					sideOffset={4}
+					aria-label="User menu"
 				>
-					<DropdownMenu.Label class="p-0 font-normal">
-						<div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+					<DropdownMenu.Label class="p-0 font-normal" role="none">
+						<div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm" role="none">
 							<Avatar.Root class="size-8 rounded-lg">
-								<Avatar.Image src={avatarUrl} alt="Avatar" />
+								<Avatar.Image src={avatarUrl} alt={`${user.username}'s avatar`} />
 								<Avatar.Fallback class="rounded-lg">{initials}</Avatar.Fallback>
 							</Avatar.Root>
 							<div class="grid flex-1 text-left text-sm leading-tight">
@@ -93,7 +94,7 @@
 							</div>
 						</div>
 					</DropdownMenu.Label>
-					<DropdownMenu.Separator />
+					<DropdownMenu.Separator role="none" />
 					<!-- TODO
 					<DropdownMenu.Group>
 						<DropdownMenu.Item disabled={true}>
@@ -121,7 +122,11 @@
 			<Sidebar.MenuButton
 				size="lg"
 				variant="outline"
-				onclick={handleSignIn}
+				href="#"
+				onclick={(e) => {
+					e.preventDefault();
+					handleSignIn();
+				}}
 				class="bg-muted/50 justify-center"
 			>
 				<LogIn />

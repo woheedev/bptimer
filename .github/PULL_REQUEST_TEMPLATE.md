@@ -16,9 +16,9 @@ Describe the tests that you ran to verify your changes.
 
 ## Checklist:
 
-- [ ] My code follows the project's style guidelines
+- [ ] My code follows the project's code style
 - [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] I have commented my code only in hard-to-understand/critical areas
 - [ ] My changes generate no new warnings
 
 ## Additional Notes

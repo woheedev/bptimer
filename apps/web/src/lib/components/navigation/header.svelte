@@ -14,7 +14,13 @@
 
 <div class="bg-background sticky top-0 z-10">
 	<header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-		<Button class="size-8" variant="outline" size="icon" onclick={sidebar.toggle}>
+		<Button
+			class="size-8"
+			variant="outline"
+			size="icon"
+			onclick={sidebar.toggle}
+			aria-label="Toggle sidebar"
+		>
 			<PanelLeft />
 		</Button>
 		<Button
@@ -22,6 +28,7 @@
 			size="sm"
 			class="flex items-center gap-2"
 			onclick={() => eventTimersStore.toggleCollapsed()}
+			aria-label={eventTimersStore.isCollapsed ? 'Show event timers' : 'Hide event timers'}
 		>
 			{#if eventTimersStore.isCollapsed}
 				<ChevronDown class="h-4 w-4" />
@@ -43,6 +50,7 @@
 			class="dark:text-foreground flex"
 			target="_blank"
 			rel="noopener noreferrer"
+			aria-label="View source code on GitHub"
 		>
 			<Github class="h-4 w-4" />
 		</Button>
