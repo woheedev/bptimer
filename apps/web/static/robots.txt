@@ -5,6 +5,7 @@
 Sitemap: https://bptimer.com/sitemap.xml
 
 # Block specific paths
+User-agent: *
 Disallow: /api/
 Disallow: /_app/
 

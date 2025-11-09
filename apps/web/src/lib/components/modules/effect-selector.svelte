@@ -68,6 +68,7 @@
 						variant="outline"
 						role="combobox"
 						aria-expanded={isOpen}
+						aria-label={effectName ? `Effect ${effectIndex + 1}: ${effectName}` : `Select effect ${effectIndex + 1}`}
 						class="w-full justify-between"
 						onkeydown={handleKeyDown}
 					>

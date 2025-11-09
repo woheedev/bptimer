@@ -24,7 +24,8 @@
 		hpValue = $bindable(100),
 		locationImage = $bindable<number | null>(null),
 		isSubmitting,
-		onSubmit
+		onSubmit,
+		sliderId = 'hp-slider'
 	}: {
 		selectedChannel: number | null;
 		user: UserRecordModel | null;
@@ -34,6 +35,7 @@
 		locationImage?: number | null;
 		isSubmitting: boolean;
 		onSubmit: () => void;
+		sliderId?: string;
 	} = $props();
 
 	let validationError = $state<string>('');
@@ -82,11 +84,12 @@
 		<Card.Content class="space-y-4">
 			<div class="space-y-4">
 				<div class="flex items-center justify-between">
-					<Label for="hp-slider" class="text-sm font-medium">HP: {hpValue}%</Label>
+					<Label for={sliderId} class="text-sm font-medium">HP: {hpValue}%</Label>
 					<Badge variant="destructive" class="text-xs">Line {selectedChannel}</Badge>
 				</div>
 				<Slider
-					id="hp-slider"
+					id={sliderId}
+					aria-label="HP percentage slider"
 					bind:value={hpValue}
 					type="single"
 					step={HP_SLIDER_STEP}

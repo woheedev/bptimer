@@ -45,6 +45,7 @@
 		isActive = false,
 		tooltipContent,
 		tooltipContentProps,
+		el = 'a',
 		...restProps
 	}: WithElementRef<HTMLAnchorAttributes> & {
 		isActive?: boolean;
@@ -53,6 +54,7 @@
 		tooltipContent?: Snippet | string;
 		tooltipContentProps?: WithoutChildrenOrChild<ComponentProps<typeof Tooltip.Content>>;
 		child?: Snippet<[{ props: Record<string, unknown> }]>;
+		el?: 'a' | 'button';
 	} = $props();
 
 	const sidebar = useSidebar();
@@ -71,6 +73,10 @@
 	{@const mergedProps = mergeProps(buttonProps, props)}
 	{#if child}
 		{@render child({ props: mergedProps })}
+	{:else if el === 'button'}
+		<button bind:this={ref} {...mergedProps}>
+			{@render children?.()}
+		</button>
 	{:else}
 		<a bind:this={ref} {...mergedProps}>
 			{@render children?.()}

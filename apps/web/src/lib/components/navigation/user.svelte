@@ -60,6 +60,7 @@
 					{#snippet child({ props })}
 						<Sidebar.MenuButton
 							size="lg"
+							el="button"
 							class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 							{...props}
 						>
@@ -120,6 +121,7 @@
 		{:else}
 			<Sidebar.MenuButton
 				size="lg"
+				el="button"
 				variant="outline"
 				onclick={handleSignIn}
 				class="bg-muted/50 justify-center"

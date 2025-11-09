@@ -7,8 +7,9 @@
 		class: className,
 		max = 100,
 		value,
+		'aria-label': ariaLabel,
 		...restProps
-	}: WithoutChildrenOrChild<ProgressPrimitive.RootProps> = $props();
+	}: WithoutChildrenOrChild<ProgressPrimitive.RootProps> & { 'aria-label'?: string } = $props();
 </script>
 
 <ProgressPrimitive.Root
@@ -17,6 +18,7 @@
 	class={cn('bg-primary/20 relative h-2 w-full overflow-hidden rounded-full', className)}
 	{value}
 	{max}
+	aria-label={ariaLabel}
 	{...restProps}
 >
 	<div
