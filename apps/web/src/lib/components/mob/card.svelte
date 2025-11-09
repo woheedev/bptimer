@@ -178,7 +178,9 @@
 			variant="outline"
 			size="sm"
 			class="p-2"
-			aria-label={isFavorited ? `Remove ${mob.name} from favorites` : `Add ${mob.name} to favorites`}
+			aria-label={isFavorited
+				? `Remove ${mob.name} from favorites`
+				: `Add ${mob.name} to favorites`}
 		>
 			<Heart
 				class={isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}
