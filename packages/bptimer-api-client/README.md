@@ -20,17 +20,31 @@ const bptimer = new BPTimerClient({
 });
 
 // Call inline wherever you get boss HP updates
-await bptimer.reportHP(monster_id, hp_pct, line);
+await bptimer.reportHP({
+  monster_id,
+  hp_pct,
+  line
+});
+
+// Map variables with different names to required property names
+await bptimer.reportHP({
+  monster_id: mobId,
+  hp_pct: hpPercentage,
+  line: channelNumber
+});
 
 // With optional parameters (not yet implemented on backend)
-await bptimer.reportHP(monster_id, hp_pct, line, {
+await bptimer.reportHP({
+  monster_id,
+  hp_pct,
+  line,
   pos_x: 123.45,
   pos_y: 678.9,
   region: 'NA'
 });
 
 // Optional helpers
-bptimer.testConnection(); // Check connection to api_url with api_key
+await bptimer.testConnection(); // Check connection to api_url with api_key
 bptimer.setEnabled(false); // Disable reporting
 bptimer.resetMonster(monster_id, line); // Force reset cache
 bptimer.clearAll(); // Clear all cache

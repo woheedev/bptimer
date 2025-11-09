@@ -4,6 +4,7 @@ import type {
   ClientConfig,
   Logger,
   LogLevel,
+  ReportHPParams,
   ReportPayload,
   ReportResponse
 } from './types.js';
@@ -36,12 +37,9 @@ export class BPTimerClient {
     this.logger[level](`[BPTimer] ${message}`);
   }
 
-  async reportHP(
-    monster_id: string | number,
-    hp_pct: number,
-    line: number,
-    options?: { pos_x?: number; pos_y?: number; region?: string }
-  ): Promise<ReportResponse> {
+  async reportHP(params: ReportHPParams): Promise<ReportResponse> {
+    const { monster_id, hp_pct, line, pos_x, pos_y, region } = params;
+
     if (!this.enabled) {
       this.log('debug', 'Client is disabled');
       return { success: false, message: 'Client is disabled' };
@@ -50,6 +48,16 @@ export class BPTimerClient {
     if (!this.api_key || !this.api_url) {
       this.log('debug', 'API key or URL not configured');
       return { success: false, message: 'API key or URL not configured' };
+    }
+
+    if (
+      (pos_x !== undefined && pos_y === undefined) ||
+      (pos_x === undefined && pos_y !== undefined)
+    ) {
+      return {
+        success: false,
+        message: 'pos_x and pos_y must both be provided or both omitted'
+      };
     }
 
     const monster_key = String(monster_id);
@@ -100,9 +108,9 @@ export class BPTimerClient {
         monster_id: Number(monster_id),
         hp_pct: current_hp,
         line,
-        ...(options?.pos_x !== undefined && { pos_x: options.pos_x }),
-        ...(options?.pos_y !== undefined && { pos_y: options.pos_y }),
-        ...(options?.region && { region: options.region })
+        ...(pos_x !== undefined && { pos_x }),
+        ...(pos_y !== undefined && { pos_y }),
+        ...(region && { region })
       };
 
       const response = await fetch(`${this.api_url}/api/create-hp-report`, {
@@ -118,6 +126,7 @@ export class BPTimerClient {
         const error_data = (await response.json().catch(() => ({}))) as { message?: string };
         const error_message = error_data.message || `API error: ${response.status}`;
         this.log('info', `Failed to report HP: ${error_message}`);
+        entry.last_reported_hp = current_hp; // prevent spamming retries
         return { success: false, message: error_message };
       }
 
@@ -132,6 +141,7 @@ export class BPTimerClient {
     } catch (error) {
       const error_message = error instanceof Error ? error.message : 'Unknown error';
       this.log('info', `Failed to report HP: ${error_message}`);
+      entry.last_reported_hp = current_hp; // prevent spamming retries
       return {
         success: false,
         message: error_message

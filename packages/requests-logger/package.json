@@ -1,0 +1,16 @@
+{
+  "name": "requests-logger",
+  "version": "0.0.1",
+  "author": "Wohee",
+  "description": "Dev tool to test requests sent / received to an endpoint",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --no-deprecation index.js"
+  },
+  "dependencies": {
+    "anyproxy": "^4.1.3"
+  }
+}

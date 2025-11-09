@@ -9,10 +9,10 @@
   "main": "index.js",
   "dependencies": {
     "@eslint/compat": "^1.4.1",
-    "@eslint/js": "^9.38.0",
+    "@eslint/js": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.13.0",
-    "globals": "^15.15.0",
-    "typescript-eslint": "^8.46.2"
+    "globals": "^16.5.0",
+    "typescript-eslint": "^8.46.3"
   }
 }

@@ -18,18 +18,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check changed files
-        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62
-        id: changed-files
-        with:
-          files: |
-            apps/web/**
-            .github/workflows/cd.yml
+      - name: Create .env file (needed for Docker build)
+        run: cp apps/web/.env.example apps/web/.env
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.3.1'
+          bun-version: '1.3.2'
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -55,6 +55,14 @@ jobs:
 
       - name: Build project
         run: bun run build
+
+      - name: Check changed files
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62
+        id: changed-files
+        with:
+          files: |
+            apps/web/**
+            .github/workflows/cd.yml
 
       - name: Install Wrangler
         run: bun install -g wrangler@latest

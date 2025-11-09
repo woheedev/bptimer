@@ -7,14 +7,8 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
 	import { HeartHandshake } from '@lucide/svelte/icons';
-	import { mode } from 'mode-watcher';
+	import { siDiscord } from 'simple-icons';
 	import type { ComponentProps } from 'svelte';
-
-	let discordIconSrc = $derived(
-		mode.current === 'dark'
-			? 'https://cdn.simpleicons.org/discord/white'
-			: 'https://cdn.simpleicons.org/discord/black'
-	);
 
 	let {
 		ref = $bindable(null),
@@ -75,7 +69,9 @@
 					rel="noopener noreferrer"
 					class="w-full justify-center"
 				>
-					<img src={discordIconSrc} alt="Discord" class="h-4 w-4" />
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+						><path d={siDiscord.path} /></svg
+					>
 					<span>Join Discord</span>
 				</Sidebar.MenuButton>
 			</div>

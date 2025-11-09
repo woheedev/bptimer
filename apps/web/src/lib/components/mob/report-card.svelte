@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import {
+		ADMIN_USER_IDS,
 		API_USERS,
 		BYPASS_VOTE_USER_IDS,
 		REPUTATION_BAD_DISPLAY_THRESHOLD,
@@ -36,6 +37,8 @@
 
 	// Special user configuration
 	const isSpecialUser = $derived(BYPASS_VOTE_USER_IDS.includes(report.user.id));
+	const isAdminUser = $derived(ADMIN_USER_IDS.includes(report.user.id));
+	const isApiUser = $derived(BYPASS_VOTE_USER_IDS.includes(report.user.id));
 	const displayName = $derived(API_USERS[report.user.id] ?? report.user.name);
 
 	// Reactive time for live updates
@@ -153,18 +156,29 @@
 </script>
 
 <div class="relative shrink-0 rounded-lg border p-3 {borderClass}">
-	<!-- Gradient overlay for good reputation -->
-	{#if hasGoodReputation}
+	<!-- Gradient overlay for admin users -->
+	{#if isAdminUser}
 		<div
 			class="pointer-events-none absolute inset-0 rounded-lg"
-			style="background: linear-gradient(139deg, #22c55e44, #22c59800);"
+			style="background: linear-gradient(90deg, rgb(180, 120, 40, 0.3), rgb(180, 120, 40, 0));"
 		></div>
-	{/if}
-	<!-- Gradient overlay for untrustworthy users -->
-	{#if isUntrustworthy && !hasGoodReputation}
+		<!-- Gradient overlay for API users -->
+	{:else if isApiUser}
 		<div
 			class="pointer-events-none absolute inset-0 rounded-lg"
-			style="background: linear-gradient(139deg, #991b1b44, #7f1d1d00);"
+			style="background: linear-gradient(90deg, rgb(40, 80, 160, 0.3), rgb(40, 80, 160, 0));"
+		></div>
+		<!-- Gradient overlay for good reputation -->
+	{:else if hasGoodReputation}
+		<div
+			class="pointer-events-none absolute inset-0 rounded-lg"
+			style="background: linear-gradient(90deg, rgb(40, 160, 80, 0.3), rgb(40, 160, 80, 0));"
+		></div>
+		<!-- Gradient overlay for untrustworthy users -->
+	{:else if isUntrustworthy && !hasGoodReputation}
+		<div
+			class="pointer-events-none absolute inset-0 rounded-lg"
+			style="background: linear-gradient(90deg, rgb(160, 40, 40, 0.3), rgb(160, 40, 40, 0));"
 		></div>
 	{/if}
 	<div class="relative flex items-start justify-between gap-2">

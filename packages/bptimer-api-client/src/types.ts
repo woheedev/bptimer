@@ -13,13 +13,17 @@ export interface ClientConfig {
   log_level?: LogLevel;
 }
 
-export interface ReportPayload {
-  monster_id: number;
+export interface ReportHPParams {
+  monster_id: string | number;
   hp_pct: number;
   line: number;
   pos_x?: number;
   pos_y?: number;
   region?: string;
+}
+
+export interface ReportPayload extends Omit<ReportHPParams, 'monster_id'> {
+  monster_id: number;
 }
 
 export interface ReportResponse {

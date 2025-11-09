@@ -6,6 +6,7 @@
   "license": "AGPL-3.0-or-later",
   "private": true,
   "scripts": {
+    "build": "docker-compose build",
     "build:binary": "go build -o pocketbase .",
     "deploy": "fly deploy",
     "dev": "docker-compose up --build",

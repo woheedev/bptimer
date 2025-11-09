@@ -115,6 +115,9 @@ export const API_USERS: Record<string, string> = {
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 
+// Admin users
+export const ADMIN_USER_IDS = ['fovkhat7zlite07'];
+
 // Storage keys
 export const FAVORITE_MOBS_STORAGE_KEY = 'favorite-mobs';
 export const EVENT_TIMERS_COLLAPSED_STORAGE_KEY = 'event-timers-collapsed';
