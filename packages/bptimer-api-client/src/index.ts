@@ -40,6 +40,9 @@ export class BPTimerClient {
   async reportHP(params: ReportHPParams): Promise<ReportResponse> {
     const { monster_id, hp_pct, line, pos_x, pos_y, region } = params;
 
+    const rounded_pos_x = pos_x !== undefined ? Math.round(pos_x * 100) / 100 : undefined;
+    const rounded_pos_y = pos_y !== undefined ? Math.round(pos_y * 100) / 100 : undefined;
+
     if (!this.enabled) {
       this.log('debug', 'Client is disabled');
       return { success: false, message: 'Client is disabled' };
@@ -108,8 +111,8 @@ export class BPTimerClient {
         monster_id: Number(monster_id),
         hp_pct: current_hp,
         line,
-        ...(pos_x !== undefined && { pos_x }),
-        ...(pos_y !== undefined && { pos_y }),
+        ...(rounded_pos_x !== undefined && { pos_x: rounded_pos_x }),
+        ...(rounded_pos_y !== undefined && { pos_y: rounded_pos_y }),
         ...(region && { region })
       };
 
@@ -133,9 +136,12 @@ export class BPTimerClient {
       const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
       entry.last_reported_hp = current_hp;
       const monster_name = MOB_MAPPING.get(monster_key) || monster_key;
+      const pos_info = rounded_pos_x !== undefined && rounded_pos_y !== undefined 
+        ? ` X: ${rounded_pos_x}, Y: ${rounded_pos_y}` 
+        : '';
       this.log(
         'info',
-        `Reported ${current_hp}% HP for ${monster_name} (${monster_key}) on Line ${line}`
+        `Reported ${current_hp}% HP for ${monster_name} (${monster_key}) on Line ${line}${pos_info}`
       );
       return { success: true, data };
     } catch (error) {
