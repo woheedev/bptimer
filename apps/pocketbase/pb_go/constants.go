@@ -10,7 +10,7 @@ const MAX_LOCATION_DISTANCE = 30.0
 
 // SSE
 const SSE_BATCH_INTERVAL_MS = 200
-const SSE_IDLE_TIMEOUT_MINUTES = 10
+const SSE_IDLE_TIMEOUT_MINUTES = 2
 const SSE_TOPIC_HP_UPDATES = "mob_hp_updates"
 const SSE_TOPIC_RESETS = "mob_resets"
 const COLLECTION_CACHE_KEY = "pb_mob_channel_status_collection"
