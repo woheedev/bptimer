@@ -6,7 +6,7 @@
 	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
-	import { HeartHandshake } from '@lucide/svelte/icons';
+	import { Construction, HeartHandshake } from '@lucide/svelte/icons';
 	import { siDiscord } from 'simple-icons';
 	import type { ComponentProps } from 'svelte';
 
@@ -38,15 +38,14 @@
 		</Sidebar.Group>
 		<Sidebar.Group class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
 			<div class="flex flex-col gap-2 p-0">
-				<!-- Downtime Alert
-				<Alert.Root class="text-xs">
+				<Alert.Root class="text-xs" variant="destructive">
 					<Construction />
-					<Alert.Title class="text-sm font-bold">System Updates</Alert.Title>
+					<Alert.Title class="text-sm font-bold">Magical Creature</Alert.Title>
 					<Alert.Description class="text-xs">
-						Sorry for any temporary outages or delays while I work on implementing new features.
+						Locations for the Loyal Boarlet and Nappos will update as DPS meters begin to support
+						sending location data.
 					</Alert.Description>
 				</Alert.Root>
-				-->
 				<Alert.Root class="text-xs">
 					<HeartHandshake />
 					<Alert.Title class="text-sm font-bold">Looking to Collaborate?</Alert.Title>
@@ -89,7 +88,7 @@
 					rel="noopener noreferrer"
 					class="hover:underline"
 				>
-					Buy me a coffee ☕ | v0.10.3
+					Buy me a coffee ☕ | v1.0.0
 				</a>
 			</p>
 		{/if}

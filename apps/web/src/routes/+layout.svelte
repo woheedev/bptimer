@@ -1,14 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { page } from '$app/state';
-	import DpsMeterToast from '$lib/components/dps-meter-toast.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
-	import { DPS_METER_TOAST_DURATION } from '$lib/constants';
 	import { pb } from '$lib/pocketbase';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { ModeWatcher } from 'mode-watcher';
 	import { setContext } from 'svelte';
-	import { toast } from 'svelte-sonner';
 	import '../app.css';
 
 	let { children } = $props();
@@ -54,6 +50,7 @@
 			});
 	});
 
+	/*
 	$effect(() => {
 		if (!browser || page.url.pathname !== '/') {
 			return;
@@ -63,6 +60,7 @@
 			position: 'bottom-right'
 		});
 	});
+	*/
 
 	setContext('token', getToken);
 	setContext('user', getUser);

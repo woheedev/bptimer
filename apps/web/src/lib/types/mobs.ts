@@ -5,6 +5,7 @@ export interface ChannelEntry {
 	hp_percentage: number;
 	status: 'alive' | 'dead' | 'unknown';
 	last_updated: string;
+	location_image?: number;
 }
 
 export interface MobWithChannels {

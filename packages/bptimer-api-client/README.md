@@ -23,24 +23,19 @@ const bptimer = new BPTimerClient({
 await bptimer.reportHP({
   monster_id,
   hp_pct,
-  line
+  line,
+  pos_x,
+  pos_y,
+  pos_z,
+  region: 'NA' // optional - not yet implemented on clients
 });
 
-// Map variables with different names to required property names
+// Map variables with different names to property names
 await bptimer.reportHP({
   monster_id: mobId,
   hp_pct: hpPercentage,
   line: channelNumber
-});
-
-// With optional parameters (not yet implemented on backend)
-await bptimer.reportHP({
-  monster_id,
-  hp_pct,
-  line,
-  pos_x: 123.45,
-  pos_y: 678.9,
-  region: 'NA'
+  // ... the rest of the fields
 });
 
 // Optional helpers

@@ -1092,6 +1092,18 @@ migrate(
           },
           {
             hidden: false,
+            id: 'number_location_image',
+            max: 20,
+            min: 1,
+            name: 'location_image',
+            onlyInt: true,
+            presentable: false,
+            required: false,
+            system: false,
+            type: 'number'
+          },
+          {
+            hidden: false,
             id: 'autodate304265122',
             name: 'last_update',
             onCreate: false,
@@ -1323,7 +1335,7 @@ migrate(
             minSelect: 0,
             name: 'user',
             presentable: false,
-            required: false,
+            required: true,
             system: false,
             type: 'relation'
           },

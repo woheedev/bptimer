@@ -1,4 +1,9 @@
-import { CACHE_EXPIRY_MS, HP_REPORT_INTERVAL, MOB_MAPPING } from './constants.js';
+import {
+  CACHE_EXPIRY_MS,
+  HP_REPORT_INTERVAL,
+  LOCATION_TRACKED_MOBS,
+  MOB_MAPPING
+} from './constants.js';
 import type {
   CacheEntry,
   ClientConfig,
@@ -38,10 +43,11 @@ export class BPTimerClient {
   }
 
   async reportHP(params: ReportHPParams): Promise<ReportResponse> {
-    const { monster_id, hp_pct, line, pos_x, pos_y, region } = params;
+    const { monster_id, hp_pct, line, pos_x, pos_y, pos_z, region } = params;
 
     const rounded_pos_x = pos_x !== undefined ? Math.round(pos_x * 100) / 100 : undefined;
     const rounded_pos_y = pos_y !== undefined ? Math.round(pos_y * 100) / 100 : undefined;
+    const rounded_pos_z = pos_z !== undefined ? Math.round(pos_z * 100) / 100 : undefined;
 
     if (!this.enabled) {
       this.log('debug', 'Client is disabled');
@@ -54,12 +60,13 @@ export class BPTimerClient {
     }
 
     if (
-      (pos_x !== undefined && pos_y === undefined) ||
-      (pos_x === undefined && pos_y !== undefined)
+      (pos_x !== undefined && (pos_y === undefined || pos_z === undefined)) ||
+      (pos_y !== undefined && (pos_x === undefined || pos_z === undefined)) ||
+      (pos_z !== undefined && (pos_x === undefined || pos_y === undefined))
     ) {
       return {
         success: false,
-        message: 'pos_x and pos_y must both be provided or both omitted'
+        message: 'pos_x, pos_y, and pos_z must all be provided together or all omitted'
       };
     }
 
@@ -67,6 +74,18 @@ export class BPTimerClient {
     if (!MOB_MAPPING.has(monster_key)) {
       this.log('debug', `Monster ${monster_key} not tracked`);
       return { success: false, message: 'Monster ID not tracked' };
+    }
+
+    // Check if this mob requires position data
+    if (
+      LOCATION_TRACKED_MOBS.has(Number(monster_id)) &&
+      (pos_x === undefined || pos_y === undefined || pos_z === undefined)
+    ) {
+      this.log('debug', `Monster ${monster_key} requires position data`);
+      return {
+        success: false,
+        message: 'Position data (pos_x, pos_y, pos_z) required for this mob'
+      };
     }
 
     // Round to nearest HP_REPORT_INTERVAL
@@ -113,6 +132,7 @@ export class BPTimerClient {
         line,
         ...(rounded_pos_x !== undefined && { pos_x: rounded_pos_x }),
         ...(rounded_pos_y !== undefined && { pos_y: rounded_pos_y }),
+        ...(rounded_pos_z !== undefined && { pos_z: rounded_pos_z }),
         ...(region && { region })
       };
 
@@ -136,9 +156,10 @@ export class BPTimerClient {
       const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
       entry.last_reported_hp = current_hp;
       const monster_name = MOB_MAPPING.get(monster_key) || monster_key;
-      const pos_info = rounded_pos_x !== undefined && rounded_pos_y !== undefined 
-        ? ` X: ${rounded_pos_x}, Y: ${rounded_pos_y}` 
-        : '';
+      const pos_info =
+        rounded_pos_x !== undefined && rounded_pos_y !== undefined && rounded_pos_z !== undefined
+          ? ` X: ${rounded_pos_x}, Y: ${rounded_pos_y}, Z: ${rounded_pos_z}`
+          : '';
       this.log(
         'info',
         `Reported ${current_hp}% HP for ${monster_name} (${monster_key}) on Line ${line}${pos_info}`

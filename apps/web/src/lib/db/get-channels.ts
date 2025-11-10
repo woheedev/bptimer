@@ -10,9 +10,14 @@ export async function getChannels(bossId: string): Promise<
 		status: 'alive' | 'dead' | 'unknown';
 		hp_percentage: number;
 		last_update: string;
+		location_image?: number;
 	}>
 > {
 	try {
+		// Fetch the mob to get its name for special handling
+		const mob = await pb.collection('mobs').getOne(bossId);
+		const mobName = mob.name;
+
 		// Fetch all mob_channel_status for this mob
 		const channels = await pb.collection('mob_channel_status').getFullList({
 			filter: pb.filter('mob = {:bossId}', { bossId }),
@@ -29,15 +34,28 @@ export async function getChannels(bossId: string): Promise<
 			.map((channel) => {
 				const last_update = channel.last_update || channel.updated;
 				const last_hp = channel.last_hp || 0;
+				const location_image = channel.location_image as number | undefined;
 
-				return {
+				const result: {
+					channel: number;
+					status: 'alive' | 'dead' | 'unknown';
+					hp_percentage: number;
+					last_update: string;
+					location_image?: number;
+				} = {
 					channel: channel.channel_number || 0,
-					status: getMobStatus(last_hp, last_update),
+					status: getMobStatus(last_hp, last_update, mobName),
 					hp_percentage: last_hp,
 					last_update: last_update
 				};
+
+				if (location_image) {
+					result.location_image = location_image;
+				}
+
+				return result;
 			})
-			.filter((channel) => !isDataStale(channel.last_update, channel.hp_percentage)); // Exclude stale data
+			.filter((channel) => !isDataStale(channel.last_update, channel.hp_percentage, mobName)); // Exclude stale data
 
 		return processed_channels;
 	} catch (error) {

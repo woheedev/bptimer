@@ -9,6 +9,11 @@ import { pbRealtime } from '$lib/pocketbase';
 import type { ChannelEntry, MobWithChannels } from '$lib/types/mobs';
 import { isDataStale, sortChannelsForMobCard } from '$lib/utils/general-utils';
 import { getMobStatus } from '$lib/utils/mob-utils';
+import {
+	clearChannelNotification,
+	clearMobNotifications,
+	showMobNotification
+} from '$lib/utils/notifications';
 
 type MobUpdateCallback = (events: RealtimeEventData[]) => void;
 type RealtimeEventData = {
@@ -50,20 +55,30 @@ function createRealtimeMobsStore() {
 
 		try {
 			// Subscribe to HP updates topic
-			// Format: [mobId, channel, hp]
+			// Format: [[mobId, channel, hp, locationImage], ...] (batched)
 			pbRealtime.realtime.subscribe('mob_hp_updates', (e) => {
-				const data = typeof e === 'string' ? JSON.parse(e) : e;
-				const [mobId, channel, hp] = data;
+				const batch = typeof e === 'string' ? JSON.parse(e) : e;
 
-				debouncedCallback({
-					record: {
+				// Process each update in the batch
+				for (const data of batch) {
+					const [mobId, channel, hp, locationImage] = data;
+
+					const record: Record<string, unknown> = {
 						mob: mobId,
 						channel_number: channel,
 						last_hp: hp,
 						last_update: new Date().toISOString()
-					},
-					type: 'hp_update'
-				});
+					};
+
+					if (locationImage) {
+						record.location_image = locationImage;
+					}
+
+					debouncedCallback({
+						record,
+						type: 'hp_update'
+					});
+				}
 			});
 
 			// Subscribe to reset events topic
@@ -143,13 +158,39 @@ function createRealtimeMobsStore() {
 
 		const recordLastHp = record.last_hp as number;
 		const recordLastUpdate = record.last_update as string;
+		const recordLocationImage = record.location_image as number | undefined;
 		const lastUpdated = recordLastUpdate || new Date().toISOString();
+		const newStatus = getMobStatus(recordLastHp, lastUpdated, mob.name);
 		const statusData: ChannelEntry = {
 			channel: channelNumber,
-			status: getMobStatus(recordLastHp, lastUpdated),
+			status: newStatus,
 			hp_percentage: recordLastHp,
 			last_updated: lastUpdated
 		};
+
+		if (recordLocationImage) {
+			statusData.location_image = recordLocationImage;
+		}
+
+		// Check for dead/stale → alive transition to trigger notification
+		const oldChannel = channelIndex !== -1 ? mob.latestChannels?.[channelIndex] : null;
+		const wasDeadOrStale =
+			!oldChannel || oldChannel.status === 'dead' || oldChannel.status === 'unknown';
+		const isNowAlive = newStatus === 'alive';
+
+		if (wasDeadOrStale && isNowAlive) {
+			showMobNotification(
+				mob.id,
+				mob.name,
+				mob.type,
+				channelNumber,
+				recordLastHp,
+				recordLocationImage,
+				false // not a reset event
+			);
+		} else if (newStatus === 'dead') {
+			clearChannelNotification(mob.id, channelNumber);
+		}
 
 		let updatedChannels;
 		if (channelIndex !== -1) {
@@ -163,7 +204,7 @@ function createRealtimeMobsStore() {
 
 		// Filter stale data, sort, and take top channels
 		const filtered = updatedChannels.filter(
-			(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
+			(channel) => !isDataStale(channel.last_updated, channel.hp_percentage, mob.name)
 		);
 		updatedChannels = sortChannelsForMobCard(filtered).slice(0, LATEST_CHANNELS_DISPLAY_COUNT);
 
@@ -204,6 +245,9 @@ function createRealtimeMobsStore() {
 		if (mobIndex === -1) return mobs;
 
 		const mob = mobs[mobIndex];
+
+		clearMobNotifications(mobId);
+
 		const resetMob = autoResetMob(mob);
 		const updatedMobs = [...mobs];
 		updatedMobs[mobIndex] = resetMob;
@@ -223,7 +267,7 @@ function createRealtimeMobsStore() {
 			}
 
 			const filteredChannels = mob.latestChannels.filter(
-				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
+				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage, mob.name)
 			);
 
 			// Only update if channels were actually filtered out

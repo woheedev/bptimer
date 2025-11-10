@@ -1,6 +1,9 @@
-const MONSTER_ID = 10018; // Inferno Ogre
-const HP_PCT = 20; // HP percentage (0-100)
+const MONSTER_ID = 10904; // Loyal Boarlet
+const HP_PCT = 100; // HP percentage (0-100)
 const LINE = 10; // Line number (1-XXX)
+const POS_X = 222; // Loyal Boarlet SCOUT 1 location
+const POS_Y = 142;
+const POS_Z = 32;
 
 class BPTimer {
   constructor(apiKey, dbURL) {
@@ -21,15 +24,23 @@ class BPTimer {
   }
 
   // Create HP report
-  async createHpReport(monsterId, hpPct, line) {
+  async createHpReport(monsterId, hpPct, line, posX, posY, posZ) {
     try {
+      const payload = {
+        monster_id: monsterId,
+        hp_pct: hpPct,
+        line: line
+      };
+
+      if (posX !== undefined && posY !== undefined && posZ !== undefined) {
+        payload.pos_x = posX;
+        payload.pos_y = posY;
+        payload.pos_z = posZ;
+      }
+
       const response = await this.request('/api/create-hp-report', {
         method: 'POST',
-        body: JSON.stringify({
-          monster_id: monsterId,
-          hp_pct: hpPct,
-          line: line
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -54,7 +65,7 @@ if (!dbURL || !apiKey) {
 const app = new BPTimer(apiKey, dbURL);
 
 try {
-  const result = await app.createHpReport(MONSTER_ID, HP_PCT, LINE);
+  const result = await app.createHpReport(MONSTER_ID, HP_PCT, LINE, POS_X, POS_Y, POS_Z);
   console.log('HP Report created successfully:', result);
 } catch (error) {
   console.error('Test failed:', error.message);

@@ -15,16 +15,13 @@
 	import { DEFAULT_HP_VALUE, MAX_REPORTS_LIMIT, SPECIAL_MAGICAL_CREATURES } from '$lib/constants';
 	import { createReport } from '$lib/db/create-reports';
 	import { getChannels } from '$lib/db/get-channels';
-	import {
-		getChannelReports,
-		getLatestMobReports,
-		getMostRecentLocationImage
-	} from '$lib/db/get-reports';
+	import { getChannelReports, getLatestMobReports } from '$lib/db/get-reports';
 	import { getUserVotesForReports } from '$lib/db/get-user-votes';
 	import { pb } from '$lib/pocketbase';
 	import { filterSortSettingsStore } from '$lib/stores/filter-sort-settings.svelte';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import type { MobReport, UserVotesMap } from '$lib/types/db';
+	import type { ChannelEntry } from '$lib/types/mobs';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { filterAndSortChannels } from '$lib/utils/mob-filtering';
 	import { getMobImagePath, getMobMapPath } from '$lib/utils/mob-utils';
@@ -48,12 +45,7 @@
 		mobId: string;
 		mobName: string;
 		totalChannels: number;
-		liveChannels?: Array<{
-			channel: number;
-			status: 'alive' | 'dead' | 'unknown';
-			hp_percentage: number;
-			last_updated: string;
-		}>;
+		liveChannels?: ChannelEntry[];
 		onClose?: () => void;
 		onReportSubmitted?: (data: { mobId: string; channel: number; hp_percentage: number }) => void;
 		type?: 'boss' | 'magical_creature' | string;
@@ -75,8 +67,7 @@
 			last_updated?: string;
 		}>,
 		reports: [] as MobReport[],
-		user_votes_map: new Map() as UserVotesMap,
-		mostRecentLocationImage: null as number | null
+		user_votes_map: new Map() as UserVotesMap
 	});
 
 	let ui_state = $state({
@@ -229,16 +220,10 @@
 		ui_state.errorMessage = null;
 		ui_state.hasError = false;
 		try {
-			const [reports_data, locationImageNumber] = await Promise.all([
-				getChannelReports(mobId, channelNumber),
-				isSpecialMagicalCreature
-					? getMostRecentLocationImage(mobId, channelNumber)
-					: Promise.resolve(null)
-			]);
+			const reports_data = await getChannelReports(mobId, channelNumber);
 
 			// Force a fresh array assignment to ensure reactivity
 			data_state.reports = [...reports_data];
-			data_state.mostRecentLocationImage = locationImageNumber;
 
 			// Fetch user votes for these reports
 			if (user && reports_data.length > 0) {
@@ -247,6 +232,9 @@
 			}
 
 			// Set default location image for submission from most recent location image
+			const locationImageNumber = liveChannels.find(
+				(ch) => ch.channel === channelNumber
+			)?.location_image;
 			if (isSpecialMagicalCreature && locationImageNumber) {
 				submission_state.locationImage = locationImageNumber;
 			}
@@ -265,6 +253,21 @@
 
 	// Check if this is a special magical creature requiring location images (random/rotating locations)
 	const isSpecialMagicalCreature = $derived(mobName in SPECIAL_MAGICAL_CREATURES);
+
+	// Reactively get the most recent location image from liveChannels based on selected channel
+	const mostRecentLocationImage = $derived(
+		isSpecialMagicalCreature && submission_state.selectedChannel
+			? (liveChannels.find((ch) => ch.channel === submission_state.selectedChannel)
+					?.location_image ?? null)
+			: null
+	);
+
+	// Sync submission_state.locationImage with mostRecentLocationImage for carousel updates
+	$effect(() => {
+		if (mostRecentLocationImage !== null) {
+			submission_state.locationImage = mostRecentLocationImage;
+		}
+	});
 
 	// Dynamic class for left section based on panel visibility
 	const leftSectionClass = $derived(
@@ -565,11 +568,11 @@
 						/>
 
 						<!-- Location Image Viewer -->
-						{#if submission_state.selectedChannel && data_state.mostRecentLocationImage !== null}
+						{#if mostRecentLocationImage !== null || submission_state.locationImage !== null}
 							<LocationImageViewer
 								{mobName}
 								mobType={type}
-								locationImageNumber={data_state.mostRecentLocationImage}
+								locationImageNumber={mostRecentLocationImage ?? submission_state.locationImage ?? 0}
 							/>
 						{/if}
 
@@ -609,11 +612,13 @@
 							<Tabs.Content value="reports" class="mt-4">
 								<div class="max-h-[35vh] space-y-2 overflow-y-auto">
 									<!-- Location Image Viewer -->
-									{#if submission_state.selectedChannel && data_state.mostRecentLocationImage !== null}
+									{#if mostRecentLocationImage !== null || submission_state.locationImage !== null}
 										<LocationImageViewer
 											{mobName}
 											mobType={type}
-											locationImageNumber={data_state.mostRecentLocationImage}
+											locationImageNumber={mostRecentLocationImage ??
+												submission_state.locationImage ??
+												0}
 										/>
 									{/if}
 

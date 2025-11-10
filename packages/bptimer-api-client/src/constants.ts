@@ -1,6 +1,9 @@
 export const CACHE_EXPIRY_MS = 5 * 60 * 1000;
 export const HP_REPORT_INTERVAL = 5;
 
+// Mob IDs that require position data for location tracking
+export const LOCATION_TRACKED_MOBS = new Set([10900, 10901, 10904]);
+
 export const MOB_MAPPING = new Map([
   ['10007', 'Storm Goblin King'],
   ['10009', 'Frost Ogre'],

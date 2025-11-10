@@ -48,6 +48,7 @@ async function getMobsByType(
 			const mob_id = status.mob;
 			const channel_number = status.channel_number || 0;
 			const last_update = status.last_update || status.updated;
+			const location_image = status.location_image as number | undefined;
 
 			if (!statuses_by_mob.has(mob_id)) {
 				statuses_by_mob.set(mob_id, new Map());
@@ -56,12 +57,18 @@ async function getMobsByType(
 			const channel_map = statuses_by_mob.get(mob_id)!;
 
 			// Store the channel status
-			channel_map.set(channel_number, {
+			const channel_entry: ChannelEntry = {
 				channel: channel_number,
 				status: getMobStatus(status.last_hp || 0, last_update),
 				hp_percentage: status.last_hp || 0,
 				last_updated: last_update
-			});
+			};
+
+			if (location_image) {
+				channel_entry.location_image = location_image;
+			}
+
+			channel_map.set(channel_number, channel_entry);
 		}
 
 		// Process each mob with its pre-fetched channel statuses
@@ -73,7 +80,7 @@ async function getMobsByType(
 
 			// Filter stale data, sort, and take top channels
 			const filtered_channels = channel_reports.filter(
-				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
+				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage, mob.name)
 			);
 			const sorted_channels = sortChannelsForMobCard(filtered_channels).slice(
 				0,
@@ -148,13 +155,18 @@ export async function getMobsByIds(
 			validateWithSchema(mobChannelStatusSchema, status, 'Channel status');
 		}
 
+		// Create a map of mob_id to mob_name for quick lookup
+		const mob_names = new Map(records.map((m) => [m.id, m.name]));
+
 		// Group channel statuses by mob
 		const statuses_by_mob = new Map<string, Map<number, ChannelEntry>>();
 
 		for (const status of all_channel_statuses) {
 			const mob_id = status.mob;
+			const mob_name = mob_names.get(mob_id);
 			const channel_number = status.channel_number || 0;
 			const last_update = status.last_update || status.updated;
+			const location_image = status.location_image as number | undefined;
 
 			if (!statuses_by_mob.has(mob_id)) {
 				statuses_by_mob.set(mob_id, new Map());
@@ -163,12 +175,18 @@ export async function getMobsByIds(
 			const channel_map = statuses_by_mob.get(mob_id)!;
 
 			// Store the channel status
-			channel_map.set(channel_number, {
+			const channel_entry: ChannelEntry = {
 				channel: channel_number,
-				status: getMobStatus(status.last_hp || 0, last_update),
+				status: getMobStatus(status.last_hp || 0, last_update, mob_name),
 				hp_percentage: status.last_hp || 0,
 				last_updated: last_update
-			});
+			};
+
+			if (location_image) {
+				channel_entry.location_image = location_image;
+			}
+
+			channel_map.set(channel_number, channel_entry);
 		}
 
 		// Process each mob with its pre-fetched channel statuses
@@ -180,7 +198,7 @@ export async function getMobsByIds(
 
 			// Filter stale data, sort, and take top channels
 			const filtered_channels = channel_reports.filter(
-				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage)
+				(channel) => !isDataStale(channel.last_updated, channel.hp_percentage, mob.name)
 			);
 			const sorted_channels = sortChannelsForMobCard(filtered_channels).slice(
 				0,

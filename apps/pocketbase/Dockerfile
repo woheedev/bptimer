@@ -17,4 +17,4 @@ EXPOSE 8090
 EXPOSE 6060
 
 COPY --from=builder /app/pocketbase /usr/local/bin/pocketbase
-ENTRYPOINT ["/usr/local/bin/pocketbase", "serve", "--http=0.0.0.0:8090", "--pprof=0.0.0.0:6060", "--dir=/pb_data", "--migrationsDir=/pb_migrations", "--hooksDir=/pb_hooks"]
+ENTRYPOINT ["/usr/local/bin/pocketbase", "serve", "--http=0.0.0.0:8090", "--pprof=0.0.0.0:6060", "--dir=/pb_data", "--migrationsDir=/pb_migrations"]

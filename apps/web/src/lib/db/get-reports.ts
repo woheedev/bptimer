@@ -87,33 +87,3 @@ export async function getChannelReports(
 		return [];
 	}
 }
-
-export async function getMostRecentLocationImage(
-	mobId: string,
-	channelNumber: number
-): Promise<number | null> {
-	try {
-		// Fetch the most recent report with a location_image for this mob and channel
-		const reports = await pb.collection('hp_reports').getList(1, 1, {
-			filter: pb.filter(
-				'mob = {:mobId} && channel_number = {:channelNumber} && location_image != null',
-				{
-					mobId,
-					channelNumber
-				}
-			),
-			sort: '-created',
-			skipTotal: true,
-			requestKey: `location-image-${mobId}-${channelNumber}`
-		});
-
-		if (reports.items.length > 0 && reports.items[0].location_image != null) {
-			return reports.items[0].location_image as number;
-		}
-
-		return null;
-	} catch (error) {
-		console.error('Error fetching most recent location image:', error);
-		return null;
-	}
-}

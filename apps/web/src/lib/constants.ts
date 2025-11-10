@@ -21,7 +21,7 @@ export const JUST_NOW_THRESHOLD = 15; // seconds
 export const LAUNCH_REFERENCE_DATE = '2025-10-09';
 
 // Realtime
-export const REALTIME_DEBOUNCE_DELAY = 100; // ms
+export const REALTIME_DEBOUNCE_DELAY = 20; // ms
 export const MAX_REALTIME_RETRIES = 3;
 export const REALTIME_RETRY_BASE_DELAY = 2 * SECOND;
 export const STALE_DATA_CHECK_INTERVAL = 30 * SECOND;
@@ -55,6 +55,12 @@ export const DEFAULT_FILTER_SORT_SETTINGS: FilterSortSettings = {
 export const MAGICAL_CREATURE_RESET_HOURS = {
 	'Lovely Boarlet': [12, 16, 20], // 10AM, 2PM, 6PM UTC-2
 	'Breezy Boarlet': [14, 18, 22] // 12PM, 4PM, 8PM UTC-2
+};
+
+export const SPECIAL_MAGICAL_CREATURES_DEAD_TIMEOUT: Record<string, number> = {
+	'Loyal Boarlet': 20 * HOUR,
+	'Silver Nappo': 2 * HOUR,
+	'Golden Nappo': 20 * HOUR
 };
 
 // Special magical creatures with location mappings
@@ -125,6 +131,7 @@ export const FILTER_SORT_SETTINGS_STORAGE_KEY = 'filter-sort-settings';
 export const MODULES_OPTIMIZER_MODULES_STORAGE_KEY = 'modules-optimizer-modules';
 export const MODULES_OPTIMIZER_PRIORITY_EFFECTS_STORAGE_KEY = 'modules-optimizer-priority-effects';
 export const MODULES_OPTIMIZER_NUM_SLOTS_STORAGE_KEY = 'modules-optimizer-num-slots';
+export const MOB_NOTIFICATIONS_STORAGE_KEY = 'mob-notifications';
 
 import {
 	Calculator,

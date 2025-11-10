@@ -153,7 +153,11 @@ export const mobChannelStatusSchema = z.object({
 		.max(15),
 	channel_number: z.number().int().min(1).max(1000),
 	last_hp: z.number().int().min(0).max(100).nullable(),
-	last_update: z.string()
+	last_update: z.string(),
+	location_image: z
+		.union([z.number().int().min(1).max(20), z.literal(0), z.literal(null)])
+		.optional()
+		.transform((val) => (val === 0 || val === null ? undefined : val))
 });
 
 export type MobChannelStatus = z.infer<typeof mobChannelStatusSchema>;

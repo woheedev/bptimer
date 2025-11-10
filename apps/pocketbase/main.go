@@ -10,6 +10,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/woheedev/bptimer/apps/pocketbase/pb_go"
 )
 
@@ -25,31 +26,7 @@ func main() {
 		&pprofAddr,
 		"pprof",
 		"",
-		"the ip:port address to bind pprof to (optional)",
-	)
-
-	var hooksDir string
-	app.RootCmd.PersistentFlags().StringVar(
-		&hooksDir,
-		"hooksDir",
-		"",
-		"the directory with the JS app hooks",
-	)
-
-	var hooksWatch bool
-	app.RootCmd.PersistentFlags().BoolVar(
-		&hooksWatch,
-		"hooksWatch",
-		true,
-		"auto restart the app on pb_hooks file change; it has no effect on Windows",
-	)
-
-	var hooksPool int
-	app.RootCmd.PersistentFlags().IntVar(
-		&hooksPool,
-		"hooksPool",
-		15,
-		"the total prewarm goja.Runtime instances for the JS app hooks execution",
+		"the ip:port address to bind pprof and metrics to (optional)",
 	)
 
 	var migrationsDir string
@@ -74,40 +51,52 @@ func main() {
 	// Plugins and hooks:
 	// ---------------------------------------------------------------
 
-	// load jsvm (pb_hooks and pb_migrations)
+	// Load jsvm for migrations
 	jsvm.MustRegister(app, jsvm.Config{
 		MigrationsDir: migrationsDir,
-		HooksDir:      hooksDir,
-		HooksWatch:    hooksWatch,
-		HooksPoolSize: hooksPool,
 	})
 
-	// migrate command (with js templates)
+	// Migrate command (with js templates)
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
 		TemplateLang: migratecmd.TemplateLangJS,
 		Automigrate:  automigrate,
 		Dir:          migrationsDir,
 	})
 
-	// Start pprof server if address is specified
+	// Start pprof + metrics server if address is specified
 	if pprofAddr != "" {
+		mux := http.NewServeMux()
+
+		mux.Handle("/debug/", http.DefaultServeMux)
+		mux.Handle("/metrics", promhttp.Handler())
+
 		go func() {
-			log.Println("pprof started at:", "http://"+pprofAddr+"/debug/pprof/")
-			if err := http.ListenAndServe(pprofAddr, nil); err != nil {
-				log.Printf("pprof server error: %v", err)
+			log.Printf("pprof started at: http://%s/debug/pprof/", pprofAddr)
+			log.Printf("metrics started at: http://%s/metrics", pprofAddr)
+			if err := http.ListenAndServe(pprofAddr, mux); err != nil {
+				log.Printf("pprof/metrics server error: %v", err)
 			}
 		}()
 	}
 
+	pb_go.InitHPReportsHooks(app)
+	pb_go.InitVoteHooks(app)
+	pb_go.InitRealtimeHooks(app)
+	pb_go.InitCronJobs(app)
+
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+		// Mob cache must initialize successfully for API endpoint to work
 		if err := pb_go.InitMobCache(se.App); err != nil {
-			log.Printf("Failed to initialize mob cache: %v", err)
+			log.Fatalf("[FATAL] Failed to initialize mob cache: %v", err)
 		}
+
 		se.Router.POST("/api/create-hp-report", pb_go.CreateHPReportHandler(se.App))
+
+		log.Printf("[API] /api/create-hp-report registered")
 		return se.Next()
 	})
 
-	// Filter specific expected errors from logs to reduce noise
+	// Filter expected validation errors from logs to reduce noise
 	app.OnModelCreate(core.LogsTableName).BindFunc(func(e *core.ModelEvent) error {
 		l := e.Model.(*core.Log)
 
@@ -116,7 +105,7 @@ func main() {
 			return e.Next()
 		}
 
-		// Error messages that should not be logged
+		// Don't log these expected validation errors
 		filteredErrors := []string{
 			"You have already reported this HP percentage.",
 			"failed to save hp report: You have already reported this HP percentage.",

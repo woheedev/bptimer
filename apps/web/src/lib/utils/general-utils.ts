@@ -9,6 +9,7 @@ import {
 	MAX_HP_VALUE,
 	MINUTE,
 	SECOND,
+	SPECIAL_MAGICAL_CREATURES_DEAD_TIMEOUT,
 	STALE_DATA_TIMEOUT,
 	STALE_DATA_TIMEOUT_FULL_HP,
 	STALE_DATA_TIMEOUT_HIGH_HP
@@ -58,17 +59,32 @@ export function formatTimeAgo(dateString: string, now?: Date): string {
 
 /**
  * Determines if data is stale based on HP percentage
- * - Dead mobs (0% HP) are never considered stale
+ * - Dead mobs (0% HP) are never considered stale, except for special magical creatures
+ * - Special magical creatures (Loyal Boarlet, Silver Nappo, Golden Nappo) transition from dead to unknown after specific timeouts
  * - 100% HP: 10 minute timeout
  * - 80-99% HP: 7 minute timeout
  * - < 80% HP: 5 minute timeout
  *
  * @param last_updated - The timestamp string to check
  * @param hp_percentage - The HP percentage to determine timeout
+ * @param mobName - Optional mob name to apply special dead timeout rules
  * @returns True if the data is older than the timeout, false otherwise
  */
-export function isDataStale(last_updated: string, hp_percentage?: number): boolean {
-	// Dead mobs are never considered stale
+export function isDataStale(
+	last_updated: string,
+	hp_percentage?: number,
+	mobName?: string
+): boolean {
+	if (hp_percentage === 0 && mobName) {
+		const specialTimeout = SPECIAL_MAGICAL_CREATURES_DEAD_TIMEOUT[mobName];
+		if (specialTimeout !== undefined) {
+			const timeoutAgo = new Date(Date.now() - specialTimeout);
+			const updateTime = new Date(last_updated);
+			return updateTime < timeoutAgo;
+		}
+	}
+
+	// Regular dead mobs are never considered stale
 	if (hp_percentage === 0) {
 		return false;
 	}

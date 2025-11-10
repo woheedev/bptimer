@@ -1,21 +1,21 @@
 import { browser } from '$app/environment';
 import { FAVORITE_MOBS_STORAGE_KEY } from '$lib/constants';
+import { SvelteSet } from 'svelte/reactivity';
 
-function loadFromLocalStorage(): Set<string> {
-	if (!browser) return new Set();
+function loadFromLocalStorage(): string[] {
+	if (!browser) return [];
 	try {
 		const stored = localStorage.getItem(FAVORITE_MOBS_STORAGE_KEY);
 		if (stored) {
-			const parsed = JSON.parse(stored);
-			return new Set(parsed);
+			return JSON.parse(stored);
 		}
 	} catch (error) {
 		console.error('Failed to load favorites from localStorage:', error);
 	}
-	return new Set();
+	return [];
 }
 
-function saveToLocalStorage(favorites: Set<string>) {
+function saveToLocalStorage(favorites: SvelteSet<string>) {
 	if (!browser) return;
 	try {
 		localStorage.setItem(FAVORITE_MOBS_STORAGE_KEY, JSON.stringify(Array.from(favorites)));
@@ -25,7 +25,7 @@ function saveToLocalStorage(favorites: Set<string>) {
 }
 
 function createFavoriteMobsStore() {
-	let favorites = $state<Set<string>>(loadFromLocalStorage());
+	const favorites = new SvelteSet<string>(loadFromLocalStorage());
 
 	function toggleFavoriteMob(mobId: string) {
 		if (favorites.has(mobId)) {
@@ -33,16 +33,19 @@ function createFavoriteMobsStore() {
 		} else {
 			favorites.add(mobId);
 		}
-		// eslint-disable-next-line svelte/prefer-svelte-reactivity
-		favorites = new Set(favorites);
 		saveToLocalStorage(favorites);
+	}
+
+	function isFavorited(mobId: string): boolean {
+		return favorites.has(mobId);
 	}
 
 	return {
 		get favoriteMobs() {
 			return favorites;
 		},
-		toggleFavoriteMob
+		toggleFavoriteMob,
+		isFavorited
 	};
 }
 

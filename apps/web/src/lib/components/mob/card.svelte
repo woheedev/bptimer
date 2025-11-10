@@ -3,22 +3,28 @@
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import * as HoverCard from '$lib/components/ui/hover-card/index.js';
 	import { Progress } from '$lib/components/ui/progress/index.js';
+	import { Switch } from '$lib/components/ui/switch/index.js';
 	import { Toggle } from '$lib/components/ui/toggle';
 	import {
 		LATEST_CHANNELS_DISPLAY_COUNT,
 		MAGICAL_CREATURE_RESET_HOURS,
-		SECOND
+		SECOND,
+		SPECIAL_MAGICAL_CREATURES
 	} from '$lib/constants';
 	import { favoriteMobsStore } from '$lib/stores/favorite-mobs.svelte';
+	import { mobNotificationsStore } from '$lib/stores/mob-notifications.svelte';
 	import { formatCountdown } from '$lib/utils/event-timer';
 	import {
 		calculateRespawnProgress,
 		getInitials,
 		getNextRespawnTime
 	} from '$lib/utils/general-utils';
-	import { getMobImagePath } from '$lib/utils/mob-utils';
+	import { getLocationImagePath, getMobImagePath } from '$lib/utils/mob-utils';
+	import { requestNotificationPermission } from '$lib/utils/notifications';
 	import Heart from '@lucide/svelte/icons/heart';
+	import MapPin from '@lucide/svelte/icons/map-pin';
 
 	let {
 		mob,
@@ -39,6 +45,7 @@
 			status: 'alive' | 'dead' | 'unknown';
 			hp_percentage: number;
 			last_updated: string;
+			location_image?: number;
 		}>;
 		onViewDetails?: (mobId: string, mobName: string, mobUid: number, totalChannels: number) => void;
 		onChannelClick?: (
@@ -75,7 +82,25 @@
 		return [...channelData, ...emptyPills];
 	});
 
-	const isFavorited = $derived.by(() => favoriteMobsStore.favoriteMobs.has(mob.id));
+	const isFavorited = $derived(favoriteMobsStore.isFavorited(mob.id));
+
+	const isSpecialMagicalCreature = $derived(mob.name in SPECIAL_MAGICAL_CREATURES);
+
+	const notificationsEnabled = $derived(mobNotificationsStore.isEnabled(mob.id));
+
+	const activeLocations = $derived.by(() => {
+		if (!isSpecialMagicalCreature || latestChannels.length === 0) return [];
+
+		// Find all alive channels that have location data
+		return latestChannels
+			.filter((ch) => ch.status === 'alive' && ch.location_image != null)
+			.map((ch) => ({
+				channelNumber: ch.channel,
+				locationImage: ch.location_image!,
+				hpPercentage: ch.hp_percentage
+			}))
+			.sort((a, b) => a.hpPercentage - b.hpPercentage); // Sort by HP (lowest first)
+	});
 
 	// Respawn countdown logic
 	const nextRespawnTime = $derived.by(() => {
@@ -138,9 +163,68 @@
 	</Card.Header>
 
 	<Card.Content class="space-y-4">
-		<!-- Progress bar area -->
+		<!-- Progress bar area / Notification toggle -->
 		<div class="mt-2 flex h-6 flex-col justify-end">
-			{#if nextRespawnTime}
+			{#if isSpecialMagicalCreature}
+				<!-- Notification toggle for special magical creatures -->
+				<div class="flex items-center justify-between">
+					<div>
+						{#if activeLocations.length > 0}
+							<!-- Map icon with hover card showing active locations -->
+							<HoverCard.Root openDelay={200}>
+								<HoverCard.Trigger>
+									<Button
+										variant="outline"
+										size="icon"
+										aria-label="View active locations"
+										class="h-8 w-8"
+									>
+										<MapPin class="h-4 w-4" strokeWidth={1.5} />
+									</Button>
+								</HoverCard.Trigger>
+								<HoverCard.Content class="w-auto max-w-md p-2">
+									<div class="space-y-2">
+										<!-- Grid of active locations -->
+										<div class="flex flex-wrap gap-2">
+											{#each activeLocations as location (location.channelNumber)}
+												<div class="flex flex-col items-center gap-1">
+													<img
+														src={getLocationImagePath(mob.name, type, location.locationImage)}
+														alt="Line {location.channelNumber}"
+														class="ring-primary h-24 w-24 rounded object-cover ring-2"
+													/>
+													<p class="text-muted-foreground text-xs">
+														Line {location.channelNumber} - {location.hpPercentage}%
+													</p>
+												</div>
+											{/each}
+										</div>
+									</div>
+								</HoverCard.Content>
+							</HoverCard.Root>
+						{/if}
+					</div>
+					<div class="flex items-center gap-2">
+						<label for="notifications-{mob.id}" class="text-muted-foreground text-sm">
+							Notifications
+						</label>
+						<Switch
+							id="notifications-{mob.id}"
+							checked={notificationsEnabled}
+							onCheckedChange={async () => {
+								if (!notificationsEnabled) {
+									const granted = await requestNotificationPermission();
+									if (!granted) {
+										return;
+									}
+								}
+								mobNotificationsStore.toggleNotifications(mob.id);
+							}}
+						/>
+					</div>
+				</div>
+			{:else if nextRespawnTime}
+				<!-- Progress bar for regular mobs -->
 				<div class="space-y-2">
 					<div class="text-muted-foreground flex justify-between text-xs">
 						<span>Time Until Respawn</span>

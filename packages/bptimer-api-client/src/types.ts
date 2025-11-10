@@ -19,6 +19,7 @@ export interface ReportHPParams {
   line: number;
   pos_x?: number;
   pos_y?: number;
+  pos_z?: number;
   region?: string;
 }
 
