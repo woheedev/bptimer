@@ -134,11 +134,13 @@ export const MODULES_OPTIMIZER_PRIORITY_EFFECTS_STORAGE_KEY = 'modules-optimizer
 export const MODULES_OPTIMIZER_NUM_SLOTS_STORAGE_KEY = 'modules-optimizer-num-slots';
 export const MOB_NOTIFICATIONS_STORAGE_KEY = 'mob-notifications';
 
+import Discord from '$lib/components/icons/discord.svelte';
 import {
 	Calculator,
 	Download,
 	Hammer,
 	Heart,
+	ListTodo,
 	Map,
 	Medal,
 	Sparkles,
@@ -191,21 +193,33 @@ export const PAGES: PageItem[] = [
 
 export const PARTNER_PAGES: PageItem[] = [
 	{
+		title: 'Daily Checklist',
+		url: 'https://teawase.github.io/blue-protocol-checklist/',
+		icon: ListTodo,
+		external: true
+	},
+	{
 		title: 'Interactive Maps',
 		url: 'https://starresonance.th.gl',
 		icon: Map,
 		external: true
 	},
 	{
-		title: 'BP:SR Farmers',
+		title: 'Raid Leaderboards',
+		url: 'https://blueprotocol.fr',
+		icon: Medal,
+		external: true
+	},
+	{
+		title: 'Farmers Discord',
 		url: 'https://discord.gg/bpsrfarmers',
 		icon: Tractor,
 		external: true
 	},
 	{
-		title: 'BP Raid Leaderboard',
-		url: 'https://blueprotocol.fr',
-		icon: Medal,
+		title: 'Invite Discord Bot',
+		url: 'https://discord.com/oauth2/authorize?client_id=1435655675081396366',
+		icon: Discord,
 		external: true
 	}
 ];
@@ -351,10 +365,19 @@ export const TOOLS_SECTIONS: ToolsSections = {
 		shortTitle: 'Discords',
 		cards: [
 			{
-				title: 'Official BPSR Discord',
-				description: 'Official Discord server for the Anime MMORPG Blue Protocol: Star Resonance.',
-				badge: 'Official',
-				url: 'https://discord.gg/starresonance'
+				title: 'BPSR Info',
+				description:
+					'A community Discord bot that provides HP alert notifications with customizable thresholds, event timers, and much more.',
+				badge: 'BP Timer',
+				badgeVariant: 'default',
+				url: 'https://discord.com/oauth2/authorize?client_id=1435655675081396366'
+			},
+			{
+				title: 'BPSR Devs',
+				description: "Developer community for BPSR. Home to winj's DPS Meter and BP Timer.",
+				badge: 'BP Timer',
+				badgeVariant: 'default',
+				url: 'https://discord.gg/3UTC4pfCyC'
 			},
 			{
 				title: 'BP:SR Farmers',
@@ -370,11 +393,10 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				url: 'https://discord.gg/xYeZx28Jc3'
 			},
 			{
-				title: 'BPSR Devs',
-				description: "Developer community for BPSR. Home to winj's DPS Meter and BP Timer.",
-				badge: 'BP Timer',
-				badgeVariant: 'default',
-				url: 'https://discord.gg/3UTC4pfCyC'
+				title: 'Official BPSR Discord',
+				description: 'Official Discord server for the Anime MMORPG Blue Protocol: Star Resonance.',
+				badge: 'Official',
+				url: 'https://discord.gg/starresonance'
 			}
 		]
 	},
@@ -383,28 +405,31 @@ export const TOOLS_SECTIONS: ToolsSections = {
 		shortTitle: 'Websites',
 		cards: [
 			{
-				title: 'Star Resonance Interactive Maps',
-				description:
-					'Explore Asteria Plains Map, Asterleeds Map, Windhowl Canyon Map in Blue Protocol: Star Resonance with BPSR, Bosses, Guides, Maps, Rare Spawns, Engram Hubs, plus more locations brought to you by The Hidden Gaming Lair!',
-				badge: 'Partner',
-				author: 'DevLeon',
-				url: 'https://starresonance.th.gl/'
-			},
-			{
 				title: 'Blue Protocol Leaderboard',
 				description:
 					'Automatic leaderboard based on DPS application. All displayed times are real session times, not game times, to ensure fairplay.',
-				badge: 'Partner',
+				badge: 'BPTimer',
+				badgeVariant: 'default',
 				author: 'Kaws & Solaray',
-				tags: 'FR|Closed Source',
+				tags: 'Closed Source',
 				url: 'https://blueprotocol.fr/'
 			},
 			{
 				title: 'Blue Protocol: Star Resonance Checklist',
 				description:
 					'A simple, responsive web-based checklist for tracking daily and weekly tasks for Blue Protocol: Star Resonance. Built with HTML, CSS, and JavaScript. No external dependencies beyond confetti.js for celebrations.',
+				badge: 'BPTimer',
+				badgeVariant: 'default',
 				author: 'Teawase',
 				url: 'https://teawase.github.io/blue-protocol-checklist/'
+			},
+			{
+				title: 'Star Resonance Interactive Maps',
+				description:
+					'Explore Asteria Plains Map, Asterleeds Map, Windhowl Canyon Map in Blue Protocol: Star Resonance with BPSR, Bosses, Guides, Maps, Rare Spawns, Engram Hubs, plus more locations brought to you by The Hidden Gaming Lair!',
+				badge: 'Partner',
+				author: 'DevLeon',
+				url: 'https://starresonance.th.gl/'
 			},
 			{
 				title: 'Maxroll',

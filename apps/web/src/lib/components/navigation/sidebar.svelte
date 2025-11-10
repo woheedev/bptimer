@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AnimatedGradientText from '$lib/components/animated-gradient-text.svelte';
+	import Discord from '$lib/components/icons/discord.svelte';
 	import InGameDay from '$lib/components/navigation/ingame-day.svelte';
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
@@ -7,7 +8,6 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
 	import { HeartHandshake } from '@lucide/svelte/icons';
-	import { siDiscord } from 'simple-icons';
 	import type { ComponentProps } from 'svelte';
 
 	let {
@@ -33,7 +33,7 @@
 			</div>
 		</Sidebar.Group>
 		<Sidebar.Group class="py-0">
-			<Sidebar.GroupLabel>Partner Sites</Sidebar.GroupLabel>
+			<Sidebar.GroupLabel>Partners</Sidebar.GroupLabel>
 			<NavigationMain items={PARTNER_PAGES} />
 		</Sidebar.Group>
 		<Sidebar.Group class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
@@ -75,9 +75,7 @@
 					rel="noopener noreferrer"
 					class="w-full justify-center"
 				>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
-						><path d={siDiscord.path} /></svg
-					>
+					<Discord />
 					<span>Join Discord</span>
 				</Sidebar.MenuButton>
 			</div>
@@ -95,7 +93,7 @@
 					rel="noopener noreferrer"
 					class="hover:underline"
 				>
-					Buy me a coffee ☕ | v1.0.0
+					Buy me a coffee ☕ | v1.0.1
 				</a>
 			</p>
 		{/if}

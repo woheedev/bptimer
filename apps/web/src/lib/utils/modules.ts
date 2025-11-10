@@ -175,16 +175,22 @@ export function updateModuleEffect(
 	field: 'name' | 'level',
 	value: string | number
 ): Module[] {
-	return modules.map((module, i) =>
-		i === moduleIndex
-			? {
-					...module,
-					effects: module.effects.map((effect, j) =>
-						j === effectIndex ? { ...effect, [field]: value } : effect
-					) as Module['effects']
-				}
-			: module
-	);
+	return modules.map((module, i) => {
+		if (i !== moduleIndex) return module;
+
+		let effects = [...module.effects];
+
+		// Clear any existing effect with the same name
+		if (field === 'name' && typeof value === 'string' && value) {
+			effects = effects.map((effect, idx) =>
+				idx !== effectIndex && effect.name === value ? { ...effect, name: '' } : effect
+			);
+		}
+
+		effects[effectIndex] = { ...effects[effectIndex], [field]: value };
+
+		return { ...module, effects: effects as Module['effects'] };
+	});
 }
 
 /**
