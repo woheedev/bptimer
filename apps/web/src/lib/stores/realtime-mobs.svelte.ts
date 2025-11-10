@@ -97,14 +97,14 @@ function createRealtimeMobsStore() {
 			isConnected = true;
 			connectionAttempts = 0;
 
-			return () => {
+			return async () => {
 				if (debounceTimer) {
 					clearTimeout(debounceTimer);
 					debounceTimer = null;
 				}
 				eventQueue = []; // Clear any pending events
-				pbRealtime.realtime.unsubscribe('mob_hp_updates');
-				pbRealtime.realtime.unsubscribe('mob_resets');
+				await pbRealtime.realtime.unsubscribe('mob_hp_updates');
+				await pbRealtime.realtime.unsubscribe('mob_resets');
 				isConnected = false;
 			};
 		} catch (error) {

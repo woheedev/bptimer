@@ -13,6 +13,7 @@ export const STALE_DATA_TIMEOUT = 2 * MINUTE; // Default timeout
 export const STALE_DATA_TIMEOUT_FULL_HP = 5 * MINUTE; // For 100% HP
 export const STALE_DATA_TIMEOUT_HIGH_HP = 3 * MINUTE; // For 80-99% HP
 export const DPS_METER_TOAST_DURATION = 10 * SECOND;
+export const MOB_NOTIFICATION_DURATION = 15 * SECOND;
 export const GAME_TIMEZONE_OFFSET = -2; // UTC-2 (deprecated)
 export const DAILY_RESET_HOUR = 7; // 5AM UTC-2 = 7AM UTC
 export const DEBOUNCE_DELAY = 300; // ms

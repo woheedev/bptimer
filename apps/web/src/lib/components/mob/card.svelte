@@ -3,7 +3,7 @@
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import * as HoverCard from '$lib/components/ui/hover-card/index.js';
+	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Progress } from '$lib/components/ui/progress/index.js';
 	import { Switch } from '$lib/components/ui/switch/index.js';
 	import { Toggle } from '$lib/components/ui/toggle';
@@ -171,8 +171,8 @@
 					<div>
 						{#if activeLocations.length > 0}
 							<!-- Map icon with hover card showing active locations -->
-							<HoverCard.Root openDelay={200}>
-								<HoverCard.Trigger>
+							<Popover.Root>
+								<Popover.Trigger>
 									<Button
 										variant="outline"
 										size="icon"
@@ -181,8 +181,8 @@
 									>
 										<MapPin class="h-4 w-4" strokeWidth={1.5} />
 									</Button>
-								</HoverCard.Trigger>
-								<HoverCard.Content class="w-auto max-w-md p-2">
+								</Popover.Trigger>
+								<Popover.Content class="w-auto max-w-md p-2">
 									<div class="space-y-2">
 										<!-- Grid of active locations -->
 										<div class="flex flex-wrap gap-2">
@@ -191,7 +191,7 @@
 													<img
 														src={getLocationImagePath(mob.name, type, location.locationImage)}
 														alt="Line {location.channelNumber}"
-														class="ring-primary h-24 w-24 rounded object-cover ring-2"
+														class="ring-primary h-36 w-36 rounded object-cover ring-2 md:h-48 md:w-48"
 													/>
 													<p class="text-muted-foreground text-xs">
 														Line {location.channelNumber} - {location.hpPercentage}%
@@ -200,8 +200,8 @@
 											{/each}
 										</div>
 									</div>
-								</HoverCard.Content>
-							</HoverCard.Root>
+								</Popover.Content>
+							</Popover.Root>
 						{/if}
 					</div>
 					<div class="flex items-center gap-2">

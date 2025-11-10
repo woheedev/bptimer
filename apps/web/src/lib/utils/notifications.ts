@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { SPECIAL_MAGICAL_CREATURES } from '$lib/constants';
+import { MOB_NOTIFICATION_DURATION, SPECIAL_MAGICAL_CREATURES } from '$lib/constants';
 import { mobNotificationsStore } from '$lib/stores/mob-notifications.svelte';
 import { getLocationImagePath } from '$lib/utils/mob-utils';
 
@@ -97,10 +97,10 @@ export function showMobNotification(
 	try {
 		const notification = new Notification(title, options);
 
-		// Auto-close after 5 seconds
+		// Auto-close after MOB_NOTIFICATION_DURATION
 		setTimeout(() => {
 			notification.close();
-		}, 5000);
+		}, MOB_NOTIFICATION_DURATION);
 
 		// Handle click to focus window
 		notification.onclick = () => {
