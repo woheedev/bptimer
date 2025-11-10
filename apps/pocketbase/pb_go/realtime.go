@@ -97,44 +97,64 @@ func (b *UpdateBatcher) flush() {
 }
 
 func (b *UpdateBatcher) broadcast(updates []*MobUpdate) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("[REALTIME] PANIC in broadcast: %v", r)
+		}
+	}()
+
 	broker := b.app.SubscriptionsBroker()
 	clients := broker.Clients()
 
+	batchPayload := make([][]interface{}, 0, len(updates))
+	for _, update := range updates {
+		payload := make([]interface{}, 4)
+		payload[0] = update.MobID
+		payload[1] = update.ChannelNumber
+		payload[2] = update.HPPercentage
+		if update.LocationImage != nil {
+			payload[3] = *update.LocationImage
+		} else {
+			payload[3] = nil
+		}
+		batchPayload = append(batchPayload, payload)
+	}
+
+	data, err := json.Marshal(batchPayload)
+	if err != nil {
+		log.Printf("[REALTIME] batch marshal error=%v", err)
+		return
+	}
+
+	message := subscriptions.Message{
+		Name: SSE_TOPIC_HP_UPDATES,
+		Data: data,
+	}
+
+	droppedCount := 0
+	sentCount := 0
+
+	// Send to all subscribed clients
 	for _, client := range clients {
 		if !client.HasSubscription(SSE_TOPIC_HP_UPDATES) {
 			continue
 		}
 
-		batchPayload := make([][]interface{}, 0, len(updates))
-		for _, update := range updates {
-			payload := make([]interface{}, 4)
-			payload[0] = update.MobID
-			payload[1] = update.ChannelNumber
-			payload[2] = update.HPPercentage
-			if update.LocationImage != nil {
-				payload[3] = *update.LocationImage
-			} else {
-				payload[3] = nil
-			}
-			batchPayload = append(batchPayload, payload)
-		}
-
-		data, err := json.Marshal(batchPayload)
-		if err != nil {
-			log.Printf("[REALTIME] batch marshal error=%v", err)
-			continue
-		}
-
-		message := subscriptions.Message{
-			Name: SSE_TOPIC_HP_UPDATES,
-			Data: data,
-		}
-
 		select {
 		case client.Channel() <- message:
+			sentCount++
 		default:
-			log.Printf("[REALTIME] client=%s channel full", client.Id())
+			droppedCount++
+			// Only log occasional drops to avoid log spam
+			if droppedCount%100 == 1 {
+				log.Printf("[REALTIME] dropped=%d sent=%d (client channels full)", droppedCount, sentCount)
+			}
 		}
+	}
+
+	// Log summary if there were significant drops
+	if droppedCount > 0 {
+		log.Printf("[REALTIME] broadcast complete: sent=%d dropped=%d total_clients=%d", sentCount, droppedCount, len(clients))
 	}
 }
 
