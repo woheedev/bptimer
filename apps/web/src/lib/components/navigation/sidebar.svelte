@@ -6,7 +6,7 @@
 	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
-	import { Construction, HeartHandshake } from '@lucide/svelte/icons';
+	import { HeartHandshake } from '@lucide/svelte/icons';
 	import { siDiscord } from 'simple-icons';
 	import type { ComponentProps } from 'svelte';
 
@@ -38,6 +38,7 @@
 		</Sidebar.Group>
 		<Sidebar.Group class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
 			<div class="flex flex-col gap-2 p-0">
+				<!--
 				<Alert.Root class="text-xs" variant="destructive">
 					<Construction />
 					<Alert.Title class="text-sm font-bold">Magical Creature</Alert.Title>
@@ -46,12 +47,18 @@
 						sending location data.
 					</Alert.Description>
 				</Alert.Root>
+				-->
 				<Alert.Root class="text-xs">
 					<HeartHandshake />
 					<Alert.Title class="text-sm font-bold">Looking to Collaborate?</Alert.Title>
 					<Alert.Description class="text-xs">
-						We're welcoming developers and partners to help grow the project. Join our Discord to
-						get involved.
+						Use our API client to help crowdsource data. Join our Discord below for an API key or
+						more information. <a
+							href="https://github.com/woheedev/bptimer/tree/main/packages/bptimer-api-client"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="underline hover:no-underline">Click here!</a
+						>
 					</Alert.Description>
 				</Alert.Root>
 			</div>

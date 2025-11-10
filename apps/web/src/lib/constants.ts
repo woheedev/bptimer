@@ -163,6 +163,8 @@ export const PAGES: PageItem[] = [
 	{
 		title: 'Magical Creatures',
 		url: '/magical-creatures',
+		badge: 'New',
+		badgeVariant: 'default',
 		icon: Sparkles
 	},
 	{
