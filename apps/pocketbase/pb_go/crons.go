@@ -145,16 +145,39 @@ func broadcastMobResets(app core.App, mobIds []string) error {
 	broker := app.SubscriptionsBroker()
 	clients := broker.Clients()
 
+	sentCount := 0
+	droppedCount := 0
+
 	for _, client := range clients {
 		if !client.HasSubscription(SSE_TOPIC_RESETS) {
 			continue
 		}
 
-		select {
-		case client.Channel() <- message:
-		default:
-			log.Printf("[MOB_RESPAWN] client=%s channel full", client.Id())
-		}
+		// Catch panic per-client to handle closed channels gracefully
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					droppedCount++
+					if droppedCount%100 == 1 {
+						log.Printf("[MOB_RESPAWN] client panic (likely closed channel): %v", r)
+					}
+				}
+			}()
+
+			select {
+			case client.Channel() <- message:
+				sentCount++
+			default:
+				droppedCount++
+				if droppedCount%100 == 1 {
+					log.Printf("[MOB_RESPAWN] dropped=%d sent=%d (client channels full)", droppedCount, sentCount)
+				}
+			}
+		}()
+	}
+
+	if droppedCount > 0 {
+		log.Printf("[MOB_RESPAWN] broadcast complete: sent=%d dropped=%d total_clients=%d", sentCount, droppedCount, len(clients))
 	}
 
 	return nil

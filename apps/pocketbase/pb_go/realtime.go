@@ -140,16 +140,27 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate) {
 			continue
 		}
 
-		select {
-		case client.Channel() <- message:
-			sentCount++
-		default:
-			droppedCount++
-			// Only log occasional drops to avoid log spam
-			if droppedCount%100 == 1 {
-				log.Printf("[REALTIME] dropped=%d sent=%d (client channels full)", droppedCount, sentCount)
+		// Catch panic per-client to handle closed channels gracefully
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					droppedCount++
+					if droppedCount%100 == 1 {
+						log.Printf("[REALTIME] client panic (likely closed channel): %v", r)
+					}
+				}
+			}()
+
+			select {
+			case client.Channel() <- message:
+				sentCount++
+			default:
+				droppedCount++
+				if droppedCount%100 == 1 {
+					log.Printf("[REALTIME] dropped=%d sent=%d (client channels full)", droppedCount, sentCount)
+				}
 			}
-		}
+		}()
 	}
 
 	// Log summary if there were significant drops
