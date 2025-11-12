@@ -8,6 +8,8 @@
     },
     "check": {},
     "lint": {},
+    "format": {},
+    "format:check": {},
     "dev": {
       "cache": false,
       "persistent": true

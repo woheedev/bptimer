@@ -7,6 +7,8 @@ node_modules
 .env.*
 !.env.example
 vite.config.js*
+target
+.wrangler
 
 # Ignore files for PNPM, NPM, YARN and BUN
 pnpm-lock.yaml

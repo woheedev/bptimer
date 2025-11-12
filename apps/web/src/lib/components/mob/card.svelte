@@ -120,6 +120,10 @@
 	let countdownText = $state('');
 	let progressValue = $state(0);
 
+	// Map pin popover state
+	let mapPinPopoverOpen = $state(false);
+	let mapPinToggled = $state(false);
+
 	// Update countdown every second
 	$effect(() => {
 		if (nextRespawnTime) {
@@ -168,42 +172,61 @@
 			{#if isSpecialMagicalCreature}
 				<!-- Notification toggle for special magical creatures -->
 				<div class="flex items-center justify-between">
-					<div>
-						{#if activeLocations.length > 0}
-							<!-- Map icon with hover card showing active locations -->
-							<Popover.Root>
-								<Popover.Trigger>
-									<Button
-										variant="outline"
-										size="icon"
-										aria-label="View active locations"
-										class="h-8 w-8"
-									>
-										<MapPin class="h-4 w-4" strokeWidth={1.5} />
-									</Button>
-								</Popover.Trigger>
-								<Popover.Content class="w-auto max-w-md p-2">
-									<div class="space-y-2">
-										<!-- Grid of active locations -->
-										<div class="flex flex-wrap gap-2">
-											{#each activeLocations as location (location.channelNumber)}
-												<div class="flex flex-col items-center gap-1">
-													<img
-														src={getLocationImagePath(mob.name, type, location.locationImage)}
-														alt="Line {location.channelNumber}"
-														class="ring-primary h-36 w-36 rounded object-cover ring-2 md:h-48 md:w-48"
-													/>
-													<p class="text-muted-foreground text-xs">
-														Line {location.channelNumber} - {location.hpPercentage}%
-													</p>
-												</div>
-											{/each}
-										</div>
+					{#if activeLocations.length > 0}
+						<!-- Map icon with toggle + hover peek showing active locations -->
+						<Popover.Root bind:open={mapPinPopoverOpen}>
+							<Popover.Trigger>
+								<Toggle
+									pressed={mapPinToggled}
+									onclick={(e) => e.stopPropagation()}
+									onPressedChange={(pressed) => {
+										mapPinToggled = pressed;
+										mapPinPopoverOpen = pressed;
+									}}
+									onmouseenter={() => {
+										if (!mapPinToggled) {
+											mapPinPopoverOpen = true;
+										}
+									}}
+									onmouseleave={() => {
+										if (!mapPinToggled) {
+											mapPinPopoverOpen = false;
+										}
+									}}
+									variant="outline"
+									size="sm"
+									class="h-8 w-8 p-0"
+									aria-label={mapPinToggled
+										? 'Unpin location map (peek mode)'
+										: 'Pin location map (always show)'}
+								>
+									<MapPin class="h-4 w-4" strokeWidth={1.5} />
+								</Toggle>
+							</Popover.Trigger>
+							<Popover.Content
+								interactOutsideBehavior={mapPinToggled ? 'ignore' : 'close'}
+								class="w-auto max-w-md p-2"
+							>
+								<div class="space-y-2">
+									<!-- Grid of active locations -->
+									<div class="flex flex-wrap gap-2">
+										{#each activeLocations as location (location.channelNumber)}
+											<div class="flex flex-col items-center gap-1">
+												<img
+													src={getLocationImagePath(mob.name, type, location.locationImage)}
+													alt="Line {location.channelNumber}"
+													class="ring-primary h-36 w-36 rounded object-cover ring-2 md:h-48 md:w-48"
+												/>
+												<p class="text-muted-foreground text-xs">
+													Line {location.channelNumber} - {location.hpPercentage}%
+												</p>
+											</div>
+										{/each}
 									</div>
-								</Popover.Content>
-							</Popover.Root>
-						{/if}
-					</div>
+								</div>
+							</Popover.Content>
+						</Popover.Root>
+					{/if}
 					<div class="flex items-center gap-2">
 						<label for="notifications-{mob.id}" class="text-muted-foreground text-sm">
 							Notifications
