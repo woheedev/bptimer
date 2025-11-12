@@ -18,6 +18,29 @@ var (
 	cacheMutex sync.RWMutex
 )
 
+// isInSubmissionBlackout checks if we're in the blackout period for a mob.
+func isInSubmissionBlackout(mobName string) bool {
+	resetHours, exists := MagicalCreatureResetHours[mobName]
+	if !exists || len(resetHours) == 0 {
+		return false // Not a magical creature or no resets configured
+	}
+
+	currentHour := time.Now().UTC().Hour()
+	firstReset := resetHours[0]
+	lastReset := resetHours[len(resetHours)-1]
+
+	// Calculate cutoff hour
+	cutoffHour := (lastReset + MAGICAL_CREATURE_CUTOFF_HOURS) % 24
+
+	if cutoffHour < firstReset {
+		// Cutoff wraps to next day
+		return currentHour >= cutoffHour && currentHour < firstReset
+	} else {
+		// No wrap
+		return currentHour < firstReset || currentHour >= cutoffHour
+	}
+}
+
 // findClosestLocation finds the nearest spawn point using squared Euclidean distance (2D: X/Z only).
 // Returns (locationID, squaredDistance).
 func findClosestLocation(mobID int, x, y, z float64) (int, float64) {
@@ -216,6 +239,11 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		if !ok {
 			logger.Error("Unknown monster ID", "monster_id", data.MonsterID)
 			return e.BadRequestError(fmt.Sprintf("Unknown monster ID: %d", data.MonsterID), nil)
+		}
+
+		// Check if submissions are currently blocked for this mob
+		if isInSubmissionBlackout(mobName) {
+			return e.BadRequestError("HP reports are currently closed for this mob. Please wait for the next reset.", nil)
 		}
 
 		// Get mob data from cache (auto-refreshes if expired)

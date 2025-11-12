@@ -118,7 +118,8 @@ export const API_USERS: Record<string, string> = {
 	d7v77edry2kmhp5: 'discord.gg/bpsrfarmers',
 	qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs', // winjwinj
 	ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr', // geonode
-	gw8hsqxlvvbok37: 'BPTL - blueprotocol.fr' // kaws & solaray
+	gw8hsqxlvvbok37: 'BPTL - blueprotocol.fr', // kaws & solaray
+	fftlpj0jgvmmoge: 'tinyurl.com/mrsnakke' // mrsnake
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 

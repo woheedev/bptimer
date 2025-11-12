@@ -56,12 +56,16 @@ var MagicalCreatureResetHours = map[string][]int{
 	"Breezy Boarlet": {14, 18, 22}, // 12PM, 4PM, 8PM UTC-2
 }
 
+// Hours after last magical creature reset to stop accepting HP report submissions
+const MAGICAL_CREATURE_CUTOFF_HOURS = 2
+
 // API users that bypass vote and rate limiting checks
 var BypassVoteUserIDs = map[string]bool{
 	"d7v77edry2kmhp5": true, // discord.gg/bpsrfarmers
 	"qctjhx7a061lhfq": true, // tinyurl.com/bpsrlogs
 	"ku99bl6jmjbijj4": true, // tinyurl.com/meter-bpsr
 	"gw8hsqxlvvbok37": true, // BPTL - blueprotocol.fr
+	"fftlpj0jgvmmoge": true, // tinyurl.com/mrsnakke
 }
 
 // MOB_MAPPING maps game monster IDs to mob names in database
