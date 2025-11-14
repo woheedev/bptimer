@@ -302,9 +302,11 @@ export const TOOLS_SECTIONS: ToolsSections = {
 			},
 			{
 				title: 'BPSR-Meter',
-				description: 'Real-time combat statistics and performance tracking tool.',
+				description:
+					'A real-time DPS meter for Blue Protocol: Star Resonance. It captures game data and converts it into performance statistics.\n\nUn medidor de DPS en tiempo real para Blue Protocol: Star Resonance. Captura datos del juego y los convierte en estadísticas de rendimiento.',
 				author: 'mrsnakke',
-				badge: 'Fork',
+				badge: 'BPTimer',
+				badgeVariant: 'default',
 				driver: 'npcap',
 				tags: 'EN|Electron|JavaScript|Node.js|Express|Socket.IO',
 				url: 'https://github.com/mrsnakke/BPSR-Meter'

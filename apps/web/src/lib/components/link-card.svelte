@@ -36,7 +36,7 @@
 		{/if}
 	</Card.Header>
 	<Card.Content class="flex-1 pt-0">
-		<p class="text-muted-foreground text-xs">{description}</p>
+		<p class="text-muted-foreground text-xs whitespace-pre-line">{description}</p>
 	</Card.Content>
 	<Card.Footer class="flex flex-col gap-2">
 		{#if driver === 'npcap'}
