@@ -1375,10 +1375,7 @@ migrate(
           }
         ],
         id: 'pbc_3577178630',
-        indexes: [
-          'CREATE UNIQUE INDEX `idx_api_keys_api_key` ON `api_keys` (`api_key`)',
-          'CREATE UNIQUE INDEX `idx_api_keys_user` ON `api_keys` (`user`)'
-        ],
+        indexes: ['CREATE UNIQUE INDEX `idx_api_keys_api_key` ON `api_keys` (`api_key`)'],
         listRule: 'user = @request.auth.id',
         name: 'api_keys',
         system: false,
