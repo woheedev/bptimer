@@ -119,7 +119,8 @@ export const API_USERS: Record<string, string> = {
 	qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs', // winjwinj
 	ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr', // geonode
 	gw8hsqxlvvbok37: 'BPTL - blueprotocol.fr', // kaws & solaray
-	fftlpj0jgvmmoge: 'tinyurl.com/mrsnakke' // mrsnake
+	fftlpj0jgvmmoge: 'tinyurl.com/mrsnakke', // mrsnakke
+	zdc1lhi31t05zco: 'tinyurl.com/gabrielsanbs' // gabrielsanbs
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 
@@ -310,6 +311,17 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				driver: 'npcap',
 				tags: 'EN|Electron|JavaScript|Node.js|Express|Socket.IO',
 				url: 'https://github.com/mrsnakke/BPSR-Meter'
+			},
+			{
+				title: 'BPSR Meter',
+				description:
+					'BPSR Meter - Damage Meter for Blue Protocol | Real-time DPS tracking, multilingual fight history, optimized performance.',
+				author: 'gabrielsanbs',
+				badge: 'BPTimer',
+				badgeVariant: 'default',
+				driver: 'npcap',
+				tags: 'EN|ES|PT-BR|Electron|JavaScript|Node.js|Express|Socket.IO',
+				url: 'https://github.com/gabrielsanbs/BPSR-Meter'
 			},
 			{
 				title: 'BPSR-PSO-SX',

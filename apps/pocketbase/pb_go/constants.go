@@ -65,7 +65,8 @@ var BypassVoteUserIDs = map[string]bool{
 	"qctjhx7a061lhfq": true, // tinyurl.com/bpsrlogs
 	"ku99bl6jmjbijj4": true, // tinyurl.com/meter-bpsr
 	"gw8hsqxlvvbok37": true, // BPTL - blueprotocol.fr
-	"fftlpj0jgvmmoge": true, // tinyurl.com/mrsnakke
+	"fftlpj0jgvmmoge": true, // tinyurl.com/mrsnakke,
+	"zdc1lhi31t05zco": true, // tinyurl.com/gabrielsanbs
 }
 
 // MOB_MAPPING maps game monster IDs to mob names in database
