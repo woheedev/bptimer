@@ -534,9 +534,9 @@ impl eframe::App for DpsMeterApp {
                             *s = update_status.clone();
                         }
                         if matches!(update_status, crate::updater::UpdateStatus::Updated(_)) {
-                            if let Err(e) = crate::updater::restart_app() {
-                                warn!("Failed to restart after update: {}", e);
-                            }
+                            info!("Update successful, exiting application to complete replacement");
+                            std::thread::sleep(std::time::Duration::from_millis(500));
+                            std::process::exit(0);
                         }
                     }
                     Err(e) => {
