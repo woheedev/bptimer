@@ -99,22 +99,3 @@ pub fn perform_update() -> Result<UpdateStatus, Box<dyn std::error::Error>> {
         }
     }
 }
-
-pub fn restart_app() -> Result<(), Box<dyn std::error::Error>> {
-    use std::process::Command;
-
-    let exe = std::env::current_exe()?;
-    info!("Restarting application: {:?}", exe);
-
-    #[cfg(windows)]
-    {
-        Command::new(&exe).spawn()?;
-    }
-
-    #[cfg(not(windows))]
-    {
-        Command::new(&exe).spawn()?;
-    }
-
-    std::process::exit(0);
-}
