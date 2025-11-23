@@ -1,6 +1,6 @@
 use crate::models::mob::Mob;
 use crate::ui::constants::{spacing, style};
-use crate::utils::constants::is_location_tracked_mob;
+use crate::utils::constants::{get_location_name, requires_location_number};
 use egui::{Align2, Color32, FontId, Pos2, Rect, RichText, Sense, Stroke, StrokeKind, Ui, Vec2};
 
 const HP_CRITICAL_THRESHOLD: f32 = 30.0;
@@ -83,21 +83,30 @@ pub fn render_mob_view(ui: &mut Ui, mobs: &[Mob]) {
                                 {
                                     rows_ui.horizontal(|ui| {
                                         for channel in chunk {
-                                            let show_location =
-                                                is_location_tracked_mob(mob.uid as u32)
-                                                    && channel.location_number.is_some();
-                                            let label = if show_location {
-                                                format!(
-                                                    "CH {}  {}",
-                                                    channel.channel,
-                                                    channel.location_number.unwrap_or_default()
-                                                )
-                                            } else {
-                                                format!(
-                                                    "CH {}  {:.0}%",
-                                                    channel.channel, channel.hp_percentage
-                                                )
-                                            };
+                                            let label =
+                                                if let Some(loc_num) = channel.location_number {
+                                                    if requires_location_number(mob.uid as u32)
+                                                        && let Some(loc_name) =
+                                                            get_location_name(&mob.name, loc_num)
+                                                    {
+                                                        format!(
+                                                            "CH {}  {}  {:.0}%",
+                                                            channel.channel,
+                                                            loc_name,
+                                                            channel.hp_percentage
+                                                        )
+                                                    } else {
+                                                        format!(
+                                                            "CH {}  {:.0}%",
+                                                            channel.channel, channel.hp_percentage
+                                                        )
+                                                    }
+                                                } else {
+                                                    format!(
+                                                        "CH {}  {:.0}%",
+                                                        channel.channel, channel.hp_percentage
+                                                    )
+                                                };
                                             ui.vertical(|channel_ui| {
                                                 let font_id = FontId::proportional(12.0);
                                                 let galley = channel_ui.painter().layout_no_wrap(

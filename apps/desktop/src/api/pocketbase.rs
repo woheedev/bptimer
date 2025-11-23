@@ -30,6 +30,7 @@ struct MobChannelStatus {
     last_hp: f32,
     #[serde(default)]
     last_update: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     location_image: Option<i32>,
 }
 
@@ -454,7 +455,13 @@ fn parse_hp_entry(entry: &Value) -> Option<(String, i32, f32, Option<i32>)> {
     let mob_id = arr.get(0)?.as_str()?;
     let channel = arr.get(1)?.as_i64()? as i32;
     let hp = arr.get(2)?.as_f64()? as f32;
-    let location = arr.get(3).and_then(|v| v.as_i64()).map(|v| v as i32);
+    let location = arr.get(3).and_then(|v| {
+        if v.is_null() {
+            None
+        } else {
+            v.as_i64().map(|n| n as i32)
+        }
+    });
     Some((mob_id.to_string(), channel, hp, location))
 }
 
@@ -474,9 +481,7 @@ fn update_channel_entry(
         entry.hp_percentage = hp;
         entry.status = status_from_hp(hp).to_string();
         entry.last_updated = Some(timestamp.to_string());
-        if let Some(loc) = location {
-            entry.location_number = Some(loc);
-        }
+        entry.location_number = location;
         true
     } else {
         channels.push(MobChannel {

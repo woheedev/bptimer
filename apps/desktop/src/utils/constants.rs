@@ -35,6 +35,50 @@ pub fn is_location_tracked_mob(mob_id: u32) -> bool {
     BOSS_AND_MAGICAL_CREATURE_IDS.contains(&mob_id)
 }
 
+pub fn requires_location_number(mob_id: u32) -> bool {
+    matches!(mob_id, 10900 | 10901 | 10904)
+}
+
+pub fn get_location_name(mob_name: &str, location_number: i32) -> Option<&'static str> {
+    match mob_name {
+        "Loyal Boarlet" => match location_number {
+            1 => Some("Cliff Ruins"),
+            2 => Some("Scout NW"),
+            3 => Some("Scout E"),
+            4 => Some("Scout NE"),
+            5 => Some("Kana"),
+            6 => Some("Farm"),
+            7 => Some("Tent"),
+            8 => Some("Andra"),
+            _ => None,
+        },
+        "Golden Nappo" => match location_number {
+            1 => Some("Beach"),
+            2 => Some("Cliff Ruins"),
+            3 => Some("Muku"),
+            4 => Some("Farm"),
+            5 => Some("Brigand Leader"),
+            6 => Some("Ruins E"),
+            _ => None,
+        },
+        "Silver Nappo" => match location_number {
+            1 => Some("Beach"),
+            2 => Some("Lone"),
+            3 => Some("Cliff Ruins"),
+            4 => Some("Scout N"),
+            5 => Some("Scout E"),
+            6 => Some("Kana Road"),
+            7 => Some("Muku"),
+            8 => Some("Farm"),
+            9 => Some("Brigand Leader"),
+            10 => Some("Ruins N"),
+            11 => Some("Ruins E"),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
 pub fn user_agent() -> String {
     format!(
         "BPTimer-Desktop-Companion/{}",

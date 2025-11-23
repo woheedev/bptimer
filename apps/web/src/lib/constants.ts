@@ -154,8 +154,8 @@ import {
 
 export const PAGES: PageItem[] = [
 	{
-		title: 'Download DPS Meter',
-		url: 'https://github.com/winjwinj/bpsr-logs/releases/latest',
+		title: 'Download Companion App',
+		url: 'https://github.com/woheedev/bptimer/releases/latest',
 		icon: Download,
 		external: true,
 		variant: 'primary'
@@ -168,8 +168,6 @@ export const PAGES: PageItem[] = [
 	{
 		title: 'Magical Creatures',
 		url: '/magical-creatures',
-		badge: 'New',
-		badgeVariant: 'default',
 		icon: Sparkles
 	},
 	{
