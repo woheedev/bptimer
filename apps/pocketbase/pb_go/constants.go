@@ -32,6 +32,9 @@ const CRON_CLEANUP_MOB_CHANNEL_STATUS_SCHEDULE = "15 0 * * *"
 const HP_REPORTS_CLEANUP_HOURS = 2
 const DUPLICATE_CHECK_WINDOW_MINUTES = 5
 
+// Validation constants
+const HP_REPORT_INTERVAL = 5
+
 // Voting and Rep
 const REPUTATION_UPVOTE_GAIN = 3
 const REPUTATION_DOWNVOTE_LOSS = 2
@@ -61,6 +64,7 @@ const MAGICAL_CREATURE_CUTOFF_HOURS = 2
 
 // API users that bypass vote and rate limiting checks
 var BypassVoteUserIDs = map[string]bool{
+	"fovkhat7zlite07": true, // BPTimer Companion
 	"d7v77edry2kmhp5": true, // discord.gg/bpsrfarmers
 	"qctjhx7a061lhfq": true, // tinyurl.com/bpsrlogs
 	"ku99bl6jmjbijj4": true, // tinyurl.com/meter-bpsr

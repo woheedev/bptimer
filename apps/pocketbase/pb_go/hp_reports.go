@@ -286,6 +286,10 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			hpReport.Set("location_image", locationID)
 		}
 
+		if data.HPPct%HP_REPORT_INTERVAL != 0 {
+			return e.BadRequestError("Invalid HP percentage", nil)
+		}
+
 		if err := e.App.Save(hpReport); err != nil {
 			return fmt.Errorf("failed to save hp report: %w", err)
 		}

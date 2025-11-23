@@ -1,0 +1,222 @@
+name: Release Desktop App
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    env:
+      BPTIMER_API_URL: ${{ secrets.BPTIMER_API_URL }}
+      BPTIMER_API_KEY: ${{ secrets.BPTIMER_API_KEY }}
+      GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+      GITHUB_REPO_NAME: ${{ github.event.repository.name }}
+      NPCAP_INSTALLER_URL: ${{ vars.NPCAP_INSTALLER_URL || 'https://npcap.com/dist/npcap-1.85.exe' }}
+      NPCAP_SDK_URL: ${{ vars.NPCAP_SDK_URL || 'https://npcap.com/dist/npcap-sdk-1.15.zip' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Install protoc
+        run: |
+          $protocVersion = "33.1"
+          $protocUrl = "https://github.com/protocolbuffers/protobuf/releases/download/v$protocVersion/protoc-$protocVersion-win64.zip"
+          $protocZip = "$env:TEMP\protoc.zip"
+          $protocDir = "$env:TEMP\protoc"
+          Write-Host "Downloading protoc from $protocUrl"
+          Invoke-WebRequest -Uri $protocUrl -OutFile $protocZip
+          Expand-Archive -Path $protocZip -DestinationPath $protocDir -Force
+          $protocPath = "$protocDir\bin\protoc.exe"
+          if (Test-Path $protocPath) {
+            echo "$protocDir\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            echo "PROTOC=$protocPath" >> $env:GITHUB_ENV
+            Write-Host "protoc installed successfully"
+          } else {
+            Write-Error "protoc.exe not found after extraction"
+            exit 1
+          }
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            apps/desktop/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('apps/desktop/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Get version from Cargo.toml
+        id: get_version
+        working-directory: apps/desktop
+        run: |
+          $content = Get-Content "Cargo.toml" -Raw
+          if ($content -match 'version\s*=\s*"([^"]+)"') {
+            $version = $matches[1]
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+            echo "Using version: $version"
+          } else {
+            Write-Error "Failed to extract version from Cargo.toml"
+            exit 1
+          }
+
+      - name: Download and extract Npcap SDK
+        run: |
+          $sdkUrl = "${{ env.NPCAP_SDK_URL }}"
+          $sdkZip = "$env:TEMP\npcap-sdk.zip"
+          $sdkDir = "C:\npcap-sdk"
+          Write-Host "Downloading Npcap SDK from $sdkUrl"
+          Invoke-WebRequest -Uri $sdkUrl -OutFile $sdkZip
+          Write-Host "Extracting Npcap SDK to $sdkDir"
+          Expand-Archive -Path $sdkZip -DestinationPath "$env:TEMP\npcap-sdk-temp" -Force
+          # Move only Include and Lib folders to final location
+          if (Test-Path $sdkDir) {
+            Remove-Item $sdkDir -Recurse -Force
+          }
+          New-Item -ItemType Directory -Path $sdkDir -Force | Out-Null
+          Move-Item "$env:TEMP\npcap-sdk-temp\Include" "$sdkDir\Include" -Force
+          Move-Item "$env:TEMP\npcap-sdk-temp\Lib" "$sdkDir\Lib" -Force
+          Write-Host "Npcap SDK extracted to $sdkDir"
+          # Set environment variables for pcap crate
+          $env:PCAP_LIBDIR = "$sdkDir\Lib\x64"
+          $env:PCAP_INCDIR = "$sdkDir\Include"
+          $env:LIB = "$sdkDir\Lib\x64;$env:LIB"
+          $env:INCLUDE = "$sdkDir\Include;$env:INCLUDE"
+          echo "PCAP_LIBDIR=$sdkDir\Lib\x64" >> $env:GITHUB_ENV
+          echo "PCAP_INCDIR=$sdkDir\Include" >> $env:GITHUB_ENV
+          echo "LIB=$sdkDir\Lib\x64;$env:LIB" >> $env:GITHUB_ENV
+          echo "INCLUDE=$sdkDir\Include;$env:INCLUDE" >> $env:GITHUB_ENV
+
+      - name: Build release binary
+        working-directory: apps/desktop
+        run: cargo build --release
+
+      - name: Install Inno Setup
+        run: |
+          $isPath = "C:\Program Files (x86)\Inno Setup 6"
+          if (-not (Test-Path $isPath)) {
+            Write-Host "Installing Inno Setup..."
+            $installerUrl = "https://jrsoftware.org/download.php/is.exe"
+            $installerPath = "$env:TEMP\is.exe"
+            Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+            Start-Process -FilePath $installerPath -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES" -Wait
+          }
+          echo "$isPath\ISCC.exe" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Download Npcap installer
+        working-directory: apps/desktop
+        run: |
+          $npcapUrl = "${{ env.NPCAP_INSTALLER_URL }}"
+          $npcapPath = "npcap-installer.exe"
+          Write-Host "Downloading Npcap from $npcapUrl"
+          Invoke-WebRequest -Uri $npcapUrl -OutFile $npcapPath
+
+      - name: Compile installer
+        working-directory: apps/desktop
+        run: |
+          $version = "${{ steps.get_version.outputs.version }}"
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          Write-Host "Compiling installer with version: $version"
+          & $iscc installer.iss /DAppVersion=$version
+          if (-not $LASTEXITCODE -eq 0) {
+            Write-Error "Inno Setup compilation failed"
+            exit 1
+          }
+
+      - name: Rename release binary
+        working-directory: apps/desktop
+        run: |
+          $version = "${{ steps.get_version.outputs.version }}"
+          $exeName = "bptimer-desktop-$version.exe"
+          Copy-Item "target\release\bptimer-desktop.exe" $exeName
+          echo "EXE_NAME=$exeName" >> $env:GITHUB_ENV
+          echo "Created: $exeName"
+
+      - name: Get installer name
+        working-directory: apps/desktop
+        run: |
+          $version = "${{ steps.get_version.outputs.version }}"
+          $installerName = "BPTimer-Desktop-Setup-$version.exe"
+          echo "INSTALLER_NAME=$installerName" >> $env:GITHUB_ENV
+          echo "Installer will be: $installerName"
+
+      - name: Get commit history
+        id: get_changelog
+        run: |
+          # Fetch all tags
+          git fetch --tags
+
+          # Get all tags sorted by version
+          $allTags = git tag -l "v*" | Sort-Object { [version]($_ -replace '^v', '') }
+
+          if ($allTags.Count -gt 0) {
+            # Get the latest tag
+            $lastTag = $allTags[-1]
+            Write-Host "Last release tag: $lastTag"
+            # Get commits since last tag
+            $commits = git log $lastTag..HEAD --pretty=format:"- %s (%h)" --reverse
+          } else {
+            # No previous tags, get recent commits (last 50)
+            Write-Host "No previous tags found, getting recent commits"
+            $commits = git log -50 --pretty=format:"- %s (%h)" --reverse
+          }
+
+          if ($commits) {
+            $changelog = $commits -join "`n"
+          } else {
+            $changelog = "- Initial release"
+          }
+
+          Write-Host "Changelog entries: $($commits.Count)"
+
+          # Use multiline output for GitHub Actions
+          $delimiter = "EOF$(Get-Random)"
+          echo "changelog<<$delimiter" >> $env:GITHUB_OUTPUT
+          echo "$changelog" >> $env:GITHUB_OUTPUT
+          echo "$delimiter" >> $env:GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: BPTimer Companion App v${{ steps.get_version.outputs.version }}
+          body: |
+            # BPTimer Companion App v${{ steps.get_version.outputs.version }}
+
+            ## 📦 Installation Options
+
+            ### Full Installation (Recommended)
+            Download and run **`${{ env.INSTALLER_NAME }}`** for a complete installation.
+            - ✅ Includes Npcap installation (if not already installed)
+            ### Portable Version
+            Download **`${{ env.EXE_NAME }}`** for a portable version.
+            - ⚠️ **Npcap must be installed separately** - Download from [npcap.com](https://npcap.com)
+            - No installation required - just run the .exe
+            - Settings are saved to AppData
+
+            ## 📝 Changes in this Release
+
+            ${{ steps.get_changelog.outputs.changelog }}
+
+            ---
+            *For more details, see the [full commit history](https://github.com/${{ env.GITHUB_REPO_OWNER }}/${{ env.GITHUB_REPO_NAME }}/compare/v${{ steps.get_version.outputs.version }}...main).*
+          files: |
+            apps/desktop/${{ env.EXE_NAME }}
+            apps/desktop/Output/${{ env.INSTALLER_NAME }}
+          draft: false
+          prerelease: false

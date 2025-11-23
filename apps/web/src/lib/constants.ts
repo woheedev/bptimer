@@ -115,6 +115,7 @@ export const LEADERBOARD_LIMIT = 50;
 
 // API users
 export const API_USERS: Record<string, string> = {
+	fovkhat7zlite07: 'BPTimer Companion',
 	d7v77edry2kmhp5: 'discord.gg/bpsrfarmers',
 	qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs', // winjwinj
 	ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr', // geonode
@@ -272,6 +273,15 @@ export const MODULE_TIER_THRESHOLDS = [
 ] as const;
 
 export const MODULE_PRIORITY_MULTIPLIERS = [10, 7, 5, 3, 2];
+export const MODULE_OPTIMIZER_MAX_MODULES_FOR_FULL_SEARCH = 100;
+export const MODULE_OPTIMIZER_PREFILTER_TOP_PER_ATTR = 30;
+export const MODULE_OPTIMIZER_MAX_SOLUTIONS = 40;
+export const MODULE_OPTIMIZER_MAX_ATTEMPTS_MULTIPLIER = 15;
+export const MODULE_OPTIMIZER_GREEDY_CANDIDATE_LIMIT = 50;
+export const MODULE_OPTIMIZER_LOCAL_SEARCH_MAX_ITERATIONS = 20;
+export const MODULE_OPTIMIZER_LOCAL_SEARCH_MIN_RELEVANT_MODULES = 10;
+export const MODULE_OPTIMIZER_LOCAL_SEARCH_SAMPLE_SIZE = 15;
+export const MODULE_OPTIMIZER_YIELD_INTERVAL = 10;
 
 // Tools & Resources constants
 export const TOOLS_SECTIONS: ToolsSections = {
@@ -279,6 +289,17 @@ export const TOOLS_SECTIONS: ToolsSections = {
 		title: 'DPS Meters',
 		shortTitle: 'Meters',
 		cards: [
+			{
+				title: 'BPTimer Companion App',
+				description:
+					'Official BPTimer.com companion app for Blue Protocol: Star Resonance. It includes mob timers just like the website, a mob radar to better track mob locations, and a simple DPS meter. Is fully native and written in Rust. Currently only supports Windows but should support Linux with minor changes.',
+				author: 'woheedev',
+				badge: 'Beta',
+				badgeVariant: 'default',
+				driver: 'npcap',
+				tags: 'EN|Rust|EGUI|Windows',
+				url: 'https://github.com/woheedev/bptimer'
+			},
 			{
 				title: 'BPSR Logs',
 				description:

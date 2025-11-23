@@ -1,0 +1,502 @@
+use crate::config::Settings;
+use crate::ui::constants::{responsive, spacing, style, theme};
+use egui::{Ui, Window};
+use instant::Instant;
+
+const FONT_SCALE_MIN: f32 = 0.5;
+const FONT_SCALE_MAX: f32 = 2.0;
+const FONT_SCALE_STEP: f32 = 0.05;
+
+pub fn render_settings_view(
+    ui: &mut Ui,
+    settings: &mut Settings,
+    devices: &[(String, String)],
+    show_bptimer_dialog: &mut bool,
+    settings_save_timer: &mut Option<instant::Instant>,
+    mobs: &[crate::models::mob::Mob],
+    extracted_modules: &[crate::utils::modules::Module],
+    update_status: &std::sync::Arc<std::sync::Mutex<crate::updater::UpdateStatus>>,
+    update_check_requested: &mut bool,
+    update_perform_requested: &mut bool,
+) {
+    ui.heading("Settings");
+    ui.add_space(spacing::MD);
+
+    responsive::scroll_area_with_reserve(ui, 50.0).show(ui, |ui| {
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            let text_color = theme::text_color(settings);
+            ui.label(egui::RichText::new("Appearance").strong().color(text_color));
+            ui.add_space(spacing::SM);
+
+            ui.horizontal(|ui| {
+                ui.label("Window Opacity:");
+                if ui
+                    .add(
+                        egui::Slider::new(&mut settings.window_opacity, 0.1..=1.0).show_value(true),
+                    )
+                    .changed()
+                {
+                    *settings_save_timer = Some(Instant::now());
+                }
+            });
+
+            ui.horizontal(|ui| {
+                ui.label("Font Scale:");
+                ui.label(format!("{:.2}", settings.font_scale));
+                if ui.button("−").clicked() {
+                    settings.font_scale =
+                        (settings.font_scale - FONT_SCALE_STEP).max(FONT_SCALE_MIN);
+                    *settings_save_timer = Some(Instant::now());
+                }
+                if ui.button("+").clicked() {
+                    settings.font_scale =
+                        (settings.font_scale + FONT_SCALE_STEP).min(FONT_SCALE_MAX);
+                    *settings_save_timer = Some(Instant::now());
+                }
+            });
+
+            ui.add_space(spacing::SM);
+
+            ui.horizontal(|ui| {
+                ui.label("Text Color:");
+                let mut color = theme::text_color(settings);
+                if egui::color_picker::color_edit_button_srgba(
+                    ui,
+                    &mut color,
+                    egui::color_picker::Alpha::OnlyBlend,
+                )
+                .changed()
+                {
+                    settings.text_color = [color.r(), color.g(), color.b(), color.a()];
+                    *settings_save_timer = Some(Instant::now());
+                }
+            });
+
+            ui.add_space(spacing::SM);
+            if ui.button("Reset Window Size").clicked() {
+                let default_size = Settings::default().window_size.unwrap_or((485.0, 500.0));
+                settings.window_size = Some(default_size);
+                ui.ctx()
+                    .send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(
+                        default_size.0,
+                        default_size.1,
+                    )));
+                settings.save();
+            }
+        });
+
+        ui.add_space(spacing::MD);
+
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            let text_color = theme::text_color(settings);
+            ui.label(
+                egui::RichText::new("Combat Data Columns")
+                    .strong()
+                    .color(text_color),
+            );
+            ui.add_space(spacing::SM);
+            ui.label(
+                egui::RichText::new("Hide/Show Columns")
+                    .strong()
+                    .color(text_color),
+            );
+            ui.label(
+                egui::RichText::new("Check to show columns in the Combat Data table")
+                    .small()
+                    .weak(),
+            );
+            ui.add_space(spacing::SM);
+
+            let columns = [
+                "Live DPS", "Name", "DMG%", "DPS", "DMG", "Max Hit", "Crit%", "Lucky%", "Heal",
+                "Taken",
+            ];
+
+            for column_name in &columns {
+                let is_hidden = settings.hidden_columns.contains(*column_name);
+                let mut checked = !is_hidden;
+                if ui.checkbox(&mut checked, *column_name).changed() {
+                    if checked {
+                        settings.hidden_columns.remove(*column_name);
+                    } else {
+                        settings.hidden_columns.insert(column_name.to_string());
+                    }
+                    *settings_save_timer = Some(Instant::now());
+                }
+            }
+        });
+
+        ui.add_space(spacing::MD);
+
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            let text_color = theme::text_color(settings);
+            ui.label(egui::RichText::new("Behavior").strong().color(text_color));
+            ui.add_space(spacing::SM);
+            ui.horizontal(|ui| {
+                let mut bptimer_checkbox = settings.bptimer_enabled;
+                if ui
+                    .checkbox(&mut bptimer_checkbox, "Enable BPTimer Integration")
+                    .changed()
+                {
+                    if !bptimer_checkbox {
+                        // User is trying to disable - show dialog instead of disabling
+                        *show_bptimer_dialog = true;
+                    } else {
+                        // User is enabling - allow it
+                        settings.bptimer_enabled = true;
+                        *settings_save_timer = Some(Instant::now());
+                    }
+                }
+            });
+
+            ui.add_space(spacing::MD);
+
+            let text_color = theme::text_color(settings);
+            ui.label(
+                egui::RichText::new("Combat Data Clearing")
+                    .strong()
+                    .color(text_color),
+            );
+            ui.add_space(spacing::SM);
+
+            ui.horizontal(|ui| {
+                ui.label("Clear after idle (seconds):");
+                let mut idle_enabled = settings.clear_combat_data_idle_seconds.is_some();
+                if ui.checkbox(&mut idle_enabled, "").changed() {
+                    if idle_enabled {
+                        settings.clear_combat_data_idle_seconds = Some(60); // Default 60 seconds
+                    } else {
+                        settings.clear_combat_data_idle_seconds = None;
+                    }
+                    *settings_save_timer = Some(Instant::now());
+                }
+                if let Some(ref mut seconds) = settings.clear_combat_data_idle_seconds {
+                    if ui
+                        .add(egui::Slider::new(seconds, 10..=600).text("sec"))
+                        .changed()
+                    {
+                        *settings_save_timer = Some(Instant::now());
+                    }
+                } else {
+                    ui.label(egui::RichText::new("Disabled").weak());
+                }
+            });
+
+            ui.add_space(spacing::SM);
+
+            if ui
+                .checkbox(
+                    &mut settings.clear_combat_data_on_server_change,
+                    "Clear on Server/Channel Change",
+                )
+                .changed()
+            {
+                *settings_save_timer = Some(Instant::now());
+            }
+        });
+
+        ui.add_space(spacing::MD);
+
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            let text_color = theme::text_color(settings);
+            ui.label(egui::RichText::new("Network").strong().color(text_color));
+            ui.add_space(spacing::SM);
+
+            ui.label("Select Network Device:");
+            let mut device_changed = false;
+            egui::ComboBox::from_id_salt("device_selector")
+                .selected_text(
+                    settings
+                        .network_device_index
+                        .and_then(|idx| devices.get(idx))
+                        .map(|(_name, desc)| desc.clone())
+                        .unwrap_or_else(|| "Auto-select".to_string()),
+                )
+                .show_ui(ui, |ui| {
+                    if ui
+                        .selectable_value(&mut settings.network_device_index, None, "Auto-select")
+                        .changed()
+                    {
+                        device_changed = true;
+                    }
+                    for (i, (_name, desc)) in devices.iter().enumerate() {
+                        if ui
+                            .selectable_value(
+                                &mut settings.network_device_index,
+                                Some(i),
+                                desc.clone(),
+                            )
+                            .changed()
+                        {
+                            device_changed = true;
+                        }
+                    }
+                });
+            if device_changed {
+                *settings_save_timer = Some(Instant::now());
+            }
+
+            ui.label(
+                egui::RichText::new("Changes to network device require restart (for now)")
+                    .small()
+                    .weak()
+                    .color(egui::Color32::YELLOW),
+            );
+        });
+
+        ui.add_space(spacing::MD);
+
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            let text_color = theme::text_color(settings);
+            ui.label(egui::RichText::new("Mob Timers").strong().color(text_color));
+            ui.add_space(spacing::SM);
+
+            if ui
+                .checkbox(&mut settings.show_radar, "Show Mob Radar")
+                .changed()
+            {
+                *settings_save_timer = Some(Instant::now());
+            }
+
+            ui.add_space(spacing::MD);
+            let text_color = theme::text_color(settings);
+            ui.label(
+                egui::RichText::new("Hide/Show Mobs")
+                    .strong()
+                    .color(text_color),
+            );
+            ui.label(
+                egui::RichText::new("Check to show mobs in the Mob Timers view")
+                    .small()
+                    .weak(),
+            );
+            ui.add_space(spacing::SM);
+
+            if mobs.is_empty() {
+                ui.label(egui::RichText::new("Loading mobs...").small().weak());
+            } else {
+                let mut sorted_mobs: Vec<_> = mobs.iter().collect();
+                sorted_mobs.sort_by(|a, b| a.name.cmp(&b.name));
+                for mob in sorted_mobs {
+                    let is_hidden = settings.hidden_mobs.contains(&mob.id);
+                    let mut checked = !is_hidden;
+                    if ui.checkbox(&mut checked, &mob.name).changed() {
+                        if checked {
+                            settings.hidden_mobs.remove(&mob.id);
+                        } else {
+                            settings.hidden_mobs.insert(mob.id.clone());
+                        }
+                        *settings_save_timer = Some(Instant::now());
+                    }
+                }
+            }
+        });
+
+        ui.add_space(spacing::MD);
+
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            let text_color = theme::text_color(settings);
+            ui.label(
+                egui::RichText::new("Module Optimizer")
+                    .strong()
+                    .color(text_color),
+            );
+            ui.add_space(spacing::SM);
+            ui.label(
+                egui::RichText::new(
+                    "Extract module data and import into module optimizer on BPTimer website.",
+                )
+                .small()
+                .weak(),
+            );
+            if extracted_modules.is_empty() {
+                ui.label(
+                    egui::RichText::new(
+                        "No modules available to extract yet. Change line to load module data.",
+                    )
+                    .small()
+                    .weak(),
+                );
+            } else {
+                ui.label(
+                    egui::RichText::new(format!("{} modules ready", extracted_modules.len()))
+                        .small()
+                        .weak(),
+                );
+            }
+            if ui.button("Open Module Optimizer").clicked() {
+                let base_url = "https://bptimer.com/modules-optimizer";
+                let url = if !extracted_modules.is_empty() {
+                    match crate::utils::modules::encode_module_data(extracted_modules) {
+                        Ok(encoded) => {
+                            format!("{}?data={}", base_url, encoded)
+                        }
+                        Err(e) => {
+                            log::warn!("Failed to encode module data: {}", e);
+                            base_url.to_string()
+                        }
+                    }
+                } else {
+                    base_url.to_string()
+                };
+                if let Err(e) = open::that(&url) {
+                    log::warn!("Failed to open module optimizer: {}", e);
+                }
+            }
+        });
+
+        ui.add_space(spacing::MD);
+
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            let text_color = theme::text_color(settings);
+            ui.label(egui::RichText::new("Updates").strong().color(text_color));
+            ui.add_space(spacing::SM);
+
+            let status = update_status.lock().unwrap().clone();
+            match &status {
+                crate::updater::UpdateStatus::Checking => {
+                    ui.horizontal(|ui| {
+                        ui.spinner();
+                        ui.label("Checking for updates...");
+                    });
+                }
+                crate::updater::UpdateStatus::Available(version) => {
+                    ui.label(egui::RichText::new(format!(
+                        "Update available: v{}",
+                        version
+                    )));
+                    ui.add_space(spacing::SM);
+                    if ui.button("Download and Install Update").clicked() {
+                        *update_perform_requested = true;
+                    }
+                }
+                crate::updater::UpdateStatus::UpToDate => {
+                    ui.label(egui::RichText::new("Application is up to date"));
+                    ui.add_space(spacing::SM);
+                    if ui.button("Check for Updates").clicked() {
+                        *update_check_requested = true;
+                    }
+                }
+                crate::updater::UpdateStatus::Updating => {
+                    ui.horizontal(|ui| {
+                        ui.spinner();
+                        ui.label("Downloading and installing update...");
+                    });
+                }
+                crate::updater::UpdateStatus::Updated(version) => {
+                    ui.label(
+                        egui::RichText::new(format!("Updated to v{} - Restart required", version))
+                            .color(egui::Color32::YELLOW),
+                    );
+                    ui.label(
+                        egui::RichText::new("The application will restart automatically...")
+                            .small()
+                            .weak(),
+                    );
+                }
+                crate::updater::UpdateStatus::Error(msg) => {
+                    ui.label(
+                        egui::RichText::new(format!("Update error: {}", msg))
+                            .color(egui::Color32::RED),
+                    );
+                    ui.add_space(spacing::SM);
+                    if ui.button("Retry Check").clicked() {
+                        *update_check_requested = true;
+                    }
+                }
+            }
+        });
+
+        ui.add_space(spacing::MD);
+
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            let text_color = theme::text_color(settings);
+            ui.label(
+                egui::RichText::new("Development")
+                    .strong()
+                    .color(text_color),
+            );
+            ui.add_space(spacing::SM);
+
+            let mut show_console = settings.show_console;
+            if ui
+                .checkbox(&mut show_console, "Show Console Window")
+                .changed()
+            {
+                settings.show_console = show_console;
+                #[cfg(windows)]
+                {
+                    use windows_sys::Win32::System::Console::{AllocConsole, FreeConsole};
+                    unsafe {
+                        if show_console {
+                            AllocConsole();
+                        } else {
+                            FreeConsole();
+                        }
+                    }
+                }
+                *settings_save_timer = Some(Instant::now());
+            }
+            ui.label(
+                egui::RichText::new("Toggle console window for viewing logs")
+                    .small()
+                    .weak(),
+            );
+        });
+    });
+
+    ui.add_space(spacing::MD);
+    ui.separator();
+    ui.add_space(spacing::SM);
+    ui.horizontal(|ui| {
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            ui.label(
+                egui::RichText::new(format!(
+                    "Made by Wohee | v{}",
+                    self_update::cargo_crate_version!()
+                ))
+                .small()
+                .weak(),
+            );
+        });
+    });
+
+    // BPTimer opt-out dialog
+    if *show_bptimer_dialog {
+        Window::new("BPTimer Integration")
+            .collapsible(false)
+            .resizable(false)
+            .default_size([400.0, 200.0])
+            .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+            .show(ui.ctx(), |ui| {
+                ui.add_space(spacing::MD);
+                ui.label("BPTimer helps crowdsource mob tracking data by sharing HP and location information.");
+                ui.label("This data is anonymous and only includes:");
+                ui.label("  • Mob HP %");
+                ui.label("  • Line number");
+                ui.label("  • Position data");
+                ui.label("  • Region data");
+                ui.add_space(spacing::MD);
+                ui.horizontal(|ui| {
+                    if ui.button("Keep Enabled").clicked() {
+                        settings.bptimer_enabled = true;
+                        *show_bptimer_dialog = false;
+                        *settings_save_timer = Some(Instant::now());
+                    }
+                    if ui.button("Disable").clicked() {
+                        settings.bptimer_enabled = false;
+                        *show_bptimer_dialog = false;
+                        *settings_save_timer = Some(Instant::now());
+                    }
+                });
+            });
+    }
+}

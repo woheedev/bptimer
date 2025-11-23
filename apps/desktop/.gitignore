@@ -1,5 +1,8 @@
 debug
 target
+npcap-installer.exe
+settings.json
+Output/
 
 **/*.rs.bk
 *.pdb

@@ -1,0 +1,19 @@
+{
+  "name": "desktop",
+  "version": "0.0.1",
+  "author": "Wohee",
+  "description": "Native desktop overlay for BPTimer tracking",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "scripts": {
+    "build": "cargo build",
+    "build:installer": "iscc installer.iss",
+    "build:release": "cargo build --release",
+    "dev": "cargo run",
+    "format": "cargo fmt",
+    "format:check": "cargo fmt --check",
+    "clean": "cargo clean",
+    "check": "cargo check",
+    "update": "cargo update"
+  }
+}

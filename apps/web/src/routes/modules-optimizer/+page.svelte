@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import ErrorBoundary from '$lib/components/error-boundary.svelte';
 	import ModuleCard from '$lib/components/modules/module-card.svelte';
 	import PriorityManager from '$lib/components/modules/priority-manager.svelte';
@@ -25,6 +28,7 @@
 	} from '$lib/utils/modules';
 	import { showToast } from '$lib/utils/toast';
 	import { Calculator, Plus, Settings, Target, Trash, Zap } from '@lucide/svelte/icons';
+	import pako from 'pako';
 
 	let modules = $state(modulesOptimizerStore.modules);
 	let priorityEffects = $state(modulesOptimizerStore.priorityEffects);
@@ -35,6 +39,64 @@
 	let showClearDialog = $state(false);
 
 	const canonicalUrl = `https://bptimer.com${page.url.pathname}`;
+
+	// Decode and import module data from URL params
+	onMount(async () => {
+		const encodedData = page.url.searchParams.get('data');
+
+		if (encodedData) {
+			try {
+				// Decode base64 URL-safe string (handle padding)
+				let base64 = encodedData.replace(/-/g, '+').replace(/_/g, '/');
+				while (base64.length % 4) {
+					base64 += '=';
+				}
+				const base64Decoded = atob(base64);
+
+				// Convert base64 string to Uint8Array for pako
+				const bytes = new Uint8Array(base64Decoded.length);
+				for (let i = 0; i < base64Decoded.length; i++) {
+					bytes[i] = base64Decoded.charCodeAt(i);
+				}
+
+				// Decompress gzip data
+				const decompressed = pako.inflate(bytes, { to: 'string' });
+				const moduleData = JSON.parse(decompressed);
+
+				if (moduleData.modules && Array.isArray(moduleData.modules)) {
+					modulesOptimizerStore.clearAll();
+
+					type ImportedModule = {
+						id?: string;
+						effects?: Array<{ name?: string; level?: number }>;
+					};
+
+					const importedModules = moduleData.modules.map((m: ImportedModule) => ({
+						id: m.id || `${MODULE_DEFAULT_NAME_PREFIX} ${modules.length + 1}`,
+						effects: [
+							m.effects?.[0] || { name: '', level: 0 },
+							m.effects?.[1] || { name: '', level: 0 },
+							m.effects?.[2] || { name: '', level: 0 }
+						]
+					}));
+
+					modulesOptimizerStore.setModules(importedModules);
+					modules = modulesOptimizerStore.modules;
+
+					result = null;
+					activeTab = 'modules';
+
+					showToast.success(`Imported ${importedModules.length} modules from game`);
+
+					await goto(resolve('/modules-optimizer'), { replaceState: true, noScroll: true });
+				} else {
+					showToast.error('Invalid module data format.');
+				}
+			} catch {
+				showToast.error('Failed to import module data. Please try again.');
+			}
+		}
+	});
 
 	const validModulesCount = $derived(
 		modules.filter((module) => module.effects.some((effect) => effect.name && effect.level > 0))
@@ -104,7 +166,7 @@
 		isCalculating = true;
 
 		try {
-			result = findOptimalSetup(modules, parseInt(numSlots), priorityEffects);
+			result = await findOptimalSetup(modules, parseInt(numSlots), priorityEffects);
 			showToast.success(`Optimal setup found! Score: ${result.totalScore}`);
 			activeTab = 'results';
 		} catch (error) {

@@ -9,6 +9,8 @@ node_modules
 vite.config.js*
 target
 .wrangler
+reference
+apps/desktop/src/protocol/pb.rs
 
 # Ignore files for PNPM, NPM, YARN and BUN
 pnpm-lock.yaml
