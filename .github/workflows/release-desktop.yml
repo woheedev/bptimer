@@ -142,7 +142,7 @@ jobs:
         working-directory: apps/desktop
         run: |
           $version = "${{ steps.get_version.outputs.version }}"
-          $exeName = "bptimer-desktop-$version.exe"
+          $exeName = "bptimer-desktop-x86_64-pc-windows-msvc.exe"
           Copy-Item "target\release\bptimer-desktop.exe" $exeName
           echo "EXE_NAME=$exeName" >> $env:GITHUB_ENV
           echo "Created: $exeName"
