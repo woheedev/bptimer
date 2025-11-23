@@ -155,66 +155,23 @@ jobs:
           echo "INSTALLER_NAME=$installerName" >> $env:GITHUB_ENV
           echo "Installer will be: $installerName"
 
-      - name: Get commit history
-        id: get_changelog
-        run: |
-          # Fetch all tags
-          git fetch --tags
-
-          # Get all tags sorted by version
-          $allTags = git tag -l "v*" | Sort-Object { [version]($_ -replace '^v', '') }
-
-          if ($allTags.Count -gt 0) {
-            # Get the latest tag
-            $lastTag = $allTags[-1]
-            Write-Host "Last release tag: $lastTag"
-            # Get commits since last tag
-            $commits = git log $lastTag..HEAD --pretty=format:"- %s (%h)" --reverse
-          } else {
-            # No previous tags, get recent commits (last 50)
-            Write-Host "No previous tags found, getting recent commits"
-            $commits = git log -50 --pretty=format:"- %s (%h)" --reverse
-          }
-
-          if ($commits) {
-            $changelog = $commits -join "`n"
-          } else {
-            $changelog = "- Initial release"
-          }
-
-          Write-Host "Changelog entries: $($commits.Count)"
-
-          # Use multiline output for GitHub Actions
-          $delimiter = "EOF$(Get-Random)"
-          echo "changelog<<$delimiter" >> $env:GITHUB_OUTPUT
-          echo "$changelog" >> $env:GITHUB_OUTPUT
-          echo "$delimiter" >> $env:GITHUB_OUTPUT
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: BPTimer Companion App v${{ steps.get_version.outputs.version }}
           body: |
-            # BPTimer Companion App v${{ steps.get_version.outputs.version }}
+            # Installation Options
 
-            ## 📦 Installation Options
-
-            ### Full Installation (Recommended)
+            ## Full Installation (Recommended)
             Download and run **`${{ env.INSTALLER_NAME }}`** for a complete installation.
             - ✅ Includes Npcap installation (if not already installed)
-            ### Portable Version
+
+            ## Portable Version
             Download **`${{ env.EXE_NAME }}`** for a portable version.
-            - ⚠️ **Npcap must be installed separately** - Download from [npcap.com](https://npcap.com)
+            - ⚠️ **Npcap must be installed separately** - Download from [npcap.com](https://npcap.com/#download)
             - No installation required - just run the .exe
             - Settings are saved to AppData
-
-            ## 📝 Changes in this Release
-
-            ${{ steps.get_changelog.outputs.changelog }}
-
-            ---
-            *For more details, see the [full commit history](https://github.com/${{ env.GITHUB_REPO_OWNER }}/${{ env.GITHUB_REPO_NAME }}/compare/v${{ steps.get_version.outputs.version }}...main).*
           files: |
             apps/desktop/${{ env.EXE_NAME }}
             apps/desktop/Output/${{ env.INSTALLER_NAME }}
