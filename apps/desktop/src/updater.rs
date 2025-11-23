@@ -67,6 +67,57 @@ pub fn check_for_updates() -> Result<UpdateStatus, Box<dyn std::error::Error>> {
     }
 }
 
+#[cfg(windows)]
+fn restart_process(exe_path: std::path::PathBuf) {
+    use std::os::windows::process::CommandExt;
+    use std::process::Command;
+    use std::thread;
+    use std::time::Duration;
+
+    // Wait to allow self_replace's batch script to complete the replacement
+    info!("Waiting 5 seconds before restarting to allow update replacement to complete...");
+    thread::sleep(Duration::from_secs(5));
+
+    // Spawn new process in a new console and exit current process
+    const CREATE_NEW_CONSOLE: u32 = 0x0000_0010;
+    match Command::new(&exe_path)
+        .args(std::env::args().skip(1))
+        .creation_flags(CREATE_NEW_CONSOLE)
+        .spawn()
+    {
+        Ok(_) => {
+            info!("Successfully spawned new process, exiting...");
+            std::process::exit(0);
+        }
+        Err(err) => {
+            error!("Failed to restart process: {}", err);
+            std::process::exit(1);
+        }
+    }
+}
+
+#[cfg(not(windows))]
+fn restart_process(exe_path: std::path::PathBuf) {
+    use std::os::unix::process::CommandExt;
+    use std::process::Command;
+
+    // On Unix, we can use exec() to replace the current process
+    let err = Command::new(&exe_path)
+        .args(std::env::args().skip(1))
+        .exec();
+    error!("Failed to restart process: {}", err);
+}
+
+pub fn schedule_restart_and_exit() {
+    if let Ok(exe_path) = std::env::current_exe() {
+        info!("Scheduling restart after update...");
+        restart_process(exe_path);
+    } else {
+        error!("Failed to get current executable path");
+        std::process::exit(1);
+    }
+}
+
 pub fn perform_update() -> Result<UpdateStatus, Box<dyn std::error::Error>> {
     let repo_owner = crate::GITHUB_REPO_OWNER;
     let repo_name = crate::GITHUB_REPO_NAME;
@@ -96,6 +147,29 @@ pub fn perform_update() -> Result<UpdateStatus, Box<dyn std::error::Error>> {
         Err(e) => {
             error!("Failed to update: {}", e);
             Ok(UpdateStatus::Error(e.to_string()))
+        }
+    }
+}
+
+pub fn perform_update_with_status_handling(status: std::sync::Arc<std::sync::Mutex<UpdateStatus>>) {
+    if let Ok(mut s) = status.lock() {
+        *s = UpdateStatus::Updating;
+    }
+
+    match perform_update() {
+        Ok(update_status) => {
+            if let Ok(mut s) = status.lock() {
+                *s = update_status.clone();
+            }
+            if matches!(update_status, UpdateStatus::Updated(_)) {
+                schedule_restart_and_exit();
+            }
+        }
+        Err(e) => {
+            warn!("Failed to perform update: {}", e);
+            if let Ok(mut s) = status.lock() {
+                *s = UpdateStatus::Error(e.to_string());
+            }
         }
     }
 }

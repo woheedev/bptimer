@@ -242,7 +242,13 @@ impl DpsMeterApp {
             match crate::updater::check_for_updates() {
                 Ok(update_status) => {
                     if let Ok(mut s) = status.lock() {
-                        *s = update_status;
+                        *s = update_status.clone();
+                    }
+
+                    // Automatically download and install if update is available
+                    if matches!(update_status, crate::updater::UpdateStatus::Available(_)) {
+                        info!("Update available on launch, automatically installing...");
+                        crate::updater::perform_update_with_status_handling(status);
                     }
                 }
                 Err(e) => {
@@ -524,28 +530,7 @@ impl eframe::App for DpsMeterApp {
             self.update_perform_requested = false;
             let status = self.update_status.clone();
             std::thread::spawn(move || {
-                if let Ok(mut s) = status.lock() {
-                    *s = crate::updater::UpdateStatus::Updating;
-                }
-
-                match crate::updater::perform_update() {
-                    Ok(update_status) => {
-                        if let Ok(mut s) = status.lock() {
-                            *s = update_status.clone();
-                        }
-                        if matches!(update_status, crate::updater::UpdateStatus::Updated(_)) {
-                            info!("Update successful, exiting application to complete replacement");
-                            std::thread::sleep(std::time::Duration::from_millis(500));
-                            std::process::exit(0);
-                        }
-                    }
-                    Err(e) => {
-                        warn!("Failed to perform update: {}", e);
-                        if let Ok(mut s) = status.lock() {
-                            *s = crate::updater::UpdateStatus::Error(e.to_string());
-                        }
-                    }
-                }
+                crate::updater::perform_update_with_status_handling(status);
             });
         }
 

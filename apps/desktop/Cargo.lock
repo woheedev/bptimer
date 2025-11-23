@@ -534,7 +534,7 @@ dependencies = [
 
 [[package]]
 name = "bptimer-desktop"
-version = "0.1.1"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64",
