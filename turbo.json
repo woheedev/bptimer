@@ -5,16 +5,16 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT", ".env*"]
     },
-    "@desktop#build": {
+    "desktop#build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT", ".env*", "**/*.rs", "Cargo.toml", "Cargo.lock", "build.rs"],
       "outputs": ["target/**"]
     },
-    "@pb#build": {
+    "pb#build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT", ".env*", "**/*.go", "go.mod", "go.sum", "Dockerfile", "*.toml"]
     },
-    "@web#build": {
+    "web#build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT", ".env*"],
       "outputs": [".svelte-kit/**"]
