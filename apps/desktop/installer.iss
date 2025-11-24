@@ -2,7 +2,6 @@
 #define AppPublisher "Wohee"
 #define AppURL "https://github.com/woheedev/bptimer"
 #define AppExeName "bptimer-desktop.exe"
-#define AppVersion "0.1.0"
 #ifndef AppVersion
   #define AppVersion "0.1.0"
 #endif
@@ -26,7 +25,7 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64compatible
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
