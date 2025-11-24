@@ -187,6 +187,7 @@ impl DpsMeterApp {
                     std::thread::spawn(move || {
                         let client = reqwest::blocking::Client::builder()
                             .user_agent(&crate::utils::constants::user_agent())
+                            .use_rustls_tls()
                             .build()
                             .unwrap_or_else(|_| reqwest::blocking::Client::new());
                         let url = format!("{}/api/health", api_url_clone);
@@ -203,7 +204,7 @@ impl DpsMeterApp {
                                 }
                             }
                             Err(e) => {
-                                warn!("[BPTimer] API connection test error: {}", e);
+                                warn!("[BPTimer] API connection test error: {:?}", e);
                             }
                         }
                     });

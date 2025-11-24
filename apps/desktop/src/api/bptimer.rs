@@ -125,6 +125,7 @@ impl BPTimerClient {
         std::thread::spawn(move || {
             let client = reqwest::blocking::Client::builder()
                 .user_agent(&crate::utils::constants::user_agent())
+                .use_rustls_tls()
                 .build()
                 .unwrap_or_else(|_| reqwest::blocking::Client::new());
 

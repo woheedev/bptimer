@@ -46,6 +46,7 @@ impl PocketBaseClient {
         let client = Client::builder()
             .user_agent(&crate::utils::constants::user_agent())
             .timeout(Duration::from_secs(600))
+            .use_rustls_tls()
             .build()
             .unwrap_or_else(|_| Client::new());
         Self {
