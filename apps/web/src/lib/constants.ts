@@ -70,34 +70,34 @@ export const SPECIAL_MAGICAL_CREATURES_DEAD_TIMEOUT: Record<string, number> = {
 export const SPECIAL_MAGICAL_CREATURES: Record<string, Record<number, string>> = {
 	'Loyal Boarlet': {
 		1: 'Cliff Ruins',
-		2: 'Scout 1',
-		3: 'Scout 2',
-		4: 'Scout 3',
-		5: 'Muku',
+		2: 'Scout NW',
+		3: 'Scout E',
+		4: 'Scout NE',
+		5: 'Kana',
 		6: 'Farm',
-		7: 'Rest 1',
-		8: 'Rest 2'
+		7: 'Tent',
+		8: 'Andra'
 	},
 	'Golden Nappo': {
-		1: 'Beech',
+		1: 'Beach',
 		2: 'Cliff Ruins',
 		3: 'Muku',
 		4: 'Farm',
 		5: 'Brigand Leader',
-		6: 'Ruins'
+		6: 'Ruins E'
 	},
 	'Silver Nappo': {
-		1: 'Beech',
+		1: 'Beach',
 		2: 'Lone',
 		3: 'Cliff Ruins',
-		4: 'Scout 1',
-		5: 'Scout 2',
-		6: 'Muku 1',
-		7: 'Muku 2',
+		4: 'Scout N',
+		5: 'Scout E',
+		6: 'Kana Road',
+		7: 'Muku',
 		8: 'Farm',
 		9: 'Brigand Leader',
-		10: 'Ruins 1',
-		11: 'Ruins 2'
+		10: 'Ruins N',
+		11: 'Ruins E'
 	}
 };
 

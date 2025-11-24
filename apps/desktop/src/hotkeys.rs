@@ -39,6 +39,13 @@ impl HotkeyManager {
 
     // Unregister existing hotkey for this action, then register new one
     pub fn register(&mut self, hotkey: HotKey, action: HotkeyAction) -> bool {
+        // Check if already registered and identical
+        if let Some(existing) = self.registered_hotkeys.get(&action) {
+            if existing.id() == hotkey.id() {
+                return true;
+            }
+        }
+
         // Unregister existing
         let old_hotkey = self.registered_hotkeys.remove(&action);
         if let Some(old) = old_hotkey {

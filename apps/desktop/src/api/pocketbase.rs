@@ -128,7 +128,7 @@ impl PocketBaseClient {
                         },
                         hp_percentage: s.last_hp,
                         last_updated: Some(s.last_update.clone()),
-                        location_number: s.location_image,
+                        location_image: s.location_image,
                     })
                     .collect();
 
@@ -481,7 +481,7 @@ fn update_channel_entry(
         entry.hp_percentage = hp;
         entry.status = status_from_hp(hp).to_string();
         entry.last_updated = Some(timestamp.to_string());
-        entry.location_number = location;
+        entry.location_image = location;
         true
     } else {
         channels.push(MobChannel {
@@ -489,7 +489,7 @@ fn update_channel_entry(
             status: status_from_hp(hp).to_string(),
             hp_percentage: hp,
             last_updated: Some(timestamp.to_string()),
-            location_number: location,
+            location_image: location,
         });
         true
     }

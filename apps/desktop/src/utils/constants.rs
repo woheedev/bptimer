@@ -1,34 +1,48 @@
-// All boss and magical creature IDs from boss-meter-ids.json
-// These are all tracked for radar/location purposes
-pub const BOSS_AND_MAGICAL_CREATURE_IDS: &[u32] = &[
-    10007, 10009, 10010, 10018, 10029, 10032, 10056, 10059, 10069, 10077, 10081, 10084, 10085,
-    10086, 10900, 10901, 10902, 10903, 10904,
-];
+// Macro to generate bidirectional mappings between mob IDs and names
+// Data source: boss-meter-ids.json
+macro_rules! define_mob_mappings {
+    ($(($id:expr, $name:expr)),* $(,)?) => {
+        // All boss and magical creature IDs
+        pub const BOSS_AND_MAGICAL_CREATURE_IDS: &[u32] = &[$($id),*];
 
-// Mob name mapping (from boss-meter-ids.json)
-pub fn get_boss_or_magical_creature_name(mob_id: u32) -> Option<&'static str> {
-    match mob_id {
-        10007 => Some("Storm Goblin King"),
-        10009 => Some("Frost Ogre"),
-        10010 => Some("Tempest Ogre"),
-        10018 => Some("Inferno Ogre"),
-        10029 => Some("Muku King"),
-        10032 => Some("Golden Juggernaut"),
-        10056 => Some("Brigand Leader"),
-        10059 => Some("Muku Chief"),
-        10069 => Some("Phantom Arachnocrab"),
-        10077 => Some("Venobzzar Incubator"),
-        10081 => Some("Iron Fang"),
-        10084 => Some("Celestial Flier"),
-        10085 => Some("Lizardman King"),
-        10086 => Some("Goblin King"),
-        10900 => Some("Golden Nappo"),
-        10901 => Some("Silver Nappo"),
-        10902 => Some("Lovely Boarlet"),
-        10903 => Some("Breezy Boarlet"),
-        10904 => Some("Loyal Boarlet"),
-        _ => None,
-    }
+        // Get mob name from ID
+        pub fn get_boss_or_magical_creature_name(mob_id: u32) -> Option<&'static str> {
+            match mob_id {
+                $($id => Some($name),)*
+                _ => None,
+            }
+        }
+
+        // Get mob ID from name
+        pub fn get_game_mob_id_from_name(mob_name: &str) -> Option<u32> {
+            match mob_name {
+                $($name => Some($id),)*
+                _ => None,
+            }
+        }
+    };
+}
+
+define_mob_mappings! {
+    (10007, "Storm Goblin King"),
+    (10009, "Frost Ogre"),
+    (10010, "Tempest Ogre"),
+    (10018, "Inferno Ogre"),
+    (10029, "Muku King"),
+    (10032, "Golden Juggernaut"),
+    (10056, "Brigand Leader"),
+    (10059, "Muku Chief"),
+    (10069, "Phantom Arachnocrab"),
+    (10077, "Venobzzar Incubator"),
+    (10081, "Iron Fang"),
+    (10084, "Celestial Flier"),
+    (10085, "Lizardman King"),
+    (10086, "Goblin King"),
+    (10900, "Golden Nappo"),
+    (10901, "Silver Nappo"),
+    (10902, "Lovely Boarlet"),
+    (10903, "Breezy Boarlet"),
+    (10904, "Loyal Boarlet"),
 }
 
 pub fn is_location_tracked_mob(mob_id: u32) -> bool {
@@ -39,9 +53,10 @@ pub fn requires_location_number(mob_id: u32) -> bool {
     matches!(mob_id, 10900 | 10901 | 10904)
 }
 
-pub fn get_location_name(mob_name: &str, location_number: i32) -> Option<&'static str> {
-    match mob_name {
-        "Loyal Boarlet" => match location_number {
+pub fn get_location_name(mob_id: u32, location_image: i32) -> Option<&'static str> {
+    match mob_id {
+        10904 => match location_image {
+            // Loyal Boarlet
             1 => Some("Cliff Ruins"),
             2 => Some("Scout NW"),
             3 => Some("Scout E"),
@@ -52,7 +67,8 @@ pub fn get_location_name(mob_name: &str, location_number: i32) -> Option<&'stati
             8 => Some("Andra"),
             _ => None,
         },
-        "Golden Nappo" => match location_number {
+        10900 => match location_image {
+            // Golden Nappo
             1 => Some("Beach"),
             2 => Some("Cliff Ruins"),
             3 => Some("Muku"),
@@ -61,7 +77,8 @@ pub fn get_location_name(mob_name: &str, location_number: i32) -> Option<&'stati
             6 => Some("Ruins E"),
             _ => None,
         },
-        "Silver Nappo" => match location_number {
+        10901 => match location_image {
+            // Silver Nappo
             1 => Some("Beach"),
             2 => Some("Lone"),
             3 => Some("Cliff Ruins"),

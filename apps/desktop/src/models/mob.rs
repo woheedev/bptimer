@@ -25,5 +25,5 @@ pub struct MobChannel {
     #[serde(rename = "last_updated", skip_serializing_if = "Option::is_none")]
     pub last_updated: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub location_number: Option<i32>,
+    pub location_image: Option<i32>,
 }
