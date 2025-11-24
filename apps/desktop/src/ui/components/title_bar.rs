@@ -16,6 +16,8 @@ pub fn render_title_bar(
     dps_history: &mut Vec<f32>,
     player_stats: &mut std::collections::HashMap<i64, crate::models::PlayerStats>,
 ) {
+    let visuals = ui.style().visuals.clone();
+    let text_color = visuals.text_color();
     let title_bar_color = Color32::from_rgba_unmultiplied(50, 50, 50, (opacity * 255.0) as u8);
     let corner_radius = 8.0;
     let main_rect = Rect::from_min_max(
@@ -49,7 +51,6 @@ pub fn render_title_bar(
         ),
     );
     ui.painter().rect_filled(top_rect, 0.0, title_bar_color);
-    let visuals = ui.style().visuals.clone();
 
     // Title text (left side)
     ui.painter().text(
@@ -57,7 +58,7 @@ pub fn render_title_bar(
         egui::Align2::LEFT_CENTER,
         "BPTimer Desktop Companion",
         egui::FontId::proportional(12.0),
-        visuals.text_color(),
+        text_color,
     );
 
     let button_size = 16.0;
@@ -71,7 +72,6 @@ pub fn render_title_bar(
     );
 
     let close_response = ui.interact(close_btn_rect, ui.id().with("close"), egui::Sense::click());
-    let close_visuals = ui.style().interact(&close_response);
 
     ui.painter().rect_filled(
         close_btn_rect,
@@ -88,7 +88,7 @@ pub fn render_title_bar(
         egui::Align2::CENTER_CENTER,
         egui_material_icons::icons::ICON_CLOSE,
         egui::FontId::proportional(14.0),
-        close_visuals.text_color(),
+        text_color,
     );
 
     if close_response.clicked() {
@@ -108,7 +108,6 @@ pub fn render_title_bar(
         ui.id().with("minimize"),
         egui::Sense::click(),
     );
-    let minimize_visuals = ui.style().interact(&minimize_response);
 
     ui.painter().rect_filled(
         minimize_btn_rect,
@@ -125,7 +124,7 @@ pub fn render_title_bar(
         egui::Align2::CENTER_CENTER,
         egui_material_icons::icons::ICON_REMOVE,
         egui::FontId::proportional(14.0),
-        minimize_visuals.text_color(),
+        text_color,
     );
 
     if minimize_response.clicked() {
@@ -147,7 +146,6 @@ pub fn render_title_bar(
         ui.id().with("settings"),
         egui::Sense::click(),
     );
-    let settings_visuals = ui.style().interact(&settings_response);
 
     ui.painter().rect_filled(
         settings_btn_rect,
@@ -170,7 +168,7 @@ pub fn render_title_bar(
         egui::Align2::CENTER_CENTER,
         settings_icon,
         egui::FontId::proportional(14.0),
-        settings_visuals.text_color(),
+        text_color,
     );
 
     if settings_response.clicked() {
@@ -200,7 +198,6 @@ pub fn render_title_bar(
         ui.id().with("refresh"),
         egui::Sense::click(),
     );
-    let refresh_visuals = ui.style().interact(&refresh_response);
 
     ui.painter().rect_filled(
         refresh_btn_rect,
@@ -217,7 +214,7 @@ pub fn render_title_bar(
         egui::Align2::CENTER_CENTER,
         egui_material_icons::icons::ICON_REFRESH,
         egui::FontId::proportional(14.0),
-        refresh_visuals.text_color(),
+        text_color,
     );
 
     if refresh_response.clicked() {
@@ -243,7 +240,6 @@ pub fn render_title_bar(
         ui.id().with("click_through"),
         egui::Sense::click(),
     );
-    let click_through_visuals = ui.style().interact(&click_through_response);
 
     ui.painter().rect_filled(
         click_through_btn_rect,
@@ -263,7 +259,7 @@ pub fn render_title_bar(
         if *click_through {
             Color32::from_rgb(100, 150, 255)
         } else {
-            click_through_visuals.text_color()
+            text_color
         },
     );
 
@@ -282,7 +278,6 @@ pub fn render_title_bar(
     );
 
     let lock_response = ui.interact(lock_btn_rect, ui.id().with("lock"), egui::Sense::click());
-    let lock_visuals = ui.style().interact(&lock_response);
 
     ui.painter().rect_filled(
         lock_btn_rect,
@@ -305,7 +300,7 @@ pub fn render_title_bar(
         egui::Align2::CENTER_CENTER,
         lock_icon,
         egui::FontId::proportional(14.0),
-        lock_visuals.text_color(),
+        text_color,
     );
 
     if lock_response.clicked() {
@@ -331,7 +326,6 @@ pub fn render_title_bar(
         ui.id().with("bptimer"),
         egui::Sense::click(),
     );
-    let bptimer_visuals = ui.style().interact(&bptimer_response);
 
     ui.painter().rect_filled(
         bptimer_btn_rect,
@@ -348,7 +342,7 @@ pub fn render_title_bar(
         egui::Align2::CENTER_CENTER,
         egui_material_icons::icons::ICON_OPEN_IN_NEW,
         egui::FontId::proportional(14.0),
-        bptimer_visuals.text_color(),
+        text_color,
     );
 
     if bptimer_response.clicked() {
@@ -371,7 +365,6 @@ pub fn render_title_bar(
         ui.id().with("combat"),
         egui::Sense::click(),
     );
-    let combat_visuals = ui.style().interact(&combat_response);
     let is_combat_active = *view_mode == ViewMode::Combat;
 
     ui.painter().rect_filled(
@@ -391,7 +384,7 @@ pub fn render_title_bar(
         egui::Align2::CENTER_CENTER,
         egui_material_icons::icons::ICON_SWORDS,
         egui::FontId::proportional(14.0),
-        combat_visuals.text_color(),
+        text_color,
     );
 
     if combat_response.clicked() {
@@ -412,7 +405,6 @@ pub fn render_title_bar(
         ui.id().with("bosses"),
         egui::Sense::click(),
     );
-    let bosses_visuals = ui.style().interact(&bosses_response);
     let is_bosses_active = *view_mode == ViewMode::Bosses;
 
     ui.painter().rect_filled(
@@ -432,7 +424,7 @@ pub fn render_title_bar(
         egui::Align2::CENTER_CENTER,
         egui_material_icons::icons::ICON_RADAR,
         egui::FontId::proportional(14.0),
-        bosses_visuals.text_color(),
+        text_color,
     );
 
     if bosses_response.clicked() {

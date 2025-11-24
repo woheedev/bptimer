@@ -1,3 +1,4 @@
+use global_hotkey::hotkey::{Code, HotKey, Modifiers};
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -49,6 +50,100 @@ pub struct Settings {
     // Development settings
     #[serde(default)]
     pub show_console: bool, // Show/hide console window for debugging
+    // Hotkey settings
+    #[serde(default = "default_hotkeys")]
+    pub hotkeys: HotkeySettings,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct HotkeySettings {
+    pub toggle_click_through: Option<HotkeyConfig>,
+    pub switch_to_mob_view: Option<HotkeyConfig>,
+    pub switch_to_combat_view: Option<HotkeyConfig>,
+    pub minimize_window: Option<HotkeyConfig>,
+    pub reset_stats: Option<HotkeyConfig>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct HotkeyConfig {
+    pub modifiers: u32,   // Store bits
+    pub key_name: String, // Store key name as string
+}
+
+impl HotkeyConfig {
+    pub fn new(modifiers: Option<Modifiers>, code: Code) -> Self {
+        Self {
+            modifiers: modifiers.map(|m| m.bits()).unwrap_or(0),
+            key_name: format!("{:?}", code),
+        }
+    }
+
+    pub fn to_hotkey(&self) -> Option<HotKey> {
+        let modifiers = Modifiers::from_bits(self.modifiers).unwrap_or_else(Modifiers::empty);
+        let code = crate::hotkeys::string_to_code(&self.key_name)?;
+
+        // Only create if we have a valid key
+        Some(HotKey::new(
+            if modifiers.is_empty() {
+                None
+            } else {
+                Some(modifiers)
+            },
+            code,
+        ))
+    }
+
+    pub fn to_display_string(&self) -> String {
+        let modifiers = Modifiers::from_bits(self.modifiers).unwrap_or_else(Modifiers::empty);
+        let mut parts = Vec::new();
+
+        if modifiers.contains(Modifiers::CONTROL) {
+            parts.push("Ctrl");
+        }
+        if modifiers.contains(Modifiers::SHIFT) {
+            parts.push("Shift");
+        }
+        if modifiers.contains(Modifiers::ALT) {
+            parts.push("Alt");
+        }
+        if modifiers.contains(Modifiers::META) {
+            parts.push("Meta");
+        }
+
+        let key_display = match self.key_name.as_str() {
+            s if s.starts_with("Key") => &s[3..],
+            s if s.starts_with("Digit") => &s[5..],
+            s => s,
+        };
+        parts.push(key_display);
+
+        parts.join(" + ")
+    }
+}
+
+fn default_hotkeys() -> HotkeySettings {
+    HotkeySettings {
+        toggle_click_through: Some(HotkeyConfig {
+            modifiers: (Modifiers::CONTROL | Modifiers::SHIFT).bits(),
+            key_name: "KeyL".to_string(),
+        }),
+        switch_to_mob_view: Some(HotkeyConfig {
+            modifiers: (Modifiers::CONTROL | Modifiers::SHIFT).bits(),
+            key_name: "KeyO".to_string(),
+        }),
+        switch_to_combat_view: Some(HotkeyConfig {
+            modifiers: (Modifiers::CONTROL | Modifiers::SHIFT).bits(),
+            key_name: "KeyP".to_string(),
+        }),
+        minimize_window: Some(HotkeyConfig {
+            modifiers: (Modifiers::CONTROL | Modifiers::SHIFT).bits(),
+            key_name: "KeyM".to_string(),
+        }),
+        reset_stats: Some(HotkeyConfig {
+            modifiers: (Modifiers::CONTROL | Modifiers::SHIFT).bits(),
+            key_name: "KeyR".to_string(),
+        }),
+    }
 }
 
 impl Default for Settings {
@@ -69,6 +164,7 @@ impl Default for Settings {
             clear_combat_data_on_server_change: true,
             text_color: [255, 255, 255, 255], // White text by default (RGBA)
             show_console: false,              // Console hidden by default
+            hotkeys: default_hotkeys(),
         }
     }
 }

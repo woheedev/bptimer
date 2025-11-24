@@ -1,5 +1,5 @@
 use egui::Color32;
-use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager};
+use global_hotkey::GlobalHotKeyEvent;
 use instant::Instant;
 use log::{info, warn};
 
@@ -10,7 +10,7 @@ use crate::stats::{
     process_damage_hit, process_damage_taken_hit, process_healing_hit, update_realtime_dps,
 };
 use crate::ui::components::title_bar;
-use crate::ui::constants::{app, colors, layout, radar, timing, window};
+use crate::ui::constants::{app, colors, layout, radar, spacing, timing, window};
 use crate::ui::views::{main_view, mob_view, radar_view, settings_view};
 
 use crate::config::Settings;
@@ -39,7 +39,6 @@ pub struct DpsMeterApp {
 
     // UI state
     pub settings: Settings,
-    pub last_hotkey_toggle: Option<Instant>,
     pub sort_column: Option<usize>,
     pub sort_descending: bool,
     pub view_mode: ViewMode,
@@ -82,13 +81,15 @@ pub struct DpsMeterApp {
     pub update_check_requested: bool,
     pub update_perform_requested: bool,
 
-    _hotkey_manager: Option<GlobalHotKeyManager>,
+    pub hotkey_manager: crate::hotkeys::HotkeyManager,
+    pub hotkey_recording_state: crate::ui::views::settings_view::HotkeyRecordingState,
+    pub last_hotkey_press: Option<Instant>,
 }
 
 impl DpsMeterApp {
     pub fn new(
         cc: &eframe::CreationContext<'_>,
-        hotkey_manager: Option<GlobalHotKeyManager>,
+        hotkey_manager: crate::hotkeys::HotkeyManager,
     ) -> Self {
         let settings = Settings::load();
 
@@ -145,8 +146,7 @@ impl DpsMeterApp {
             max_dps: 1.0,
             dps_history: vec![0.0; app::DPS_HISTORY_SIZE],
 
-            settings,
-            last_hotkey_toggle: None,
+            settings: settings.clone(),
             sort_column: Some(2),
             sort_descending: true,
             view_mode: ViewMode::Bosses,
@@ -225,7 +225,10 @@ impl DpsMeterApp {
             update_check_requested: false,
             update_perform_requested: false,
 
-            _hotkey_manager: hotkey_manager,
+            hotkey_manager,
+            hotkey_recording_state: crate::ui::views::settings_view::HotkeyRecordingState::default(
+            ),
+            last_hotkey_press: None,
         };
 
         instance.check_for_updates_on_launch();
@@ -498,6 +501,7 @@ impl eframe::App for DpsMeterApp {
         if let Some(timer) = self.settings_save_timer {
             if timer.elapsed().as_millis() >= timing::SETTINGS_SAVE_DEBOUNCE_MS {
                 self.settings.save();
+                self.hotkey_manager.reload_from_settings(&self.settings);
                 self.settings_save_timer = None;
             }
         }
@@ -544,20 +548,52 @@ impl eframe::App for DpsMeterApp {
         while let Ok(event) = GlobalHotKeyEvent::receiver().try_recv() {
             if event.state == global_hotkey::HotKeyState::Pressed {
                 let now = Instant::now();
-                let should_toggle = match self.last_hotkey_toggle {
+                let should_handle = match self.last_hotkey_press {
                     Some(last) => now.duration_since(last).as_millis() > timing::HOTKEY_DEBOUNCE_MS,
                     None => true,
                 };
 
-                if should_toggle {
-                    self.settings.click_through = !self.settings.click_through;
-                    self.settings.save(); // Save on hotkey toggle
-                    self.last_hotkey_toggle = Some(now);
-                    info!(
-                        "Hotkey pressed: click-through toggled to {}",
-                        self.settings.click_through
-                    );
-                    break;
+                if should_handle {
+                    if let Some(action) = self.hotkey_manager.get_action(event.id) {
+                        match action {
+                            crate::hotkeys::HotkeyAction::ToggleClickThrough => {
+                                self.settings.click_through = !self.settings.click_through;
+                                self.settings.save();
+                                info!(
+                                    "Hotkey pressed: click-through toggled to {}",
+                                    self.settings.click_through
+                                );
+                            }
+                            crate::hotkeys::HotkeyAction::SwitchToMobView => {
+                                self.view_mode = ViewMode::Bosses;
+                                info!("Hotkey pressed: switched to mob view");
+                            }
+                            crate::hotkeys::HotkeyAction::SwitchToCombatView => {
+                                self.view_mode = ViewMode::Combat;
+                                info!("Hotkey pressed: switched to combat view");
+                            }
+                            crate::hotkeys::HotkeyAction::MinimizeWindow => {
+                                let is_minimized =
+                                    ctx.input(|i| i.viewport().minimized.unwrap_or(false));
+                                ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(
+                                    !is_minimized,
+                                ));
+                                info!(
+                                    "Hotkey pressed: minimize window (toggled from {})",
+                                    is_minimized
+                                );
+                            }
+                            crate::hotkeys::HotkeyAction::ResetStats => {
+                                self.dps_value = 0.0;
+                                self.total_damage = 0.0;
+                                self.max_dps = 0.0;
+                                self.dps_history = vec![0.0; app::DPS_HISTORY_SIZE];
+                                self.player_stats.clear();
+                                info!("Hotkey pressed: reset stats");
+                            }
+                        }
+                        self.last_hotkey_press = Some(now);
+                    }
                 }
             }
         }
@@ -597,6 +633,7 @@ impl eframe::App for DpsMeterApp {
         ctx.set_pixels_per_point(self.settings.font_scale);
 
         let mut style = (*ctx.style()).clone();
+        style.visuals = egui::Visuals::dark();
         let text_color = Color32::from_rgba_unmultiplied(
             self.settings.text_color[0],
             self.settings.text_color[1],
@@ -673,9 +710,9 @@ impl eframe::App for DpsMeterApp {
                                         &self.radar_state,
                                         text_color,
                                     );
-                                    ui.add_space(10.0);
+                                    ui.add_space(spacing::MD);
                                     ui.separator();
-                                    ui.add_space(10.0);
+                                    ui.add_space(spacing::MD);
                                 }
 
                                 ui.heading("Mob Timers");
@@ -700,6 +737,8 @@ impl eframe::App for DpsMeterApp {
                                 &self.update_status,
                                 &mut self.update_check_requested,
                                 &mut self.update_perform_requested,
+                                &mut self.hotkey_manager,
+                                &mut self.hotkey_recording_state,
                             );
                         }
                     });

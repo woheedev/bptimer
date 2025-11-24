@@ -2,10 +2,6 @@
 
 use eframe::egui;
 use env_logger;
-use global_hotkey::{
-    GlobalHotKeyManager,
-    hotkey::{Code, HotKey, Modifiers},
-};
 use log::{info, warn};
 
 // Load .env file if it exists (non-fatal if missing)
@@ -29,6 +25,7 @@ include!(concat!(env!("OUT_DIR"), "/config.rs"));
 mod api;
 mod capture;
 mod config;
+mod hotkeys;
 mod models;
 mod protocol;
 mod stats;
@@ -63,29 +60,11 @@ fn main() -> eframe::Result {
         self_update::cargo_crate_version!()
     );
 
-    let hotkey_manager = match GlobalHotKeyManager::new() {
-        Ok(manager) => {
-            info!("Global hotkey manager initialized successfully");
-            let hotkey = HotKey::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyL);
-            match manager.register(hotkey) {
-                Ok(_) => {
-                    info!("Global hotkey registered: Ctrl+Shift+L (toggle click-through)");
-                    Some(manager)
-                }
-                Err(e) => {
-                    warn!("Warning: Could not register hotkey: {:?}", e);
-                    None
-                }
-            }
-        }
-        Err(e) => {
-            warn!(
-                "Failed to initialize hotkey manager: {:?} - continuing without hotkey support",
-                e
-            );
-            None
-        }
-    };
+    let mut hotkey_manager = crate::hotkeys::HotkeyManager::new();
+
+    // Load settings and register initial hotkeys
+    let settings = crate::config::Settings::load();
+    hotkey_manager.reload_from_settings(&settings);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()

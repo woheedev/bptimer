@@ -1,6 +1,6 @@
 use std::env;
-use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
+use std::fs::File;
+use std::io::Write;
 use std::path::PathBuf;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -9,26 +9,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     prost_build::Config::new()
         .out_dir(&manifest_dir.join("src/protocol"))
         .compile_protos(&["src/pb.proto"], &["src/"])?;
-
-    // Add #[rustfmt::skip] to the generated pb.rs file to skip formatting
-    let pb_rs_path = manifest_dir.join("src/protocol/pb.rs");
-    if pb_rs_path.exists() {
-        let mut content = String::new();
-        {
-            let mut file = File::open(&pb_rs_path)?;
-            file.read_to_string(&mut content)?;
-        }
-
-        // Only add if not already present
-        if !content.starts_with("#[rustfmt::skip]") {
-            let mut file = OpenOptions::new()
-                .write(true)
-                .truncate(true)
-                .open(&pb_rs_path)?;
-            writeln!(file, "#[rustfmt::skip]")?;
-            file.write_all(content.as_bytes())?;
-        }
-    }
 
     let out_dir = env::var("OUT_DIR")?;
     let dest_path = PathBuf::from(&out_dir).join("config.rs");

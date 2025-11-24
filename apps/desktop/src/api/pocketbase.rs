@@ -65,7 +65,7 @@ impl PocketBaseClient {
                     warn!("Realtime stream closed gracefully. Reconnecting in 5s...");
                 }
                 Err(e) => {
-                    warn!("Realtime connection error: {}. Reconnecting in 5s...", e);
+                    warn!("Realtime connection error: {:#}. Reconnecting in 5s...", e);
                 }
             }
             sleep(Duration::from_secs(5)).await;

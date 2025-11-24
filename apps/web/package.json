@@ -22,7 +22,7 @@
 		"mode-watcher": "^1.1.0",
 		"pako": "^2.1.0",
 		"pocketbase": "^0.26.3",
-		"simple-icons": "^15.21.0",
+		"simple-icons": "^15.22.0",
 		"zod": "^4.1.12"
 	},
 	"devDependencies": {

@@ -3,6 +3,7 @@ use egui::{Color32, Stroke, Ui};
 /// Spacing constants for consistent UI layout
 /// Only includes values that are actually used in the UI
 pub mod spacing {
+    pub const XS: f32 = 2.0; // Extra small spacing
     pub const SM: f32 = 5.0; // Small spacing (most common)
     pub const MD: f32 = 10.0; // Medium spacing (most common)
     pub const LG: f32 = 20.0; // Large spacing (for empty states, etc.)

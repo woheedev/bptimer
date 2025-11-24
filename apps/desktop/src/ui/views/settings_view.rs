@@ -1,11 +1,23 @@
 use crate::config::Settings;
+use crate::hotkeys::{HotkeyAction, HotkeyManager};
 use crate::ui::constants::{responsive, spacing, style, theme};
 use egui::{Ui, Window};
+use global_hotkey::hotkey::{HotKey, Modifiers};
 use instant::Instant;
 
 const FONT_SCALE_MIN: f32 = 0.5;
 const FONT_SCALE_MAX: f32 = 2.0;
 const FONT_SCALE_STEP: f32 = 0.05;
+
+pub struct HotkeyRecordingState {
+    pub action: Option<HotkeyAction>,
+}
+
+impl Default for HotkeyRecordingState {
+    fn default() -> Self {
+        Self { action: None }
+    }
+}
 
 pub fn render_settings_view(
     ui: &mut Ui,
@@ -18,11 +30,218 @@ pub fn render_settings_view(
     update_status: &std::sync::Arc<std::sync::Mutex<crate::updater::UpdateStatus>>,
     update_check_requested: &mut bool,
     update_perform_requested: &mut bool,
+    hotkey_manager: &mut HotkeyManager,
+    recording_state: &mut HotkeyRecordingState,
 ) {
+    // Handle hotkey recording
+    if let Some(action) = recording_state.action {
+        ui.input(|i| {
+            // Check for Esc to cancel/clear
+            if i.key_pressed(egui::Key::Escape) {
+                // Clear the hotkey
+                hotkey_manager.unregister_action(action);
+                match action {
+                    HotkeyAction::ToggleClickThrough => {
+                        settings.hotkeys.toggle_click_through = None
+                    }
+                    HotkeyAction::SwitchToMobView => settings.hotkeys.switch_to_mob_view = None,
+                    HotkeyAction::SwitchToCombatView => {
+                        settings.hotkeys.switch_to_combat_view = None
+                    }
+                    HotkeyAction::MinimizeWindow => settings.hotkeys.minimize_window = None,
+                    HotkeyAction::ResetStats => settings.hotkeys.reset_stats = None,
+                }
+                *settings_save_timer = Some(Instant::now());
+                recording_state.action = None;
+                return;
+            }
+
+            // Map egui modifiers to global_hotkey modifiers
+            let mut gh_modifiers = Modifiers::empty();
+            if i.modifiers.ctrl {
+                gh_modifiers |= Modifiers::CONTROL;
+            }
+            if i.modifiers.shift {
+                gh_modifiers |= Modifiers::SHIFT;
+            }
+            if i.modifiers.alt {
+                gh_modifiers |= Modifiers::ALT;
+            }
+
+            for key in [
+                egui::Key::A,
+                egui::Key::B,
+                egui::Key::C,
+                egui::Key::D,
+                egui::Key::E,
+                egui::Key::F,
+                egui::Key::G,
+                egui::Key::H,
+                egui::Key::I,
+                egui::Key::J,
+                egui::Key::K,
+                egui::Key::L,
+                egui::Key::M,
+                egui::Key::N,
+                egui::Key::O,
+                egui::Key::P,
+                egui::Key::Q,
+                egui::Key::R,
+                egui::Key::S,
+                egui::Key::T,
+                egui::Key::U,
+                egui::Key::V,
+                egui::Key::W,
+                egui::Key::X,
+                egui::Key::Y,
+                egui::Key::Z,
+                egui::Key::Num0,
+                egui::Key::Num1,
+                egui::Key::Num2,
+                egui::Key::Num3,
+                egui::Key::Num4,
+                egui::Key::Num5,
+                egui::Key::Num6,
+                egui::Key::Num7,
+                egui::Key::Num8,
+                egui::Key::Num9,
+                egui::Key::F1,
+                egui::Key::F2,
+                egui::Key::F3,
+                egui::Key::F4,
+                egui::Key::F5,
+                egui::Key::F6,
+                egui::Key::F7,
+                egui::Key::F8,
+                egui::Key::F9,
+                egui::Key::F10,
+                egui::Key::F11,
+                egui::Key::F12,
+                egui::Key::Space,
+                egui::Key::Enter,
+                egui::Key::Tab,
+                egui::Key::Backspace,
+            ] {
+                if i.key_pressed(key) {
+                    let Some(code) = crate::hotkeys::egui_key_to_code(key) else {
+                        continue;
+                    };
+
+                    let hotkey = HotKey::new(
+                        if gh_modifiers.is_empty() {
+                            None
+                        } else {
+                            Some(gh_modifiers)
+                        },
+                        code,
+                    );
+
+                    // Register
+                    if hotkey_manager.register(hotkey, action) {
+                        // Update settings
+                        let config = crate::config::HotkeyConfig::new(
+                            if gh_modifiers.is_empty() {
+                                None
+                            } else {
+                                Some(gh_modifiers)
+                            },
+                            code,
+                        );
+                        match action {
+                            HotkeyAction::ToggleClickThrough => {
+                                settings.hotkeys.toggle_click_through = Some(config)
+                            }
+                            HotkeyAction::SwitchToMobView => {
+                                settings.hotkeys.switch_to_mob_view = Some(config)
+                            }
+                            HotkeyAction::SwitchToCombatView => {
+                                settings.hotkeys.switch_to_combat_view = Some(config)
+                            }
+                            HotkeyAction::MinimizeWindow => {
+                                settings.hotkeys.minimize_window = Some(config)
+                            }
+                            HotkeyAction::ResetStats => settings.hotkeys.reset_stats = Some(config),
+                        }
+                        *settings_save_timer = Some(Instant::now());
+                    }
+
+                    recording_state.action = None;
+                    break;
+                }
+            }
+        });
+    }
+
     ui.heading("Settings");
     ui.add_space(spacing::MD);
 
     responsive::scroll_area_with_reserve(ui, 50.0).show(ui, |ui| {
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            let text_color = theme::text_color(settings);
+            ui.label(egui::RichText::new("Hotkeys").strong().color(text_color));
+            ui.add_space(spacing::SM);
+
+            if recording_state.action.is_some() {
+                ui.label(
+                    egui::RichText::new("Press desired hotkey combination... (Esc to clear)")
+                        .color(egui::Color32::YELLOW),
+                );
+                ui.add_space(spacing::SM);
+            }
+
+            let mut render_hotkey_btn =
+                |label: &str,
+                 action: HotkeyAction,
+                 config: &Option<crate::config::HotkeyConfig>| {
+                    ui.horizontal(|ui| {
+                        ui.label(label);
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            let btn_text = if recording_state.action == Some(action) {
+                                "Recording...".to_string()
+                            } else if let Some(cfg) = config {
+                                cfg.to_display_string()
+                            } else {
+                                "Not Set".to_string()
+                            };
+
+                            if ui.button(btn_text).clicked() {
+                                recording_state.action = Some(action);
+                            }
+                        });
+                    });
+                    ui.add_space(spacing::XS);
+                };
+
+            render_hotkey_btn(
+                "Toggle Click-Through",
+                HotkeyAction::ToggleClickThrough,
+                &settings.hotkeys.toggle_click_through,
+            );
+            render_hotkey_btn(
+                "Switch to Mob View",
+                HotkeyAction::SwitchToMobView,
+                &settings.hotkeys.switch_to_mob_view,
+            );
+            render_hotkey_btn(
+                "Switch to Combat View",
+                HotkeyAction::SwitchToCombatView,
+                &settings.hotkeys.switch_to_combat_view,
+            );
+            render_hotkey_btn(
+                "Minimize Window",
+                HotkeyAction::MinimizeWindow,
+                &settings.hotkeys.minimize_window,
+            );
+            render_hotkey_btn(
+                "Reset Stats",
+                HotkeyAction::ResetStats,
+                &settings.hotkeys.reset_stats,
+            );
+        });
+
+        ui.add_space(spacing::MD);
+
         style::group_frame(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
             let text_color = theme::text_color(settings);

@@ -160,12 +160,12 @@ pub fn render_mob_view(ui: &mut Ui, mobs: &[Mob]) {
                                                     hp_color(channel.hp_percentage),
                                                 );
 
-                                                channel_ui.add_space(4.0);
+                                                channel_ui.add_space(spacing::SM);
                                             });
                                         }
                                     });
                                     if total_rows > 0 && row_idx + 1 < total_rows {
-                                        rows_ui.add_space(6.0);
+                                        rows_ui.add_space(spacing::SM);
                                     }
                                 }
                             });

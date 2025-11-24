@@ -1,5 +1,6 @@
 use crate::config::Settings;
 use crate::models::PlayerStats;
+use crate::ui::constants::spacing;
 use crate::utils::format_compact;
 use egui::{Color32, Ui};
 use egui_extras::{Column, TableBuilder};
@@ -245,6 +246,6 @@ pub fn render_player_table(
                     }
                 });
 
-            ui.add_space(18.0);
+            ui.add_space(spacing::LG);
         });
 }
