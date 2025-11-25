@@ -191,8 +191,9 @@ func authenticateAPIKey(app core.App, apiKey string) (string, error) {
 func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 	collection, err := app.FindCollectionByNameOrId(COLLECTION_HP_REPORTS)
 	if err != nil {
+		log.Printf("[FATAL] Failed to find hp_reports collection: %v", err)
 		return func(e *core.RequestEvent) error {
-			return fmt.Errorf("failed to find hp_reports collection: %w", err)
+			return e.InternalServerError("Service temporarily unavailable", nil)
 		}
 	}
 
@@ -291,15 +292,25 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		}
 
 		if err := e.App.Save(hpReport); err != nil {
-			return fmt.Errorf("failed to save hp report: %w", err)
+			logger.Error("Failed to save HP report", "error", err)
+			return e.InternalServerError("Failed to save HP report", nil)
 		}
 
-		logger.Info("HP report saved",
+		logArgs := []any{
 			"mob", mobName,
 			"channel", data.Channel,
 			"hp_pct", data.HPPct,
 			"ip", e.RealIP(),
-		)
+		}
+
+		if data.AccountID != "" {
+			logArgs = append(logArgs, "account_id", data.AccountID)
+		}
+		if data.UID != "" {
+			logArgs = append(logArgs, "uid", data.UID)
+		}
+
+		logger.Info("HP report saved", logArgs...)
 
 		return e.JSON(http.StatusOK, successResponse)
 	}
@@ -346,7 +357,7 @@ func preventDuplicateHPReports(e *core.RecordEvent) error {
 		One(&duplicateResult)
 
 	if err == nil && duplicateResult.Count > 0 {
-		return apis.NewBadRequestError("You have already reported this HP percentage.", nil)
+		return apis.NewApiError(409, "You have already reported this HP percentage.", nil)
 	}
 
 	lastHpResult := struct {
@@ -360,7 +371,7 @@ func preventDuplicateHPReports(e *core.RecordEvent) error {
 		One(&lastHpResult)
 
 	if err == nil && hpPercentage > lastHpResult.HPPercentage {
-		return apis.NewBadRequestError("HP percentage can only decrease.", nil)
+		return apis.NewApiError(409, "HP percentage can only decrease.", nil)
 	}
 
 	return e.Next()

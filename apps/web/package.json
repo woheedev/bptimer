@@ -23,7 +23,7 @@
 		"pako": "^2.1.0",
 		"pocketbase": "^0.26.3",
 		"simple-icons": "^15.22.0",
-		"zod": "^4.1.12"
+		"zod": "^4.1.13"
 	},
 	"devDependencies": {
 		"@internationalized/date": "^3.10.0",
@@ -43,7 +43,7 @@
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
 		"prettier-plugin-tailwindcss": "^0.7.1",
-		"svelte": "^5.43.14",
+		"svelte": "^5.43.15",
 		"svelte-check": "^4.3.4",
 		"svelte-sonner": "^1.0.6",
 		"tailwind-merge": "^3.4.0",

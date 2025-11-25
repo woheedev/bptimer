@@ -23,6 +23,7 @@
 		mobType,
 		hpValue = $bindable(100),
 		locationImage = $bindable<number | null>(null),
+		hasUserSelectedLocation = $bindable(false),
 		isSubmitting,
 		onSubmit,
 		sliderId = 'hp-slider'
@@ -33,6 +34,7 @@
 		mobType: 'boss' | 'magical_creature' | string;
 		hpValue: number;
 		locationImage?: number | null;
+		hasUserSelectedLocation?: boolean;
 		isSubmitting: boolean;
 		onSubmit: () => void;
 		sliderId?: string;
@@ -59,7 +61,7 @@
 		if (!selectedChannel || !user || validationError) return;
 
 		// Validate location image for magical creatures
-		if (requiresLocation && locationImage === null) {
+		if (requiresLocation && (!hasUserSelectedLocation || locationImage === null)) {
 			showToast.error('Please select a location image for this magical creature');
 			return;
 		}
@@ -106,6 +108,7 @@
 					{mobName}
 					{mobType}
 					bind:selectedLocation={locationImage}
+					bind:hasUserSelected={hasUserSelectedLocation}
 					required={true}
 				/>
 			{/if}

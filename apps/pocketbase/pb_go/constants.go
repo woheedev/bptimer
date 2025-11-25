@@ -99,34 +99,34 @@ var MOB_MAPPING = map[int]string{
 // MOB_LOCATIONS maps game monster IDs to their known spawn coordinates
 var MOB_LOCATIONS = map[int][]MobLocation{
 	10900: { // Golden Nappo
-		{ID: 1, X: -710, Y: 100, Z: 97},   // BEECH
-		{ID: 2, X: -151, Y: 125, Z: -282}, // CR
-		{ID: 3, X: 600, Y: 198, Z: 226},   // MUKU
-		{ID: 4, X: 186, Y: 183, Z: 414},   // FARM
+		{ID: 1, X: -710, Y: 100, Z: 97},   // Beach
+		{ID: 2, X: -151, Y: 125, Z: -282}, // Cliff Ruins
+		{ID: 3, X: 600, Y: 198, Z: 226},   // Muku
+		{ID: 4, X: 186, Y: 183, Z: 414},   // Farm
 		{ID: 5, X: -116, Y: 172, Z: 314},  // BL
-		{ID: 6, X: -111, Y: 281, Z: 597},  // RUINS
+		{ID: 6, X: -111, Y: 281, Z: 597},  // Ruins E
 	},
 	10901: { // Silver Nappo
-		{ID: 1, X: -592, Y: 102, Z: 32},   // BEECH
-		{ID: 2, X: -318, Y: 125, Z: -318}, // LONE
-		{ID: 3, X: 100, Y: 155, Z: -142},  // CR
-		{ID: 4, X: 316, Y: 191, Z: 134},   // SCOUT 1
-		{ID: 5, X: 348, Y: 170, Z: -73},   // SCOUT 2
-		{ID: 6, X: 502, Y: 174, Z: 376},   // MUKU 1
-		{ID: 7, X: 638, Y: 152, Z: 281},   // MUKU 2
-		{ID: 8, X: 306, Y: 184, Z: 313},   // FARM
+		{ID: 1, X: -592, Y: 102, Z: 32},   // Beach
+		{ID: 2, X: -318, Y: 125, Z: -318}, // Lone
+		{ID: 3, X: 100, Y: 155, Z: -142},  // Cliff Ruins
+		{ID: 4, X: 316, Y: 191, Z: 134},   // Scout N
+		{ID: 5, X: 348, Y: 170, Z: -73},   // Scout E
+		{ID: 6, X: 502, Y: 174, Z: 376},   // Kana Road
+		{ID: 7, X: 638, Y: 152, Z: 281},   // Muku
+		{ID: 8, X: 306, Y: 184, Z: 313},   // Farm
 		{ID: 9, X: -170, Y: 166, Z: 254},  // BL
-		{ID: 10, X: -415, Y: 239, Z: 695}, // RUINS 1
-		{ID: 11, X: -42, Y: 287, Z: 473},  // RUINS 2
+		{ID: 10, X: -415, Y: 239, Z: 695}, // Ruins N
+		{ID: 11, X: -42, Y: 287, Z: 473},  // Ruins E
 	},
 	10904: { // Loyal Boarlet
-		{ID: 1, X: -54, Y: 200, Z: -205}, // CR
-		{ID: 2, X: 220, Y: 142, Z: 32},   // SCOUT 1
-		{ID: 3, X: 348, Y: 170, Z: -83},  // SCOUT 2
-		{ID: 4, X: 355, Y: 159, Z: 18},   // SCOUT 3
-		{ID: 5, X: 460, Y: 213, Z: 471},  // MUKU
-		{ID: 6, X: 210, Y: 160, Z: 274},  // FARM
-		{ID: 7, X: -482, Y: 207, Z: 166}, // REST 1
-		{ID: 8, X: -282, Y: 157, Z: 86},  // REST 2
+		{ID: 1, X: -54, Y: 200, Z: -205}, // Cliff Ruins
+		{ID: 2, X: 220, Y: 142, Z: 32},   // Scout NW
+		{ID: 3, X: 348, Y: 170, Z: -83},  // Scout E
+		{ID: 4, X: 355, Y: 159, Z: 18},   // Scout NE
+		{ID: 5, X: 460, Y: 213, Z: 471},  // Muku
+		{ID: 6, X: 210, Y: 160, Z: 274},  // Farm
+		{ID: 7, X: -482, Y: 207, Z: 166}, // Tent
+		{ID: 8, X: -282, Y: 157, Z: 86},  // Andra
 	},
 }

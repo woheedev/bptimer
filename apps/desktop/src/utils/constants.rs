@@ -72,7 +72,7 @@ pub fn get_location_name(mob_id: u32, location_image: i32) -> Option<&'static st
             1 => Some("Beach"),
             2 => Some("Cliff Ruins"),
             3 => Some("Muku"),
-            4 => Some("Farm"),
+            4 => Some("Old Kana"),
             5 => Some("Brigand Leader"),
             6 => Some("Ruins E"),
             _ => None,

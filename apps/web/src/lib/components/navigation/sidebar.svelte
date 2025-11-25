@@ -93,7 +93,7 @@
 					rel="noopener noreferrer"
 					class="hover:underline"
 				>
-					Buy me a coffee ☕ | v1.1.0
+					Buy me a coffee ☕ | v1.2.0
 				</a>
 			</p>
 		{/if}

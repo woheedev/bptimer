@@ -89,9 +89,10 @@ export function showMobNotification(
 	const isSpecialCreature = mobName in SPECIAL_MAGICAL_CREATURES;
 	if (isSpecialCreature && locationImage) {
 		const imagePath = getLocationImagePath(mobName, mobType, locationImage);
+		const notificationImagePath = getLocationImagePath(mobName, mobType, locationImage, true);
 		options.icon = imagePath;
 		// image: supported in Chrome/Edge, not Safari/Firefox
-		(options as Record<string, unknown>).image = imagePath;
+		(options as Record<string, unknown>).image = notificationImagePath;
 	}
 
 	try {

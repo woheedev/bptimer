@@ -5,12 +5,14 @@ import (
 )
 
 type CreateHPReportRequest struct {
-	MonsterID int     `json:"monster_id" form:"monster_id"` // Game monster ID (from meter)
-	HPPct     int     `json:"hp_pct" form:"hp_pct"`         // HP percentage (0-100)
-	Channel   int     `json:"line" form:"line"`             // Channel/Line number
-	PosX      float64 `json:"pos_x,omitempty" form:"pos_x"` // X coordinate
-	PosY      float64 `json:"pos_y,omitempty" form:"pos_y"` // Y coordinate
-	PosZ      float64 `json:"pos_z,omitempty" form:"pos_z"` // Z coordinate
+	MonsterID int     `json:"monster_id" form:"monster_id"`           // Game monster ID (from meter)
+	HPPct     int     `json:"hp_pct" form:"hp_pct"`                   // HP percentage (0-100)
+	Channel   int     `json:"line" form:"line"`                       // Channel/Line number
+	PosX      float64 `json:"pos_x,omitempty" form:"pos_x"`           // X coordinate
+	PosY      float64 `json:"pos_y,omitempty" form:"pos_y"`           // Y coordinate
+	PosZ      float64 `json:"pos_z,omitempty" form:"pos_z"`           // Z coordinate
+	AccountID string  `json:"account_id,omitempty" form:"account_id"` // User account ID (pending implementation)
+	UID       string  `json:"uid,omitempty" form:"uid"`               // User Unique ID (pending implementation)
 }
 
 type CachedMobData struct {

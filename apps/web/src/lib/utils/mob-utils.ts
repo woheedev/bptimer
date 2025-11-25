@@ -88,16 +88,19 @@ export function getLocationName(mobName: string, locationNumber: number): string
  * @param mobName - The name of the mob
  * @param mobType - The type of mob ('boss' or 'magical_creature')
  * @param locationNumber - The location number (1-based)
+ * @param forNotification - If true, adds _noti suffix before .webp for notification images
  * @returns The image path for the location
  */
 export function getLocationImagePath(
 	mobName: string,
 	mobType: 'boss' | 'magical_creature' | string,
-	locationNumber: number
+	locationNumber: number,
+	forNotification = false
 ): string {
 	const imageName = toSnakeCase(mobName);
 	const folder = mobType === 'boss' ? 'bosses' : 'magical-creatures';
-	return `/images/${folder}/locations/${imageName}_${locationNumber}.webp`;
+	const suffix = forNotification ? '_noti' : '';
+	return `/images/${folder}/locations/${imageName}_${locationNumber}${suffix}.webp`;
 }
 
 /**

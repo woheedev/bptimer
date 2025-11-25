@@ -56,7 +56,8 @@
 		selectedChannel: null as number | null,
 		hpValue: DEFAULT_HP_VALUE,
 		isSubmitting: false,
-		locationImage: null as number | null
+		locationImage: null as number | null,
+		hasUserSelectedLocation: false
 	});
 
 	let data_state = $state({
@@ -95,6 +96,7 @@
 			submission_state.hpValue = DEFAULT_HP_VALUE;
 			submission_state.isSubmitting = false;
 			submission_state.locationImage = null;
+			submission_state.hasUserSelectedLocation = false;
 			data_state.channels = [];
 			data_state.reports = [];
 			ui_state.isLoading = false;
@@ -317,9 +319,10 @@
 		data_state.reports = [];
 		ui_state.isLoadingReports = true;
 
-		// Reset location image
+		// Reset location image and selection state
 		if (isSpecialMagicalCreature) {
 			submission_state.locationImage = null;
+			submission_state.hasUserSelectedLocation = false;
 		}
 
 		// Set HP value to current channel's HP if available
@@ -334,9 +337,10 @@
 		submission_state.selectedChannel = null;
 		ui_state.showBackButton = false;
 
-		// Reset location image when going back to all reports
+		// Reset location image and selection state when going back to all reports
 		if (isSpecialMagicalCreature) {
 			submission_state.locationImage = null;
+			submission_state.hasUserSelectedLocation = false;
 		}
 
 		// Only refresh reports for all channels, don't refetch channel data
@@ -563,6 +567,7 @@
 							mobType={type}
 							bind:hpValue={submission_state.hpValue}
 							bind:locationImage={submission_state.locationImage}
+							bind:hasUserSelectedLocation={submission_state.hasUserSelectedLocation}
 							isSubmitting={submission_state.isSubmitting}
 							onSubmit={handleSubmitReport}
 						/>
@@ -604,6 +609,7 @@
 										mobType={type}
 										bind:hpValue={submission_state.hpValue}
 										bind:locationImage={submission_state.locationImage}
+										bind:hasUserSelectedLocation={submission_state.hasUserSelectedLocation}
 										isSubmitting={submission_state.isSubmitting}
 										onSubmit={handleSubmitReport}
 									/>

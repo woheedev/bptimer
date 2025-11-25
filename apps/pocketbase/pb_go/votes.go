@@ -44,7 +44,7 @@ func validateVote(e *core.RecordEvent) error {
 
 	report, err := e.App.FindRecordById(COLLECTION_HP_REPORTS, reportId)
 	if err != nil {
-		return apis.NewBadRequestError("Report not found", err)
+		return apis.NewNotFoundError("Report not found", err)
 	}
 
 	// Cache report in app.Store for reuse in handleVoteCreated
@@ -54,11 +54,11 @@ func validateVote(e *core.RecordEvent) error {
 	reporterId := report.GetString("reporter")
 
 	if voterId == reporterId {
-		return apis.NewBadRequestError("You cannot vote on your own report", nil)
+		return apis.NewForbiddenError("You cannot vote on your own report", nil)
 	}
 
 	if BypassVoteUserIDs[reporterId] {
-		return apis.NewBadRequestError("Cannot vote on reports from this user", nil)
+		return apis.NewForbiddenError("Cannot vote on reports from this user", nil)
 	}
 
 	reportCreatedTime, err := time.Parse("2006-01-02 15:04:05.000Z", report.GetString("created"))
@@ -69,7 +69,7 @@ func validateVote(e *core.RecordEvent) error {
 	timeSinceReport := time.Since(reportCreatedTime)
 	if timeSinceReport > voteTimeWindow {
 		minutes := int(voteTimeWindow.Minutes())
-		return apis.NewBadRequestError(
+		return apis.NewApiError(409,
 			fmt.Sprintf("Voting period has expired. You can only vote within %d minutes of the report.", minutes),
 			nil,
 		)
@@ -83,7 +83,7 @@ func validateVote(e *core.RecordEvent) error {
 
 		voterReputation := voter.GetInt("reputation")
 		if voterReputation <= RATE_LIMIT_THRESHOLD {
-			return apis.NewBadRequestError(
+			return apis.NewForbiddenError(
 				fmt.Sprintf("Your voting privileges are suspended due to low reputation (%d). Improve your report quality to restore voting rights.", voterReputation),
 				nil,
 			)
@@ -234,7 +234,7 @@ func rateLimitBadActors(e *core.RecordEvent) error {
 	reputation := reporter.GetInt("reputation")
 
 	if reputation <= BLOCKED_THRESHOLD {
-		return apis.NewBadRequestError(
+		return apis.NewForbiddenError(
 			fmt.Sprintf("Your reporting privileges have been revoked due to very low reputation (%d). Please contact Wohee if you believe this is an error.", reputation),
 			nil,
 		)
@@ -266,7 +266,7 @@ func rateLimitBadActors(e *core.RecordEvent) error {
 
 			if timeSinceLastReport < rateLimitedCooldown {
 				waitTimeMinutes := int((rateLimitedCooldown - timeSinceLastReport).Minutes()) + 1
-				return apis.NewBadRequestError(
+				return apis.NewTooManyRequestsError(
 					fmt.Sprintf("Your reporting privileges are limited due to low reputation (%d). Please wait %d more minutes before submitting another report.", reputation, waitTimeMinutes),
 					nil,
 				)

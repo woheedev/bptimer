@@ -14,11 +14,13 @@
 		mobName,
 		mobType,
 		selectedLocation = $bindable<number | null>(null),
+		hasUserSelected = $bindable(false),
 		required = false
 	}: {
 		mobName: string;
 		mobType: 'boss' | 'magical_creature' | string;
 		selectedLocation?: number | null;
+		hasUserSelected?: boolean;
 		required?: boolean;
 	} = $props();
 
@@ -38,6 +40,7 @@
 
 	function handleLocationSelect(locationNumber: number) {
 		selectedLocation = locationNumber;
+		hasUserSelected = true;
 		popoverOpen = false;
 	}
 
@@ -60,7 +63,9 @@
 
 	// Get display text for selected location
 	const selectedLocationText = $derived(
-		selectedLocation !== null ? getLocationName(mobName, selectedLocation) : 'Select location'
+		hasUserSelected && selectedLocation !== null
+			? getLocationName(mobName, selectedLocation)
+			: 'Select Location'
 	);
 </script>
 
@@ -68,7 +73,12 @@
 	<div class="space-y-2">
 		<Popover.Root bind:open={popoverOpen}>
 			<Popover.Trigger class="w-full">
-				<Button variant="outline" class="w-full justify-between">
+				<Button
+					variant="outline"
+					class="w-full justify-between {required && !hasUserSelected
+						? 'border-destructive! ring-destructive/25! ring-2!'
+						: ''}"
+				>
 					<MapPin class="h-4 w-4" />
 					{selectedLocationText}
 				</Button>
@@ -125,10 +135,5 @@
 				</Carousel.Root>
 			</Popover.Content>
 		</Popover.Root>
-		{#if required && selectedLocation === null}
-			<p class="text-muted-foreground text-xs">
-				Please select a location image for this magical creature
-			</p>
-		{/if}
 	</div>
 {/if}
