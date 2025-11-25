@@ -147,6 +147,7 @@ pub struct PlayerStats {
     pub last_healing_time: Option<Instant>,
     pub first_damage_taken_time: Option<Instant>,
     pub last_damage_taken_time: Option<Instant>,
+    pub dps_session_start_damage: f32,
 }
 
 impl PlayerStats {
@@ -196,15 +197,25 @@ impl PlayerStats {
             last_healing_time: None,
             first_damage_taken_time: None,
             last_damage_taken_time: None,
+            dps_session_start_damage: 0.0,
         }
     }
 
-    pub fn get_total_dps(&self) -> f32 {
+    pub fn get_total_dps(&self, cutoff_seconds: f32) -> f32 {
         if let (Some(first), Some(last)) = (self.first_damage_time, self.last_damage_time) {
-            let duration = last.duration_since(first).as_secs_f32();
-            if duration > 0.0 {
-                return self.total_damage / duration;
-            }
+            let now = Instant::now();
+            let time_since_last = now.duration_since(last).as_secs_f32();
+
+            let duration = if time_since_last > cutoff_seconds {
+                let combat_duration = last.duration_since(first).as_secs_f32();
+                combat_duration + cutoff_seconds
+            } else {
+                now.duration_since(first).as_secs_f32()
+            };
+
+            let session_damage = self.total_damage - self.dps_session_start_damage;
+            let duration_whole_secs = duration.round().max(1.0);
+            return session_damage / duration_whole_secs;
         }
         0.0
     }

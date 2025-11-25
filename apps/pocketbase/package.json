@@ -8,6 +8,7 @@
   "scripts": {
     "build": "docker-compose build",
     "build:binary": "go build -o pocketbase .",
+    "check": "go vet ./...",
     "deploy": "fly deploy",
     "dev": "docker-compose up --build",
     "format": "go fmt ./...",

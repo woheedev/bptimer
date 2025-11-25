@@ -292,8 +292,8 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		}
 
 		if err := e.App.Save(hpReport); err != nil {
-			logger.Error("Failed to save HP report", "error", err)
-			return e.InternalServerError("Failed to save HP report", nil)
+			// PocketBase's global error handler will convert errors to ApiError
+			return err
 		}
 
 		logArgs := []any{
@@ -320,15 +320,15 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 // Prevents duplicate reports and enforces HP can only decrease.
 func InitHPReportsHooks(app core.App) {
 	app.OnRecordCreate(COLLECTION_HP_REPORTS).BindFunc(func(e *core.RecordEvent) error {
-		return preventDuplicateHPReports(e)
+		return validateHPReport(e)
 	})
 
 	log.Printf("[HP] Hooks registered")
 }
 
-// preventDuplicateHPReports ensures users can't spam identical HP reports
+// validateHPReport ensures users can't spam identical HP reports
 // within 5 minutes and that HP only decreases for same mob/channel.
-func preventDuplicateHPReports(e *core.RecordEvent) error {
+func validateHPReport(e *core.RecordEvent) error {
 	hpReport := e.Record
 	reporterId := hpReport.GetString("reporter")
 	mobId := hpReport.GetString("mob")

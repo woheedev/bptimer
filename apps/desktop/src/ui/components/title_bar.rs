@@ -346,7 +346,7 @@ pub fn render_title_bar(
     );
 
     if bptimer_response.clicked() {
-        if let Err(e) = open::that("https://bptimer.com") {
+        if let Err(e) = open::that(crate::utils::constants::BPTIMER_BASE_URL) {
             log::warn!("Failed to open BPTimer website: {}", e);
         }
     }

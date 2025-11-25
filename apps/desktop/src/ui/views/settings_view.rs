@@ -375,6 +375,35 @@ pub fn render_settings_view(
 
             let text_color = theme::text_color(settings);
             ui.label(
+                egui::RichText::new("DPS Calculation")
+                    .strong()
+                    .color(text_color),
+            );
+            ui.add_space(spacing::SM);
+
+            ui.horizontal(|ui| {
+                ui.label("DPS calculation cutoff:");
+                if ui
+                    .add(
+                        egui::Slider::new(&mut settings.dps_calculation_cutoff_seconds, 1.0..=60.0)
+                            .text("sec")
+                            .step_by(1.0),
+                    )
+                    .changed()
+                {
+                    *settings_save_timer = Some(Instant::now());
+                }
+            });
+            ui.label(
+                egui::RichText::new("DPS stops calculating after this many seconds from last hit")
+                    .small()
+                    .weak(),
+            );
+
+            ui.add_space(spacing::MD);
+
+            let text_color = theme::text_color(settings);
+            ui.label(
                 egui::RichText::new("Combat Data Clearing")
                     .strong()
                     .color(text_color),
@@ -550,7 +579,10 @@ pub fn render_settings_view(
                 );
             }
             if ui.button("Open Module Optimizer").clicked() {
-                let base_url = "https://bptimer.com/modules-optimizer";
+                let base_url = format!(
+                    "{}/modules-optimizer",
+                    crate::utils::constants::BPTIMER_BASE_URL
+                );
                 let url = if !extracted_modules.is_empty() {
                     match crate::utils::modules::encode_module_data(extracted_modules) {
                         Ok(encoded) => {

@@ -13,7 +13,6 @@ use std::time::Duration;
 use tokio::sync::{Mutex, mpsc::Sender};
 use tokio::time::sleep;
 
-const POCKETBASE_URL: &str = "https://db.bptimer.com";
 const MOB_PAGE_SIZE: usize = 100;
 const STATUS_PAGE_SIZE: usize = 200;
 const STATUS_CHUNK_SIZE: usize = 25;
@@ -21,6 +20,10 @@ const REALTIME_TOPICS: [&str; 2] = ["mob_hp_updates", "mob_resets"];
 const LATEST_CHANNELS_DISPLAY_COUNT: usize = 10;
 const DEAD_STALE_SECS: i64 = 30 * 60;
 const ALIVE_STALE_SECS: i64 = 5 * 60;
+
+fn get_pocketbase_url() -> String {
+    std::env::var("BPTIMER_API_URL").unwrap_or_else(|_| crate::BPTIMER_API_URL.to_string())
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct MobChannelStatus {
@@ -149,7 +152,7 @@ impl PocketBaseClient {
     }
 
     async fn listen_realtime(self: &Arc<Self>) -> anyhow::Result<()> {
-        let url = format!("{}/api/realtime", POCKETBASE_URL);
+        let url = format!("{}/api/realtime", get_pocketbase_url());
         let response = self
             .client
             .get(&url)
@@ -191,7 +194,7 @@ impl PocketBaseClient {
     }
 
     async fn subscribe(&self, client_id: &str) -> anyhow::Result<()> {
-        let url = format!("{}/api/realtime", POCKETBASE_URL);
+        let url = format!("{}/api/realtime", get_pocketbase_url());
         let body = serde_json::json!({
             "clientId": client_id,
             "subscriptions": REALTIME_TOPICS
@@ -216,9 +219,11 @@ impl PocketBaseClient {
         let mut page = 1;
 
         loop {
-            let mut mobs_url =
-                Url::parse(&format!("{}/api/collections/mobs/records", POCKETBASE_URL))
-                    .expect("valid PocketBase URL");
+            let mut mobs_url = Url::parse(&format!(
+                "{}/api/collections/mobs/records",
+                get_pocketbase_url()
+            ))
+            .expect("valid PocketBase URL");
             {
                 let mut qp = mobs_url.query_pairs_mut();
                 qp.append_pair("page", &page.to_string());
@@ -313,7 +318,7 @@ impl PocketBaseClient {
             loop {
                 let mut status_url = Url::parse(&format!(
                     "{}/api/collections/mob_channel_status/records",
-                    POCKETBASE_URL
+                    get_pocketbase_url()
                 ))
                 .expect("valid PocketBase URL");
                 {

@@ -44,6 +44,9 @@ pub struct Settings {
     pub clear_combat_data_idle_seconds: Option<u64>, // None = disabled, Some(seconds) = clear after idle
     #[serde(default = "default_true")]
     pub clear_combat_data_on_server_change: bool, // Clear data when server/channel changes
+    // DPS calculation settings
+    #[serde(default = "default_dps_cutoff_seconds")]
+    pub dps_calculation_cutoff_seconds: f32, // Seconds after last hit to stop DPS calculation
     // Text color (RGBA)
     #[serde(default = "default_text_color")]
     pub text_color: [u8; 4], // RGBA color for UI text
@@ -165,6 +168,7 @@ impl Default for Settings {
             text_color: [255, 255, 255, 255], // White text by default (RGBA)
             show_console: false,              // Console hidden by default
             hotkeys: default_hotkeys(),
+            dps_calculation_cutoff_seconds: default_dps_cutoff_seconds(),
         }
     }
 }
@@ -227,4 +231,8 @@ fn default_hidden_columns() -> std::collections::HashSet<String> {
     hidden.insert("Heal".to_string());
     hidden.insert("Taken".to_string());
     hidden
+}
+
+fn default_dps_cutoff_seconds() -> f32 {
+    10.0
 }

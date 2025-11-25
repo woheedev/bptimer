@@ -10,8 +10,8 @@ use crate::stats::{
     process_damage_hit, process_damage_taken_hit, process_healing_hit, update_realtime_dps,
 };
 use crate::ui::components::title_bar;
-use crate::ui::constants::{app, colors, layout, radar, spacing, timing, window};
-use crate::ui::views::{main_view, mob_view, radar_view, settings_view};
+use crate::ui::constants::{app, colors, layout, radar, responsive, spacing, timing, window};
+use crate::ui::views::{combat_view, mob_view, radar_view, settings_view};
 
 use crate::config::Settings;
 
@@ -341,7 +341,12 @@ impl eframe::App for DpsMeterApp {
                             stats.name = self.player_name_cache.get_or_default(player_uid);
                             stats
                         });
-                        process_damage_hit(stats, &mut self.total_damage, hit);
+                        process_damage_hit(
+                            stats,
+                            &mut self.total_damage,
+                            hit,
+                            self.settings.dps_calculation_cutoff_seconds,
+                        );
                     }
                     events::CombatEvent::Healing(hit) => {
                         self.last_combat_event_time = Some(Instant::now());
@@ -688,15 +693,40 @@ impl eframe::App for DpsMeterApp {
                 let mut content_ui = ui.new_child(egui::UiBuilder::new().max_rect(content_rect));
 
                 content_ui.vertical(|ui| {
-                    egui::ScrollArea::vertical().show(ui, |ui| match self.view_mode {
+                    let mut combat_players = if self.view_mode == ViewMode::Combat {
+                        combat_view::collect_active_players(&self.player_stats)
+                    } else {
+                        Vec::new()
+                    };
+
+                    let reserve_height =
+                        if self.view_mode == ViewMode::Combat && !combat_players.is_empty() {
+                            combat_view::footer_height(ui)
+                        } else {
+                            0.0
+                        };
+
+                    let mut combat_footer_text = None;
+                    let scroll_area = if reserve_height > 0.0 {
+                        responsive::scroll_area_with_reserve(ui, reserve_height)
+                    } else {
+                        egui::ScrollArea::vertical()
+                    };
+
+                    scroll_area.show(ui, |ui| match self.view_mode {
                         ViewMode::Combat => {
-                            main_view::render_main_view(
+                            if combat_view::render_combat_view(
                                 ui,
-                                &self.player_stats,
+                                &mut combat_players,
                                 &mut self.sort_column,
                                 &mut self.sort_descending,
                                 &self.settings,
-                            );
+                            ) {
+                                combat_footer_text = Some(combat_view::dps_window_text(
+                                    &self.player_stats,
+                                    &self.settings,
+                                ));
+                            }
                         }
                         ViewMode::Bosses => {
                             ui.vertical(|ui| {
@@ -743,6 +773,10 @@ impl eframe::App for DpsMeterApp {
                             );
                         }
                     });
+
+                    if let Some(timer_text) = combat_footer_text {
+                        combat_view::render_footer(ui, &timer_text, &self.settings);
+                    }
                 });
 
                 // Resize handles for undecorated windows

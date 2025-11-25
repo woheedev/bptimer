@@ -1,3 +1,5 @@
+pub const BPTIMER_BASE_URL: &str = "https://bptimer.com";
+
 // Macro to generate bidirectional mappings between mob IDs and names
 // Data source: boss-meter-ids.json
 macro_rules! define_mob_mappings {

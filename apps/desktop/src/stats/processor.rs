@@ -3,9 +3,22 @@ use crate::models::{DamageEntry, DamageTakenEntry, HealingEntry, PlayerStats};
 use crate::stats::{DAMAGE_WINDOW_MAX_SIZE, DAMAGE_WINDOW_RETENTION_SECS};
 use instant::Instant;
 
-pub fn process_damage_hit(stats: &mut PlayerStats, total_damage: &mut f32, hit: DamageHit) {
+pub fn process_damage_hit(
+    stats: &mut PlayerStats,
+    total_damage: &mut f32,
+    hit: DamageHit,
+    cutoff_seconds: f32,
+) {
     let now = Instant::now();
     let value = hit.damage as f32;
+
+    if let Some(last) = stats.last_damage_time {
+        if now.duration_since(last).as_secs_f32() > cutoff_seconds {
+            stats.first_damage_time = None;
+            stats.last_damage_time = None;
+            stats.dps_session_start_damage = stats.total_damage;
+        }
+    }
 
     if stats.first_damage_time.is_none() {
         stats.first_damage_time = Some(now);
