@@ -173,8 +173,26 @@ impl BPTimerClient {
                         );
                         true
                     } else {
-                        let error_msg = format!("API error: {}", resp.status());
-                        log::warn!("[BPTimer] Failed to report HP: {}", error_msg);
+                        let status = resp.status();
+                        let message = resp.text().ok().and_then(|body| {
+                            serde_json::from_str::<serde_json::Value>(&body)
+                                .ok()
+                                .and_then(|json| {
+                                    json.get("message")?.as_str().map(|s| s.to_string())
+                                })
+                        });
+
+                        if status.as_u16() == 409 {
+                            // 409 Conflict is expected when multiple clients are on the same line
+                            log::info!(
+                                "[BPTimer] HP Report skipped: Already reported by another user."
+                            );
+                        } else {
+                            let error_msg = message
+                                .map(|m| format!("{} - {}", status, m))
+                                .unwrap_or_else(|| status.to_string());
+                            log::warn!("[BPTimer] Failed to report HP: {}", error_msg);
+                        }
                         false
                     }
                 }

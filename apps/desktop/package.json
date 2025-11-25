@@ -14,6 +14,7 @@
     "format:check": "cargo fmt --check",
     "clean": "cargo clean",
     "check": "cargo check",
-    "update": "cargo update"
+    "update": "cargo update",
+    "upgrade": "cargo upgrade --incompatible allow"
   }
 }
