@@ -12,7 +12,7 @@ type CreateHPReportRequest struct {
 	PosY      float64 `json:"pos_y,omitempty" form:"pos_y"`           // Y coordinate
 	PosZ      float64 `json:"pos_z,omitempty" form:"pos_z"`           // Z coordinate
 	AccountID string  `json:"account_id,omitempty" form:"account_id"` // User account ID (pending implementation)
-	UID       string  `json:"uid,omitempty" form:"uid"`               // User Unique ID (pending implementation)
+	UID       int64   `json:"uid,omitempty" form:"uid"`               // User Unique ID (pending implementation)
 }
 
 type CachedMobData struct {

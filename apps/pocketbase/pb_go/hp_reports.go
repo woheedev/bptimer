@@ -306,7 +306,7 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		if data.AccountID != "" {
 			logArgs = append(logArgs, "account_id", data.AccountID)
 		}
-		if data.UID != "" {
+		if data.UID != 0 {
 			logArgs = append(logArgs, "uid", data.UID)
 		}
 
