@@ -8,7 +8,7 @@
 	import SeoHead from '$lib/components/seo-head.svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { Spinner } from '$lib/components/ui/spinner';
+	import LoadingSpinner from '$lib/components/loading-spinner.svelte';
 	import {
 		LEADERBOARD_LIMIT,
 		REPUTATION_GOOD_THRESHOLD,
@@ -78,9 +78,7 @@
 				/>
 
 				{#if isLoading}
-					<div class="flex h-screen items-center justify-center">
-						<Spinner class="size-16" />
-					</div>
+					<LoadingSpinner />
 				{:else if error}
 					<div class="rounded-lg border border-red-500 bg-red-50 p-4 dark:bg-red-950">
 						<p class="text-red-700 dark:text-red-300">Error loading leaderboard: {error}</p>

@@ -26,6 +26,7 @@
 	import { requestNotificationPermission } from '$lib/utils/notifications';
 	import Heart from '@lucide/svelte/icons/heart';
 	import MapPin from '@lucide/svelte/icons/map-pin';
+	import LootDrops from '$lib/components/mob/loot-drops.svelte';
 
 	let {
 		mob,
@@ -286,20 +287,25 @@
 		<Button onclick={handleViewDetails} class="flex-1" variant="secondary" size="sm"
 			>View Details</Button
 		>
-		<Toggle
-			pressed={isFavorited}
-			onPressedChange={() => favoriteMobsStore.toggleFavoriteMob(mob.id)}
-			variant="outline"
-			size="sm"
-			class="p-2"
-			aria-label={isFavorited
-				? `Remove ${mob.name} from favorites`
-				: `Add ${mob.name} to favorites`}
-		>
-			<Heart
-				class={isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}
-				size={16}
-			/>
-		</Toggle>
+		<div class="flex items-center gap-2">
+			{#if type === 'boss'}
+				<LootDrops mobName={mob.name} />
+			{/if}
+			<Toggle
+				pressed={isFavorited}
+				onPressedChange={() => favoriteMobsStore.toggleFavoriteMob(mob.id)}
+				variant="outline"
+				size="sm"
+				class="p-2"
+				aria-label={isFavorited
+					? `Remove ${mob.name} from favorites`
+					: `Add ${mob.name} to favorites`}
+			>
+				<Heart
+					class={isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}
+					size={16}
+				/>
+			</Toggle>
+		</div>
 	</Card.Footer>
 </Card.Root>

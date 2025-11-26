@@ -4,7 +4,7 @@
 	import MobModal from '$lib/components/mob/modal.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Empty } from '$lib/components/ui/empty';
-	import { Spinner } from '$lib/components/ui/spinner';
+	import LoadingSpinner from '$lib/components/loading-spinner.svelte';
 	import {
 		DEBOUNCE_DELAY,
 		LATEST_CHANNELS_DISPLAY_COUNT,
@@ -199,9 +199,7 @@
 			{/if}
 
 			{#if loading}
-				<div class="flex h-screen items-center justify-center">
-					<Spinner class="size-16" />
-				</div>
+				<LoadingSpinner />
 			{:else if isFavorites && filteredMobs.length === 0}
 				<!-- Empty state for no favorites -->
 				<Empty class="min-h-96">

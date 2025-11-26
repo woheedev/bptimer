@@ -511,3 +511,45 @@ export const TOOLS_SECTIONS: ToolsSections = {
 		]
 	}
 };
+
+export const BOSS_LOOT_DROPS: Record<string, string[]> = {
+	'Golden Juggernaut': ['epic_weapon', 'epic_helmet', 'epic_necklace'],
+	'Frost Ogre': ['epic_weapon', 'epic_armor', 'epic_ring'],
+	'Inferno Ogre': ['epic_weapon', 'epic_bracelet_left', 'epic_bracelet_right'],
+	'Phantom Arachnocrab': ['epic_weapon', 'epic_helmet', 'epic_necklace'],
+	'Brigand Leader': ['epic_weapon', 'epic_armor', 'epic_ring'],
+	'Venobzzar Incubator': ['epic_weapon', 'epic_gauntlets', 'epic_earrings'],
+	'Muku Chief': ['epic_weapon', 'epic_boots', 'epic_charm'],
+	'Iron Fang': ['epic_weapon', 'epic_bracelet_left', 'epic_bracelet_right'],
+	'Storm Goblin King': [
+		'legendary_box_helmet_necklace',
+		'legendary_weapon',
+		'legendary_helmet',
+		'legendary_necklace'
+	],
+	'Tempest Ogre': [
+		'legendary_box_armor_ring',
+		'legendary_weapon',
+		'legendary_armor',
+		'legendary_ring'
+	],
+	'Celestial Flier': [
+		'legendary_box_gauntlets_earrings',
+		'legendary_weapon',
+		'legendary_gauntlets',
+		'legendary_earrings'
+	],
+	'Lizardman King': [
+		'legendary_box_boots_charm',
+		'legendary_weapon',
+		'legendary_boots',
+		'legendary_charm'
+	],
+	'Goblin King': [
+		'legendary_box_bracelets',
+		'legendary_weapon',
+		'legendary_bracelet_left',
+		'legendary_bracelet_right'
+	],
+	'Muku King': ['legendary_box_weapon', 'legendary_weapon', 'legendary_armor']
+};
