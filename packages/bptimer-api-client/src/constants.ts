@@ -1,5 +1,6 @@
 export const CACHE_EXPIRY_MS = 5 * 60 * 1000;
 export const HP_REPORT_INTERVAL = 5;
+export const VERSION = '0.2.0';
 
 // Mob IDs that require position data for location tracking
 export const LOCATION_TRACKED_MOBS = new Set([10900, 10901, 10904]);

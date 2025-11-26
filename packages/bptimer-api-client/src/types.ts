@@ -11,6 +11,7 @@ export interface ClientConfig {
   enabled?: boolean;
   logger?: Logger;
   log_level?: LogLevel;
+  user_agent?: string;
 }
 
 export interface ReportHPParams {
@@ -20,7 +21,8 @@ export interface ReportHPParams {
   pos_x?: number;
   pos_y?: number;
   pos_z?: number;
-  region?: string;
+  account_id?: string;
+  uid?: number;
 }
 
 export interface ReportPayload extends Omit<ReportHPParams, 'monster_id'> {

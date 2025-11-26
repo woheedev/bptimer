@@ -1,6 +1,6 @@
 {
   "name": "@woheedev/bptimer-api-client",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "author": "Wohee",
   "description": "An API client for tracking and submitting boss HP data to bptimer.com",
   "license": "AGPL-3.0-or-later",
@@ -17,8 +17,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build"
+    "build": "bun run generate-version && tsc",
+    "generate-version": "bun scripts/generate-version.mjs",
+    "prepublishOnly": "bun run build"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",

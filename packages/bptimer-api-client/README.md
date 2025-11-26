@@ -12,11 +12,23 @@ npm install @woheedev/bptimer-api-client
 
 ```typescript
 import { BPTimerClient } from '@woheedev/bptimer-api-client';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Example loading ENV from .env but you can do it
+// however you want to do it that is not hardcoded
+const BPTIMER_API_URL = process.env.BPTIMER_API_URL;
+const BPTIMER_API_KEY = process.env.BPTIMER_API_KEY;
+
+// Another example if using vite
+const BPTIMER_API_URL = import.meta.env.VITE_BPTIMER_API_URL;
+const BPTIMER_API_KEY = import.meta.env.VITE_BPTIMER_API_KEY;
 
 // Initialize once at startup (don't call this in a loop!)
 const bptimer = new BPTimerClient({
-  api_url: 'https://db.bptimer.com',
-  api_key: 'your-api-key'
+  api_url: BPTIMER_API_URL,
+  api_key: BPTIMER_API_KEY
 });
 
 // Call inline wherever you get boss HP updates
@@ -27,7 +39,8 @@ await bptimer.reportHP({
   pos_x,
   pos_y,
   pos_z,
-  region: 'NA' // optional - not yet implemented on clients
+  account_id, // used for region detection (comes from local player state)
+  uid // future implementation for linking users to their website account (comes from local player state)
 });
 
 // Map variables with different names to property names

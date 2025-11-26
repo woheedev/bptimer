@@ -2,7 +2,8 @@ import {
   CACHE_EXPIRY_MS,
   HP_REPORT_INTERVAL,
   LOCATION_TRACKED_MOBS,
-  MOB_MAPPING
+  MOB_MAPPING,
+  VERSION
 } from './constants.js';
 import type {
   CacheEntry,
@@ -23,6 +24,7 @@ export class BPTimerClient {
   private enabled: boolean;
   private logger: Logger;
   private log_level: LogLevel;
+  private user_agent: string;
   private cache = new Map<string, CacheEntry>();
 
   constructor(config: ClientConfig) {
@@ -34,6 +36,7 @@ export class BPTimerClient {
       info: (message: string) => console.log('[INFO]', message),
       debug: (message: string) => console.log('[DEBUG]', message)
     };
+    this.user_agent = config.user_agent ?? `BPTimer-API-Client/${VERSION}`;
   }
 
   private log(level: 'info' | 'debug', message: string): void {
@@ -43,7 +46,7 @@ export class BPTimerClient {
   }
 
   async reportHP(params: ReportHPParams): Promise<ReportResponse> {
-    const { monster_id, hp_pct, line, pos_x, pos_y, pos_z, region } = params;
+    const { monster_id, hp_pct, line, pos_x, pos_y, pos_z, account_id, uid } = params;
 
     const rounded_pos_x = pos_x !== undefined ? Math.round(pos_x * 100) / 100 : undefined;
     const rounded_pos_y = pos_y !== undefined ? Math.round(pos_y * 100) / 100 : undefined;
@@ -133,14 +136,16 @@ export class BPTimerClient {
         ...(rounded_pos_x !== undefined && { pos_x: rounded_pos_x }),
         ...(rounded_pos_y !== undefined && { pos_y: rounded_pos_y }),
         ...(rounded_pos_z !== undefined && { pos_z: rounded_pos_z }),
-        ...(region && { region })
+        ...(account_id !== undefined && { account_id }),
+        ...(uid !== undefined && { uid })
       };
 
       const response = await fetch(`${this.api_url}/api/create-hp-report`, {
         method: 'POST',
         headers: {
           'X-API-Key': this.api_key,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'User-Agent': this.user_agent
         },
         body: JSON.stringify(payload)
       });
@@ -211,7 +216,8 @@ export class BPTimerClient {
       const response = await fetch(`${this.api_url}/api/health`, {
         method: 'GET',
         headers: {
-          'X-API-Key': this.api_key
+          'X-API-Key': this.api_key,
+          'User-Agent': this.user_agent
         }
       });
 
