@@ -52,6 +52,11 @@ pub struct DpsMeterApp {
     // Mob Timer State
     pub mobs: Vec<Mob>,
     pub mob_receiver: Receiver<Vec<Mob>>,
+    pub pb_sender: tokio::sync::mpsc::Sender<Vec<Mob>>,
+    pub pb_client: Option<Arc<crate::api::pocketbase::PocketBaseClient>>,
+    pub pb_shutdown_tx: Option<tokio::sync::watch::Sender<bool>>,
+    pub pb_task_handle: Option<std::thread::JoinHandle<()>>,
+    pub show_mob_timers_prev: bool,
 
     // Radar State
     pub radar_state: RadarState,
@@ -127,18 +132,27 @@ impl DpsMeterApp {
             warn!("Failed to start packet capture - continuing without capture");
         }
 
-        // Initialize PocketBase Client
+        // Initialize PocketBase channel
         let (tx, rx) = channel(100);
-        let pb_client = Arc::new(PocketBaseClient::new(tx));
+        let mut initial_pb_client: Option<Arc<PocketBaseClient>> = None;
+        let mut initial_shutdown_tx: Option<tokio::sync::watch::Sender<bool>> = None;
+        let mut initial_pb_task: Option<std::thread::JoinHandle<()>> = None;
 
-        // Spawn background task for PocketBase
-        let pb_client_clone = pb_client.clone();
-        std::thread::spawn(move || {
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(async {
-                pb_client_clone.start().await;
+        if settings.show_mob_timers {
+            let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
+            let pb_client = Arc::new(PocketBaseClient::new(tx.clone(), shutdown_rx));
+            let pb_client_clone = pb_client.clone();
+            let handle = std::thread::spawn(move || {
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                rt.block_on(async {
+                    pb_client_clone.start().await;
+                });
             });
-        });
+
+            initial_pb_client = Some(pb_client);
+            initial_shutdown_tx = Some(shutdown_tx);
+            initial_pb_task = Some(handle);
+        }
 
         let instance = Self {
             dps_value: 0.0,
@@ -158,6 +172,11 @@ impl DpsMeterApp {
 
             mobs: Vec::new(),
             mob_receiver: rx,
+            pb_sender: tx,
+            pb_client: initial_pb_client,
+            pb_shutdown_tx: initial_shutdown_tx,
+            pb_task_handle: initial_pb_task,
+            show_mob_timers_prev: settings.show_mob_timers,
 
             radar_state: RadarState::new(),
 
@@ -321,8 +340,73 @@ impl eframe::App for DpsMeterApp {
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        while let Ok(mobs) = self.mob_receiver.try_recv() {
-            self.mobs = mobs;
+        // Fallback if current view is disabled
+        match self.view_mode {
+            ViewMode::Combat if !self.settings.show_combat_data => {
+                if self.settings.show_radar || self.settings.show_mob_timers {
+                    self.view_mode = ViewMode::Bosses;
+                } else {
+                    self.view_mode = ViewMode::Settings;
+                }
+            }
+            ViewMode::Bosses if !self.settings.show_radar && !self.settings.show_mob_timers => {
+                if self.settings.show_combat_data {
+                    self.view_mode = ViewMode::Combat;
+                } else {
+                    self.view_mode = ViewMode::Settings;
+                }
+            }
+            _ => {}
+        }
+
+        if self.settings.show_mob_timers {
+            while let Ok(mobs) = self.mob_receiver.try_recv() {
+                self.mobs = mobs;
+            }
+        } else {
+            // Drain receiver to prevent buffer buildup when disabled
+            while let Ok(_) = self.mob_receiver.try_recv() {}
+        }
+
+        // Handle PocketBase client start/stop based on show_mob_timers setting
+        if self.settings.show_mob_timers != self.show_mob_timers_prev {
+            if self.settings.show_mob_timers {
+                // Start PocketBase client
+                if self.pb_client.is_none() {
+                    let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
+                    let pb_client =
+                        Arc::new(PocketBaseClient::new(self.pb_sender.clone(), shutdown_rx));
+
+                    let pb_client_clone = pb_client.clone();
+                    let handle = std::thread::spawn(move || {
+                        let rt = tokio::runtime::Runtime::new().unwrap();
+                        rt.block_on(async {
+                            pb_client_clone.start().await;
+                        });
+                    });
+
+                    self.pb_client = Some(pb_client);
+                    self.pb_shutdown_tx = Some(shutdown_tx);
+                    self.pb_task_handle = Some(handle);
+                    info!("PocketBase client started");
+                }
+            } else {
+                // Stop PocketBase client
+                if let Some(shutdown_tx) = self.pb_shutdown_tx.take() {
+                    let _ = shutdown_tx.send(true);
+                }
+                if let Some(handle) = self.pb_task_handle.take() {
+                    std::thread::spawn(move || {
+                        if let Err(err) = handle.join() {
+                            warn!("Failed to join PocketBase thread: {:?}", err);
+                        }
+                    });
+                }
+                self.pb_client = None;
+                self.mobs.clear();
+                info!("PocketBase client stopped");
+            }
+            self.show_mob_timers_prev = self.settings.show_mob_timers;
         }
 
         let mut has_new_events = false;
@@ -334,39 +418,45 @@ impl eframe::App for DpsMeterApp {
             for event in events {
                 match event {
                     events::CombatEvent::Damage(hit) => {
-                        self.last_combat_event_time = Some(Instant::now());
-                        let player_uid = hit.player_uid;
-                        let stats = self.player_stats.entry(player_uid).or_insert_with(|| {
-                            let mut stats = PlayerStats::new(player_uid);
-                            stats.name = self.player_name_cache.get_or_default(player_uid);
-                            stats
-                        });
-                        process_damage_hit(
-                            stats,
-                            &mut self.total_damage,
-                            hit,
-                            self.settings.dps_calculation_cutoff_seconds,
-                        );
+                        if self.settings.show_combat_data {
+                            self.last_combat_event_time = Some(Instant::now());
+                            let player_uid = hit.player_uid;
+                            let stats = self.player_stats.entry(player_uid).or_insert_with(|| {
+                                let mut stats = PlayerStats::new(player_uid);
+                                stats.name = self.player_name_cache.get_or_default(player_uid);
+                                stats
+                            });
+                            process_damage_hit(
+                                stats,
+                                &mut self.total_damage,
+                                hit,
+                                self.settings.dps_calculation_cutoff_seconds,
+                            );
+                        }
                     }
                     events::CombatEvent::Healing(hit) => {
-                        self.last_combat_event_time = Some(Instant::now());
-                        let player_uid = hit.player_uid;
-                        let stats = self.player_stats.entry(player_uid).or_insert_with(|| {
-                            let mut stats = PlayerStats::new(player_uid);
-                            stats.name = self.player_name_cache.get_or_default(player_uid);
-                            stats
-                        });
-                        process_healing_hit(stats, hit);
+                        if self.settings.show_combat_data {
+                            self.last_combat_event_time = Some(Instant::now());
+                            let player_uid = hit.player_uid;
+                            let stats = self.player_stats.entry(player_uid).or_insert_with(|| {
+                                let mut stats = PlayerStats::new(player_uid);
+                                stats.name = self.player_name_cache.get_or_default(player_uid);
+                                stats
+                            });
+                            process_healing_hit(stats, hit);
+                        }
                     }
                     events::CombatEvent::DamageTaken(hit) => {
-                        self.last_combat_event_time = Some(Instant::now());
-                        let player_uid = hit.player_uid;
-                        let stats = self.player_stats.entry(player_uid).or_insert_with(|| {
-                            let mut stats = PlayerStats::new(player_uid);
-                            stats.name = self.player_name_cache.get_or_default(player_uid);
-                            stats
-                        });
-                        process_damage_taken_hit(stats, hit);
+                        if self.settings.show_combat_data {
+                            self.last_combat_event_time = Some(Instant::now());
+                            let player_uid = hit.player_uid;
+                            let stats = self.player_stats.entry(player_uid).or_insert_with(|| {
+                                let mut stats = PlayerStats::new(player_uid);
+                                stats.name = self.player_name_cache.get_or_default(player_uid);
+                                stats
+                            });
+                            process_damage_taken_hit(stats, hit);
+                        }
                     }
                     events::CombatEvent::ServerChange(update) => {
                         if self.settings.clear_combat_data_on_server_change {
@@ -398,76 +488,67 @@ impl eframe::App for DpsMeterApp {
                     events::CombatEvent::EntityPosition(update) => {
                         if update.entity_type == crate::models::events::EntityType::Monster {
                             if let Some(mob_base_id) = update.mob_base_id {
-                                self.radar_state.register_mob_uuid(update.uuid, mob_base_id);
+                                if self.settings.show_radar || self.settings.bptimer_enabled {
+                                    self.radar_state.register_mob_uuid(update.uuid, mob_base_id);
 
-                                if is_location_tracked_mob(mob_base_id) {
-                                    let mob_name = self.mobs.iter()
-                                        .find(|m| m.id.parse::<u32>().unwrap_or(0) == mob_base_id)
-                                        .map(|m| m.name.clone())
-                                        .unwrap_or_else(|| {
-                                            crate::utils::constants::get_boss_or_magical_creature_name(mob_base_id)
-                                                .map(|s| s.to_string())
-                                                .unwrap_or_else(|| format!("Mob {}", mob_base_id))
-                                        });
+                                    if is_location_tracked_mob(mob_base_id) {
+                                        let is_hp_only_update = update.position.x
+                                            == f32::NEG_INFINITY
+                                            && update.position.y == f32::NEG_INFINITY
+                                            && update.position.z == f32::NEG_INFINITY;
 
-                                    let is_hp_only_update = update.position.x == f32::NEG_INFINITY
-                                        && update.position.y == f32::NEG_INFINITY
-                                        && update.position.z == f32::NEG_INFINITY;
-
-                                    if is_hp_only_update {
-                                        if self.radar_state.update_mob_hp(
-                                            mob_base_id,
-                                            update.current_hp,
-                                            update.max_hp,
-                                        ) {
-                                            self.last_radar_update_time = Some(Instant::now());
-                                            if let Some(mob) =
-                                                self.radar_state.tracked_mobs.get(&mob_base_id)
-                                            {
-                                                if let Some(hp_pct) = mob.hp_percentage() {
-                                                    self.report_mob_hp(
-                                                        mob_base_id,
-                                                        hp_pct as f32,
-                                                        mob.position,
-                                                    );
-                                                }
+                                        if is_hp_only_update {
+                                            if self.radar_state.update_mob_hp(
+                                                mob_base_id,
+                                                update.current_hp,
+                                                update.max_hp,
+                                            ) {
+                                                self.last_radar_update_time = Some(Instant::now());
+                                            } else {
+                                                continue;
                                             }
                                         } else {
-                                            continue;
+                                            let mob_name = self.mobs.iter()
+                                                .find(|m| m.id.parse::<u32>().unwrap_or(0) == mob_base_id)
+                                                .map(|m| m.name.clone())
+                                                .unwrap_or_else(|| {
+                                                    crate::utils::constants::get_boss_or_magical_creature_name(mob_base_id)
+                                                        .map(|s| s.to_string())
+                                                        .unwrap_or_else(|| format!("Mob {}", mob_base_id))
+                                                });
+
+                                            self.radar_state.update_mob_position(
+                                                mob_base_id,
+                                                mob_name,
+                                                update.position,
+                                                update.current_hp,
+                                                update.max_hp,
+                                            );
+                                            self.last_radar_update_time = Some(Instant::now());
                                         }
-                                    } else {
-                                        self.radar_state.update_mob_position(
-                                            mob_base_id,
-                                            mob_name,
-                                            update.position,
-                                            update.current_hp,
-                                            update.max_hp,
-                                        );
-                                        self.last_radar_update_time = Some(Instant::now());
 
                                         if let Some(mob) =
                                             self.radar_state.tracked_mobs.get(&mob_base_id)
                                         {
-                                            if let Some(hp_pct) = mob.hp_percentage() {
+                                            let hp_pct = mob.hp_percentage();
+                                            let position = mob.position;
+                                            let is_dead = match hp_pct {
+                                                Some(0) => true,
+                                                _ => mob.current_hp == Some(0),
+                                            };
+
+                                            if let Some(hp_pct) = hp_pct {
                                                 self.report_mob_hp(
                                                     mob_base_id,
                                                     hp_pct as f32,
-                                                    mob.position,
+                                                    position,
                                                 );
                                             }
-                                        }
-                                    }
 
-                                    if let Some(mob) =
-                                        self.radar_state.tracked_mobs.get(&mob_base_id)
-                                    {
-                                        let is_dead = match mob.hp_percentage() {
-                                            Some(0) => true,
-                                            _ => mob.current_hp == Some(0),
-                                        };
-                                        if is_dead {
-                                            self.radar_state.remove_mob(mob_base_id);
-                                            continue;
+                                            if is_dead {
+                                                self.radar_state.remove_mob(mob_base_id);
+                                                continue;
+                                            }
                                         }
                                     }
                                 }
@@ -475,18 +556,22 @@ impl eframe::App for DpsMeterApp {
                         }
                     }
                     events::CombatEvent::LocalPlayerPosition(update) => {
-                        self.radar_state.update_player_position(update.position);
+                        if self.settings.show_radar || self.settings.bptimer_enabled {
+                            self.radar_state.update_player_position(update.position);
+                        }
                     }
                 }
             }
         }
 
-        update_realtime_dps(
-            &mut self.player_stats,
-            &mut self.dps_value,
-            &mut self.max_dps,
-            &mut self.dps_history,
-        );
+        if self.settings.show_combat_data {
+            update_realtime_dps(
+                &mut self.player_stats,
+                &mut self.dps_value,
+                &mut self.max_dps,
+                &mut self.dps_history,
+            );
+        }
 
         if let Some(idle_seconds) = self.settings.clear_combat_data_idle_seconds {
             if let Some(last_event) = self.last_combat_event_time {
@@ -571,12 +656,16 @@ impl eframe::App for DpsMeterApp {
                                 );
                             }
                             crate::hotkeys::HotkeyAction::SwitchToMobView => {
-                                self.view_mode = ViewMode::Bosses;
-                                info!("Hotkey pressed: switched to mob view");
+                                if self.settings.show_radar || self.settings.show_mob_timers {
+                                    self.view_mode = ViewMode::Bosses;
+                                    info!("Hotkey pressed: switched to mob view");
+                                }
                             }
                             crate::hotkeys::HotkeyAction::SwitchToCombatView => {
-                                self.view_mode = ViewMode::Combat;
-                                info!("Hotkey pressed: switched to combat view");
+                                if self.settings.show_combat_data {
+                                    self.view_mode = ViewMode::Combat;
+                                    info!("Hotkey pressed: switched to combat view");
+                                }
                             }
                             crate::hotkeys::HotkeyAction::MinimizeWindow => {
                                 let is_minimized =
@@ -681,6 +770,9 @@ impl eframe::App for DpsMeterApp {
                     &mut self.max_dps,
                     &mut self.dps_history,
                     &mut self.player_stats,
+                    self.settings.show_radar,
+                    self.settings.show_mob_timers,
+                    self.settings.show_combat_data,
                 );
 
                 let content_rect = {
@@ -715,45 +807,50 @@ impl eframe::App for DpsMeterApp {
 
                     scroll_area.show(ui, |ui| match self.view_mode {
                         ViewMode::Combat => {
-                            if combat_view::render_combat_view(
-                                ui,
-                                &mut combat_players,
-                                &mut self.sort_column,
-                                &mut self.sort_descending,
-                                &self.settings,
-                            ) {
-                                combat_footer_text = Some(combat_view::dps_window_text(
-                                    &self.player_stats,
+                            if self.settings.show_combat_data {
+                                if combat_view::render_combat_view(
+                                    ui,
+                                    &mut combat_players,
+                                    &mut self.sort_column,
+                                    &mut self.sort_descending,
                                     &self.settings,
-                                ));
+                                ) {
+                                    combat_footer_text = Some(combat_view::dps_window_text(
+                                        &self.player_stats,
+                                        &self.settings,
+                                    ));
+                                }
                             }
                         }
                         ViewMode::Bosses => {
                             ui.vertical(|ui| {
-                                let show_radar = self.settings.show_radar
-                                    && self.radar_state.player_position.is_some()
-                                    && !self.radar_state.tracked_mobs.is_empty();
+                                if self.settings.show_radar {
+                                    let show_radar = self.radar_state.player_position.is_some()
+                                        && !self.radar_state.tracked_mobs.is_empty();
 
-                                if show_radar {
-                                    ui.heading("Mob Radar");
-                                    radar_view::render_radar_view(
-                                        ui,
-                                        &self.radar_state,
-                                        text_color,
-                                    );
-                                    ui.add_space(spacing::MD);
-                                    ui.separator();
-                                    ui.add_space(spacing::MD);
+                                    if show_radar {
+                                        ui.heading("Mob Radar");
+                                        radar_view::render_radar_view(
+                                            ui,
+                                            &self.radar_state,
+                                            text_color,
+                                        );
+                                        ui.add_space(spacing::MD);
+                                        ui.separator();
+                                        ui.add_space(spacing::MD);
+                                    }
                                 }
 
-                                ui.heading("Mob Timers");
-                                let visible_mobs: Vec<_> = self
-                                    .mobs
-                                    .iter()
-                                    .filter(|mob| !self.settings.hidden_mobs.contains(&mob.id))
-                                    .cloned()
-                                    .collect();
-                                mob_view::render_mob_view(ui, &visible_mobs);
+                                if self.settings.show_mob_timers {
+                                    ui.heading("Mob Timers");
+                                    let visible_mobs: Vec<_> = self
+                                        .mobs
+                                        .iter()
+                                        .filter(|mob| !self.settings.hidden_mobs.contains(&mob.id))
+                                        .cloned()
+                                        .collect();
+                                    mob_view::render_mob_view(ui, &visible_mobs);
+                                }
                             });
                         }
                         ViewMode::Settings => {

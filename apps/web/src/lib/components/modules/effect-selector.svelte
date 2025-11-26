@@ -5,7 +5,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Popover from '$lib/components/ui/popover';
 	import {
-		MODULE_AVAILABLE_EFFECTS,
+		getEffectNames,
 		MODULE_EFFECT_MAX_LEVEL,
 		MODULE_THIRD_EFFECT_MAX_LEVEL
 	} from '$lib/constants';
@@ -99,7 +99,7 @@
 							<Command.Separator />
 						{/if}
 						<Command.Group heading="Available Effects">
-							{#each MODULE_AVAILABLE_EFFECTS as availableEffect (availableEffect)}
+							{#each getEffectNames() as availableEffect (availableEffect)}
 								<Command.Item
 									value={availableEffect}
 									onclick={() => {

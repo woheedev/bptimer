@@ -209,7 +209,8 @@ export const filterSortSettingsSchema = z.object({
 	sortField: z.enum(['channel', 'hp', 'report_time']),
 	sortDirection: z.enum(['ascending', 'descending']),
 	hpRange: z.tuple([z.number().min(0).max(100), z.number().min(0).max(100)]),
-	hideStaleChannels: z.boolean()
+	hideStaleChannels: z.boolean(),
+	showTimestamp: z.boolean()
 });
 
 export type FilterSortSettings = z.infer<typeof filterSortSettingsSchema>;

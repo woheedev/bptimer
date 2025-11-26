@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -17,7 +18,12 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { MODULE_DEFAULT_NAME_PREFIX, MODULE_MAX_PRIORITY_EFFECTS } from '$lib/constants';
+	import {
+		getEffectName,
+		isKnownEffectId,
+		MODULE_DEFAULT_NAME_PREFIX,
+		MODULE_MAX_PRIORITY_EFFECTS
+	} from '$lib/constants';
 	import { modulesOptimizerStore } from '$lib/stores/modules-optimizer.svelte';
 	import type { OptimizationResult } from '$lib/types/modules';
 	import {
@@ -67,17 +73,28 @@
 					modulesOptimizerStore.clearAll();
 
 					type ImportedModule = {
-						id?: string;
-						effects?: Array<{ name?: string; level?: number }>;
+						effects?: Array<{ id?: number; level?: number }>;
 					};
 
-					const importedModules = moduleData.modules.map((m: ImportedModule) => ({
-						id: m.id || `${MODULE_DEFAULT_NAME_PREFIX} ${modules.length + 1}`,
-						effects: [
-							m.effects?.[0] || { name: '', level: 0 },
-							m.effects?.[1] || { name: '', level: 0 },
-							m.effects?.[2] || { name: '', level: 0 }
-						]
+					const unknownEffectIds = new SvelteSet<number>();
+
+					const importedModules = moduleData.modules.map((m: ImportedModule, index: number) => ({
+						id: `${MODULE_DEFAULT_NAME_PREFIX} ${index + 1}`,
+						effects: Array.from({ length: 3 }, (_, i) => {
+							const effect = m.effects?.[i];
+							if (effect?.id == null) {
+								return { name: '', level: 0 };
+							}
+
+							if (!isKnownEffectId(effect.id)) {
+								unknownEffectIds.add(effect.id);
+							}
+
+							return {
+								name: getEffectName(effect.id),
+								level: effect.level || 0
+							};
+						})
 					}));
 
 					modulesOptimizerStore.setModules(importedModules);
@@ -87,6 +104,12 @@
 					activeTab = 'modules';
 
 					showToast.success(`Imported ${importedModules.length} modules from game`);
+					if (unknownEffectIds.size > 0) {
+						const idsList = Array.from(unknownEffectIds)
+							.sort((a, b) => a - b)
+							.join(', ');
+						showToast.warning(`Some effects in this import are not recognized (IDs: ${idsList}).`);
+					}
 
 					await goto(resolve('/modules-optimizer'), { replaceState: true, noScroll: true });
 				} else {

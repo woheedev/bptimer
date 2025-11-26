@@ -1,19 +1,24 @@
 <script lang="ts">
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { HP_CRITICAL_THRESHOLD, HP_LOW_THRESHOLD } from '$lib/constants';
+	import { HP_CRITICAL_THRESHOLD, HP_LOW_THRESHOLD, SECOND } from '$lib/constants';
+	import { formatTimeAgoCountdown } from '$lib/utils/general-utils';
 
 	let {
 		channelNumber,
 		status,
 		hpPercentage,
 		clickable = false,
-		onclick
+		onclick,
+		lastUpdated,
+		showTimestamp = false
 	}: {
 		channelNumber: number;
 		status: 'alive' | 'dead' | 'unknown';
 		hpPercentage: number;
 		clickable?: boolean;
 		onclick?: () => void;
+		lastUpdated?: string;
+		showTimestamp?: boolean;
 	} = $props();
 
 	function getHPColorClass(hpPercentage: number, status: string) {
@@ -36,6 +41,24 @@
 					? '100%'
 					: '0%'
 	);
+
+	// Timestamp countdown
+	let timestampText = $state('');
+
+	$effect(() => {
+		if (!showTimestamp || !lastUpdated || channelNumber === 0) {
+			timestampText = '';
+			return;
+		}
+
+		const updateTimestamp = () => {
+			timestampText = formatTimeAgoCountdown(lastUpdated);
+		};
+
+		updateTimestamp();
+		const interval = setInterval(updateTimestamp, SECOND);
+		return () => clearInterval(interval);
+	});
 </script>
 
 {#if clickable}
@@ -54,7 +77,12 @@
 					{...props}
 				>
 					<div class="hp-fill {hpColorClass}" style="width: {fillWidth}"></div>
-					<span class="pill-text">{channelNumber}</span>
+					<div class="flex flex-col">
+						<span class="pill-text">{channelNumber}</span>
+						{#if showTimestamp && timestampText}
+							<span class="pill-timestamp">{timestampText}</span>
+						{/if}
+					</div>
 				</button>
 			{/snippet}
 		</Tooltip.Trigger>
@@ -70,7 +98,12 @@
 			{#snippet child({ props })}
 				<div class="channel-pill px-2 py-1 text-xs font-medium" {...props}>
 					<div class="hp-fill {hpColorClass}" style="width: {fillWidth}"></div>
-					<span class="pill-text">{channelNumber}</span>
+					<div class="flex flex-col">
+						<span class="pill-text">{channelNumber}</span>
+						{#if showTimestamp && timestampText}
+							<span class="pill-timestamp">{timestampText}</span>
+						{/if}
+					</div>
 				</div>
 			{/snippet}
 		</Tooltip.Trigger>

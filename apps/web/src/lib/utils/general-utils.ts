@@ -14,6 +14,7 @@ import {
 	STALE_DATA_TIMEOUT_FULL_HP,
 	STALE_DATA_TIMEOUT_HIGH_HP
 } from '$lib/constants';
+import type { ChannelEntry } from '$lib/types/mobs';
 
 /**
  * Gets initials from any name string
@@ -58,6 +59,38 @@ export function formatTimeAgo(dateString: string, now?: Date): string {
 }
 
 /**
+ * Formats elapsed time as a countdown-style "time ago" string
+ * Example: formatTimeAgoCountdown("2023-10-25T10:00:00Z") -> "12h 39m ago"
+ *
+ * @param dateString - The date string to format
+ * @param now - Optional current time for reactive updates
+ * @returns Human-readable countdown-style time ago string
+ */
+export function formatTimeAgoCountdown(dateString?: string, now?: Date): string {
+	if (!dateString) {
+		return '';
+	}
+	const date = new Date(dateString);
+	const currentNow = now || new Date();
+	const diffMs = currentNow.getTime() - date.getTime();
+	const diffSeconds = Math.floor(diffMs / SECOND);
+	const days = Math.floor(diffSeconds / (DAY / SECOND));
+	const hours = Math.floor((diffSeconds % (DAY / SECOND)) / (HOUR / SECOND));
+	const minutes = Math.floor((diffSeconds % (HOUR / SECOND)) / (MINUTE / SECOND));
+	const seconds = diffSeconds % (MINUTE / SECOND);
+
+	if (days > 0) {
+		return `${days}d ${hours}h ago`;
+	} else if (hours > 0) {
+		return `${hours}h ${minutes}m ago`;
+	} else if (minutes > 0) {
+		return `${minutes}m ago`;
+	} else {
+		return `${seconds}s ago`;
+	}
+}
+
+/**
  * Determines if data is stale based on HP percentage
  * - Dead mobs (0% HP) are never considered stale, except for special magical creatures
  * - Special magical creatures (Loyal Boarlet, Silver Nappo, Golden Nappo) transition from dead to unknown after specific timeouts
@@ -68,13 +101,16 @@ export function formatTimeAgo(dateString: string, now?: Date): string {
  * @param last_updated - The timestamp string to check
  * @param hp_percentage - The HP percentage to determine timeout
  * @param mobName - Optional mob name to apply special dead timeout rules
- * @returns True if the data is older than the timeout, false otherwise
+ * @returns True if the data is older than the timeout or missing timestamp, false otherwise
  */
 export function isDataStale(
-	last_updated: string,
+	last_updated?: string,
 	hp_percentage?: number,
 	mobName?: string
 ): boolean {
+	if (!last_updated) {
+		return true;
+	}
 	if (hp_percentage === 0 && mobName) {
 		const specialTimeout = SPECIAL_MAGICAL_CREATURES_DEAD_TIMEOUT[mobName];
 		if (specialTimeout !== undefined) {
@@ -251,14 +287,7 @@ export function calculateRespawnProgress(
  * @param channels - Array of channels to sort
  * @returns Sorted array (does not mutate original)
  */
-export function sortChannelsForMobCard<
-	T extends {
-		channel: number;
-		hp_percentage: number;
-		status: 'alive' | 'dead' | 'unknown';
-		last_updated: string;
-	}
->(channels: T[]): T[] {
+export function sortChannelsForMobCard<T extends ChannelEntry>(channels: T[]): T[] {
 	return [...channels].sort((a, b) => {
 		const aIsDead = a.hp_percentage === 0;
 		const bIsDead = b.hp_percentage === 0;
@@ -275,7 +304,9 @@ export function sortChannelsForMobCard<
 		}
 
 		// For dead channels: sort by most recent first
-		return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
+		const aTime = a.last_updated ? new Date(a.last_updated).getTime() : 0;
+		const bTime = b.last_updated ? new Date(b.last_updated).getTime() : 0;
+		return bTime - aTime;
 	});
 }
 

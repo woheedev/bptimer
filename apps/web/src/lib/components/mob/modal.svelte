@@ -61,12 +61,7 @@
 	});
 
 	let data_state = $state({
-		channels: [] as Array<{
-			channel: number;
-			status: 'alive' | 'dead' | 'unknown';
-			hp_percentage: number;
-			last_updated?: string;
-		}>,
+		channels: [] as ChannelEntry[],
 		reports: [] as MobReport[],
 		user_votes_map: new Map() as UserVotesMap
 	});
@@ -171,12 +166,7 @@
 			const channel_statuses = await getChannels(mobId);
 
 			// Create a complete channel list (1 to totalChannels) with existing data or unknown status
-			const all_channels: Array<{
-				channel: number;
-				status: 'alive' | 'dead' | 'unknown';
-				hp_percentage: number;
-				last_updated?: string;
-			}> = [];
+			const all_channels: ChannelEntry[] = [];
 
 			for (let i = 1; i <= totalChannels; i++) {
 				const status_data = channel_statuses.find((c) => c.channel === i);
@@ -283,14 +273,14 @@
 		if (!totalChannels || !data_state.channels.length) return [];
 
 		// Create complete channel list with all channels (1 to totalChannels)
-		const allChannels = Array.from({ length: totalChannels }, (_, i) => {
+		const allChannels: ChannelEntry[] = Array.from({ length: totalChannels }, (_, i) => {
 			const channel_num = i + 1;
 			const channel_data = data_state.channels.find((c) => c.channel === channel_num);
 			return {
 				channel: channel_num,
 				status: channel_data?.status || 'unknown',
 				hp_percentage: channel_data?.hp_percentage || 0,
-				last_updated: channel_data?.last_updated || ''
+				last_updated: channel_data?.last_updated
 			};
 		});
 
@@ -307,7 +297,8 @@
 		return filteredSortedChannels.map((channel) => ({
 			channelNumber: channel.channel,
 			status: channel.status,
-			hpPercentage: channel.hp_percentage
+			hpPercentage: channel.hp_percentage,
+			lastUpdated: channel.last_updated
 		}));
 	});
 
@@ -513,6 +504,7 @@
 							bind:sortDirection={filterSortSettingsStore.sortDirection}
 							bind:hpRange={filterSortSettingsStore.hpRange}
 							bind:hideStaleChannels={filterSortSettingsStore.hideStaleChannels}
+							bind:showTimestamp={filterSortSettingsStore.showTimestamp}
 						/>
 						<Toggle
 							bind:pressed={ui_state.isPanelVisible}
@@ -544,6 +536,8 @@
 										hpPercentage={channel.hpPercentage}
 										clickable={true}
 										onclick={() => handleChannelClick(channel.channelNumber)}
+										lastUpdated={channel.lastUpdated}
+										showTimestamp={filterSortSettingsStore.showTimestamp}
 									/>
 								{/each}
 							</div>

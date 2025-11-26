@@ -1,18 +1,10 @@
 import { pb } from '$lib/pocketbase';
 import { mobChannelStatusSchema } from '$lib/schemas';
-import { isDataStale } from '$lib/utils/general-utils';
+import type { ChannelEntry } from '$lib/types/mobs';
 import { getMobStatus } from '$lib/utils/mob-utils';
 import { validateWithSchema } from '$lib/utils/validation';
 
-export async function getChannels(bossId: string): Promise<
-	Array<{
-		channel: number;
-		status: 'alive' | 'dead' | 'unknown';
-		hp_percentage: number;
-		last_update: string;
-		location_image?: number;
-	}>
-> {
+export async function getChannels(bossId: string): Promise<ChannelEntry[]> {
 	try {
 		// Fetch the mob to get its name for special handling
 		const mob = await pb.collection('mobs').getOne(bossId);
@@ -30,32 +22,24 @@ export async function getChannels(bossId: string): Promise<
 		}
 
 		// Process and filter channels
-		const processed_channels = channels
-			.map((channel) => {
-				const last_update = channel.last_update || channel.updated;
-				const last_hp = channel.last_hp || 0;
-				const location_image = channel.location_image as number | undefined;
+		const processed_channels = channels.map((channel): ChannelEntry => {
+			const last_update = channel.last_update || channel.updated;
+			const last_hp = channel.last_hp || 0;
+			const location_image = channel.location_image as number | undefined;
 
-				const result: {
-					channel: number;
-					status: 'alive' | 'dead' | 'unknown';
-					hp_percentage: number;
-					last_update: string;
-					location_image?: number;
-				} = {
-					channel: channel.channel_number || 0,
-					status: getMobStatus(last_hp, last_update, mobName),
-					hp_percentage: last_hp,
-					last_update: last_update
-				};
+			const result: ChannelEntry = {
+				channel: channel.channel_number || 0,
+				status: getMobStatus(last_hp, last_update, mobName),
+				hp_percentage: last_hp,
+				last_updated: last_update
+			};
 
-				if (location_image) {
-					result.location_image = location_image;
-				}
+			if (location_image) {
+				result.location_image = location_image;
+			}
 
-				return result;
-			})
-			.filter((channel) => !isDataStale(channel.last_update, channel.hp_percentage, mobName)); // Exclude stale data
+			return result;
+		});
 
 		return processed_channels;
 	} catch (error) {

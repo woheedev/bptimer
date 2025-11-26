@@ -27,13 +27,18 @@ pub struct Settings {
     pub network_device_index: Option<usize>,
     pub show_top_10_only: bool,
     pub font_scale: f32,
-    pub bptimer_enabled: bool,
     // Window position and size for persistence
     pub window_pos: Option<(f32, f32)>,
     pub window_size: Option<(f32, f32)>,
-    // Mob radar settings
-    #[serde(default = "default_show_radar")]
+    // Module enable/disable settings
+    #[serde(default = "default_true")]
     pub show_radar: bool,
+    #[serde(default = "default_true")]
+    pub show_mob_timers: bool,
+    #[serde(default = "default_true")]
+    pub show_combat_data: bool,
+    #[serde(default = "default_true")]
+    pub bptimer_enabled: bool,
     #[serde(default)]
     pub hidden_mobs: std::collections::HashSet<String>, // Mob IDs to hide
     // Combat data column visibility
@@ -157,10 +162,12 @@ impl Default for Settings {
             network_device_index: None,
             show_top_10_only: false,
             font_scale: 1.0,
-            bptimer_enabled: true,
             window_pos: None,
             window_size: Some((485.0, 500.0)),
             show_radar: true,
+            show_mob_timers: true,
+            show_combat_data: true,
+            bptimer_enabled: true,
             hidden_mobs: std::collections::HashSet::new(),
             hidden_columns: default_hidden_columns(),
             clear_combat_data_idle_seconds: None,
@@ -214,10 +221,6 @@ impl Settings {
             }
         }
     }
-}
-
-fn default_show_radar() -> bool {
-    true
 }
 
 fn default_text_color() -> [u8; 4] {

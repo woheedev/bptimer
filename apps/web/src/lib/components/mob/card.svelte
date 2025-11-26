@@ -13,6 +13,7 @@
 		SECOND,
 		SPECIAL_MAGICAL_CREATURES
 	} from '$lib/constants';
+	import type { ChannelEntry } from '$lib/types/mobs';
 	import { favoriteMobsStore } from '$lib/stores/favorite-mobs.svelte';
 	import { mobNotificationsStore } from '$lib/stores/mob-notifications.svelte';
 	import { formatCountdown } from '$lib/utils/event-timer';
@@ -40,13 +41,7 @@
 			total_channels: number;
 			respawn_time?: number;
 		};
-		latestChannels?: Array<{
-			channel: number;
-			status: 'alive' | 'dead' | 'unknown';
-			hp_percentage: number;
-			last_updated: string;
-			location_image?: number;
-		}>;
+		latestChannels?: ChannelEntry[];
 		onViewDetails?: (mobId: string, mobName: string, mobUid: number, totalChannels: number) => void;
 		onChannelClick?: (
 			mobId: string,
@@ -69,14 +64,16 @@
 		const channelData = latestChannels.map((channel) => ({
 			channelNumber: channel.channel,
 			status: channel.status,
-			hpPercentage: channel.hp_percentage
+			hpPercentage: channel.hp_percentage,
+			lastUpdated: channel.last_updated
 		}));
 
 		const emptySlots = LATEST_CHANNELS_DISPLAY_COUNT - channelData.length;
 		const emptyPills = Array.from({ length: Math.max(0, emptySlots) }, () => ({
 			channelNumber: 0,
 			status: 'unknown' as const,
-			hpPercentage: 0
+			hpPercentage: 0,
+			lastUpdated: undefined
 		}));
 
 		return [...channelData, ...emptyPills];
@@ -147,6 +144,13 @@
 			updateCountdown();
 			const interval = setInterval(updateCountdown, SECOND);
 			return () => clearInterval(interval);
+		}
+	});
+
+	$effect(() => {
+		if (isSpecialMagicalCreature && activeLocations.length === 0) {
+			mapPinPopoverOpen = false;
+			mapPinToggled = false;
 		}
 	});
 </script>
@@ -226,6 +230,9 @@
 								</div>
 							</Popover.Content>
 						</Popover.Root>
+					{:else}
+						<!-- Spacer keeps layout aligned when no locations are available -->
+						<div class="h-8 w-8" aria-hidden="true"></div>
 					{/if}
 					<div class="flex items-center gap-2">
 						<label for="notifications-{mob.id}" class="text-muted-foreground text-sm">

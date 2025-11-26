@@ -190,7 +190,8 @@
 	z-index: 1;
 }
 
-.channel-pill .pill-text {
+.channel-pill .pill-text,
+.channel-pill .pill-timestamp {
 	position: relative;
 	z-index: 2;
 	color: var(--channel-pill-text);
@@ -202,8 +203,13 @@
 	text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.4);
 }
 
-.dark .channel-pill .pill-text {
+.dark .channel-pill .pill-text,
+.dark .channel-pill .pill-timestamp {
 	text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 1);
+}
+
+.channel-pill .pill-timestamp {
+	font-size: 0.75em;
 }
 
 /* HP color coding */

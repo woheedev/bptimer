@@ -4,7 +4,7 @@ export interface ChannelEntry {
 	channel: number;
 	hp_percentage: number;
 	status: 'alive' | 'dead' | 'unknown';
-	last_updated: string;
+	last_updated?: string;
 	location_image?: number;
 }
 

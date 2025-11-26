@@ -1,5 +1,5 @@
 import {
-	MODULE_AVAILABLE_EFFECTS,
+	getEffectNames,
 	MODULE_DEFAULT_NAME_PREFIX,
 	MODULE_OPTIMIZER_GREEDY_CANDIDATE_LIMIT,
 	MODULE_OPTIMIZER_LOCAL_SEARCH_MAX_ITERATIONS,
@@ -363,5 +363,6 @@ export function removeModule(modules: Module[], index: number): Module[] {
  * Gets available effects that are not in the priority list
  */
 export function getAvailableEffects(priorityEffects: string[]): string[] {
-	return MODULE_AVAILABLE_EFFECTS.filter((effect) => !priorityEffects.includes(effect));
+	const allEffects = getEffectNames();
+	return allEffects.filter((effect) => !priorityEffects.includes(effect));
 }

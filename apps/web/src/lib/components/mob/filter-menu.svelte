@@ -8,6 +8,7 @@
 	import type {
 		HideStaleChannels,
 		HpRange,
+		ShowTimestamp,
 		SortDirection,
 		SortDirectionOption,
 		SortField,
@@ -21,13 +22,15 @@
 		sortDirection?: SortDirection;
 		hpRange?: HpRange;
 		hideStaleChannels?: HideStaleChannels;
+		showTimestamp?: ShowTimestamp;
 	}
 
 	let {
 		sortField = $bindable('channel'),
 		sortDirection = $bindable('ascending'),
 		hpRange = $bindable([0, 100]),
-		hideStaleChannels = $bindable(false)
+		hideStaleChannels = $bindable(false),
+		showTimestamp = $bindable(false)
 	}: Props = $props();
 
 	const sortFieldOptions: SortFieldOption[] = [
@@ -99,6 +102,10 @@
 			<div class="flex items-center space-x-2">
 				<Switch id="hide-stale" bind:checked={hideStaleChannels} />
 				<Label for="hide-stale">Hide stale channels</Label>
+			</div>
+			<div class="flex items-center space-x-2">
+				<Switch id="show-timestamp" bind:checked={showTimestamp} />
+				<Label for="show-timestamp">Show timestamp</Label>
 			</div>
 		</div>
 	</Popover.Content>

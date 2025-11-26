@@ -17,6 +17,7 @@ export type SortField = 'channel' | 'hp' | 'report_time';
 export type SortDirection = 'ascending' | 'descending';
 export type HpRange = [number, number];
 export type HideStaleChannels = boolean;
+export type ShowTimestamp = boolean;
 
 export interface SortFieldOption {
 	value: SortField;

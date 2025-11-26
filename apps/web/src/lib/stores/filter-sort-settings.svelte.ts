@@ -2,14 +2,25 @@ import { browser } from '$app/environment';
 import { DEFAULT_FILTER_SORT_SETTINGS, FILTER_SORT_SETTINGS_STORAGE_KEY } from '$lib/constants';
 import type { FilterSortSettings } from '$lib/schemas';
 import { filterSortSettingsSchema } from '$lib/schemas';
-import type { HideStaleChannels, HpRange, SortDirection, SortField } from '$lib/types/ui';
+import type {
+	HideStaleChannels,
+	HpRange,
+	ShowTimestamp,
+	SortDirection,
+	SortField
+} from '$lib/types/ui';
 
 function loadFromLocalStorage(): FilterSortSettings {
 	if (!browser) return DEFAULT_FILTER_SORT_SETTINGS;
 	try {
 		const stored = localStorage.getItem(FILTER_SORT_SETTINGS_STORAGE_KEY);
 		if (stored) {
-			const parsed = filterSortSettingsSchema.safeParse(JSON.parse(stored));
+			const rawSettings = JSON.parse(stored);
+			const mergedSettings = {
+				...DEFAULT_FILTER_SORT_SETTINGS,
+				...rawSettings
+			};
+			const parsed = filterSortSettingsSchema.safeParse(mergedSettings);
 			if (parsed.success) {
 				return parsed.data;
 			}
@@ -69,6 +80,13 @@ function createFilterSortSettingsStore() {
 		},
 		set hideStaleChannels(value: HideStaleChannels) {
 			settings = { ...settings, hideStaleChannels: value };
+			saveToLocalStorage(settings);
+		},
+		get showTimestamp() {
+			return settings.showTimestamp;
+		},
+		set showTimestamp(value: ShowTimestamp) {
+			settings = { ...settings, showTimestamp: value };
 			saveToLocalStorage(settings);
 		},
 		updateSettings,

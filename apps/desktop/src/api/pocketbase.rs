@@ -10,7 +10,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
-use tokio::sync::{Mutex, mpsc::Sender};
+use tokio::sync::{Mutex, mpsc::Sender, watch};
 use tokio::time::sleep;
 
 const MOB_PAGE_SIZE: usize = 100;
@@ -42,10 +42,11 @@ pub struct PocketBaseClient {
     sender: Sender<Vec<Mob>>, // Send full mob list updates to UI
     mobs_state: Mutex<Vec<Mob>>,
     has_connected: AtomicBool,
+    shutdown_rx: watch::Receiver<bool>,
 }
 
 impl PocketBaseClient {
-    pub fn new(sender: Sender<Vec<Mob>>) -> Self {
+    pub fn new(sender: Sender<Vec<Mob>>, shutdown_rx: watch::Receiver<bool>) -> Self {
         let client = Client::builder()
             .user_agent(&crate::utils::constants::user_agent())
             .timeout(Duration::from_secs(600))
@@ -57,23 +58,71 @@ impl PocketBaseClient {
             sender,
             mobs_state: Mutex::new(Vec::new()),
             has_connected: AtomicBool::new(false),
+            shutdown_rx,
         }
     }
 
     pub async fn start(self: Arc<Self>) {
         self.fetch_and_emit_full().await;
+        let mut shutdown_rx = self.shutdown_rx.clone();
 
         loop {
-            match self.listen_realtime().await {
+            if *shutdown_rx.borrow() {
+                info!("PocketBase client shutdown requested");
+                break;
+            }
+
+            let listen_result = tokio::select! {
+                biased;
+                res = shutdown_rx.changed() => {
+                    match res {
+                        Ok(_) if *shutdown_rx.borrow() => {
+                            info!("PocketBase client shutdown requested");
+                            break;
+                        }
+                        Err(_) => {
+                            info!("Shutdown sender dropped, stopping PocketBase client");
+                            break;
+                        }
+                        _ => continue,
+                    }
+                }
+                result = self.listen_realtime() => result,
+            };
+
+            match listen_result {
                 Ok(()) => {
+                    if *shutdown_rx.borrow() {
+                        break;
+                    }
                     warn!("Realtime stream closed gracefully. Reconnecting in 5s...");
                 }
                 Err(e) => {
+                    if *shutdown_rx.borrow()
+                        && e.root_cause().to_string().contains("Shutdown requested")
+                    {
+                        break;
+                    }
                     warn!("Realtime connection error: {:#}. Reconnecting in 5s...", e);
                 }
             }
-            sleep(Duration::from_secs(5)).await;
+
+            if *shutdown_rx.borrow() {
+                break;
+            }
+
+            tokio::select! {
+                _ = sleep(Duration::from_secs(5)) => {},
+                res = shutdown_rx.changed() => {
+                    let _ = res;
+                    if *shutdown_rx.borrow() {
+                        break;
+                    }
+                }
+            }
         }
+
+        info!("PocketBase client stopped");
     }
 
     async fn fetch_and_emit_full(&self) {
@@ -161,12 +210,29 @@ impl PocketBaseClient {
             .send()
             .await?;
         let mut stream = response.bytes_stream().eventsource();
+        let mut shutdown_rx = self.shutdown_rx.clone();
 
         // Subscribe to mobs collection
 
-        while let Some(event) = stream.next().await {
-            match event {
-                Ok(event) => {
+        loop {
+            let next_event = tokio::select! {
+                biased;
+                res = shutdown_rx.changed() => {
+                    match res {
+                        Ok(_) if *shutdown_rx.borrow() => {
+                            return Err(anyhow::anyhow!("Shutdown requested"));
+                        }
+                        Err(_) => {
+                            return Err(anyhow::anyhow!("Shutdown sender dropped"));
+                        }
+                        _ => continue,
+                    }
+                }
+                event = stream.next() => event,
+            };
+
+            match next_event {
+                Some(Ok(event)) => {
                     if event.event == "PB_CONNECT" {
                         let data: serde_json::Value = serde_json::from_str(&event.data)?;
                         if let Some(client_id) = data.get("clientId").and_then(|s| s.as_str()) {
@@ -186,11 +252,10 @@ impl PocketBaseClient {
                         debug!("Unhandled realtime event: {}", event.event);
                     }
                 }
-                Err(e) => return Err(anyhow::anyhow!("SSE error: {}", e)),
+                Some(Err(e)) => return Err(anyhow::anyhow!("SSE error: {}", e)),
+                None => return Err(anyhow::anyhow!("Realtime stream ended by server")),
             }
         }
-
-        Err(anyhow::anyhow!("Realtime stream ended by server"))
     }
 
     async fn subscribe(&self, client_id: &str) -> anyhow::Result<()> {

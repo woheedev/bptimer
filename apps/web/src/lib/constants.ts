@@ -49,7 +49,8 @@ export const DEFAULT_FILTER_SORT_SETTINGS: FilterSortSettings = {
 	sortField: 'channel',
 	sortDirection: 'ascending',
 	hpRange: [0, 100],
-	hideStaleChannels: false
+	hideStaleChannels: false,
+	showTimestamp: true
 };
 
 // Mob respawn constants (all times in UTC)
@@ -231,29 +232,41 @@ export const MODULE_EFFECTS_PER_MODULE = 3; // 2 for purple, 3 for gold
 export const MODULE_EFFECT_MAX_LEVEL = 10; // 1-10
 export const MODULE_THIRD_EFFECT_MAX_LEVEL = 5; // 1-5 for 3rd effect
 export const MODULE_DEFAULT_NAME_PREFIX = 'Module';
-export const MODULE_AVAILABLE_EFFECTS = [
-	'Agile',
-	'Agility Boost',
-	'Armor',
-	'Attack SPD',
-	'Cast Focus',
-	'Crit Focus',
-	'DMG Stack',
-	'Elite Strike',
-	'Final Protection',
-	'First Aid',
-	'Healing Boost',
-	'Healing Enhance',
-	'Intellect Boost',
-	'Life Condense',
-	'Life Steal',
-	'Life Wave',
-	'Luck Focus',
-	'Resistance',
-	'Special Attack',
-	'Strength Boost',
-	'Team Luck & Crit'
-] as const;
+export const MODULE_AVAILABLE_EFFECTS: Record<number, string> = {
+	1110: 'Strength Boost',
+	1111: 'Agility Boost',
+	1112: 'Intellect Boost',
+	1113: 'Special Attack',
+	1114: 'Elite Strike',
+	1205: 'Healing Boost',
+	1206: 'Healing Enhance',
+	1307: 'Resistance',
+	1308: 'Armor',
+	1407: 'Cast Focus',
+	1408: 'Attack SPD',
+	1409: 'Crit Focus',
+	1410: 'Luck Focus',
+	2104: 'DMG Stack',
+	2105: 'Agile',
+	2204: 'Life Condense',
+	2205: 'First Aid',
+	2304: 'Final Protection',
+	2404: 'Life Wave',
+	2405: 'Life Steal',
+	2406: 'Team Luck & Crit'
+} as const;
+
+export function getEffectNames(): string[] {
+	return Object.values(MODULE_AVAILABLE_EFFECTS).sort();
+}
+
+export function isKnownEffectId(id: number): boolean {
+	return Object.prototype.hasOwnProperty.call(MODULE_AVAILABLE_EFFECTS, id);
+}
+
+export function getEffectName(id: number): string {
+	return MODULE_AVAILABLE_EFFECTS[id] ?? `Unknown Effect (ID: ${id})`;
+}
 
 export const MODULE_SLOTS = [
 	{ value: 2, label: '2 Slots' },

@@ -15,6 +15,9 @@ pub fn render_title_bar(
     max_dps: &mut f32,
     dps_history: &mut Vec<f32>,
     player_stats: &mut std::collections::HashMap<i64, crate::models::PlayerStats>,
+    show_radar: bool,
+    show_mob_timers: bool,
+    show_combat_data: bool,
 ) {
     let visuals = ui.style().visuals.clone();
     let text_color = visuals.text_color();
@@ -173,7 +176,11 @@ pub fn render_title_bar(
 
     if settings_response.clicked() {
         if *view_mode == ViewMode::Settings {
-            *view_mode = ViewMode::Bosses; // Go back to Mobs (home)
+            if show_radar || show_mob_timers {
+                *view_mode = ViewMode::Bosses;
+            } else {
+                *view_mode = ViewMode::Combat;
+            }
         } else {
             *view_mode = ViewMode::Settings;
         }
@@ -356,86 +363,95 @@ pub fn render_title_bar(
     button_offset += button_size + button_padding;
 
     // Combat button
-    let combat_btn_rect = Rect::from_min_size(
-        title_bar_rect.right_top() + Vec2::new(-button_size - button_offset, button_padding),
-        Vec2::splat(button_size),
-    );
-    let combat_response = ui.interact(
-        combat_btn_rect,
-        ui.id().with("combat"),
-        egui::Sense::click(),
-    );
-    let is_combat_active = *view_mode == ViewMode::Combat;
+    if show_combat_data {
+        let combat_btn_rect = Rect::from_min_size(
+            title_bar_rect.right_top() + Vec2::new(-button_size - button_offset, button_padding),
+            Vec2::splat(button_size),
+        );
+        let combat_response = ui.interact(
+            combat_btn_rect,
+            ui.id().with("combat"),
+            egui::Sense::click(),
+        );
+        let is_combat_active = *view_mode == ViewMode::Combat;
 
-    ui.painter().rect_filled(
-        combat_btn_rect,
-        3.0,
-        if is_combat_active {
-            Color32::from_rgba_unmultiplied(150, 100, 100, 200)
-        } else if combat_response.hovered() {
-            Color32::from_rgba_unmultiplied(150, 150, 150, 150)
-        } else {
-            Color32::from_rgba_unmultiplied(100, 100, 100, 100)
-        },
-    );
+        ui.painter().rect_filled(
+            combat_btn_rect,
+            3.0,
+            if is_combat_active {
+                Color32::from_rgba_unmultiplied(150, 100, 100, 200)
+            } else if combat_response.hovered() {
+                Color32::from_rgba_unmultiplied(150, 150, 150, 150)
+            } else {
+                Color32::from_rgba_unmultiplied(100, 100, 100, 100)
+            },
+        );
 
-    ui.painter().text(
-        combat_btn_rect.center(),
-        egui::Align2::CENTER_CENTER,
-        egui_material_icons::icons::ICON_SWORDS,
-        egui::FontId::proportional(14.0),
-        text_color,
-    );
+        ui.painter().text(
+            combat_btn_rect.center(),
+            egui::Align2::CENTER_CENTER,
+            egui_material_icons::icons::ICON_SWORDS,
+            egui::FontId::proportional(14.0),
+            text_color,
+        );
 
-    if combat_response.clicked() {
-        *view_mode = ViewMode::Combat;
+        if combat_response.clicked() {
+            *view_mode = ViewMode::Combat;
+        }
+
+        combat_response.on_hover_text("Combat");
+
+        button_offset += button_size + button_padding;
     }
-
-    combat_response.on_hover_text("Combat");
-
-    button_offset += button_size + button_padding;
 
     // Bosses button
-    let bosses_btn_rect = Rect::from_min_size(
-        title_bar_rect.right_top() + Vec2::new(-button_size - button_offset, button_padding),
-        Vec2::splat(button_size),
-    );
-    let bosses_response = ui.interact(
-        bosses_btn_rect,
-        ui.id().with("bosses"),
-        egui::Sense::click(),
-    );
-    let is_bosses_active = *view_mode == ViewMode::Bosses;
+    if show_radar || show_mob_timers {
+        let bosses_btn_rect = Rect::from_min_size(
+            title_bar_rect.right_top() + Vec2::new(-button_size - button_offset, button_padding),
+            Vec2::splat(button_size),
+        );
+        let bosses_response = ui.interact(
+            bosses_btn_rect,
+            ui.id().with("bosses"),
+            egui::Sense::click(),
+        );
+        let is_bosses_active = *view_mode == ViewMode::Bosses;
 
-    ui.painter().rect_filled(
-        bosses_btn_rect,
-        3.0,
-        if is_bosses_active {
-            Color32::from_rgba_unmultiplied(100, 150, 100, 200)
-        } else if bosses_response.hovered() {
-            Color32::from_rgba_unmultiplied(150, 150, 150, 150)
-        } else {
-            Color32::from_rgba_unmultiplied(100, 100, 100, 100)
-        },
-    );
+        ui.painter().rect_filled(
+            bosses_btn_rect,
+            3.0,
+            if is_bosses_active {
+                Color32::from_rgba_unmultiplied(100, 150, 100, 200)
+            } else if bosses_response.hovered() {
+                Color32::from_rgba_unmultiplied(150, 150, 150, 150)
+            } else {
+                Color32::from_rgba_unmultiplied(100, 100, 100, 100)
+            },
+        );
 
-    ui.painter().text(
-        bosses_btn_rect.center(),
-        egui::Align2::CENTER_CENTER,
-        egui_material_icons::icons::ICON_RADAR,
-        egui::FontId::proportional(14.0),
-        text_color,
-    );
+        ui.painter().text(
+            bosses_btn_rect.center(),
+            egui::Align2::CENTER_CENTER,
+            egui_material_icons::icons::ICON_RADAR,
+            egui::FontId::proportional(14.0),
+            text_color,
+        );
 
-    if bosses_response.clicked() {
-        *view_mode = ViewMode::Bosses;
+        if bosses_response.clicked() {
+            *view_mode = ViewMode::Bosses;
+        }
+
+        bosses_response.on_hover_text("Mobs");
+
+        button_offset += button_size + button_padding;
     }
-
-    bosses_response.on_hover_text("Mobs");
 
     let drag_area_rect = Rect::from_min_max(
         title_bar_rect.min,
-        egui::pos2(bosses_btn_rect.min.x - button_padding, title_bar_rect.max.y),
+        egui::pos2(
+            title_bar_rect.right_top().x - button_offset,
+            title_bar_rect.max.y,
+        ),
     );
 
     if !*click_through && !*window_locked {

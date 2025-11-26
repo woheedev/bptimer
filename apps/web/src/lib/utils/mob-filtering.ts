@@ -1,3 +1,4 @@
+import type { ChannelEntry } from '$lib/types/mobs';
 import type { HideStaleChannels, HpRange, SortDirection, SortField } from '$lib/types/ui';
 
 /**
@@ -31,14 +32,7 @@ export function shouldIncludeMob(
  * @param hideStaleChannels - Whether to hide unknown/stale channels
  * @returns Filtered and sorted array of channels
  */
-export function filterAndSortChannels<
-	T extends {
-		channel: number;
-		hp_percentage: number;
-		status: 'alive' | 'dead' | 'unknown';
-		last_updated: string;
-	}
->(
+export function filterAndSortChannels<T extends ChannelEntry>(
 	channels: T[],
 	sortField: SortField = 'channel',
 	sortDirection: SortDirection = 'ascending',

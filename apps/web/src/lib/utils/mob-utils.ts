@@ -12,7 +12,7 @@ import { isDataStale, sortChannelsForMobCard, toSnakeCase } from '$lib/utils/gen
  * @param hp_percentage - The HP percentage (0-100)
  * @param last_updated - The timestamp string of the last update
  * @param mobName - Optional mob name for special handling
- * @returns 'alive' if HP > 0 and data is fresh, 'dead' if HP = 0, 'unknown' if data is stale
+ * @returns 'alive' if HP > 0 and data is fresh, 'dead' if HP = 0, 'unknown' if data is stale or no timestamp
  *
  * Note: Dead mobs (HP = 0) stay 'dead' even when data is stale, until the pocketbase cronjob
  * resets them to 100% HP at their respawn time. This prevents dead bosses from showing as
@@ -20,7 +20,7 @@ import { isDataStale, sortChannelsForMobCard, toSnakeCase } from '$lib/utils/gen
  */
 export function getMobStatus(
 	hp_percentage: number,
-	last_updated: string,
+	last_updated?: string,
 	mobName?: string
 ): 'alive' | 'dead' | 'unknown' {
 	if (hp_percentage === DEAD_HP_VALUE) {

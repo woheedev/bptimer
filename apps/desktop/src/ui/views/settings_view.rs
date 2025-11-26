@@ -175,10 +175,61 @@ pub fn render_settings_view(
     ui.heading("Settings");
     ui.add_space(spacing::MD);
 
+    let text_color = theme::text_color(settings);
+
     responsive::scroll_area_with_reserve(ui, 50.0).show(ui, |ui| {
         style::group_frame(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
-            let text_color = theme::text_color(settings);
+            ui.label(egui::RichText::new("Modules").strong().color(text_color));
+            ui.add_space(spacing::SM);
+            ui.label(
+                egui::RichText::new("Disabling a module will stop calculations / processing for that module, not just hide the view.")
+                    .small()
+                    .weak(),
+            );
+            ui.add_space(spacing::SM);
+
+            if ui
+                .checkbox(&mut settings.show_radar, "Mob Radar")
+                .changed()
+            {
+                *settings_save_timer = Some(Instant::now());
+            }
+
+            if ui
+                .checkbox(&mut settings.show_mob_timers, "Mob Timers")
+                .changed()
+            {
+                *settings_save_timer = Some(Instant::now());
+            }
+
+            if ui
+                .checkbox(&mut settings.show_combat_data, "Combat Data")
+                .changed()
+            {
+                *settings_save_timer = Some(Instant::now());
+            }
+
+            ui.horizontal(|ui| {
+                let mut bptimer_checkbox = settings.bptimer_enabled;
+                if ui
+                    .checkbox(&mut bptimer_checkbox, "BPTimer Integration")
+                    .changed()
+                {
+                    if !bptimer_checkbox {
+                        *show_bptimer_dialog = true;
+                    } else {
+                        settings.bptimer_enabled = true;
+                        *settings_save_timer = Some(Instant::now());
+                    }
+                }
+            });
+        });
+
+        ui.add_space(spacing::MD);
+
+        style::group_frame(ui).show(ui, |ui| {
+            ui.set_width(ui.available_width());
             ui.label(egui::RichText::new("Hotkeys").strong().color(text_color));
             ui.add_space(spacing::SM);
 
@@ -244,7 +295,6 @@ pub fn render_settings_view(
 
         style::group_frame(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
-            let text_color = theme::text_color(settings);
             ui.label(egui::RichText::new("Appearance").strong().color(text_color));
             ui.add_space(spacing::SM);
 
@@ -309,73 +359,8 @@ pub fn render_settings_view(
 
         style::group_frame(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
-            let text_color = theme::text_color(settings);
             ui.label(
-                egui::RichText::new("Combat Data Columns")
-                    .strong()
-                    .color(text_color),
-            );
-            ui.add_space(spacing::SM);
-            ui.label(
-                egui::RichText::new("Hide/Show Columns")
-                    .strong()
-                    .color(text_color),
-            );
-            ui.label(
-                egui::RichText::new("Check to show columns in the Combat Data table")
-                    .small()
-                    .weak(),
-            );
-            ui.add_space(spacing::SM);
-
-            let columns = [
-                "Live DPS", "Name", "DMG%", "DPS", "DMG", "Max Hit", "Crit%", "Lucky%", "Heal",
-                "Taken",
-            ];
-
-            for column_name in &columns {
-                let is_hidden = settings.hidden_columns.contains(*column_name);
-                let mut checked = !is_hidden;
-                if ui.checkbox(&mut checked, *column_name).changed() {
-                    if checked {
-                        settings.hidden_columns.remove(*column_name);
-                    } else {
-                        settings.hidden_columns.insert(column_name.to_string());
-                    }
-                    *settings_save_timer = Some(Instant::now());
-                }
-            }
-        });
-
-        ui.add_space(spacing::MD);
-
-        style::group_frame(ui).show(ui, |ui| {
-            ui.set_width(ui.available_width());
-            let text_color = theme::text_color(settings);
-            ui.label(egui::RichText::new("Behavior").strong().color(text_color));
-            ui.add_space(spacing::SM);
-            ui.horizontal(|ui| {
-                let mut bptimer_checkbox = settings.bptimer_enabled;
-                if ui
-                    .checkbox(&mut bptimer_checkbox, "Enable BPTimer Integration")
-                    .changed()
-                {
-                    if !bptimer_checkbox {
-                        // User is trying to disable - show dialog instead of disabling
-                        *show_bptimer_dialog = true;
-                    } else {
-                        // User is enabling - allow it
-                        settings.bptimer_enabled = true;
-                        *settings_save_timer = Some(Instant::now());
-                    }
-                }
-            });
-
-            ui.add_space(spacing::MD);
-
-            let text_color = theme::text_color(settings);
-            ui.label(
-                egui::RichText::new("DPS Calculation")
+                egui::RichText::new("Combat Data")
                     .strong()
                     .color(text_color),
             );
@@ -401,14 +386,6 @@ pub fn render_settings_view(
             );
 
             ui.add_space(spacing::MD);
-
-            let text_color = theme::text_color(settings);
-            ui.label(
-                egui::RichText::new("Combat Data Clearing")
-                    .strong()
-                    .color(text_color),
-            );
-            ui.add_space(spacing::SM);
 
             ui.horizontal(|ui| {
                 ui.label("Clear after idle (seconds):");
@@ -444,17 +421,46 @@ pub fn render_settings_view(
             {
                 *settings_save_timer = Some(Instant::now());
             }
+
+            ui.add_space(spacing::SM);
+
+            ui.label(
+                egui::RichText::new("Hide/Show Columns")
+                    .strong()
+                    .color(text_color),
+            );
+            ui.label(
+                egui::RichText::new("Check to show columns in the Combat Data table")
+                    .small()
+                    .weak(),
+            );
+            ui.add_space(spacing::SM);
+
+            let columns = [
+                "Live DPS", "Name", "DMG%", "DPS", "DMG", "Max Hit", "Crit%", "Lucky%", "Heal",
+                "Taken",
+            ];
+
+            for column_name in &columns {
+                let is_hidden = settings.hidden_columns.contains(*column_name);
+                let mut checked = !is_hidden;
+                if ui.checkbox(&mut checked, *column_name).changed() {
+                    if checked {
+                        settings.hidden_columns.remove(*column_name);
+                    } else {
+                        settings.hidden_columns.insert(column_name.to_string());
+                    }
+                    *settings_save_timer = Some(Instant::now());
+                }
+            }
         });
 
         ui.add_space(spacing::MD);
 
         style::group_frame(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
-            let text_color = theme::text_color(settings);
-            ui.label(egui::RichText::new("Network").strong().color(text_color));
-            ui.add_space(spacing::SM);
 
-            ui.label("Select Network Device:");
+            ui.label("Network Device");
             let mut device_changed = false;
             egui::ComboBox::from_id_salt("device_selector")
                 .selected_text(
@@ -489,7 +495,7 @@ pub fn render_settings_view(
             }
 
             ui.label(
-                egui::RichText::new("Changes to network device require restart (for now)")
+                egui::RichText::new("Changes will require a restart to apply.")
                     .small()
                     .weak()
                     .color(egui::Color32::YELLOW),
@@ -500,26 +506,15 @@ pub fn render_settings_view(
 
         style::group_frame(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
-            let text_color = theme::text_color(settings);
             ui.label(egui::RichText::new("Mob Timers").strong().color(text_color));
             ui.add_space(spacing::SM);
-
-            if ui
-                .checkbox(&mut settings.show_radar, "Show Mob Radar")
-                .changed()
-            {
-                *settings_save_timer = Some(Instant::now());
-            }
-
-            ui.add_space(spacing::MD);
-            let text_color = theme::text_color(settings);
             ui.label(
                 egui::RichText::new("Hide/Show Mobs")
                     .strong()
                     .color(text_color),
             );
             ui.label(
-                egui::RichText::new("Check to show mobs in the Mob Timers view")
+                egui::RichText::new("Check to show mobs in the Mob Timers view.")
                     .small()
                     .weak(),
             );
@@ -549,7 +544,6 @@ pub fn render_settings_view(
 
         style::group_frame(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
-            let text_color = theme::text_color(settings);
             ui.label(
                 egui::RichText::new("Module Optimizer")
                     .strong()
@@ -606,7 +600,6 @@ pub fn render_settings_view(
 
         style::group_frame(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
-            let text_color = theme::text_color(settings);
             ui.label(egui::RichText::new("Updates").strong().color(text_color));
             ui.add_space(spacing::SM);
 
@@ -669,7 +662,6 @@ pub fn render_settings_view(
 
         style::group_frame(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
-            let text_color = theme::text_color(settings);
             ui.label(
                 egui::RichText::new("Development")
                     .strong()
@@ -697,7 +689,7 @@ pub fn render_settings_view(
                 *settings_save_timer = Some(Instant::now());
             }
             ui.label(
-                egui::RichText::new("Toggle console window for viewing logs")
+                egui::RichText::new("Toggle console window for viewing logs.")
                     .small()
                     .weak(),
             );
