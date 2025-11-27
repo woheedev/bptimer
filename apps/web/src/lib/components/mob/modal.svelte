@@ -12,7 +12,12 @@
 	import * as Drawer from '$lib/components/ui/drawer/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Toggle } from '$lib/components/ui/toggle/index.js';
-	import { DEFAULT_HP_VALUE, MAX_REPORTS_LIMIT, SPECIAL_MAGICAL_CREATURES } from '$lib/constants';
+	import {
+		DEFAULT_HP_VALUE,
+		MAX_REPORTS_LIMIT,
+		SPECIAL_MAGICAL_CREATURES,
+		STALE_DATA_CHECK_INTERVAL
+	} from '$lib/constants';
 	import { createReport } from '$lib/db/create-reports';
 	import { getChannels } from '$lib/db/get-channels';
 	import { getChannelReports, getLatestMobReports } from '$lib/db/get-reports';
@@ -24,7 +29,7 @@
 	import type { ChannelEntry } from '$lib/types/mobs';
 	import { getInitials } from '$lib/utils/general-utils';
 	import { filterAndSortChannels } from '$lib/utils/mob-filtering';
-	import { getMobImagePath, getMobMapPath } from '$lib/utils/mob-utils';
+	import { getMobImagePath, getMobMapPath, getMobStatus } from '$lib/utils/mob-utils';
 	import { showToast } from '$lib/utils/toast';
 	import { mapUserRecord } from '$lib/utils/user-utils';
 	import { Eye, EyeOff, MapPin } from '@lucide/svelte/icons';
@@ -79,6 +84,7 @@
 	let mapOpen = $state(false);
 
 	let initialChannelHandled = $state(false);
+	let staleCheckCounter = $state(0);
 
 	// Get user from context
 	const user = $derived.by(() => pb.authStore.record as UserRecordModel);
@@ -142,8 +148,9 @@
 		}
 
 		// Merge live channel data with existing grid
+		const liveChannelsMap = new Map(liveChannels.map((ch) => [ch.channel, ch]));
 		const updated = currentChannels.map((ch) => {
-			const liveData = liveChannels.find((live) => live.channel === ch.channel);
+			const liveData = liveChannelsMap.get(ch.channel);
 			return liveData || ch; // Use live data if available, otherwise keep existing
 		});
 
@@ -166,10 +173,11 @@
 			const channel_statuses = await getChannels(mobId);
 
 			// Create a complete channel list (1 to totalChannels) with existing data or unknown status
+			const channelStatusMap = new Map(channel_statuses.map((c) => [c.channel, c]));
 			const all_channels: ChannelEntry[] = [];
 
 			for (let i = 1; i <= totalChannels; i++) {
-				const status_data = channel_statuses.find((c) => c.channel === i);
+				const status_data = channelStatusMap.get(i);
 				if (status_data) {
 					all_channels.push(status_data);
 				} else {
@@ -268,17 +276,35 @@
 		}`
 	);
 
+	// Periodic update to trigger stale status recalculation
+	$effect(() => {
+		if (!browser || !open) return;
+		const interval = setInterval(() => {
+			staleCheckCounter++;
+		}, STALE_DATA_CHECK_INTERVAL);
+		return () => clearInterval(interval);
+	});
+
 	// Create filtered and sorted channel grid
 	const channelGrid = $derived.by(() => {
+		// Trigger recalculation when stale check runs
+		staleCheckCounter;
+
 		if (!totalChannels || !data_state.channels.length) return [];
+
+		// Channel lookup map
+		const channelMap = new Map(data_state.channels.map((ch) => [ch.channel, ch]));
 
 		// Create complete channel list with all channels (1 to totalChannels)
 		const allChannels: ChannelEntry[] = Array.from({ length: totalChannels }, (_, i) => {
 			const channel_num = i + 1;
-			const channel_data = data_state.channels.find((c) => c.channel === channel_num);
+			const channel_data = channelMap.get(channel_num);
+
 			return {
 				channel: channel_num,
-				status: channel_data?.status || 'unknown',
+				status: channel_data
+					? getMobStatus(channel_data.hp_percentage, channel_data.last_updated, mobName)
+					: 'unknown',
 				hp_percentage: channel_data?.hp_percentage || 0,
 				last_updated: channel_data?.last_updated
 			};
