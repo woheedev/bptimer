@@ -134,4 +134,6 @@ pub enum AttrType {
     AttrId = 0x0A,
     AttrHp = 0x2C2E,
     AttrMaxHp = 0x2C38,
+    AttrProfessionId = 0xDC,
+    AttrFightPoint = 0x272E,
 }

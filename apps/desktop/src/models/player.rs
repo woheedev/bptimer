@@ -1,7 +1,7 @@
 use crate::models::combat::{DamageEntry, DamageTakenEntry, HealingEntry};
 use instant::Instant;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct PlayerState {
     pub account_id: Option<String>,
     pub uid: Option<i64>,
@@ -10,20 +10,14 @@ pub struct PlayerState {
 
 impl PlayerState {
     pub fn new() -> Self {
-        Self {
-            account_id: None,
-            uid: None,
-            line_id: None,
-        }
+        Self::default()
     }
 
-    pub fn set_account_info(&mut self, account_id: String, uid: i64) -> bool {
-        let changed = self.account_id != Some(account_id.clone()) || self.uid != Some(uid);
-        if changed {
+    pub fn set_account_info(&mut self, account_id: String, uid: i64) {
+        if self.account_id.as_ref() != Some(&account_id) || self.uid != Some(uid) {
             self.account_id = Some(account_id);
             self.uid = Some(uid);
         }
-        changed
     }
 
     pub fn set_line_id(&mut self, line_id: u32) {
@@ -43,44 +37,86 @@ impl PlayerState {
     }
 }
 
-impl Default for PlayerState {
-    fn default() -> Self {
-        Self::new()
-    }
+/// Player metadata stored in cache
+#[derive(Debug, Clone, Default)]
+pub struct PlayerMetadata {
+    pub name: Option<String>,
+    pub class_id: Option<i32>,
+    pub ability_score: Option<i32>,
 }
 
-/// Global player name cache (uid => name)
+/// Global player info cache (uid => PlayerMetadata)
 /// Persists across stats clearing until app closes
-pub struct PlayerNameCache {
-    cache: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<i64, String>>>,
+pub struct PlayerInfoCache {
+    cache: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<i64, PlayerMetadata>>>,
 }
 
-impl PlayerNameCache {
+impl PlayerInfoCache {
     pub fn new() -> Self {
         Self {
             cache: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())),
         }
     }
 
-    pub fn set(&self, uid: i64, name: String) {
+    pub fn set_name(&self, uid: i64, name: String) {
+        if name.is_empty() {
+            return;
+        }
         if let Ok(mut cache) = self.cache.lock() {
-            cache.insert(uid, name);
+            let entry = cache.entry(uid).or_insert_with(PlayerMetadata::default);
+            if entry.name.as_ref() != Some(&name) {
+                entry.name = Some(name);
+            }
         }
     }
 
-    pub fn get(&self, uid: i64) -> Option<String> {
+    pub fn set_class(&self, uid: i64, class_id: i32) {
+        if class_id <= 0 {
+            return;
+        }
+        if let Ok(mut cache) = self.cache.lock() {
+            let entry = cache.entry(uid).or_insert_with(PlayerMetadata::default);
+            if entry.class_id != Some(class_id) {
+                entry.class_id = Some(class_id);
+            }
+        }
+    }
+
+    pub fn set_ability_score(&self, uid: i64, ability_score: i32) {
+        if ability_score <= 0 {
+            return;
+        }
+        if let Ok(mut cache) = self.cache.lock() {
+            let entry = cache.entry(uid).or_insert_with(PlayerMetadata::default);
+            if entry.ability_score != Some(ability_score) {
+                entry.ability_score = Some(ability_score);
+            }
+        }
+    }
+
+    pub fn get_name(&self, uid: i64) -> Option<String> {
+        self.cache
+            .lock()
+            .ok()
+            .and_then(|cache| cache.get(&uid).and_then(|m| m.name.clone()))
+    }
+
+    pub fn get_name_or_default(&self, uid: i64) -> String {
+        self.get_name(uid)
+            .filter(|name| !name.is_empty())
+            .unwrap_or_else(|| format!("Player {}", uid))
+    }
+
+    pub fn get(&self, uid: i64) -> PlayerMetadata {
         self.cache
             .lock()
             .ok()
             .and_then(|cache| cache.get(&uid).cloned())
-    }
-
-    pub fn get_or_default(&self, uid: i64) -> String {
-        self.get(uid).unwrap_or_else(|| format!("Player {}", uid))
+            .unwrap_or_default()
     }
 }
 
-impl Default for PlayerNameCache {
+impl Default for PlayerInfoCache {
     fn default() -> Self {
         Self::new()
     }

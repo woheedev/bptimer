@@ -1,6 +1,6 @@
 [package]
 name = "bptimer-desktop"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2024"
 
 [dependencies]
@@ -24,7 +24,7 @@ global-hotkey = "0.7"
 instant = "0.1.13"
 log = "0.4"
 open = "5.3"
-pcap = { version = "2.3.0", features = ["capture-stream"] }
+pcap = { version = "2.4.0", features = ["capture-stream"] }
 prost = "0.14.1"
 reqwest = { version = "0.12.24", features = ["json", "stream", "rustls-tls", "blocking"], default-features = false }
 self_update = "0.42.0"

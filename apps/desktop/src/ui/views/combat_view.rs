@@ -19,7 +19,8 @@ pub fn render_combat_view(
     players: &mut Vec<&PlayerStats>,
     sort_column: &mut Option<usize>,
     sort_descending: &mut bool,
-    settings: &Settings,
+    settings: &mut Settings,
+    info_cache: &crate::models::PlayerInfoCache,
 ) -> bool {
     if players.is_empty() {
         ui.vertical_centered(|ui| {
@@ -47,6 +48,7 @@ pub fn render_combat_view(
         sort_column,
         sort_descending,
         settings,
+        info_cache,
     );
 
     true

@@ -2,42 +2,16 @@ syntax = "proto3";
 
 package pb;
 
-message ActorBodyPartInfo {
-  int32 part_id = 1;
-  uint64 hp = 2;
-  uint64 max_hp = 3;
-  BodyPartState state = 4;
-  int32 fleshy_id = 5;
+enum EDamageType {
+  Normal = 0;
+  Miss = 1;
+  Heal = 2;
 }
 
-message ActorBodyPartInfos {
-  int64 uuid = 1;
-  repeated ActorBodyPartInfo infos = 2;
-}
-
-message AoiSyncDelta {
-  int64 uuid = 1;
-  AttrCollection attrs = 2;
-  TempAttrCollection temp_attrs = 3;
-  EventDataList event_data_list = 4;
-  BulletEvent bullet_event = 5;
-  ActorBodyPartInfos body_part_infos = 6;
-  SkillEffect skill_effects = 7;
-  SeqPassiveSkillInfo passive_skill_infos = 8;
-  SeqPassiveSkillEndInfo passive_skill_end_infos = 9;
-  BuffInfoSync buff_infos = 10;
-  BuffEffectSync buff_effect = 11;
-  repeated FakeBulletInfo fake_bullets = 12;
-  repeated MagneticRideQueueChangeInfo magnetic_ride_queue_change_info_list =
-      13;
-}
-
-message AoiSyncToMeDelta {
-  AoiSyncDelta base_delta = 1;
-  repeated int64 sync_hate_ids = 2;
-  repeated SkillCD sync_skill_c_ds = 3;
-  repeated FightResCD fight_res_c_ds = 4;
-  int64 uuid = 5;
+enum EEntityType {
+  EntErrType = 0;
+  EntMonster = 1;
+  EntChar = 10;
 }
 
 message Attr {
@@ -48,505 +22,23 @@ message Attr {
 message AttrCollection {
   int64 uuid = 1;
   repeated Attr attrs = 2;
-  repeated MapAttr map_attrs = 3;
 }
 
-enum BodyPartState {
-  BodyPartStateDefault = 0;
-  BodyPartStateInjury = 1;
-  BodyPartStateDead = 2;
-}
-
-message BuffEffect {
-  EBuffEventType type = 1;
-  int32 buff_uuid = 2;
-  int64 host_uuid = 3;
-  int64 trigger_time = 4;
-  repeated BuffEffectLogicInfo logic_effect = 5;
-}
-
-message BuffEffectLogicInfo {
-  EBuffEffectLogicPbType effect_type = 1;
-  bytes raw_data = 2;
-  bool is_loop = 3;
-}
-
-message BuffEffectSync {
+message AoiSyncDelta {
   int64 uuid = 1;
-  repeated BuffEffect buff_effects = 2;
+  AttrCollection attrs = 2;
+  SkillEffect skill_effects = 7;
 }
 
-message BuffInfo {
-  int32 buff_uuid = 1;
-  int32 base_id = 2;
-  int32 level = 3;
-  int64 host_uuid = 4;
-  int32 table_uuid = 5;
-  int64 create_time = 6;
-  int64 fire_uuid = 7;
-  int32 layer = 8;
-  int32 part_id = 9;
-  int32 count = 10;
-  int32 duration = 11;
-  FightSourceInfo fight_source_info = 12;
-  BuffEffectLogicInfo logic_effect = 13;
-}
-
-message BuffInfoSync {
-  int64 uuid = 1;
-  repeated BuffInfo buff_infos = 2;
-}
-
-message BulletEvent {
-  int64 uuid = 1;
-  int32 enter_stage_id = 2;
-}
-
-message ClientHitPartInfo {
-  int32 part_id = 1;
-  Vector3 damage_pos = 2;
-  int64 damage_val = 3;
-}
-
-enum EBuffEffectLogicPbType {
-  PlayEffect = 0;
-  Gravity = 1;
-  ParabolaEffect = 2;
-  Linking = 3;
-  ConfusionEffect = 4;
-  ZoomScale = 5;
-  BuffProfessionEffect = 7;
-  TeleportBelt = 8;
-  BuffEffectRainbow = 9;
-  BuffEffectAttrHUD = 11;
-  BuffEffectStop = 12;
-  BuffEffectProgress = 13;
-  BuffEffectEnergyDisplay = 14;
-  BuffEffectStopAll = 15;
-  BuffEffectLayerChange = 16;
-  Tension = 17;
-}
-
-enum EBuffEventType {
-  BuffEventUnknown = 0;
-  BuffEventAddTo = 1;
-  BuffEventRemove = 2;
-  BuffEventReplace = 3;
-  BuffEventTimer = 4;
-  BuffEventStackLayer = 5;
-  BuffEventRemoveLayer = 6;
-  BuffEventOnHitTargetBefore = 7;
-  BuffEventOnHitTargetAfter = 8;
-  BuffEventOnHittedBefore = 9;
-  BuffEventOnHittedAfter = 10;
-  BuffEventOnReachMaxLayer = 11;
-  BuffEventHostDeath = 12;
-  BuffEventOnSkillHitAfter = 13;
-  BuffEventTrigTimingAura = 14;
-  BuffEventBodyPartDead = 15;
-  BuffEventBodyPartHit = 16;
-  BuffEventBodyPartStateChange = 17;
-  BuffEventOnPartHittedBefore = 18;
-  BuffEventOnPartHittedAfter = 19;
-  BuffEventGravitational = 20;
-  BuffEventFightResChange = 21;
-  BuffEventOnKillActor = 23;
-  BuffEventAttrWatcher = 24;
-  BuffEventOnHittedLHBefore = 25;
-  BuffEventOnBeHittedLHBefore = 26;
-  BuffEventAddByTarget = 27;
-  BuffEventRemoveByTarget = 28;
-  BuffEventInCombatState = 29;
-  BuffEventOutCombatState = 30;
-  BuffEventSkillBegin = 31;
-  BuffEventSkillEnd = 32;
-  BuffEventSingingEnd = 34;
-  BuffEventSummonBuffAdd = 35;
-  BuffEventSummonEntity = 36;
-  BuffEventGuideEnd = 37;
-  BuffEventOnDelayHit = 39;
-  BuffEventTeamBuffAdd = 40;
-  BuffEventChangeProfession = 41;
-  BuffEventDodgeSuccess = 42;
-  BuffEventHealBefore = 43;
-  BuffEventHealAfter = 44;
-  BuffEventProduceHealBefore = 45;
-  BuffEventProduceHealAfter = 46;
-  BuffEventShieldBroken = 47;
-  BuffEventLinkingStart = 48;
-  BuffEventLinkingEnd = 49;
-  BuffEventLinkingWatcher = 50;
-  BuffEventSuperArmorBroken = 51;
-  BuffEventAddedByTargetTag = 52;
-  BuffEventAddToTargetTag = 53;
-  BuffEventOnBeHitLessenHp = 57;
-  BuffEventEnterBreaking = 58;
-  BuffEventTeleportBelt = 59;
-  BuffEventOnBeHitAfterOnly = 63;
-  BuffEventOnHitAfterOnly = 64;
-  BuffEventOnBeHealAfterOnly = 65;
-  BuffEventOnHealAfterOnly = 66;
-  BuffEventHealCalcAttrBefore = 67;
-  BuffEventProduceHealCalcAttrBefore = 68;
-  BuffEventReviveSuccessEnd = 69;
-  BuffEventAfterReviveFirstMove = 70;
-  BuffEventMonsterIntoAlert = 71;
-  BuffEventMonsterOutAlert = 72;
-  BuffEventOnAddShieldCalcBefore = 73;
-  BuffEventOnAddShieldBefore = 74;
-  BuffEventOnAddShieldAfter = 75;
-  BuffEventOnBeAddedShieldCalcBefore = 76;
-  BuffEventOnBeAddedShieldBefore = 77;
-  BuffEventOnBeAddedShieldAfter = 78;
-  BuffEventProgressWatcher = 79;
-  BuffEventOnLuckyDamage = 80;
-  BuffEventSkillCDEnd = 81;
-  BuffEventMotionless = 82;
-  BuffEventParticipateKill = 83;
-  BuffEventProfessionBDTypeChange = 84;
-  BuffEventSingingBegin = 85;
-  BuffEventGuideBegin = 86;
-  BuffEventRandTimer = 87;
-  BuffEventIntoFractureState = 88;
-  BuffEventTakeOnRide = 89;
-  BuffEventTakeOffRide = 90;
-  BuffEventStartJump = 91;
-  BuffEventPlayAction = 92;
-  BuffEventPlayEmote = 93;
-  BuffEventCheck = 1001;
-  BuffEventCustomize = 1002;
-  BuffEventShapeshiftEndEvent = 1003;
-  BuffEventAttrRefresh = 1004;
-  BuffEventMonitorTeamKillActor = 1005;
-  BuffEventSpecialEffects = 10001;
-}
-
-enum EDamageMode {
-  DamageNormal = 0;
-  DamagePhysical = 1;
-  DamageMagical = 2;
-}
-
-enum EDamageProperty {
-  General = 0;
-  Fire = 1;
-  Water = 2;
-  Electricity = 3;
-  Wood = 4;
-  Wind = 5;
-  Rock = 6;
-  Light = 7;
-  Dark = 8;
-  Count = 9;
-}
-
-enum EDamageSource {
-  EDamageSourceSkill = 0;
-  EDamageSourceBullet = 1;
-  EDamageSourceBuff = 2;
-  EDamageSourceFall = 3;
-  EDamageSourceFakeBullet = 4;
-  EDamageSourceOther = 100;
-}
-
-enum EDamageType {
-  Normal = 0;
-  Miss = 1;
-  Heal = 2;
-  Immune = 3;
-  Fall = 4;
-  Absorbed = 5;
-}
-
-enum ESkillCDType {
-  ESkillCDNormal = 0;
-  ESkillCDCharge = 1;
-}
-
-message EventData {
-  int32 event_type = 1;
-  repeated int32 int_params = 2;
-  repeated int64 long_params = 3;
-  repeated float float_params = 4;
-  repeated string str_params = 5;
-}
-
-message EventDataList {
-  int64 uuid = 1;
-  repeated EventData events = 2;
-}
-
-message FakeBulletInfo {
-  int32 uuid = 1;
-  int32 bullet_id = 2;
-  int64 target_id = 3;
-  int32 part_id = 4;
-  Vector3 offset = 5;
-  Vector3 rotate = 6;
-  int32 skin_id = 7;
-}
-
-message FightResCD {
-  int32 res_id = 1;
-  int64 begin_time = 2;
-  int32 duration = 3;
-  int32 valid_cd_time = 4;
-}
-
-message FightSourceInfo {
-  int32 fight_source_type = 1;
-  int32 source_config_id = 2;
-}
-
-message MagneticRidePassengerChangeInfo {
-  repeated PassengerChangeParam passenger_change_list = 1;
-}
-
-message MagneticRidePathPointChangeInfo {
-  repeated PathPointChangeParam path_point_change_list = 1;
-}
-
-message MagneticRideQueueChangeInfo {
-  int64 queue_uuid = 1;
-  MagneticRidePassengerChangeInfo passenger_change_info = 2;
-  MagneticRidePathPointChangeInfo path_point_change_info = 3;
-  bool is_circle = 4;
-  bool is_remove = 5;
-  float path_length = 6;
-}
-
-message MapAttr {
-  bool is_clear = 1;
-  int32 id = 2;
-  repeated MapAttrValue attrs = 3;
-}
-
-message MapAttrValue {
-  bool is_remove = 1;
-  bytes key = 2;
-  bytes value = 3;
-}
-
-message PassengerChangeParam {
-  bool is_add_passenger = 1;
-  int64 add_or_remove_uuid = 2;
-}
-
-message PassiveSkillInfo {
-  int32 uuid = 1;
-  int64 target_uuid = 2;
-  int64 stage_begin_time = 3;
-  int64 begin_time = 4;
-  int32 stage_play_num = 5;
-  int32 skill_id = 6;
-  int32 skill_level = 7;
-  int32 skill_stage = 8;
-}
-
-message PathPointChangeParam {
-  int32 operation = 1;
-  Position add_point = 2;
-  int32 remove_point_count = 3;
-}
-
-message Position {
-  float x = 1;
-  float y = 2;
-  float z = 3;
-  float dir = 4;
-}
-
-message SeqPassiveSkillEndInfo {
-  int64 actor_uuid = 1;
-  repeated int64 uuids = 2;
-}
-
-message SeqPassiveSkillInfo {
-  int64 actor_uuid = 1;
-  repeated PassiveSkillInfo passive_infos = 2;
-}
-
-message SkillCD {
-  int32 skill_level_id = 1;
-  int64 begin_time = 2;
-  int32 duration = 3;
-  ESkillCDType skill_cd_type = 4;
-  int32 valid_cd_time = 5;
-}
-
-message SkillEffect {
-  int64 uuid = 1;
-  repeated SyncDamageInfo damages = 2;
-  int64 total_damage = 3;
-}
-
-message SyncDamageInfo {
-  EDamageSource damage_source = 1;
-  bool is_miss = 2;
-  bool is_crit = 3;
-  EDamageType type = 4;
-  int32 type_flag = 5;
-  int64 value = 6;
-  int64 actual_value = 7;
-  int64 lucky_value = 8;
-  int64 hp_lessen_value = 9;
-  int64 shield_lessen_value = 10;
-  int64 attacker_uuid = 11;
-  int32 owner_id = 12;
-  int32 owner_level = 13;
-  int32 owner_stage = 14;
-  int32 hit_event_id = 15;
-  bool is_normal = 16;
-  bool is_dead = 17;
-  EDamageProperty property = 18;
-  Vector3 damage_pos = 19;
-  repeated ClientHitPartInfo part_infos = 20;
-  int64 top_summoner_id = 21;
-  Vector2 damage_weight = 22;
-  uint32 passive_uuid = 23;
-  bool is_rainbow = 24;
-  EDamageMode damage_mode = 25;
-}
-
-message DisappearEntity {
-  int64 uuid = 1;
-}
-
-enum EAppearType {
-  PAppearNone = 0;
-  PAppearInRange = 1;
-  PAppearTransferIn = 2;
-  PAppearFlyLineIn = 3;
-  PAppearNpcCreate = 5;
-}
-
-enum EEntityType {
-  EntErrType = 0;
-  EntMonster = 1;
-  EntNpc = 2;
-  EntSceneObject = 3;
-  EntZone = 5;
-  EntBullet = 6;
-  EntClientBullet = 7;
-  EntPet = 8;
-  EntChar = 10;
-  EntDummy = 11;
-  EntDrop = 12;
-  EntField = 14;
-  EntTrap = 15;
-  EntCollection = 16;
-  EntStaticObject = 18;
-  EntVehicle = 19;
-  EntToy = 20;
-  EntCommunityHouse = 21;
-  EntHouseItem = 22;
-  EntCount = 23;
-}
-
-message MagneticQueueAppearInfo {
-  repeated int64 passenger_uuid_list = 1;
-  bool is_circle = 2;
-  float path_length = 3;
-}
-
-message Entity {
-  int64 uuid = 1;
-  EEntityType ent_type = 2;
-  AttrCollection attrs = 3;
-  TempAttrCollection temp_attrs = 4;
-  ActorBodyPartInfos body_part_infos = 5;
-  SeqPassiveSkillInfo passive_skill_infos = 6;
-  BuffInfoSync buff_infos = 7;
-  BuffEffectSync buff_effect = 8;
-  EAppearType appear_type = 9;
-  map<int32, MagneticQueueAppearInfo> magnetic_ride_queue_change_info_dict = 10;
-}
-
-message SyncNearDeltaInfo { repeated AoiSyncDelta delta_infos = 1; }
-
-message SyncNearEntities {
-  repeated Entity appear = 1;
-  repeated DisappearEntity disappear = 2;
-}
-
-message SyncToMeDeltaInfo { AoiSyncToMeDelta delta_info = 1; }
-
-message TempAttr {
-  int32 id = 1;
-  int32 value = 2;
-}
-
-message TempAttrCollection { repeated TempAttr attrs = 1; }
-
-message Vector2 {
-  float x = 1;
-  float y = 2;
-}
-
-message Vector3 {
-  float x = 1;
-  float y = 2;
-  float z = 3;
+message AoiSyncToMeDelta {
+  AoiSyncDelta base_delta = 1;
+  int64 uuid = 5;
 }
 
 message CharBaseInfo {
   int64 char_id = 1;
   string account_id = 2;
-  uint32 show_id = 3;
-  uint32 server_id = 4;
   string name = 5;
-}
-
-message SceneData {
-  uint32 map_id = 1;
-  uint32 channel_id = 2;
-  Position pos = 3;
-  int64 level_uuid = 4;
-  Position level_pos = 5;
-  uint32 level_map_id = 6;
-  uint32 level_revive_id = 7;
-  uint32 plane_id = 9;
-  uint32 scene_layer = 10;
-  bool can_switch_layer = 11;
-  string scene_guid = 13;
-  string dungeon_guid = 14;
-  uint32 line_id = 15;
-}
-
-message Mod {
-  map<int64, ModInfo> mod_infos = 2;
-}
-
-message ModInfo {
-  repeated int32 part_ids = 1;
-  ModPartUpgradeRecord upgrade_records = 2;
-  int32 success_rate = 3;
-  repeated int32 init_link_nums = 4;
-}
-
-message ModPartUpgradeRecord {
-  int32 part_id = 1;
-}
-
-message ModNewAttr {
-  repeated int32 mod_parts = 1;
-}
-
-message Item {
-  int32 config_id = 1;
-  int64 uuid = 2;
-  int32 quality = 3;
-  ModNewAttr mod_new_attr = 13;
-}
-
-message Package {
-  int32 type = 1;
-  int32 max_capacity = 2;
-  map<int64, Item> items = 4;
-}
-
-message ItemPackage {
-  map<int32, Package> packages = 1;
 }
 
 message CharSerialize {
@@ -557,6 +49,80 @@ message CharSerialize {
   Mod mod = 57;
 }
 
+message DisappearEntity {
+  int64 uuid = 1;
+}
+
+message Entity {
+  int64 uuid = 1;
+  EEntityType ent_type = 2;
+  AttrCollection attrs = 3;
+}
+
+message Item {
+  ModNewAttr mod_new_attr = 13;
+}
+
+message ItemPackage {
+  map<int32, Package> packages = 1;
+}
+
+message Mod {
+  map<int64, ModInfo> mod_infos = 2;
+}
+
+message ModInfo {
+  repeated int32 init_link_nums = 4;
+}
+
+message ModNewAttr {
+  repeated int32 mod_parts = 1;
+}
+
+message Package {
+  map<int64, Item> items = 4;
+}
+
+message Position {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message SceneData {
+  uint32 line_id = 15;
+}
+
+message SkillEffect {
+  repeated SyncDamageInfo damages = 2;
+}
+
 message SyncContainerData {
   CharSerialize v_data = 1;
+}
+
+message SyncDamageInfo {
+  bool is_miss = 2;
+  EDamageType type = 4;
+  int32 type_flag = 5;
+  int64 value = 6;
+  int64 lucky_value = 8;
+  int64 hp_lessen_value = 9;
+  int64 attacker_uuid = 11;
+  int32 owner_id = 12;
+  bool is_dead = 17;
+  int64 top_summoner_id = 21;
+}
+
+message SyncNearDeltaInfo {
+  repeated AoiSyncDelta delta_infos = 1;
+}
+
+message SyncNearEntities {
+  repeated Entity appear = 1;
+  repeated DisappearEntity disappear = 2;
+}
+
+message SyncToMeDeltaInfo {
+  AoiSyncToMeDelta delta_info = 1;
 }

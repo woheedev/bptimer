@@ -5,4 +5,4 @@ pub mod player;
 pub mod radar;
 
 pub use combat::{DamageEntry, DamageTakenEntry, HealingEntry};
-pub use player::{PlayerNameCache, PlayerState, PlayerStats};
+pub use player::{PlayerInfoCache, PlayerState, PlayerStats};

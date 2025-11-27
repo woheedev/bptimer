@@ -104,3 +104,20 @@ pub fn user_agent() -> String {
         self_update::cargo_crate_version!()
     )
 }
+
+pub fn get_class_name(class_id: i32) -> Option<&'static str> {
+    match class_id {
+        1 => Some("Stormblade"),
+        2 => Some("Frost Mage"),
+        3 => Some("Fire Axe"),
+        4 => Some("Wind Knight"),
+        5 => Some("Verdant Oracle"),
+        8 => Some("Gunner"),
+        9 => Some("Heavy Guardian"),
+        10 => Some("Spirit Dancer"),
+        11 => Some("Marksman"),
+        12 => Some("Shield Knight"),
+        13 => Some("Beat Performer"),
+        _ => None,
+    }
+}

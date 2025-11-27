@@ -89,6 +89,20 @@ pub struct ModuleDataUpdate {
     pub modules: Vec<crate::utils::modules::Module>,
 }
 
+/// Player class update event
+#[derive(Debug, Clone)]
+pub struct PlayerClassUpdate {
+    pub player_uid: i64,
+    pub class_id: i32,
+}
+
+/// Player ability score update event
+#[derive(Debug, Clone)]
+pub struct PlayerAbilityScoreUpdate {
+    pub player_uid: i64,
+    pub ability_score: i32,
+}
+
 /// Combat event enum
 #[derive(Debug, Clone)]
 pub enum CombatEvent {
@@ -102,4 +116,6 @@ pub enum CombatEvent {
     PlayerAccountInfo(PlayerAccountInfoUpdate),
     PlayerLineInfo(PlayerLineInfoUpdate),
     ModuleData(ModuleDataUpdate),
+    PlayerClass(PlayerClassUpdate),
+    PlayerAbilityScore(PlayerAbilityScoreUpdate),
 }

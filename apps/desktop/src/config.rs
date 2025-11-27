@@ -61,6 +61,11 @@ pub struct Settings {
     // Hotkey settings
     #[serde(default = "default_hotkeys")]
     pub hotkeys: HotkeySettings,
+    // Table sorting settings
+    #[serde(default = "default_sort_column")]
+    pub sort_column: Option<usize>,
+    #[serde(default = "default_true")]
+    pub sort_descending: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -176,6 +181,8 @@ impl Default for Settings {
             show_console: false,              // Console hidden by default
             hotkeys: default_hotkeys(),
             dps_calculation_cutoff_seconds: default_dps_cutoff_seconds(),
+            sort_column: Some(2),
+            sort_descending: true,
         }
     }
 }
@@ -238,4 +245,8 @@ fn default_hidden_columns() -> std::collections::HashSet<String> {
 
 fn default_dps_cutoff_seconds() -> f32 {
     10.0
+}
+
+fn default_sort_column() -> Option<usize> {
+    Some(2)
 }

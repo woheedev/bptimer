@@ -1,7 +1,7 @@
 use crate::config::Settings;
-use crate::models::PlayerStats;
+use crate::models::{PlayerInfoCache, PlayerStats};
 use crate::ui::constants::spacing;
-use crate::utils::format_compact;
+use crate::utils::{constants, format_compact};
 use egui::{Color32, Ui};
 use egui_extras::{Column, TableBuilder};
 use egui_material_icons;
@@ -35,10 +35,11 @@ impl ColumnDef {
         player: &'a PlayerStats,
         party_total_damage: f32,
         settings: &Settings,
+        info_cache: &'a PlayerInfoCache,
     ) -> ColumnValue<'a> {
         match self.index {
             0 => ColumnValue::LiveDps(player),
-            1 => ColumnValue::Name(&player.name, player.uid),
+            1 => ColumnValue::Name(&player.name, player.uid, info_cache),
             2 => {
                 let pct = if party_total_damage > 0.0 {
                     (player.total_damage / party_total_damage) * 100.0
@@ -156,7 +157,7 @@ impl ColumnDef {
 
 enum ColumnValue<'a> {
     LiveDps(&'a PlayerStats),
-    Name(&'a str, i64),
+    Name(&'a str, i64, &'a PlayerInfoCache),
     Percentage(f32),
     Compact(f32),
     Empty,
@@ -168,10 +169,22 @@ impl<'a> ColumnValue<'a> {
             ColumnValue::LiveDps(player) => {
                 crate::ui::components::dps_graph::render_dps_graph(ui, player, text_color);
             }
-            ColumnValue::Name(name, uid) => {
+            ColumnValue::Name(name, uid, info_cache) => {
                 let label = ui.colored_label(text_color, *name);
                 label.on_hover_ui(|ui| {
-                    ui.label(format!("UID: {}", uid));
+                    ui.vertical(|ui| {
+                        ui.label(format!("UID: {}", uid));
+                        let metadata = info_cache.get(*uid);
+                        if let Some(class_id) = metadata.class_id {
+                            let class_name = constants::get_class_name(class_id)
+                                .map(|s| s.to_string())
+                                .unwrap_or_else(|| format!("Unknown ({})", class_id));
+                            ui.label(format!("Class: {}", class_name));
+                        }
+                        if let Some(score) = metadata.ability_score {
+                            ui.label(format!("Ability Score: {}", score));
+                        }
+                    });
                 });
             }
             ColumnValue::Percentage(pct) => {
@@ -206,7 +219,8 @@ pub fn render_player_table(
     party_total_damage: f32,
     sort_column: &mut Option<usize>,
     sort_descending: &mut bool,
-    settings: &Settings,
+    settings: &mut Settings,
+    info_cache: &PlayerInfoCache,
 ) {
     let visible_columns: Vec<&ColumnDef> = COLUMNS
         .iter()
@@ -261,11 +275,18 @@ pub fn render_player_table(
                                 format!("{}{}", col_def.name, sort_indicator),
                             );
                             if response.clicked() && col_def.sortable {
-                                if *sort_column == Some(col_def.index) {
+                                let sort_changed = if *sort_column == Some(col_def.index) {
                                     *sort_descending = !*sort_descending;
+                                    true
                                 } else {
                                     *sort_column = Some(col_def.index);
                                     *sort_descending = true;
+                                    true
+                                };
+                                if sort_changed {
+                                    settings.sort_column = *sort_column;
+                                    settings.sort_descending = *sort_descending;
+                                    settings.save();
                                 }
                             }
                         });
@@ -287,6 +308,7 @@ pub fn render_player_table(
                                         player,
                                         party_total_damage,
                                         settings,
+                                        info_cache,
                                     );
                                     value.render(ui, text_color);
                                 });

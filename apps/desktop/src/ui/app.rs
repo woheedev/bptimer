@@ -61,8 +61,8 @@ pub struct DpsMeterApp {
     // Radar State
     pub radar_state: RadarState,
 
-    // Player name cache (persists across stats clearing)
-    pub player_name_cache: crate::models::PlayerNameCache,
+    // Player info cache (name, class, ability score - persists across stats clearing)
+    pub player_info_cache: crate::models::PlayerInfoCache,
 
     // UI State
     pub show_bptimer_dialog: bool,
@@ -161,8 +161,8 @@ impl DpsMeterApp {
             dps_history: vec![0.0; app::DPS_HISTORY_SIZE],
 
             settings: settings.clone(),
-            sort_column: Some(2),
-            sort_descending: true,
+            sort_column: settings.sort_column,
+            sort_descending: settings.sort_descending,
             view_mode: ViewMode::Bosses,
             window_locked: false,
 
@@ -180,7 +180,7 @@ impl DpsMeterApp {
 
             radar_state: RadarState::new(),
 
-            player_name_cache: crate::models::PlayerNameCache::new(),
+            player_info_cache: crate::models::PlayerInfoCache::new(),
 
             show_bptimer_dialog: false,
             settings_save_timer: None,
@@ -324,6 +324,14 @@ impl DpsMeterApp {
         self.dps_history = vec![0.0; app::DPS_HISTORY_SIZE];
         self.last_combat_event_time = None;
     }
+
+    fn ensure_player_stats_exists(&mut self, player_uid: i64) {
+        if !self.player_stats.contains_key(&player_uid) {
+            let mut stats = PlayerStats::new(player_uid);
+            stats.name = self.player_info_cache.get_name_or_default(player_uid);
+            self.player_stats.insert(player_uid, stats);
+        }
+    }
 }
 
 impl eframe::App for DpsMeterApp {
@@ -420,12 +428,8 @@ impl eframe::App for DpsMeterApp {
                     events::CombatEvent::Damage(hit) => {
                         if self.settings.show_combat_data {
                             self.last_combat_event_time = Some(Instant::now());
-                            let player_uid = hit.player_uid;
-                            let stats = self.player_stats.entry(player_uid).or_insert_with(|| {
-                                let mut stats = PlayerStats::new(player_uid);
-                                stats.name = self.player_name_cache.get_or_default(player_uid);
-                                stats
-                            });
+                            self.ensure_player_stats_exists(hit.player_uid);
+                            let stats = self.player_stats.get_mut(&hit.player_uid).unwrap();
                             process_damage_hit(
                                 stats,
                                 &mut self.total_damage,
@@ -437,24 +441,16 @@ impl eframe::App for DpsMeterApp {
                     events::CombatEvent::Healing(hit) => {
                         if self.settings.show_combat_data {
                             self.last_combat_event_time = Some(Instant::now());
-                            let player_uid = hit.player_uid;
-                            let stats = self.player_stats.entry(player_uid).or_insert_with(|| {
-                                let mut stats = PlayerStats::new(player_uid);
-                                stats.name = self.player_name_cache.get_or_default(player_uid);
-                                stats
-                            });
+                            self.ensure_player_stats_exists(hit.player_uid);
+                            let stats = self.player_stats.get_mut(&hit.player_uid).unwrap();
                             process_healing_hit(stats, hit);
                         }
                     }
                     events::CombatEvent::DamageTaken(hit) => {
                         if self.settings.show_combat_data {
                             self.last_combat_event_time = Some(Instant::now());
-                            let player_uid = hit.player_uid;
-                            let stats = self.player_stats.entry(player_uid).or_insert_with(|| {
-                                let mut stats = PlayerStats::new(player_uid);
-                                stats.name = self.player_name_cache.get_or_default(player_uid);
-                                stats
-                            });
+                            self.ensure_player_stats_exists(hit.player_uid);
+                            let stats = self.player_stats.get_mut(&hit.player_uid).unwrap();
                             process_damage_taken_hit(stats, hit);
                         }
                     }
@@ -467,8 +463,9 @@ impl eframe::App for DpsMeterApp {
                         self.current_server_endpoint = Some(update.server_endpoint);
                     }
                     events::CombatEvent::PlayerName(update) => {
-                        self.player_name_cache
-                            .set(update.player_uid, update.name.clone());
+                        self.player_info_cache
+                            .set_name(update.player_uid, update.name.clone());
+                        self.ensure_player_stats_exists(update.player_uid);
                         if let Some(stats) = self.player_stats.get_mut(&update.player_uid) {
                             stats.name = update.name.clone();
                         }
@@ -484,6 +481,14 @@ impl eframe::App for DpsMeterApp {
                     }
                     events::CombatEvent::ModuleData(update) => {
                         self.extracted_modules = update.modules;
+                    }
+                    events::CombatEvent::PlayerClass(update) => {
+                        self.player_info_cache
+                            .set_class(update.player_uid, update.class_id);
+                    }
+                    events::CombatEvent::PlayerAbilityScore(update) => {
+                        self.player_info_cache
+                            .set_ability_score(update.player_uid, update.ability_score);
                     }
                     events::CombatEvent::EntityPosition(update) => {
                         if update.entity_type == crate::models::events::EntityType::Monster {
@@ -813,7 +818,8 @@ impl eframe::App for DpsMeterApp {
                                     &mut combat_players,
                                     &mut self.sort_column,
                                     &mut self.sort_descending,
-                                    &self.settings,
+                                    &mut self.settings,
+                                    &self.player_info_cache,
                                 ) {
                                     combat_footer_text = Some(combat_view::dps_window_text(
                                         &self.player_stats,

@@ -6,8 +6,8 @@ use std::sync::mpsc;
 use crate::capture::tcp::ServerEndpoint;
 use crate::models::events::{
     CombatEvent, DamageHit, DamageTakenHit, EntityPositionUpdate, HealingHit,
-    LocalPlayerPositionUpdate, ModuleDataUpdate, PlayerAccountInfoUpdate, PlayerLineInfoUpdate,
-    PlayerNameUpdate,
+    LocalPlayerPositionUpdate, ModuleDataUpdate, PlayerAbilityScoreUpdate, PlayerAccountInfoUpdate,
+    PlayerClassUpdate, PlayerLineInfoUpdate, PlayerNameUpdate,
 };
 use crate::protocol::constants::{
     MessageMethod, MessageType, SERVICE_UUID, entity, packet, packet_layout, server_detection,
@@ -534,6 +534,29 @@ fn process_sync_near_entities(
                                     player_uid,
                                     name: player_name,
                                 }));
+                            }
+                        }
+                    } else if attr.id
+                        == crate::protocol::constants::AttrType::AttrProfessionId as i32
+                    {
+                        if let Ok(class_id) = decode_protobuf_int32(&attr.raw_data) {
+                            if class_id > 0 {
+                                events.push(CombatEvent::PlayerClass(PlayerClassUpdate {
+                                    player_uid,
+                                    class_id,
+                                }));
+                            }
+                        }
+                    } else if attr.id == crate::protocol::constants::AttrType::AttrFightPoint as i32
+                    {
+                        if let Ok(ability_score) = decode_protobuf_int32(&attr.raw_data) {
+                            if ability_score > 0 {
+                                events.push(CombatEvent::PlayerAbilityScore(
+                                    PlayerAbilityScoreUpdate {
+                                        player_uid,
+                                        ability_score,
+                                    },
+                                ));
                             }
                         }
                     }

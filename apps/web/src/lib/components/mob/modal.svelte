@@ -288,7 +288,7 @@
 	// Create filtered and sorted channel grid
 	const channelGrid = $derived.by(() => {
 		// Trigger recalculation when stale check runs
-		staleCheckCounter;
+		void staleCheckCounter;
 
 		if (!totalChannels || !data_state.channels.length) return [];
 
