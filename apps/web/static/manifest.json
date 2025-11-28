@@ -1,7 +1,7 @@
 {
 	"name": "Blue Protocol Timer",
 	"short_name": "BP Timer",
-	"description": "Track boss spawns, magical creature spawns, and event timers in Blue Protocol: Star Resonance. Real-time community-driven tracking powered by winj's DPS Meter.",
+	"description": "Track boss spawns, magical creature spawns, and event timers in Blue Protocol: Star Resonance. Real-time community-driven tracking.",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#020817",

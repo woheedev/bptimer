@@ -14,7 +14,7 @@
 
 <SeoHead
 	title="Boss Spawn Tracker | BP Timer"
-	description="Real-time boss spawn tracking for Blue Protocol: Star Resonance. Track all field bosses including Muku King, Goblin King, Tempest Ogre, and more. Community-driven data powered by winj's DPS Meter."
+	description="Real-time boss spawn tracking for Blue Protocol: Star Resonance. Track all field bosses including Muku King, Goblin King, Tempest Ogre, and more. Community-driven data."
 	keywords="blue protocol boss tracker, BPSR boss timer, field boss spawns, muku king timer, goblin king timer, tempest ogre tracker, blue protocol events"
 	{canonicalUrl}
 />

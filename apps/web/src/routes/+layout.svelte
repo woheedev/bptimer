@@ -70,7 +70,7 @@
 	<!-- Default meta tags -->
 	<meta
 		name="description"
-		content="Track boss spawns, magical creature spawns, and event timers in Blue Protocol: Star Resonance. Real-time community-driven tracking powered by winj's DPS Meter."
+		content="Track boss spawns, magical creature spawns, and event timers in Blue Protocol: Star Resonance. Real-time community-driven tracking."
 	/>
 	<meta
 		name="keywords"
