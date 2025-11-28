@@ -101,6 +101,13 @@ pub mod app {
     pub const DPS_HISTORY_SIZE: usize = 600;
 }
 
+/// Player table constants
+pub mod player_table {
+    pub const ROW_HEIGHT: f32 = 16.0;
+    pub const ICON_SIZE: f32 = 16.0;
+    pub const ICON_NAME_SPACING: f32 = 4.0;
+}
+
 /// Radar view constants
 pub mod radar {
     use super::Color32;

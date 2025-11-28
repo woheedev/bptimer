@@ -64,6 +64,9 @@ pub struct DpsMeterApp {
     // Player info cache (name, class, ability score - persists across stats clearing)
     pub player_info_cache: crate::models::PlayerInfoCache,
 
+    // Class icon cache
+    pub class_icon_cache: crate::ui::components::class_icons::ClassIconCache,
+
     // UI State
     pub show_bptimer_dialog: bool,
     pub settings_save_timer: Option<Instant>,
@@ -181,6 +184,8 @@ impl DpsMeterApp {
             radar_state: RadarState::new(),
 
             player_info_cache: crate::models::PlayerInfoCache::new(),
+
+            class_icon_cache: crate::ui::components::class_icons::ClassIconCache::new(),
 
             show_bptimer_dialog: false,
             settings_save_timer: None,
@@ -820,6 +825,8 @@ impl eframe::App for DpsMeterApp {
                                     &mut self.sort_descending,
                                     &mut self.settings,
                                     &self.player_info_cache,
+                                    &self.class_icon_cache,
+                                    &self.player_state,
                                 ) {
                                     combat_footer_text = Some(combat_view::dps_window_text(
                                         &self.player_stats,

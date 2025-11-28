@@ -1,6 +1,7 @@
 use crate::config::Settings;
 use crate::models::{PlayerInfoCache, PlayerStats};
-use crate::ui::constants::spacing;
+use crate::ui::components::class_icons;
+use crate::ui::constants::{player_table, spacing};
 use crate::utils::{constants, format_compact};
 use egui::{Color32, Ui};
 use egui_extras::{Column, TableBuilder};
@@ -36,10 +37,11 @@ impl ColumnDef {
         party_total_damage: f32,
         settings: &Settings,
         info_cache: &'a PlayerInfoCache,
+        icon_cache: &'a class_icons::ClassIconCache,
     ) -> ColumnValue<'a> {
         match self.index {
             0 => ColumnValue::LiveDps(player),
-            1 => ColumnValue::Name(&player.name, player.uid, info_cache),
+            1 => ColumnValue::Name(&player.name, player.uid, info_cache, icon_cache),
             2 => {
                 let pct = if party_total_damage > 0.0 {
                     (player.total_damage / party_total_damage) * 100.0
@@ -157,35 +159,61 @@ impl ColumnDef {
 
 enum ColumnValue<'a> {
     LiveDps(&'a PlayerStats),
-    Name(&'a str, i64, &'a PlayerInfoCache),
+    Name(
+        &'a str,
+        i64,
+        &'a PlayerInfoCache,
+        &'a class_icons::ClassIconCache,
+    ),
     Percentage(f32),
     Compact(f32),
     Empty,
 }
 
 impl<'a> ColumnValue<'a> {
-    fn render(&self, ui: &mut Ui, text_color: Color32) {
+    fn render(&self, ui: &mut Ui, text_color: Color32, local_player_uid: Option<i64>) {
         match self {
             ColumnValue::LiveDps(player) => {
                 crate::ui::components::dps_graph::render_dps_graph(ui, player, text_color);
             }
-            ColumnValue::Name(name, uid, info_cache) => {
-                let label = ui.colored_label(text_color, *name);
-                label.on_hover_ui(|ui| {
-                    ui.vertical(|ui| {
-                        ui.label(format!("UID: {}", uid));
-                        let metadata = info_cache.get(*uid);
-                        if let Some(class_id) = metadata.class_id {
-                            let class_name = constants::get_class_name(class_id)
-                                .map(|s| s.to_string())
-                                .unwrap_or_else(|| format!("Unknown ({})", class_id));
-                            ui.label(format!("Class: {}", class_name));
-                        }
-                        if let Some(score) = metadata.ability_score {
-                            ui.label(format!("Ability Score: {}", score));
-                        }
+            ColumnValue::Name(name, uid, info_cache, icon_cache) => {
+                let old_spacing = {
+                    let spacing = ui.spacing_mut();
+                    let old = spacing.item_spacing;
+                    spacing.item_spacing = egui::vec2(0.0, 0.0);
+                    old
+                };
+
+                ui.horizontal(|ui| {
+                    ui.set_min_height(player_table::ROW_HEIGHT);
+                    let metadata = info_cache.get(*uid);
+                    let is_local = local_player_uid == Some(*uid);
+                    class_icons::render_class_icon(
+                        ui,
+                        icon_cache,
+                        metadata.class_id,
+                        is_local,
+                        text_color,
+                    );
+                    ui.add_space(player_table::ICON_NAME_SPACING);
+                    let label = ui.colored_label(text_color, *name);
+                    label.on_hover_ui(|ui| {
+                        ui.vertical(|ui| {
+                            ui.label(format!("UID: {}", uid));
+                            if let Some(class_id) = metadata.class_id {
+                                let class_name = constants::get_class_name(class_id)
+                                    .map(|s| s.to_string())
+                                    .unwrap_or_else(|| format!("Unknown ({})", class_id));
+                                ui.label(format!("Class: {}", class_name));
+                            }
+                            if let Some(score) = metadata.ability_score {
+                                ui.label(format!("Ability Score: {}", score));
+                            }
+                        });
                     });
                 });
+
+                ui.spacing_mut().item_spacing = old_spacing;
             }
             ColumnValue::Percentage(pct) => {
                 ui.label(format!("{:.1}%", pct));
@@ -221,6 +249,8 @@ pub fn render_player_table(
     sort_descending: &mut bool,
     settings: &mut Settings,
     info_cache: &PlayerInfoCache,
+    icon_cache: &class_icons::ClassIconCache,
+    player_state: &crate::models::PlayerState,
 ) {
     let visible_columns: Vec<&ColumnDef> = COLUMNS
         .iter()
@@ -299,9 +329,10 @@ pub fn render_player_table(
                         settings.text_color[2],
                         settings.text_color[3],
                     );
+                    let local_player_uid = player_state.get_uid();
 
                     for player in players.iter() {
-                        body.row(16.0, |mut row| {
+                        body.row(player_table::ROW_HEIGHT, |mut row| {
                             for col_def in &visible_columns {
                                 row.col(|ui| {
                                     let value = col_def.value_for_player(
@@ -309,8 +340,9 @@ pub fn render_player_table(
                                         party_total_damage,
                                         settings,
                                         info_cache,
+                                        icon_cache,
                                     );
-                                    value.render(ui, text_color);
+                                    value.render(ui, text_color, local_player_uid);
                                 });
                             }
                         });
