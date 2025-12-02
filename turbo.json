@@ -29,6 +29,9 @@
     },
     "deploy": {
       "cache": false
+    },
+    "upgrade": {
+      "cache": false
     }
   }
 }

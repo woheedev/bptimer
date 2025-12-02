@@ -57,6 +57,8 @@
 
 	const sidebar = useSidebar();
 
+	type ButtonProps = Record<string, unknown>;
+
 	const buttonProps = $derived({
 		class: cn(sidebarMenuButtonVariants({ variant, size }), className),
 		'data-slot': 'sidebar-menu-button',
@@ -67,7 +69,7 @@
 	});
 </script>
 
-{#snippet Button({ props }: { props?: Record<string, unknown> })}
+{#snippet Button({ props }: { props?: ButtonProps })}
 	{@const mergedProps = mergeProps(buttonProps, props)}
 	{#if child}
 		{@render child({ props: mergedProps })}

@@ -59,18 +59,19 @@
 	});
 
 	// User's current vote
-	let userVote = $state<UserVoteInfo | null>(passedUserVote);
+	let userVote = $state<UserVoteInfo | null>(null);
 	let isVoting = $state(false);
 
 	// Optimistic local vote counts
-	let localUpvotes = $state(report.upvotes);
-	let localDownvotes = $state(report.downvotes);
-	let lastReportId = $state(report.id);
+	let localUpvotes = $state(0);
+	let localDownvotes = $state(0);
+	let lastReportId = $state('');
 
-	// Sync counts when report changes or votes update
+	// Initialize and sync counts when report or passedUserVote changes
 	$effect(() => {
 		if (report.id !== lastReportId) {
 			lastReportId = report.id;
+			userVote = passedUserVote;
 		}
 		localUpvotes = report.upvotes;
 		localDownvotes = report.downvotes;

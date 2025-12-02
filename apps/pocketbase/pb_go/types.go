@@ -18,6 +18,8 @@ type CreateHPReportRequest struct {
 type CachedMobData struct {
 	MobID         string    // PocketBase mob record ID
 	TotalChannels int       // Number of channels for this mob's map
+	MobType       string    // Mob type (boss or magical_creature)
+	RespawnTime   int       // Respawn time in minutes (0-59)
 	Cached        time.Time // When this entry was cached
 }
 

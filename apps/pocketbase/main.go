@@ -86,7 +86,7 @@ func main() {
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		// Mob cache must initialize successfully for API endpoint to work
-		if err := pb_go.InitMobCache(se.App); err != nil {
+		if err := pb_go.MobCache.Init(se.App); err != nil {
 			log.Fatalf("[FATAL] Failed to initialize mob cache: %v", err)
 		}
 

@@ -24,7 +24,9 @@
 		$props();
 
 	let isOpen = $state(false);
-	const maxLevel = effectIndex === 2 ? MODULE_THIRD_EFFECT_MAX_LEVEL : MODULE_EFFECT_MAX_LEVEL;
+	const maxLevel = $derived(
+		effectIndex === 2 ? MODULE_THIRD_EFFECT_MAX_LEVEL : MODULE_EFFECT_MAX_LEVEL
+	);
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (!isOpen && event.key.length === 1 && /[a-zA-Z0-9]/.test(event.key)) {

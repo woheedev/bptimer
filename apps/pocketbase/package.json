@@ -12,7 +12,7 @@
     "dev": "docker-compose up --build",
     "format": "go fmt ./...",
     "format:check": "node ../../scripts/check-go-format.js",
-    "update": "go get -u ./... && go mod tidy",
+    "upgrade": "go get -u ./... && go mod tidy",
     "vet": "go vet ./..."
   }
 }

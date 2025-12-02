@@ -15,6 +15,6 @@
     "clean": "cargo clean",
     "check": "cargo check",
     "update": "cargo update",
-    "upgrade": "cargo upgrade --incompatible allow"
+    "upgrade": "cargo upgrade --incompatible allow && cargo update"
   }
 }

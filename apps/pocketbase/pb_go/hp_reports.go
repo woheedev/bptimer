@@ -1,21 +1,16 @@
 package pb_go
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
-)
-
-// Global mob cache
-var (
-	mobCache   = make(map[string]CachedMobData)
-	cacheMutex sync.RWMutex
 )
 
 // isInSubmissionBlackout checks if we're in the blackout period for a mob.
@@ -69,93 +64,6 @@ func findClosestLocation(mobID int, x, y, z float64) (int, float64) {
 	}
 
 	return closestID, minDistSq
-}
-
-func loadMobFromDB(app core.App, mobName string) (string, int, error) {
-	mob, err := app.FindFirstRecordByFilter(
-		COLLECTION_MOBS,
-		"name = {:mobName}",
-		map[string]any{"mobName": mobName},
-	)
-	if err != nil {
-		return "", 0, fmt.Errorf("failed to load mob %s: %w", mobName, err)
-	}
-
-	if errs := app.ExpandRecord(mob, []string{"map"}, nil); len(errs) > 0 {
-		return "", 0, fmt.Errorf("failed to expand map for mob %s: %w", mobName, errs["map"])
-	}
-
-	mapRecord := mob.ExpandedOne("map")
-	if mapRecord == nil {
-		return "", 0, fmt.Errorf("map not found for mob %s", mobName)
-	}
-
-	totalChannelsFloat, ok := mapRecord.Get("total_channels").(float64)
-	if !ok {
-		return "", 0, fmt.Errorf("invalid total_channels for mob %s", mobName)
-	}
-
-	return mob.Id, int(totalChannelsFloat), nil
-}
-
-func InitMobCache(app core.App) error {
-	cacheMutex.Lock()
-	defer cacheMutex.Unlock()
-
-	// Load all mobs that are in MOB_MAPPING
-	for _, mobName := range MOB_MAPPING {
-		mobID, totalChannels, err := loadMobFromDB(app, mobName)
-		if err != nil {
-			return err
-		}
-
-		mobCache[mobName] = CachedMobData{
-			MobID:         mobID,
-			TotalChannels: totalChannels,
-			Cached:        time.Now(),
-		}
-	}
-
-	return nil
-}
-
-func getCachedMob(app core.App, mobName string) (string, int, error) {
-	// Fast path: Check if cached and still valid (read lock only)
-	cacheMutex.RLock()
-	if data, found := mobCache[mobName]; found {
-		if time.Since(data.Cached) < mobCacheTTL {
-			cacheMutex.RUnlock()
-			return data.MobID, data.TotalChannels, nil
-		}
-	}
-	cacheMutex.RUnlock()
-
-	// Slow path: Cache miss or expired - acquire write lock to refresh
-	cacheMutex.Lock()
-	defer cacheMutex.Unlock()
-
-	// Double-check: Another goroutine may have refreshed while we waited for the lock
-	// This prevents multiple concurrent requests from all querying the database
-	if data, found := mobCache[mobName]; found {
-		if time.Since(data.Cached) < mobCacheTTL {
-			return data.MobID, data.TotalChannels, nil
-		}
-	}
-
-	// Fetch from database
-	mobID, totalChannels, err := loadMobFromDB(app, mobName)
-	if err != nil {
-		return "", 0, err
-	}
-
-	// Update cache
-	mobCache[mobName] = CachedMobData{
-		MobID:         mobID,
-		TotalChannels: totalChannels,
-		Cached:        time.Now(),
-	}
-
-	return mobID, totalChannels, nil
 }
 
 // authenticateAPIKey validates an API key with API_KEY_CACHE_TTL_SECONDS caching.
@@ -248,14 +156,14 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		}
 
 		// Get mob data from cache (auto-refreshes if expired)
-		mobID, totalChannels, err := getCachedMob(e.App, mobName)
+		mobData, err := MobCache.GetByName(e.App, mobName)
 		if err != nil {
 			return e.NotFoundError(fmt.Sprintf("Mob '%s' not found", mobName), nil)
 		}
 
 		// Validate channel number
-		if data.Channel < 1 || data.Channel > totalChannels {
-			return e.BadRequestError(fmt.Sprintf("Line must be between 1 and %d for this mob", totalChannels), nil)
+		if data.Channel < 1 || data.Channel > mobData.TotalChannels {
+			return e.BadRequestError(fmt.Sprintf("Line must be between 1 and %d for this mob", mobData.TotalChannels), nil)
 		}
 
 		// Validate position if mob requires location tracking
@@ -272,7 +180,7 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		}
 
 		hpReport := core.NewRecord(collection)
-		hpReport.Set("mob", mobID)
+		hpReport.Set("mob", mobData.MobID)
 		hpReport.Set("channel_number", data.Channel)
 		hpReport.Set("hp_percentage", data.HPPct)
 		hpReport.Set("reporter", userId)
@@ -326,6 +234,37 @@ func InitHPReportsHooks(app core.App) {
 	log.Printf("[HP] Hooks registered")
 }
 
+// calculateBossRespawnCutoff calculates the cutoff time for boss duplicate checks.
+// For bosses, only consider reports after the last respawn time.
+func calculateBossRespawnCutoff(e *core.RecordEvent, mobId string, defaultCutoff time.Time) time.Time {
+	cachedData, err := MobCache.GetByID(e.App, mobId)
+	if err != nil || cachedData.MobType != "boss" {
+		return defaultCutoff
+	}
+
+	if cachedData.RespawnTime < 0 || cachedData.RespawnTime >= 60 {
+		return defaultCutoff
+	}
+
+	now := time.Now().UTC()
+	currentMinute := now.Minute()
+	currentHour := now.Hour()
+
+	// Calculate last respawn time
+	// If current minute >= respawn_time, boss respawned this hour
+	// Otherwise, boss respawned in the previous hour
+	var lastRespawn time.Time
+	if currentMinute >= cachedData.RespawnTime {
+		lastRespawn = time.Date(now.Year(), now.Month(), now.Day(), currentHour, cachedData.RespawnTime, 0, 0, time.UTC)
+	} else {
+		// Respawned in previous hour
+		lastRespawn = time.Date(now.Year(), now.Month(), now.Day(), currentHour-1, cachedData.RespawnTime, 0, 0, time.UTC)
+	}
+
+	// Use the last respawn time as cutoff for bosses
+	return lastRespawn
+}
+
 // validateHPReport ensures users can't spam identical HP reports
 // within 5 minutes and that HP only decreases for same mob/channel.
 func validateHPReport(e *core.RecordEvent) error {
@@ -335,7 +274,8 @@ func validateHPReport(e *core.RecordEvent) error {
 	channelNumber := hpReport.GetInt("channel_number")
 	hpPercentage := hpReport.GetInt("hp_percentage")
 
-	cutoffTime := time.Now().Add(-time.Duration(DUPLICATE_CHECK_WINDOW_MINUTES) * time.Minute)
+	defaultCutoff := time.Now().Add(-time.Duration(DUPLICATE_CHECK_WINDOW_MINUTES) * time.Minute)
+	cutoffTime := calculateBossRespawnCutoff(e, mobId, defaultCutoff)
 	cutoffStr := cutoffTime.Format("2006-01-02 15:04:05")
 
 	// Reusable query params for both checks
@@ -346,32 +286,35 @@ func validateHPReport(e *core.RecordEvent) error {
 		"cutoff":   cutoffStr,
 	}
 
-	duplicateResult := struct {
-		Count int `db:"count"`
-	}{}
-
-	params["hp"] = hpPercentage
-	err := e.App.DB().
-		NewQuery("SELECT COUNT(*) as count FROM hp_reports WHERE reporter = {:reporter} AND mob = {:mob} AND channel_number = {:channel} AND hp_percentage = {:hp} AND created > {:cutoff}").
-		Bind(params).
-		One(&duplicateResult)
-
-	if err == nil && duplicateResult.Count > 0 {
-		return apis.NewApiError(409, "You have already reported this HP percentage.", nil)
-	}
-
 	lastHpResult := struct {
 		HPPercentage int `db:"hp_percentage"`
 	}{}
 
-	delete(params, "hp") // Remove hp from params for this query
-	err = e.App.DB().
+	err := e.App.DB().
 		NewQuery("SELECT hp_percentage FROM hp_reports WHERE reporter = {:reporter} AND mob = {:mob} AND channel_number = {:channel} AND created > {:cutoff} ORDER BY created DESC LIMIT 1").
 		Bind(params).
 		One(&lastHpResult)
 
 	if err == nil && hpPercentage > lastHpResult.HPPercentage {
 		return apis.NewApiError(409, "HP percentage can only decrease.", nil)
+	}
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Printf("[HP] Error querying last HP report: %v", err)
+	}
+
+	duplicateResult := struct {
+		Count int `db:"count"`
+	}{}
+
+	params["hp"] = hpPercentage
+	err = e.App.DB().
+		NewQuery("SELECT COUNT(*) as count FROM hp_reports WHERE reporter = {:reporter} AND mob = {:mob} AND channel_number = {:channel} AND hp_percentage = {:hp} AND created > {:cutoff}").
+		Bind(params).
+		One(&duplicateResult)
+
+	if err == nil && duplicateResult.Count > 0 {
+		return apis.NewApiError(409, "You have already reported this HP percentage.", nil)
 	}
 
 	return e.Next()
