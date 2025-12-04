@@ -122,7 +122,8 @@ export const API_USERS: Record<string, string> = {
 	ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr', // geonode
 	gw8hsqxlvvbok37: 'BPTL - blueprotocol.fr', // kaws & solaray
 	fftlpj0jgvmmoge: 'tinyurl.com/mrsnakke', // mrsnakke
-	zdc1lhi31t05zco: 'tinyurl.com/gabrielsanbs' // gabrielsanbs
+	zdc1lhi31t05zco: 'tinyurl.com/gabrielsanbs', // gabrielsanbs
+	g9bavfjybj4ezhb: 'ZDPS - Damage Meter' // ZDPS Meter - xennma
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 
