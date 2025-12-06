@@ -139,7 +139,7 @@ export const MODULES_OPTIMIZER_PRIORITY_EFFECTS_STORAGE_KEY = 'modules-optimizer
 export const MODULES_OPTIMIZER_NUM_SLOTS_STORAGE_KEY = 'modules-optimizer-num-slots';
 export const MOB_NOTIFICATIONS_STORAGE_KEY = 'mob-notifications';
 
-import Discord from '$lib/components/icons/discord.svelte';
+// import Discord from '$lib/components/icons/discord.svelte';
 import {
 	Calculator,
 	Download,
@@ -218,13 +218,15 @@ export const PARTNER_PAGES: PageItem[] = [
 		url: 'https://discord.gg/bpsrfarmers',
 		icon: Tractor,
 		external: true
-	},
+	}
+	/*
 	{
 		title: 'Invite Discord Bot',
 		url: 'https://discord.com/oauth2/authorize?client_id=1435655675081396366',
 		icon: Discord,
 		external: true
 	}
+	*/
 ];
 
 // Module Optimizer constants
@@ -412,6 +414,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 		title: 'Community Discords',
 		shortTitle: 'Discords',
 		cards: [
+			/*
 			{
 				title: 'BPSR Info',
 				description:
@@ -420,6 +423,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				badgeVariant: 'default',
 				url: 'https://discord.com/oauth2/authorize?client_id=1435655675081396366'
 			},
+			*/
 			{
 				title: 'BPSR Devs',
 				description: "Developer community for BPSR. Home to winj's DPS Meter and BP Timer.",

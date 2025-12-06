@@ -228,3 +228,8 @@
 .hp-fill.unknown {
 	background-color: var(--hp-unknown);
 }
+
+ins.adsbygoogle[data-ad-status='unfilled'],
+ins.adsbygoogle[data-ad-status='unfill-optimized'] {
+	display: none !important;
+}

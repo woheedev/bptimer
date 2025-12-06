@@ -1,6 +1,7 @@
 import {
 	DAILY_RESET_HOUR,
 	DAY,
+	GAME_TIMEZONE_OFFSET,
 	HOUR,
 	HP_HIGH_THRESHOLD,
 	JUST_NOW_THRESHOLD,
@@ -321,4 +322,15 @@ export function calculateGameDay(): number {
 	gameLaunch.setUTCHours(DAILY_RESET_HOUR, 0, 0, 0);
 	const gameNow = new Date();
 	return Math.floor((gameNow.getTime() - gameLaunch.getTime()) / DAY) + 1;
+}
+
+/**
+ * Gets the IANA timezone identifier for the game timezone
+ * Converts GAME_TIMEZONE_OFFSET to Etc/GMT format for use with Intl.DateTimeFormat
+ * Note: Etc/GMT signs are inverted (GMT+2 = UTC-2)
+ *
+ * @returns IANA timezone string (e.g., 'Etc/GMT+2' for UTC-2)
+ */
+export function getGameTimezone(): string {
+	return `Etc/GMT${-GAME_TIMEZONE_OFFSET >= 0 ? '+' : ''}${-GAME_TIMEZONE_OFFSET}`;
 }
