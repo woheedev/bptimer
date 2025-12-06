@@ -39,66 +39,157 @@ migrate(
     // Seed mobs (upsert)
     const mobsCollection = app.findCollectionByNameOrId('mobs');
     const mobsData = [
-      { uid: 1, type: 'boss', name: 'Golden Juggernaut', map: mapRecords[2].id, respawn_time: 0 },
-      { uid: 2, type: 'boss', name: 'Frost Ogre', map: mapRecords[2].id, respawn_time: 30 },
-      { uid: 3, type: 'boss', name: 'Inferno Ogre', map: mapRecords[2].id, respawn_time: 0 },
+      {
+        uid: 1,
+        type: 'boss',
+        name: 'Golden Juggernaut',
+        map: mapRecords[2].id,
+        respawn_time: 0,
+        monster_id: 10032
+      },
+      {
+        uid: 2,
+        type: 'boss',
+        name: 'Frost Ogre',
+        map: mapRecords[2].id,
+        respawn_time: 30,
+        monster_id: 10009
+      },
+      {
+        uid: 3,
+        type: 'boss',
+        name: 'Inferno Ogre',
+        map: mapRecords[2].id,
+        respawn_time: 0,
+        monster_id: 10018
+      },
       {
         uid: 4,
         type: 'boss',
         name: 'Phantom Arachnocrab',
         map: mapRecords[1].id,
-        respawn_time: 30
+        respawn_time: 30,
+        monster_id: 10069
       },
-      { uid: 5, type: 'boss', name: 'Brigand Leader', map: mapRecords[2].id, respawn_time: 0 },
+      {
+        uid: 5,
+        type: 'boss',
+        name: 'Brigand Leader',
+        map: mapRecords[2].id,
+        respawn_time: 0,
+        monster_id: 10056
+      },
       {
         uid: 6,
         type: 'boss',
         name: 'Venobzzar Incubator',
         map: mapRecords[1].id,
-        respawn_time: 30
+        respawn_time: 30,
+        monster_id: 10077
       },
-      { uid: 7, type: 'boss', name: 'Muku Chief', map: mapRecords[2].id, respawn_time: 0 },
-      { uid: 8, type: 'boss', name: 'Iron Fang', map: mapRecords[3].id, respawn_time: 30 },
-      { uid: 9, type: 'boss', name: 'Storm Goblin King', map: mapRecords[3].id, respawn_time: 0 },
-      { uid: 10, type: 'boss', name: 'Tempest Ogre', map: mapRecords[2].id, respawn_time: 30 },
-      { uid: 11, type: 'boss', name: 'Celestial Flier', map: mapRecords[4].id, respawn_time: 0 },
-      { uid: 12, type: 'boss', name: 'Lizardman King', map: mapRecords[4].id, respawn_time: 30 },
-      { uid: 13, type: 'boss', name: 'Goblin King', map: mapRecords[5].id, respawn_time: 0 },
-      { uid: 14, type: 'boss', name: 'Muku King', map: mapRecords[6].id, respawn_time: 30 },
+      {
+        uid: 7,
+        type: 'boss',
+        name: 'Muku Chief',
+        map: mapRecords[2].id,
+        respawn_time: 0,
+        monster_id: 10059
+      },
+      {
+        uid: 8,
+        type: 'boss',
+        name: 'Iron Fang',
+        map: mapRecords[3].id,
+        respawn_time: 30,
+        monster_id: 10081
+      },
+      {
+        uid: 9,
+        type: 'boss',
+        name: 'Storm Goblin King',
+        map: mapRecords[3].id,
+        respawn_time: 0,
+        monster_id: 10007
+      },
+      {
+        uid: 10,
+        type: 'boss',
+        name: 'Tempest Ogre',
+        map: mapRecords[2].id,
+        respawn_time: 30,
+        monster_id: 10010
+      },
+      {
+        uid: 11,
+        type: 'boss',
+        name: 'Celestial Flier',
+        map: mapRecords[4].id,
+        respawn_time: 0,
+        monster_id: 10084
+      },
+      {
+        uid: 12,
+        type: 'boss',
+        name: 'Lizardman King',
+        map: mapRecords[4].id,
+        respawn_time: 30,
+        monster_id: 10085
+      },
+      {
+        uid: 13,
+        type: 'boss',
+        name: 'Goblin King',
+        map: mapRecords[5].id,
+        respawn_time: 0,
+        monster_id: 10086
+      },
+      {
+        uid: 14,
+        type: 'boss',
+        name: 'Muku King',
+        map: mapRecords[6].id,
+        respawn_time: 30,
+        monster_id: 10029
+      },
       {
         uid: 15,
         type: 'magical_creature',
         name: 'Lovely Boarlet',
         map: mapRecords[2].id,
-        respawn_time: 0
+        respawn_time: 0,
+        monster_id: 10902
       },
       {
         uid: 16,
         type: 'magical_creature',
         name: 'Breezy Boarlet',
         map: mapRecords[2].id,
-        respawn_time: 0
+        respawn_time: 0,
+        monster_id: 10903
       },
       {
         uid: 17,
         type: 'magical_creature',
         name: 'Loyal Boarlet',
         map: mapRecords[2].id,
-        respawn_time: 0
+        respawn_time: 0,
+        monster_id: 10904
       },
       {
         uid: 18,
         type: 'magical_creature',
         name: 'Golden Nappo',
         map: mapRecords[2].id,
-        respawn_time: 0
+        respawn_time: 0,
+        monster_id: 10900
       },
       {
         uid: 19,
         type: 'magical_creature',
         name: 'Silver Nappo',
         map: mapRecords[2].id,
-        respawn_time: 0
+        respawn_time: 0,
+        monster_id: 10901
       }
     ];
 

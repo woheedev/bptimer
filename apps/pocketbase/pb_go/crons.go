@@ -61,13 +61,14 @@ func handleMobRespawn(app core.App) {
 		mobName := mob.GetString("name")
 		mobId := mob.Id
 		mobType := mob.GetString("type")
+		monsterID := mob.GetInt("monster_id")
 
 		shouldReset := false
 		if mobType == "boss" {
 			shouldReset = true
 		} else if mobType == "magical_creature" {
 			// Check if current hour matches any reset hour for this magical creature
-			if resetHours, exists := MagicalCreatureResetHours[mobName]; exists {
+			if resetHours, exists := MagicalCreatureResetHours[monsterID]; exists {
 				for _, hour := range resetHours {
 					if hour == currentHour {
 						shouldReset = true

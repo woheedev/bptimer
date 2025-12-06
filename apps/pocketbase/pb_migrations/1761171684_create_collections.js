@@ -1156,6 +1156,18 @@ migrate(
           },
           {
             hidden: false,
+            id: 'number3321827875',
+            max: 11000,
+            min: 10000,
+            name: 'monster_id',
+            onlyInt: true,
+            presentable: false,
+            required: true,
+            system: false,
+            type: 'number'
+          },
+          {
+            hidden: false,
             id: 'select2363381545',
             maxSelect: 1,
             name: 'type',
@@ -1209,6 +1221,7 @@ migrate(
         indexes: [
           'CREATE UNIQUE INDEX `idx_mobs_name` ON `mobs` (`name`)',
           'CREATE UNIQUE INDEX `idx_mobs_uid` ON `mobs` (`uid`)',
+          'CREATE UNIQUE INDEX `idx_mobs_monster_id` ON `mobs` (`monster_id`)',
           'CREATE INDEX `idx_mobs_type` ON `mobs` (`type`)',
           'CREATE INDEX `idx_mobs_respawn_time` ON `mobs` (`respawn_time`)'
         ],

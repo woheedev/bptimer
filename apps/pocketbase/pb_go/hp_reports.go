@@ -14,8 +14,8 @@ import (
 )
 
 // isInSubmissionBlackout checks if we're in the blackout period for a mob.
-func isInSubmissionBlackout(mobName string) bool {
-	resetHours, exists := MagicalCreatureResetHours[mobName]
+func isInSubmissionBlackout(monsterID int) bool {
+	resetHours, exists := MagicalCreatureResetHours[monsterID]
 	if !exists || len(resetHours) == 0 {
 		return false // Not a magical creature or no resets configured
 	}
@@ -143,22 +143,16 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			"user_id", userId,
 		)
 
-		// Map game monster ID to mob name
-		mobName, ok := MOB_MAPPING[data.MonsterID]
-		if !ok {
-			logger.Error("Unknown monster ID", "monster_id", data.MonsterID)
+		// Get mob data from cache by monster ID (auto-refreshes if expired)
+		mobData, err := MobCache.GetByMonsterID(e.App, data.MonsterID)
+		if err != nil {
+			logger.Error("Unknown monster ID", "monster_id", data.MonsterID, "error", err)
 			return e.BadRequestError(fmt.Sprintf("Unknown monster ID: %d", data.MonsterID), nil)
 		}
 
 		// Check if submissions are currently blocked for this mob
-		if isInSubmissionBlackout(mobName) {
+		if isInSubmissionBlackout(data.MonsterID) {
 			return e.BadRequestError("HP reports are currently closed for this mob. Please wait for the next reset.", nil)
-		}
-
-		// Get mob data from cache (auto-refreshes if expired)
-		mobData, err := MobCache.GetByName(e.App, mobName)
-		if err != nil {
-			return e.NotFoundError(fmt.Sprintf("Mob '%s' not found", mobName), nil)
 		}
 
 		// Validate channel number
@@ -205,7 +199,7 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		}
 
 		logArgs := []any{
-			"mob", mobName,
+			"mob", mobData.Name,
 			"channel", data.Channel,
 			"hp_pct", data.HPPct,
 			"ip", e.RealIP(),

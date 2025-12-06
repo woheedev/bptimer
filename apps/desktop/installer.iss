@@ -46,6 +46,9 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; IconFilename:
 Filename: "{tmp}\npcap-installer.exe"; StatusMsg: "Installing Npcap (user interaction required)..."; Check: not IsNpcapInstalled
 Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(AppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
+[UninstallDelete]
+Type: files; Name: "{app}\settings.json"
+
 [Code]
 function IsNpcapInstalled(): Boolean;
 var
