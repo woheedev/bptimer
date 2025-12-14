@@ -47,7 +47,7 @@ pub struct DpsMeterApp {
     // Packet capture + player data
     pub packet_capture: Option<packet::PacketCapture>,
     pub player_stats: std::collections::HashMap<i64, PlayerStats>,
-    pub available_devices: Vec<(String, String)>, // (Name, Description)
+    pub available_devices: Vec<pcap::Device>,
 
     // Mob Timer State
     pub mobs: Vec<Mob>,
@@ -114,13 +114,7 @@ impl DpsMeterApp {
 
         // Get available devices for settings UI
         let available_devices = match pcap::Device::list() {
-            Ok(devs) => devs
-                .into_iter()
-                .map(|d| {
-                    let clean_name = crate::capture::packet::clean_device_name(&d);
-                    (clean_name, d.desc.unwrap_or_default())
-                })
-                .collect(),
+            Ok(devs) => devs,
             Err(e) => {
                 warn!("Failed to list network devices: {}", e);
                 Vec::new()
@@ -870,6 +864,7 @@ impl eframe::App for DpsMeterApp {
                             settings_view::render_settings_view(
                                 ui,
                                 &mut self.settings,
+                                self.packet_capture.as_ref(),
                                 &self.available_devices,
                                 &mut self.show_bptimer_dialog,
                                 &mut self.settings_save_timer,

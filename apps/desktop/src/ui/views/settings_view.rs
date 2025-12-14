@@ -1,3 +1,4 @@
+use crate::capture::packet;
 use crate::config::Settings;
 use crate::hotkeys::{HotkeyAction, HotkeyManager};
 use crate::ui::constants::{responsive, spacing, style, theme};
@@ -22,7 +23,8 @@ impl Default for HotkeyRecordingState {
 pub fn render_settings_view(
     ui: &mut Ui,
     settings: &mut Settings,
-    devices: &[(String, String)],
+    packet_capture: Option<&packet::PacketCapture>,
+    devices: &[pcap::Device],
     show_bptimer_dialog: &mut bool,
     settings_save_timer: &mut Option<instant::Instant>,
     mobs: &[crate::models::mob::Mob],
@@ -467,7 +469,7 @@ pub fn render_settings_view(
                     settings
                         .network_device_index
                         .and_then(|idx| devices.get(idx))
-                        .map(|(_name, desc)| desc.clone())
+                        .map(|d| crate::capture::packet::clean_device_name(d))
                         .unwrap_or_else(|| "Auto-select".to_string()),
                 )
                 .show_ui(ui, |ui| {
@@ -477,12 +479,13 @@ pub fn render_settings_view(
                     {
                         device_changed = true;
                     }
-                    for (i, (_name, desc)) in devices.iter().enumerate() {
+                    for (i, dev) in devices.iter().enumerate() {
+                        let clean_name = crate::capture::packet::clean_device_name(dev);
                         if ui
                             .selectable_value(
                                 &mut settings.network_device_index,
                                 Some(i),
-                                desc.clone(),
+                                clean_name,
                             )
                             .changed()
                         {
@@ -491,15 +494,19 @@ pub fn render_settings_view(
                     }
                 });
             if device_changed {
+                if let Some(capture) = packet_capture {
+                    if let Some(idx) = settings.network_device_index {
+                        // Manual selection
+                        capture.switch_device(idx);
+                    } else {
+                        // Auto-select
+                        if let Some(best_idx) = crate::capture::packet::select_best_device(devices) {
+                            capture.switch_device(best_idx);
+                        }
+                    }
+                }
                 *settings_save_timer = Some(Instant::now());
             }
-
-            ui.label(
-                egui::RichText::new("Changes will require a restart to apply.")
-                    .small()
-                    .weak()
-                    .color(egui::Color32::YELLOW),
-            );
         });
 
         ui.add_space(spacing::MD);

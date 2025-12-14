@@ -89,19 +89,15 @@
 </script>
 
 <Alert.Root
-	class="overflow-hidden p-0 text-xs"
-	style="grid-template-columns: 1fr; min-height: 50px;{adBlocked || adUnfilled
-		? ' display: none;'
-		: ''}"
+	class="flex min-h-0 flex-1 overflow-hidden p-0 text-xs"
+	style={adBlocked || adUnfilled ? 'display: none;' : undefined}
 >
 	<ins
 		bind:this={adElement}
 		class="adsbygoogle block w-full"
-		style="display:block;min-height:50px;"
+		style="height:100%;min-height:50px;"
 		data-ad-client="ca-pub-8392238124244371"
 		data-ad-slot="3487180796"
-		data-ad-format="auto"
-		data-full-width-responsive="true"
 	></ins>
 </Alert.Root>
 {#if adBlocked}

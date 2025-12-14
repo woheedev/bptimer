@@ -6,10 +6,11 @@
 	import NavigationSidebar from '$lib/components/navigation/sidebar.svelte';
 	import PageHeader from '$lib/components/page-header.svelte';
 	import SeoHead from '$lib/components/seo-head.svelte';
+	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { TOOLS_SECTIONS } from '$lib/constants';
-	import { Globe, Hammer, Monitor, Users } from '@lucide/svelte/icons';
+	import { Globe, Hammer, HeartHandshake, Monitor, Users } from '@lucide/svelte/icons';
 
 	const canonicalUrl = `https://bptimer.com${page.url.pathname}`;
 </script>
@@ -32,6 +33,22 @@
 					title="Tools & Resources"
 					subtitle="Community tools, DPS meters, and helpful resources"
 				/>
+
+				<Alert.Root class="text-xs">
+					<HeartHandshake />
+					<Alert.Title class="text-sm font-bold">Looking to Collaborate?</Alert.Title>
+					<Alert.Description class="text-xs">
+						<span
+							>Use our API client to help crowdsource data and join the list of BPTimer-supported
+							clients. Join our Discord to request an API key or more information. <a
+								href="https://github.com/woheedev/bptimer/tree/main/packages/bptimer-api-client"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="underline hover:no-underline">Click here!</a
+							></span
+						>
+					</Alert.Description>
+				</Alert.Root>
 
 				<Tabs.Root value="officialTools" class="space-y-6">
 					<Tabs.List class="grid w-full grid-cols-3">

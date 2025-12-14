@@ -5,10 +5,10 @@
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import SidebarAd from '$lib/components/navigation/sidebar-ad.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
-	import * as Alert from '$lib/components/ui/alert/index.js';
+	// import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
-	import { HeartHandshake } from '@lucide/svelte/icons';
+	// import { HeartHandshake } from '@lucide/svelte/icons';
 	import type { ComponentProps } from 'svelte';
 
 	let {
@@ -37,18 +37,9 @@
 			<Sidebar.GroupLabel>Partners</Sidebar.GroupLabel>
 			<NavigationMain items={PARTNER_PAGES} />
 		</Sidebar.Group>
-		<Sidebar.Group class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
-			<div class="flex flex-col gap-2 p-0">
+		<Sidebar.Group class="flex-1 {sidebar.state === 'collapsed' ? 'hidden' : ''}">
+			<div class="flex h-full flex-col gap-2 p-0">
 				<!--
-				<Alert.Root class="text-xs" variant="destructive">
-					<Construction />
-					<Alert.Title class="text-sm font-bold">Magical Creature</Alert.Title>
-					<Alert.Description class="text-xs">
-						Locations for the Loyal Boarlet and Nappos will update as DPS meters begin to support
-						sending location data.
-					</Alert.Description>
-				</Alert.Root>
-				-->
 				<Alert.Root class="text-xs">
 					<HeartHandshake />
 					<Alert.Title class="text-sm font-bold">Looking to Collaborate?</Alert.Title>
@@ -62,6 +53,7 @@
 						>
 					</Alert.Description>
 				</Alert.Root>
+				-->
 				<SidebarAd />
 			</div>
 		</Sidebar.Group>
@@ -95,7 +87,7 @@
 					rel="noopener noreferrer"
 					class="hover:underline"
 				>
-					Buy me a coffee ☕ | v1.3.2
+					Buy me a coffee ☕ | v1.3.3
 				</a>
 			</p>
 		{/if}
