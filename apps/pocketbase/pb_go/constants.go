@@ -74,6 +74,17 @@ var BypassVoteUserIDs = map[string]bool{
 	"g9bavfjybj4ezhb": true, // ZDPS Meter - xennma
 }
 
+// ACCOUNT_ID_REGIONS maps account_id prefixes to their region information
+var ACCOUNT_ID_REGIONS = map[string]RegionInfo{
+	"0_": {Name: "DEV", Enabled: false},
+	"1_": {Name: "CN", Enabled: false},
+	"2_": {Name: "INT", Enabled: false},
+	"3_": {Name: "TW", Enabled: false},
+	"4_": {Name: "NA", Enabled: true},
+	"5_": {Name: "JPKR", Enabled: false},
+	"6_": {Name: "SEA", Enabled: false},
+}
+
 // MOB_LOCATIONS maps game monster IDs to their known spawn coordinates
 var MOB_LOCATIONS = map[int][]MobLocation{
 	10900: { // Golden Nappo

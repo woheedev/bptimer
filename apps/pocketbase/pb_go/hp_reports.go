@@ -66,6 +66,20 @@ func findClosestLocation(mobID int, x, y, z float64) (int, float64) {
 	return closestID, minDistSq
 }
 
+// getRegionFromAccountID extracts the region from an account_id by checking the first two characters.
+// Returns the region name and whether it's enabled. Returns empty string and false if not found.
+func getRegionFromAccountID(accountID string) (string, bool) {
+	if len(accountID) < 2 {
+		return "", false
+	}
+	prefix := accountID[:2]
+	regionInfo, exists := ACCOUNT_ID_REGIONS[prefix]
+	if !exists {
+		return "", false
+	}
+	return regionInfo.Name, regionInfo.Enabled
+}
+
 // authenticateAPIKey validates an API key with API_KEY_CACHE_TTL_SECONDS caching.
 func authenticateAPIKey(app core.App, apiKey string) (string, error) {
 	cacheKey := API_KEY_CACHE_PREFIX + apiKey
@@ -131,28 +145,55 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		}
 
 		if data.MonsterID == 0 {
-			return e.BadRequestError("Missing or invalid monster_id", nil)
-		}
-		if data.HPPct < 0 || data.HPPct > 100 {
-			return e.BadRequestError("HP percentage must be between 0 and 100", nil)
+			return e.BadRequestError("Missing monster_id", nil)
 		}
 
-		// Attach endpoint and user to logger
-		logger := app.Logger().With(
-			"endpoint", "/api/create-hp-report",
-			"user_id", userId,
-		)
+		if data.HPPct < 0 || data.HPPct > 100 {
+			return e.BadRequestError("HP percentage must be between 0 and 100", LogData{
+				"hp_pct": data.HPPct,
+			})
+		}
+		if data.HPPct%HP_REPORT_INTERVAL != 0 {
+			return e.BadRequestError("Invalid HP percentage", LogData{
+				"hp_pct": data.HPPct,
+			})
+		}
+
+		if data.AccountID == "" {
+			return e.BadRequestError("Missing account_id", nil)
+		}
+
+		// Extract region for logging and validation
+		region, regionEnabled := getRegionFromAccountID(data.AccountID)
+
+		// Validate region exists
+		if region == "" {
+			return e.BadRequestError("Invalid account_id", LogData{
+				"account_id": data.AccountID,
+			})
+		}
+
+		// Validate region is enabled
+		if !regionEnabled {
+			return e.BadRequestError("Region not enabled for submissions", LogData{
+				"account_id": data.AccountID,
+				"region":     region,
+			})
+		}
 
 		// Get mob data from cache by monster ID (auto-refreshes if expired)
 		mobData, err := MobCache.GetByMonsterID(e.App, data.MonsterID)
 		if err != nil {
-			logger.Error("Unknown monster ID", "monster_id", data.MonsterID, "error", err)
-			return e.BadRequestError(fmt.Sprintf("Unknown monster ID: %d", data.MonsterID), nil)
+			return e.BadRequestError("Unknown monster ID", LogData{
+				"monster_id": data.MonsterID,
+			})
 		}
 
 		// Check if submissions are currently blocked for this mob
 		if isInSubmissionBlackout(data.MonsterID) {
-			return e.BadRequestError("HP reports are currently closed for this mob. Please wait for the next reset.", nil)
+			return e.BadRequestError("HP reports are currently closed for this mob. Please wait for the next reset.", LogData{
+				"mob_name": mobData.Name,
+			})
 		}
 
 		// Validate channel number
@@ -166,10 +207,17 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			hasAllPos := (data.PosX != 0 && data.PosY != 0 && data.PosZ != 0)
 
 			if !hasAnyPos {
-				return e.BadRequestError("Position (pos_x, pos_y, pos_z) is required for this mob", nil)
+				return e.BadRequestError("Position (pos_x, pos_y, pos_z) is required for this mob", LogData{
+					"mob_name": mobData.Name,
+				})
 			}
 			if !hasAllPos {
-				return e.BadRequestError("All position coordinates (pos_x, pos_y, pos_z) must be provided for this mob", nil)
+				return e.BadRequestError("All position coordinates (pos_x, pos_y, pos_z) must be provided for this mob", LogData{
+					"mob_name": mobData.Name,
+					"pos_x":    data.PosX,
+					"pos_y":    data.PosY,
+					"pos_z":    data.PosZ,
+				})
 			}
 		}
 
@@ -184,13 +232,14 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			// Reject if distance exceeds maximum allowed distance
 			maxDistSq := MAX_LOCATION_DISTANCE * MAX_LOCATION_DISTANCE
 			if distSq > maxDistSq {
-				return e.BadRequestError("Mob position too far from any known location", nil)
+				return e.BadRequestError("Mob position too far from any known location", LogData{
+					"mob_name": mobData.Name,
+					"pos_x":    data.PosX,
+					"pos_y":    data.PosY,
+					"pos_z":    data.PosZ,
+				})
 			}
 			hpReport.Set("location_image", locationID)
-		}
-
-		if data.HPPct%HP_REPORT_INTERVAL != 0 {
-			return e.BadRequestError("Invalid HP percentage", nil)
 		}
 
 		if err := e.App.Save(hpReport); err != nil {
@@ -199,20 +248,19 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		}
 
 		logArgs := []any{
+			"user_id", userId,
 			"mob", mobData.Name,
 			"channel", data.Channel,
 			"hp_pct", data.HPPct,
 			"ip", e.RealIP(),
-		}
-
-		if data.AccountID != "" {
-			logArgs = append(logArgs, "account_id", data.AccountID)
+			"account_id", data.AccountID,
+			"region", region,
 		}
 		if data.UID != 0 {
 			logArgs = append(logArgs, "uid", data.UID)
 		}
 
-		logger.Info("HP report saved", logArgs...)
+		app.Logger().Info("HP report saved", logArgs...)
 
 		return e.JSON(http.StatusOK, successResponse)
 	}

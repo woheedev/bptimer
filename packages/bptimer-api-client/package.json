@@ -22,7 +22,7 @@
     "prepublishOnly": "bun run build"
   },
   "devDependencies": {
-    "@types/node": "^25.0.2",
+    "@types/node": "^25.0.3",
     "typescript": "^5.9.3"
   },
   "keywords": [

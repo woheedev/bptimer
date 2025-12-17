@@ -43,3 +43,10 @@ type MobUpdate struct {
 	HPPercentage  int    // HP percentage
 	LocationImage *int   // Location image ID (nil if not set)
 }
+
+type LogData = map[string]any // Type alias for optData in return log errors
+
+type RegionInfo struct {
+	Name    string // Region code
+	Enabled bool   // Whether to handle this region's reports
+}

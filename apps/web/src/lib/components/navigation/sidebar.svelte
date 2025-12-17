@@ -7,6 +7,7 @@
 	import NavigationUser from '$lib/components/navigation/user.svelte';
 	// import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { PAGES, PARTNER_PAGES } from '$lib/constants';
 	// import { HeartHandshake } from '@lucide/svelte/icons';
 	import type { ComponentProps } from 'svelte';
@@ -17,6 +18,8 @@
 		...restProps
 	}: ComponentProps<typeof Sidebar.Root> = $props();
 
+	let selectedRegionTab = $state('NA');
+
 	const sidebar = Sidebar.useSidebar();
 </script>
 
@@ -26,6 +29,17 @@
 	</Sidebar.Header>
 	<Sidebar.Content class="gap-0">
 		<Sidebar.Group class="pb-0">
+			<!-- Region Selection -->
+			<div class="mb-2 hidden {sidebar.state === 'collapsed' ? 'hidden' : ''}">
+				<Tabs.Root bind:value={selectedRegionTab}>
+					<Tabs.List class="h-8 w-full">
+						<Tabs.Trigger value="NA" class="h-6 ">NA</Tabs.Trigger>
+						<Tabs.Trigger value="SEA" class="h-6 ">SEA</Tabs.Trigger>
+						<Tabs.Trigger value="JPKR" class="h-6 ">JP/KR</Tabs.Trigger>
+					</Tabs.List>
+				</Tabs.Root>
+			</div>
+
 			<NavigationMain items={PAGES} />
 			<div class={sidebar.state === 'collapsed' ? 'hidden' : ''}>
 				<div class="flex items-center gap-2 py-2">
