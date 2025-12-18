@@ -249,22 +249,35 @@ func handleCleanupMobChannelStatus(app core.App) {
 	for mobID := range mobIDs {
 		mob, err := app.FindRecordById(COLLECTION_MOBS, mobID)
 		if err != nil {
-			log.Printf("[CLEANUP] mob not found: %s, error=%v", mobID, err)
 			continue
 		}
 		if errs := app.ExpandRecord(mob, []string{"map"}, nil); len(errs) > 0 {
-			log.Printf("[CLEANUP] failed to expand map for mob %s: %v", mobID, errs)
 			continue
 		}
 		mobMapCache[mobID] = mob
 	}
 
-	// Check each status record
 	var recordsToDelete []string
+
 	for _, statusRecord := range statusRecords {
 		mobID := statusRecord.GetString("mob")
 		channelNumber := statusRecord.GetInt("channel_number")
 		region := statusRecord.GetString("region")
+
+		// Check if region is disabled
+		isRegionEnabled := false
+		for _, regionInfo := range ACCOUNT_ID_REGIONS {
+			if regionInfo.Name == region {
+				isRegionEnabled = regionInfo.Enabled
+				break
+			}
+		}
+
+		// Delete records for disabled regions
+		if !isRegionEnabled {
+			recordsToDelete = append(recordsToDelete, statusRecord.Id)
+			continue
+		}
 
 		mob, exists := mobMapCache[mobID]
 		if !exists {
@@ -281,13 +294,15 @@ func handleCleanupMobChannelStatus(app core.App) {
 			continue
 		}
 
-		regionMap, ok := regionData.(map[string]interface{})
-		if !ok {
+		regionMap, err := parseRegionData(regionData)
+		if err != nil {
 			continue
 		}
 
 		regionChannels, exists := regionMap[region]
+		// Delete records for regions that don't exist in region_data
 		if !exists {
+			recordsToDelete = append(recordsToDelete, statusRecord.Id)
 			continue
 		}
 
@@ -300,13 +315,13 @@ func handleCleanupMobChannelStatus(app core.App) {
 			continue
 		}
 
+		// Delete records where channel number exceeds region-specific channel count
 		if channelNumber > totalChannels {
 			recordsToDelete = append(recordsToDelete, statusRecord.Id)
 		}
 	}
 
 	if len(recordsToDelete) == 0 {
-		log.Printf("[CLEANUP] mob_channel_status: no records to delete")
 		return
 	}
 

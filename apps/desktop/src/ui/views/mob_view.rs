@@ -3,7 +3,7 @@ use crate::models::mob::Mob;
 use crate::ui::app::determine_effective_region;
 use crate::ui::constants::{spacing, style, theme};
 use crate::utils::constants::{
-    get_game_mob_id_from_name, get_location_name, requires_location_number,
+    account_id_regions, get_game_mob_id_from_name, get_location_name, requires_location_number,
 };
 use egui::{Align2, Color32, FontId, Pos2, Rect, RichText, Sense, Stroke, StrokeKind, Ui, Vec2};
 
@@ -51,11 +51,22 @@ pub fn render_mob_view(
     }
 
     if effective_region.is_none() {
+        let is_unsupported_region = if let Some(acc_id) = account_id {
+            let prefix = if acc_id.len() >= 2 { &acc_id[..2] } else { "" };
+            account_id_regions::is_prefix_known_but_disabled(prefix)
+        } else {
+            false
+        };
+
         ui.vertical_centered(|ui| {
             ui.add_space(spacing::LG);
             ui.label(
-                RichText::new("Unable to determine region from account ID")
-                    .color(theme::text_color(settings)),
+                RichText::new(if is_unsupported_region {
+                    "Region not supported for mob timers"
+                } else {
+                    "Unable to determine region from account ID"
+                })
+                .color(theme::text_color(settings)),
             );
         });
         return false;

@@ -19,6 +19,7 @@ export const DEBOUNCE_DELAY = 300; // ms
 export const SMALL_DELAY = 100; // ms
 export const JUST_NOW_THRESHOLD = 15; // seconds
 export const LAUNCH_REFERENCE_DATE = '2025-10-09';
+export const SEA_LAUNCH_REFERENCE_DATE = '2025-12-17';
 
 // Realtime
 export const REALTIME_DEBOUNCE_DELAY = 20; // ms
@@ -300,8 +301,7 @@ export const MODULE_OPTIMIZER_YIELD_INTERVAL = 10;
 export const DEFAULT_REGION = 'NA';
 export const REGIONS: { value: string; label: string }[] = [
 	{ value: 'NA', label: 'GLOBAL' },
-	{ value: 'SEA', label: 'SEA' },
-	{ value: 'JPKR', label: 'JP/KR' }
+	{ value: 'SEA', label: 'SEA' }
 ];
 // Tools & Resources constants
 export const TOOLS_SECTIONS: ToolsSections = {

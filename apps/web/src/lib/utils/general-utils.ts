@@ -10,6 +10,7 @@ import {
 	MAX_HP_VALUE,
 	MINUTE,
 	SECOND,
+	SEA_LAUNCH_REFERENCE_DATE,
 	SPECIAL_MAGICAL_CREATURES_DEAD_TIMEOUT,
 	STALE_DATA_TIMEOUT,
 	STALE_DATA_TIMEOUT_FULL_HP,
@@ -315,10 +316,12 @@ export function sortChannelsForMobCard<T extends ChannelEntry>(channels: T[]): T
  * Calculates the current game day based on launch date and daily reset time
  * Daily reset is at 7AM UTC (5AM UTC-2)
  *
+ * @param region - The region to use for launch date
  * @returns The current game day number
  */
-export function calculateGameDay(): number {
-	const gameLaunch = new Date(LAUNCH_REFERENCE_DATE);
+export function calculateGameDay(region: string = 'NA'): number {
+	const launchDate = region === 'SEA' ? SEA_LAUNCH_REFERENCE_DATE : LAUNCH_REFERENCE_DATE;
+	const gameLaunch = new Date(launchDate);
 	gameLaunch.setUTCHours(DAILY_RESET_HOUR, 0, 0, 0);
 	const gameNow = new Date();
 	return Math.floor((gameNow.getTime() - gameLaunch.getTime()) / DAY) + 1;

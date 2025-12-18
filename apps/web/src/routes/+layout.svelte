@@ -6,7 +6,6 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import { setContext } from 'svelte';
 	import '../app.css';
-	import { toast } from 'svelte-sonner';
 
 	let { children } = $props();
 
@@ -49,19 +48,6 @@
 					pb.authStore.clear();
 				}
 			});
-	});
-
-	$effect(() => {
-		if (!browser) {
-			return;
-		}
-		toast.warning(
-			'Website is being updated for multi-region support. Expect random downtime during these updates.',
-			{
-				duration: 10000,
-				position: 'top-center'
-			}
-		);
 	});
 
 	setContext('token', getToken);

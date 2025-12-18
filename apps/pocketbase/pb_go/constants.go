@@ -81,7 +81,7 @@ var ACCOUNT_ID_REGIONS = map[string]RegionInfo{
 	"2_": {Name: "INT", Enabled: false},
 	"3_": {Name: "TW", Enabled: false},
 	"4_": {Name: "NA", Enabled: true},
-	"5_": {Name: "JPKR", Enabled: true},
+	"5_": {Name: "JPKR", Enabled: false},
 	"6_": {Name: "SEA", Enabled: true},
 }
 

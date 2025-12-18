@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { calculateGameDay, getGameTimezone } from '$lib/utils/general-utils';
+	import { regionStore } from '$lib/stores/region.svelte';
 	import { SvelteDate } from 'svelte/reactivity';
 
-	const days = calculateGameDay();
+	const days = $derived(calculateGameDay(regionStore.value));
 	const gameTime = new SvelteDate();
 
 	const formatter = new Intl.DateTimeFormat('en-US', {

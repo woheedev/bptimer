@@ -148,28 +148,28 @@ pub mod account_id_regions {
             name: "DEV",
             display_name: "DEV",
             enabled: false,
-            region: None,
+            region: Some(MobTimersRegion::DEV),
         },
         RegionInfo {
             prefix: PREFIX_CN,
             name: "CN",
             display_name: "CN",
             enabled: false,
-            region: None,
+            region: Some(MobTimersRegion::CN),
         },
         RegionInfo {
             prefix: PREFIX_INT,
             name: "INT",
             display_name: "INT",
             enabled: false,
-            region: None,
+            region: Some(MobTimersRegion::INT),
         },
         RegionInfo {
             prefix: PREFIX_TW,
             name: "TW",
             display_name: "TW",
             enabled: false,
-            region: None,
+            region: Some(MobTimersRegion::TW),
         },
         RegionInfo {
             prefix: PREFIX_NA,
@@ -182,7 +182,7 @@ pub mod account_id_regions {
             prefix: PREFIX_JPKR,
             name: "JPKR",
             display_name: "JP/KR",
-            enabled: true,
+            enabled: false,
             region: Some(MobTimersRegion::JPKR),
         },
         RegionInfo {
@@ -200,6 +200,11 @@ pub mod account_id_regions {
             .iter()
             .find(|r| r.prefix == prefix && r.enabled)
             .and_then(|r| r.region.clone())
+    }
+
+    /// Check if a prefix exists in REGIONS but is not enabled
+    pub fn is_prefix_known_but_disabled(prefix: &str) -> bool {
+        REGIONS.iter().any(|r| r.prefix == prefix && !r.enabled)
     }
 
     /// Get region info from MobTimersRegion enum

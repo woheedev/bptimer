@@ -1,18 +1,18 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
   (app) => {
-    const regions = ['NA', 'SEA', 'JPKR'];
+    const regions = ['NA', 'SEA'];
 
     // Seed maps first (upsert)
     const mapsCollection = app.findCollectionByNameOrId('maps');
     const mapsData = [
-      { uid: 1, name: 'Asterleeds', region_data: { NA: 101, SEA: 500, JPKR: 500 } },
-      { uid: 2, name: 'Underground District', region_data: { NA: 10, SEA: 200, JPKR: 200 } },
-      { uid: 3, name: 'Asteria Plains', region_data: { NA: 70, SEA: 500, JPKR: 500 } },
-      { uid: 4, name: 'Windhowl Canyon', region_data: { NA: 10, SEA: 200, JPKR: 200 } },
-      { uid: 5, name: "Skimmer's Lair", region_data: { NA: 10, SEA: 200, JPKR: 200 } },
-      { uid: 6, name: 'Duskdye Woods', region_data: { NA: 10, SEA: 200, JPKR: 200 } },
-      { uid: 7, name: 'Everfall Forest', region_data: { NA: 10, SEA: 200, JPKR: 200 } }
+      { uid: 1, name: 'Asterleeds', region_data: { NA: 101, SEA: 100 } },
+      { uid: 2, name: 'Underground District', region_data: { NA: 10, SEA: 10 } },
+      { uid: 3, name: 'Asteria Plains', region_data: { NA: 70, SEA: 70 } },
+      { uid: 4, name: 'Windhowl Canyon', region_data: { NA: 10, SEA: 5 } },
+      { uid: 5, name: "Skimmer's Lair", region_data: { NA: 10, SEA: 10 } },
+      { uid: 6, name: 'Duskdye Woods', region_data: { NA: 10, SEA: 10 } },
+      { uid: 7, name: 'Everfall Forest', region_data: { NA: 10, SEA: 10 } }
     ];
 
     const mapRecords = [];

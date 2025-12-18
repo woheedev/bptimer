@@ -82,9 +82,13 @@ pub struct HotkeySettings {
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum MobTimersRegion {
+    DEV,
+    CN,
+    INT,
+    TW,
     NA,
-    SEA,
     JPKR,
+    SEA,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
