@@ -1,5 +1,7 @@
+use crate::config::Settings;
 use crate::models::mob::Mob;
-use crate::ui::constants::{spacing, style};
+use crate::ui::app::determine_effective_region;
+use crate::ui::constants::{spacing, style, theme};
 use crate::utils::constants::{
     get_game_mob_id_from_name, get_location_name, requires_location_number,
 };
@@ -23,14 +25,49 @@ fn hp_color(hp: f32) -> Color32 {
     }
 }
 
-pub fn render_mob_view(ui: &mut Ui, mobs: &[Mob]) {
+pub fn render_mob_view(
+    ui: &mut Ui,
+    mobs: &[Mob],
+    settings: &mut Settings,
+    account_id: Option<&String>,
+) -> bool {
+    let effective_region = determine_effective_region(&settings.mob_timers_region, account_id);
+
+    if settings.mob_timers_region.is_none() && account_id.is_none() {
+        ui.vertical_centered(|ui| {
+            let available_height = ui.available_height();
+            let vertical_padding = (available_height * 0.2).min(50.0);
+            ui.add_space(vertical_padding);
+            ui.label(
+                RichText::new("Waiting for player data...")
+                    .size(16.0)
+                    .color(theme::text_color(settings)),
+            );
+            ui.add_space(spacing::MD);
+            ui.spinner();
+            ui.add_space(vertical_padding);
+        });
+        return false;
+    }
+
+    if effective_region.is_none() {
+        ui.vertical_centered(|ui| {
+            ui.add_space(spacing::LG);
+            ui.label(
+                RichText::new("Unable to determine region from account ID")
+                    .color(theme::text_color(settings)),
+            );
+        });
+        return false;
+    }
+
     if mobs.is_empty() {
         ui.vertical_centered(|ui| {
             ui.add_space(spacing::LG);
             ui.label("Loading mob data...");
             ui.spinner();
         });
-        return;
+        return false;
     }
 
     egui::ScrollArea::vertical().show(ui, |ui| {
@@ -175,4 +212,5 @@ pub fn render_mob_view(ui: &mut Ui, mobs: &[Mob]) {
             }
         });
     });
+    true
 }

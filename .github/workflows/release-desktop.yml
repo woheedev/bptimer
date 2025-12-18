@@ -268,7 +268,7 @@ jobs:
             - Requires libpcap (usually pre-installed on most Linux distributions)
           files: |
             artifacts/windows/${{ needs.build-windows.outputs.exe_name }}
-            artifacts/windows/${{ needs.build-windows.outputs.installer_name }}
+            artifacts/windows/Output/${{ needs.build-windows.outputs.installer_name }}
             artifacts/linux/${{ needs.build-linux.outputs.binary_name }}
           draft: false
           prerelease: false
