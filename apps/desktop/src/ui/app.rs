@@ -57,6 +57,7 @@ pub struct DpsMeterApp {
     pub pb_shutdown_tx: Option<tokio::sync::watch::Sender<bool>>,
     pub pb_task_handle: Option<std::thread::JoinHandle<()>>,
     pub show_mob_timers_prev: bool,
+    pub effective_region_prev: Option<crate::config::MobTimersRegion>,
 
     // Radar State
     pub radar_state: RadarState,
@@ -92,6 +93,46 @@ pub struct DpsMeterApp {
     pub hotkey_manager: crate::hotkeys::HotkeyManager,
     pub hotkey_recording_state: crate::ui::views::settings_view::HotkeyRecordingState,
     pub last_hotkey_press: Option<Instant>,
+}
+
+pub(crate) fn determine_effective_region(
+    region: &Option<crate::config::MobTimersRegion>,
+    account_id: Option<&String>,
+) -> Option<crate::config::MobTimersRegion> {
+    match region {
+        None => {
+            // Auto mode - determine from account_id
+            if let Some(acc_id) = account_id {
+                let prefix = if acc_id.len() >= 2 { &acc_id[..2] } else { "" };
+                crate::utils::constants::account_id_regions::get_mob_timers_region_from_prefix(
+                    prefix,
+                )
+            } else {
+                None
+            }
+        }
+        Some(region) => Some(*region),
+    }
+}
+
+fn start_pocketbase_client(
+    sender: tokio::sync::mpsc::Sender<Vec<crate::models::mob::Mob>>,
+    region: crate::config::MobTimersRegion,
+) -> (
+    std::sync::Arc<crate::api::pocketbase::PocketBaseClient>,
+    tokio::sync::watch::Sender<bool>,
+    std::thread::JoinHandle<()>,
+) {
+    let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
+    let pb_client = Arc::new(PocketBaseClient::new(sender, shutdown_rx, region));
+    let pb_client_clone = pb_client.clone();
+    let handle = std::thread::spawn(move || {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            pb_client_clone.start().await;
+        });
+    });
+    (pb_client, shutdown_tx, handle)
 }
 
 impl DpsMeterApp {
@@ -135,17 +176,14 @@ impl DpsMeterApp {
         let mut initial_shutdown_tx: Option<tokio::sync::watch::Sender<bool>> = None;
         let mut initial_pb_task: Option<std::thread::JoinHandle<()>> = None;
 
-        if settings.show_mob_timers {
-            let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
-            let pb_client = Arc::new(PocketBaseClient::new(tx.clone(), shutdown_rx));
-            let pb_client_clone = pb_client.clone();
-            let handle = std::thread::spawn(move || {
-                let rt = tokio::runtime::Runtime::new().unwrap();
-                rt.block_on(async {
-                    pb_client_clone.start().await;
-                });
-            });
+        let initial_effective_region = if settings.show_mob_timers {
+            determine_effective_region(&settings.mob_timers_region, None)
+        } else {
+            None
+        };
 
+        if let Some(region) = initial_effective_region {
+            let (pb_client, shutdown_tx, handle) = start_pocketbase_client(tx.clone(), region);
             initial_pb_client = Some(pb_client);
             initial_shutdown_tx = Some(shutdown_tx);
             initial_pb_task = Some(handle);
@@ -174,6 +212,7 @@ impl DpsMeterApp {
             pb_shutdown_tx: initial_shutdown_tx,
             pb_task_handle: initial_pb_task,
             show_mob_timers_prev: settings.show_mob_timers,
+            effective_region_prev: initial_effective_region,
 
             radar_state: RadarState::new(),
 
@@ -375,45 +414,46 @@ impl eframe::App for DpsMeterApp {
             while let Ok(_) = self.mob_receiver.try_recv() {}
         }
 
-        // Handle PocketBase client start/stop based on show_mob_timers setting
-        if self.settings.show_mob_timers != self.show_mob_timers_prev {
+        // Determine effective region for Auto mode
+        let account_id = self.player_state.get_account_id();
+        let effective_region =
+            determine_effective_region(&self.settings.mob_timers_region, account_id.as_ref());
+
+        // Check if we need to restart:
+        // 1. show_mob_timers setting changed
+        // 2. effective region changed (handles Auto->explicit, explicit->Auto, and Auto getting account_id)
+        let show_mob_timers_changed = self.settings.show_mob_timers != self.show_mob_timers_prev;
+        let effective_region_changed = effective_region != self.effective_region_prev;
+        let needs_restart = show_mob_timers_changed || effective_region_changed;
+
+        if needs_restart {
+            // Stop existing client if any
+            if let Some(shutdown_tx) = self.pb_shutdown_tx.take() {
+                let _ = shutdown_tx.send(true);
+            }
+            if let Some(handle) = self.pb_task_handle.take() {
+                std::thread::spawn(move || {
+                    if let Err(err) = handle.join() {
+                        warn!("Failed to join PocketBase thread: {:?}", err);
+                    }
+                });
+            }
+            self.pb_client = None;
+            self.mobs.clear();
+
+            // Start new client if needed
             if self.settings.show_mob_timers {
-                // Start PocketBase client
-                if self.pb_client.is_none() {
-                    let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
-                    let pb_client =
-                        Arc::new(PocketBaseClient::new(self.pb_sender.clone(), shutdown_rx));
-
-                    let pb_client_clone = pb_client.clone();
-                    let handle = std::thread::spawn(move || {
-                        let rt = tokio::runtime::Runtime::new().unwrap();
-                        rt.block_on(async {
-                            pb_client_clone.start().await;
-                        });
-                    });
-
+                if let Some(region) = effective_region {
+                    let (pb_client, shutdown_tx, handle) =
+                        start_pocketbase_client(self.pb_sender.clone(), region);
                     self.pb_client = Some(pb_client);
                     self.pb_shutdown_tx = Some(shutdown_tx);
                     self.pb_task_handle = Some(handle);
-                    info!("PocketBase client started");
+                    info!("PocketBase client started with region");
                 }
-            } else {
-                // Stop PocketBase client
-                if let Some(shutdown_tx) = self.pb_shutdown_tx.take() {
-                    let _ = shutdown_tx.send(true);
-                }
-                if let Some(handle) = self.pb_task_handle.take() {
-                    std::thread::spawn(move || {
-                        if let Err(err) = handle.join() {
-                            warn!("Failed to join PocketBase thread: {:?}", err);
-                        }
-                    });
-                }
-                self.pb_client = None;
-                self.mobs.clear();
-                info!("PocketBase client stopped");
             }
             self.show_mob_timers_prev = self.settings.show_mob_timers;
+            self.effective_region_prev = effective_region;
         }
 
         let mut has_new_events = false;
@@ -849,14 +889,20 @@ impl eframe::App for DpsMeterApp {
                                 }
 
                                 if self.settings.show_mob_timers {
-                                    ui.heading("Mob Timers");
+                                    let region_display = crate::utils::constants::account_id_regions::get_region_display_name(&effective_region);
+                                    ui.heading(format!("Mob Timers ({})", region_display));
                                     let visible_mobs: Vec<_> = self
                                         .mobs
                                         .iter()
                                         .filter(|mob| !self.settings.hidden_mobs.contains(&mob.id))
                                         .cloned()
                                         .collect();
-                                    mob_view::render_mob_view(ui, &visible_mobs);
+                                    mob_view::render_mob_view(
+                                        ui,
+                                        &visible_mobs,
+                                        &mut self.settings,
+                                        account_id.as_ref(),
+                                    );
                                 }
                             });
                         }

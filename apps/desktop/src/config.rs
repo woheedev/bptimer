@@ -35,6 +35,8 @@ pub struct Settings {
     pub show_radar: bool,
     #[serde(default = "default_true")]
     pub show_mob_timers: bool,
+    #[serde(default)]
+    pub mob_timers_region: Option<MobTimersRegion>,
     #[serde(default = "default_true")]
     pub show_combat_data: bool,
     #[serde(default = "default_true")]
@@ -75,6 +77,14 @@ pub struct HotkeySettings {
     pub switch_to_combat_view: Option<HotkeyConfig>,
     pub minimize_window: Option<HotkeyConfig>,
     pub reset_stats: Option<HotkeyConfig>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum MobTimersRegion {
+    NA,
+    SEA,
+    JPKR,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -171,6 +181,7 @@ impl Default for Settings {
             window_size: Some((485.0, 500.0)),
             show_radar: true,
             show_mob_timers: true,
+            mob_timers_region: None, // None = Auto mode
             show_combat_data: true,
             bptimer_enabled: true,
             hidden_mobs: std::collections::HashSet::new(),

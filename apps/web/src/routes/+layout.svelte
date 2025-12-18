@@ -6,7 +6,6 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import { setContext } from 'svelte';
 	import '../app.css';
-	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 
 	let { children } = $props();
@@ -53,7 +52,7 @@
 	});
 
 	$effect(() => {
-		if (!browser || page.url.pathname !== '/magical-creatures') {
+		if (!browser) {
 			return;
 		}
 		toast.warning(

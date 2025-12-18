@@ -2,6 +2,7 @@ use crate::capture::packet;
 use crate::config::Settings;
 use crate::hotkeys::{HotkeyAction, HotkeyManager};
 use crate::ui::constants::{responsive, spacing, style, theme};
+use crate::utils::constants::account_id_regions;
 use egui::{Ui, Window};
 use global_hotkey::hotkey::{HotKey, Modifiers};
 use instant::Instant;
@@ -515,6 +516,33 @@ pub fn render_settings_view(
             ui.set_width(ui.available_width());
             ui.label(egui::RichText::new("Mob Timers").strong().color(text_color));
             ui.add_space(spacing::SM);
+
+            ui.horizontal(|ui| {
+                ui.label("Timers Region:");
+                let region_str = account_id_regions::get_region_display_name(&settings.mob_timers_region);
+
+                if egui::ComboBox::from_id_salt("timers_region_settings")
+                    .selected_text(region_str)
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(&mut settings.mob_timers_region, None, "Auto");
+                        for region_info in account_id_regions::REGIONS.iter().filter(|r| r.enabled) {
+                            if let Some(region) = region_info.region {
+                                ui.selectable_value(
+                                    &mut settings.mob_timers_region,
+                                    Some(region),
+                                    region_info.display_name,
+                                );
+                            }
+                        }
+                    })
+                    .response
+                    .changed()
+                {
+                    *settings_save_timer = Some(Instant::now());
+                }
+            });
+            ui.add_space(spacing::SM);
+
             ui.label(
                 egui::RichText::new("Hide/Show Mobs")
                     .strong()

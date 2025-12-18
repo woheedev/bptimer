@@ -121,3 +121,121 @@ pub fn get_class_name(class_id: i32) -> Option<&'static str> {
         _ => None,
     }
 }
+
+/// Account ID prefix constants for region detection
+pub mod account_id_regions {
+    use crate::config::MobTimersRegion;
+
+    pub const PREFIX_DEV: &str = "0_";
+    pub const PREFIX_CN: &str = "1_";
+    pub const PREFIX_INT: &str = "2_";
+    pub const PREFIX_TW: &str = "3_";
+    pub const PREFIX_NA: &str = "4_";
+    pub const PREFIX_JPKR: &str = "5_";
+    pub const PREFIX_SEA: &str = "6_";
+
+    pub struct RegionInfo {
+        pub prefix: &'static str,
+        pub name: &'static str,
+        pub display_name: &'static str,
+        pub enabled: bool,
+        pub region: Option<MobTimersRegion>,
+    }
+
+    pub const REGIONS: &[RegionInfo] = &[
+        RegionInfo {
+            prefix: PREFIX_DEV,
+            name: "DEV",
+            display_name: "DEV",
+            enabled: false,
+            region: None,
+        },
+        RegionInfo {
+            prefix: PREFIX_CN,
+            name: "CN",
+            display_name: "CN",
+            enabled: false,
+            region: None,
+        },
+        RegionInfo {
+            prefix: PREFIX_INT,
+            name: "INT",
+            display_name: "INT",
+            enabled: false,
+            region: None,
+        },
+        RegionInfo {
+            prefix: PREFIX_TW,
+            name: "TW",
+            display_name: "TW",
+            enabled: false,
+            region: None,
+        },
+        RegionInfo {
+            prefix: PREFIX_NA,
+            name: "NA",
+            display_name: "NA",
+            enabled: true,
+            region: Some(MobTimersRegion::NA),
+        },
+        RegionInfo {
+            prefix: PREFIX_JPKR,
+            name: "JPKR",
+            display_name: "JP/KR",
+            enabled: true,
+            region: Some(MobTimersRegion::JPKR),
+        },
+        RegionInfo {
+            prefix: PREFIX_SEA,
+            name: "SEA",
+            display_name: "SEA",
+            enabled: true,
+            region: Some(MobTimersRegion::SEA),
+        },
+    ];
+
+    /// Get MobTimersRegion from account_id prefix
+    pub fn get_mob_timers_region_from_prefix(prefix: &str) -> Option<MobTimersRegion> {
+        REGIONS
+            .iter()
+            .find(|r| r.prefix == prefix && r.enabled)
+            .and_then(|r| r.region.clone())
+    }
+
+    /// Get region info from MobTimersRegion enum
+    pub fn get_region_info(region: &MobTimersRegion) -> Option<&'static RegionInfo> {
+        REGIONS.iter().find(|r| r.region.as_ref() == Some(region))
+    }
+
+    /// Get SSE topic name for a region (e.g., "mob_hp_updates", "mob_hp_updates_sea")
+    pub fn get_sse_topic(region: &MobTimersRegion) -> String {
+        let region_info = get_region_info(region);
+        match region_info {
+            Some(info) => {
+                if info.name == "NA" {
+                    "mob_hp_updates".to_string()
+                } else {
+                    format!("mob_hp_updates_{}", info.name.to_lowercase())
+                }
+            }
+            None => "mob_hp_updates".to_string(), // Fallback
+        }
+    }
+
+    /// Get region string name for API queries (e.g., "NA", "SEA", "JPKR")
+    pub fn get_region_string(region: &MobTimersRegion) -> String {
+        get_region_info(region)
+            .map(|r| r.name.to_string())
+            .unwrap_or_else(|| "NA".to_string()) // Fallback
+    }
+
+    /// Get region display name for UI (e.g., "Auto", "NA", "JP/KR")
+    pub fn get_region_display_name(region: &Option<MobTimersRegion>) -> &'static str {
+        match region {
+            None => "Auto",
+            Some(region) => get_region_info(region)
+                .map(|r| r.display_name)
+                .unwrap_or("Unknown"),
+        }
+    }
+}

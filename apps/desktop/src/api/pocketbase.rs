@@ -1,4 +1,6 @@
+use crate::config::MobTimersRegion;
 use crate::models::mob::{Mob, MobChannel};
+use crate::utils::constants::account_id_regions;
 use chrono::{DateTime, Utc};
 use eventsource_stream::Eventsource;
 use futures::stream::StreamExt;
@@ -16,10 +18,18 @@ use tokio::time::sleep;
 const MOB_PAGE_SIZE: usize = 100;
 const STATUS_PAGE_SIZE: usize = 200;
 const STATUS_CHUNK_SIZE: usize = 25;
-const REALTIME_TOPICS: [&str; 2] = ["mob_hp_updates", "mob_resets"];
 const LATEST_CHANNELS_DISPLAY_COUNT: usize = 10;
 const DEAD_STALE_SECS: i64 = 30 * 60;
 const ALIVE_STALE_SECS: i64 = 5 * 60;
+
+fn get_realtime_topics(region: &MobTimersRegion) -> Vec<String> {
+    let hp_updates_topic = account_id_regions::get_sse_topic(region);
+    vec![hp_updates_topic, "mob_resets".to_string()]
+}
+
+fn get_region_string(region: &MobTimersRegion) -> String {
+    account_id_regions::get_region_string(region)
+}
 
 fn get_pocketbase_url() -> String {
     std::env::var("BPTIMER_API_URL").unwrap_or_else(|_| crate::BPTIMER_API_URL.to_string())
@@ -43,10 +53,15 @@ pub struct PocketBaseClient {
     mobs_state: Mutex<Vec<Mob>>,
     has_connected: AtomicBool,
     shutdown_rx: watch::Receiver<bool>,
+    region: MobTimersRegion,
 }
 
 impl PocketBaseClient {
-    pub fn new(sender: Sender<Vec<Mob>>, shutdown_rx: watch::Receiver<bool>) -> Self {
+    pub fn new(
+        sender: Sender<Vec<Mob>>,
+        shutdown_rx: watch::Receiver<bool>,
+        region: MobTimersRegion,
+    ) -> Self {
         let client = Client::builder()
             .user_agent(&crate::utils::constants::user_agent())
             .timeout(Duration::from_secs(600))
@@ -59,6 +74,7 @@ impl PocketBaseClient {
             mobs_state: Mutex::new(Vec::new()),
             has_connected: AtomicBool::new(false),
             shutdown_rx,
+            region,
         }
     }
 
@@ -242,7 +258,7 @@ impl PocketBaseClient {
                                 self.fetch_and_emit_full().await;
                             }
                         }
-                    } else if event.event == "mob_hp_updates" {
+                    } else if event.event.starts_with("mob_hp_updates") {
                         self.handle_hp_updates(&event.data).await?;
                     } else if event.event == "mob_resets" {
                         self.handle_reset_events(&event.data).await?;
@@ -260,9 +276,10 @@ impl PocketBaseClient {
 
     async fn subscribe(&self, client_id: &str) -> anyhow::Result<()> {
         let url = format!("{}/api/realtime", get_pocketbase_url());
+        let topics = get_realtime_topics(&self.region);
         let body = serde_json::json!({
             "clientId": client_id,
-            "subscriptions": REALTIME_TOPICS
+            "subscriptions": topics
         });
 
         let resp = self.client.post(&url).json(&body).send().await?;
@@ -274,7 +291,7 @@ impl PocketBaseClient {
                 status, text
             );
         } else {
-            info!("Subscribed to realtime topics: {:?}", REALTIME_TOPICS);
+            info!("Subscribed to realtime topics: {:?}", topics);
         }
         Ok(())
     }
@@ -336,11 +353,14 @@ impl PocketBaseClient {
                     Ok(mut mob) => {
                         if let Some(expand) = item.get("expand") {
                             if let Some(map) = expand.get("map") {
-                                // Read from region_data["NA"] instead of total_channels
+                                // Read from region_data based on selected region
                                 if let Some(region_data) = map.get("region_data") {
                                     if let Some(region_data_obj) = region_data.as_object() {
-                                        if let Some(na_channels) = region_data_obj.get("NA") {
-                                            if let Some(total_channels) = na_channels.as_i64() {
+                                        let region_str = get_region_string(&self.region);
+                                        if let Some(region_channels) =
+                                            region_data_obj.get(&region_str)
+                                        {
+                                            if let Some(total_channels) = region_channels.as_i64() {
                                                 mob.total_channels = total_channels as i32;
                                             }
                                         }
@@ -378,13 +398,14 @@ impl PocketBaseClient {
         let mob_list: Vec<String> = mob_ids.iter().cloned().collect();
 
         for chunk in mob_list.chunks(STATUS_CHUNK_SIZE) {
-            // Filter by mob IDs and region='NA' (hardcoded for now)
+            // Filter by mob IDs and region
             let mob_filter = chunk
                 .iter()
                 .map(|id| format!("mob='{}'", id))
                 .collect::<Vec<_>>()
                 .join(" || ");
-            let filter = format!("({}) && region='NA'", mob_filter);
+            let region_str = get_region_string(&self.region);
+            let filter = format!("({}) && region='{}'", mob_filter, region_str);
 
             let mut page = 1;
             loop {
