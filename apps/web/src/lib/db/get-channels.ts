@@ -4,15 +4,17 @@ import type { ChannelEntry } from '$lib/types/mobs';
 import { getMobStatus } from '$lib/utils/mob-utils';
 import { validateWithSchema } from '$lib/utils/validation';
 
-export async function getChannels(bossId: string): Promise<ChannelEntry[]> {
+export async function getChannels(bossId: string, region: string): Promise<ChannelEntry[]> {
 	try {
 		// Fetch the mob to get its name for special handling
 		const mob = await pb.collection('mobs').getOne(bossId);
 		const mobName = mob.name;
 
-		// Fetch all mob_channel_status for this mob
+		const filter = 'mob = {:bossId} && region = {:region}';
+		const params = { bossId, region };
+
 		const channels = await pb.collection('mob_channel_status').getFullList({
-			filter: pb.filter('mob = {:bossId}', { bossId }),
+			filter: pb.filter(filter, params),
 			skipTotal: true
 		});
 

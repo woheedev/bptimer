@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import LoadingSpinner from '$lib/components/loading-spinner.svelte';
 	import MobCard from '$lib/components/mob/card.svelte';
 	import MobModal from '$lib/components/mob/modal.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Empty } from '$lib/components/ui/empty';
-	import LoadingSpinner from '$lib/components/loading-spinner.svelte';
 	import {
 		DEBOUNCE_DELAY,
 		LATEST_CHANNELS_DISPLAY_COUNT,
 		STALE_DATA_CHECK_INTERVAL
 	} from '$lib/constants';
 	import { realtimeMobsStore } from '$lib/stores/realtime-mobs.svelte';
+	import { regionStore } from '$lib/stores/region.svelte';
 	import type { MobWithChannels } from '$lib/types/mobs';
 	import { loadMobsData } from '$lib/utils/mob-filtering';
 	import { updateLatestChannels } from '$lib/utils/mob-utils';
@@ -77,31 +78,20 @@
 
 	async function loadMobs() {
 		try {
-			const response = await loadMobsData(type, mobIds);
+			const response = await loadMobsData(type, regionStore.value, mobIds);
 			mobs = response.data;
 		} catch (error) {
 			console.error(`Error fetching ${pluralName}:`, error);
 		}
 	}
 
-	// Initial load on mount
+	// Load mobs when type, region, or mobIds change
 	$effect(() => {
 		if (!browser) return;
-		if (mobIds === undefined) {
-			loadMobs().then(() => {
-				loading = false;
-			});
-		}
-	});
-
-	$effect(() => {
-		// Handle favorites loading when mobIds changes
-		if (mobIds !== undefined) {
-			loading = true;
-			loadMobs().then(() => {
-				loading = false;
-			});
-		}
+		loading = true;
+		loadMobs().then(() => {
+			loading = false;
+		});
 	});
 
 	// Realtime subscription
@@ -119,7 +109,7 @@
 				// Fallback to HTTP request if no event data
 				loadMobs();
 			}
-		});
+		}, regionStore.value);
 		return cleanup;
 	});
 

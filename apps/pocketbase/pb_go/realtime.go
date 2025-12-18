@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 )
 
 type UpdateBatcher struct {
-	updates map[string]*MobUpdate // Key: "mobID:channel"
+	updates map[string]*MobUpdate // Key: "mobID:channel:region"
 	mu      sync.Mutex
 	ticker  *time.Ticker
 	app     core.App
@@ -35,6 +36,7 @@ func InitRealtimeHooks(app core.App) {
 		mobID := e.Record.GetString("mob")
 		channelNumber := e.Record.GetInt("channel_number")
 		hpPercentage := e.Record.GetInt("hp_percentage")
+		region := e.Record.GetString("region")
 
 		var locationImage *int
 		if locImg := e.Record.GetInt("location_image"); locImg > 0 {
@@ -45,10 +47,11 @@ func InitRealtimeHooks(app core.App) {
 			MobID:         mobID,
 			ChannelNumber: channelNumber,
 			HPPercentage:  hpPercentage,
+			Region:        region,
 			LocationImage: locationImage,
 		})
 
-		if err := updateMobChannelStatus(e.App, mobID, channelNumber, hpPercentage, locationImage); err != nil {
+		if err := updateMobChannelStatus(e.App, mobID, channelNumber, hpPercentage, region, locationImage); err != nil {
 			log.Printf("[REALTIME] mob_channel_status update error=%v", err)
 		}
 
@@ -67,7 +70,7 @@ func (b *UpdateBatcher) Add(update MobUpdate) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	key := fmt.Sprintf("%s:%d", update.MobID, update.ChannelNumber)
+	key := fmt.Sprintf("%s:%d:%s", update.MobID, update.ChannelNumber, update.Region)
 	b.updates[key] = &update
 }
 
@@ -85,18 +88,37 @@ func (b *UpdateBatcher) flush() {
 		return
 	}
 
-	updates := make([]*MobUpdate, 0, len(b.updates))
+	// Group updates by region
+	updatesByRegion := make(map[string][]*MobUpdate)
 	for _, update := range b.updates {
-		updates = append(updates, update)
+		region := update.Region
+		if region == "" {
+			log.Printf("[REALTIME] WARNING: update with empty region, mob=%s channel=%d", update.MobID, update.ChannelNumber)
+			continue
+		}
+		updatesByRegion[region] = append(updatesByRegion[region], update)
 	}
 	b.updates = make(map[string]*MobUpdate)
 
 	b.mu.Unlock()
 
-	b.broadcast(updates)
+	// Broadcast each region separately
+	for region, updates := range updatesByRegion {
+		b.broadcast(updates, region)
+	}
 }
 
-func (b *UpdateBatcher) broadcast(updates []*MobUpdate) {
+// getHPUpdatesTopic returns the topic name for HP updates based on region.
+// NA uses the default topic (mob_hp_updates) for backwards compatibility,
+// other regions use region-specific topics (e.g., mob_hp_updates_sea for SEA).
+func getHPUpdatesTopic(region string) string {
+	if region == "NA" {
+		return SSE_TOPIC_HP_UPDATES
+	}
+	return fmt.Sprintf("mob_hp_updates_%s", strings.ToLower(region))
+}
+
+func (b *UpdateBatcher) broadcast(updates []*MobUpdate, region string) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("[REALTIME] PANIC in broadcast: %v", r)
@@ -105,6 +127,8 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate) {
 
 	broker := b.app.SubscriptionsBroker()
 	clients := broker.Clients()
+
+	topic := getHPUpdatesTopic(region)
 
 	batchPayload := make([][]interface{}, 0, len(updates))
 	for _, update := range updates {
@@ -127,7 +151,7 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate) {
 	}
 
 	message := subscriptions.Message{
-		Name: SSE_TOPIC_HP_UPDATES,
+		Name: topic,
 		Data: data,
 	}
 
@@ -136,7 +160,7 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate) {
 
 	// Send to all subscribed clients
 	for _, client := range clients {
-		if !client.HasSubscription(SSE_TOPIC_HP_UPDATES) {
+		if !client.HasSubscription(topic) {
 			continue
 		}
 
@@ -165,17 +189,18 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate) {
 
 	// Log summary if there were significant drops
 	if droppedCount > 0 {
-		log.Printf("[REALTIME] broadcast complete: sent=%d dropped=%d total_clients=%d", sentCount, droppedCount, len(clients))
+		log.Printf("[REALTIME] broadcast complete: region=%s sent=%d dropped=%d total_clients=%d", region, sentCount, droppedCount, len(clients))
 	}
 }
 
-func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPercentage int, locationImage *int) error {
+func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPercentage int, region string, locationImage *int) error {
 	record, err := app.FindFirstRecordByFilter(
 		COLLECTION_MOB_CHANNEL_STATUS,
-		"mob = {:mobId} && channel_number = {:channelNumber}",
+		"mob = {:mobId} && channel_number = {:channelNumber} && region = {:region}",
 		map[string]any{
 			"mobId":         mobID,
 			"channelNumber": channelNumber,
+			"region":        region,
 		},
 	)
 
@@ -201,6 +226,7 @@ func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPer
 		}
 		record.Set("mob", mobID)
 		record.Set("channel_number", channelNumber)
+		record.Set("region", region)
 	}
 
 	record.Set("last_hp", hpPercentage)

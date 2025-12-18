@@ -24,6 +24,7 @@
 	import { getUserVotesForReports } from '$lib/db/get-user-votes';
 	import { pb } from '$lib/pocketbase';
 	import { filterSortSettingsStore } from '$lib/stores/filter-sort-settings.svelte';
+	import { regionStore } from '$lib/stores/region.svelte';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import type { MobReport, UserVotesMap } from '$lib/types/db';
 	import type { ChannelEntry } from '$lib/types/mobs';
@@ -170,7 +171,7 @@
 			}
 
 			// Fetch existing channel statuses
-			const channel_statuses = await getChannels(mobId);
+			const channel_statuses = await getChannels(mobId, regionStore.value);
 
 			// Create a complete channel list (1 to totalChannels) with existing data or unknown status
 			const channelStatusMap = new Map(channel_statuses.map((c) => [c.channel, c]));
@@ -194,7 +195,7 @@
 
 			// Only fetch latest reports if no specific channel is selected
 			if (!initialSelectedChannel) {
-				data_state.reports = await getLatestMobReports(mobId, MAX_REPORTS_LIMIT);
+				data_state.reports = await getLatestMobReports(mobId, MAX_REPORTS_LIMIT, regionStore.value);
 				// Fetch user votes for these reports
 				if (user && data_state.reports.length > 0) {
 					const reportIds = data_state.reports.map((r) => r.id);
@@ -220,7 +221,7 @@
 		ui_state.errorMessage = null;
 		ui_state.hasError = false;
 		try {
-			const reports_data = await getChannelReports(mobId, channelNumber);
+			const reports_data = await getChannelReports(mobId, channelNumber, regionStore.value);
 
 			// Force a fresh array assignment to ensure reactivity
 			data_state.reports = [...reports_data];
@@ -363,7 +364,7 @@
 		// Only refresh reports for all channels, don't refetch channel data
 		// Channel grid is already kept up-to-date via realtime updates
 		ui_state.isLoadingReports = true;
-		getLatestMobReports(mobId, MAX_REPORTS_LIMIT)
+		getLatestMobReports(mobId, MAX_REPORTS_LIMIT, regionStore.value)
 			.then(async (reports) => {
 				data_state.reports = reports;
 				// Fetch user votes
@@ -390,7 +391,7 @@
 			// Refresh latest reports for all channels
 			ui_state.isLoadingReports = true;
 			try {
-				data_state.reports = await getLatestMobReports(mobId, MAX_REPORTS_LIMIT);
+				data_state.reports = await getLatestMobReports(mobId, MAX_REPORTS_LIMIT, regionStore.value);
 				// Fetch user votes
 				if (user && data_state.reports.length > 0) {
 					const reportIds = data_state.reports.map((r) => r.id);
@@ -446,6 +447,7 @@
 				submission_state.selectedChannel,
 				submission_state.hpValue,
 				user.id,
+				regionStore.value,
 				submission_state.locationImage
 			);
 

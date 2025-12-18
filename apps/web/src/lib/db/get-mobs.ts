@@ -7,14 +7,17 @@ import { getMobStatus } from '$lib/utils/mob-utils';
 import { validateWithSchema } from '$lib/utils/validation';
 
 async function getMobsByType(
-	type: string
+	type: string,
+	region: string
 ): Promise<{ data: MobWithChannels[] } | { error: string }> {
 	try {
 		// Fetch all mobs of the specified type from PocketBase with map expansion
+		// Mobs are global (not region-specific), so requestKey only needs type
 		const records = await pb.collection('mobs').getFullList({
 			filter: pb.filter('type = {:type}', { type }),
 			sort: 'uid',
-			expand: 'map'
+			expand: 'map',
+			requestKey: `mobs-${type}` // Unique request key to prevent auto-cancellation
 		});
 
 		// Validate mob records
@@ -28,12 +31,16 @@ async function getMobsByType(
 
 		// Fetch all mob_channel_status for all mobs in a single query
 		const mob_ids = records.map((m) => m.id);
-		const orConditions = mob_ids.map((_, i) => `mob = {:id${i}}`).join(' || ');
-		const params = Object.fromEntries(mob_ids.map((id, i) => [`id${i}`, id]));
+		const orConditions = `(${mob_ids.map((_, i) => `mob = {:id${i}}`).join(' || ')}) && region = {:region}`;
+		const params: Record<string, unknown> = {
+			...Object.fromEntries(mob_ids.map((id, i) => [`id${i}`, id])),
+			region
+		};
+
 		const all_channel_statuses = await pb.collection('mob_channel_status').getFullList({
 			filter: pb.filter(orConditions, params),
 			skipTotal: true,
-			requestKey: `all-channel-statuses-${type}` // Unique request key
+			requestKey: `all-channel-statuses-${type}-${region}` // Unique request key
 		});
 
 		// Validate channel status records
@@ -92,7 +99,7 @@ async function getMobsByType(
 				uid: mob.uid,
 				name: mob.name,
 				type: mob.type,
-				total_channels: mob.expand?.map?.total_channels || 0,
+				total_channels: mob.expand?.map?.region_data?.[region] || 0,
 				respawn_time: mob.respawn_time,
 				latestChannels: sorted_channels
 			};
@@ -100,35 +107,40 @@ async function getMobsByType(
 
 		return { data: mobs_with_channels };
 	} catch (error) {
-		console.error(`Error fetching ${type}s:`, error);
-		return { error: `Failed to fetch ${type}s` };
+		console.error(`Error fetching ${type}:`, error);
+		return { error: `Failed to fetch ${type}` };
 	}
 }
 
-export async function getBosses(): Promise<{ data: MobWithChannels[] } | { error: string }> {
-	return getMobsByType('boss');
+export async function getBosses(
+	region: string
+): Promise<{ data: MobWithChannels[] } | { error: string }> {
+	return getMobsByType('boss', region);
 }
 
-export async function getMagicalCreatures(): Promise<
-	{ data: MobWithChannels[] } | { error: string }
-> {
-	return getMobsByType('magical_creature');
+export async function getMagicalCreatures(
+	region: string
+): Promise<{ data: MobWithChannels[] } | { error: string }> {
+	return getMobsByType('magical_creature', region);
 }
 
 export async function getMobsByIds(
-	ids: string[]
+	ids: string[],
+	region: string
 ): Promise<{ data: MobWithChannels[] } | { error: string }> {
 	if (ids.length === 0) {
 		return { data: [] };
 	}
 	try {
 		// Fetch mobs by ids
+		// Mobs are global (not region-specific), so requestKey only needs ids
 		const mobOrConditions = ids.map((_, i) => `id = {:id${i}}`).join(' || ');
 		const mobParams = Object.fromEntries(ids.map((id, i) => [`id${i}`, id]));
 		const records = await pb.collection('mobs').getFullList({
 			filter: pb.filter(mobOrConditions, mobParams),
 			sort: 'uid',
-			expand: 'map'
+			expand: 'map',
+			requestKey: `mobs-by-ids-${[...ids].sort().join('-')}` // Unique request key to prevent auto-cancellation
 		});
 
 		// Validate mob records
@@ -142,12 +154,16 @@ export async function getMobsByIds(
 
 		// Fetch all mob_channel_status for all mobs in a single query
 		const mob_ids = records.map((m) => m.id);
-		const statusOrConditions = mob_ids.map((_, i) => `mob = {:id${i}}`).join(' || ');
-		const statusParams = Object.fromEntries(mob_ids.map((id, i) => [`id${i}`, id]));
+		const statusOrConditions = `(${mob_ids.map((_, i) => `mob = {:id${i}}`).join(' || ')}) && region = {:region}`;
+		const statusParams: Record<string, unknown> = {
+			...Object.fromEntries(mob_ids.map((id, i) => [`id${i}`, id])),
+			region
+		};
+
 		const all_channel_statuses = await pb.collection('mob_channel_status').getFullList({
 			filter: pb.filter(statusOrConditions, statusParams),
 			skipTotal: true,
-			requestKey: `all-channel-statuses-by-ids-${[...ids].sort().join('-')}` // Unique request key (sorted for consistency, non-mutating)
+			requestKey: `all-channel-statuses-by-ids-${[...ids].sort().join('-')}-${region}` // Unique request key (sorted for consistency, non-mutating)
 		});
 
 		// Validate channel status records
@@ -210,7 +226,7 @@ export async function getMobsByIds(
 				uid: mob.uid,
 				name: mob.name,
 				type: mob.type,
-				total_channels: mob.expand?.map?.total_channels || 0,
+				total_channels: mob.expand?.map?.region_data?.[region] || 0,
 				respawn_time: mob.respawn_time,
 				latestChannels: sorted_channels
 			};

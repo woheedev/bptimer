@@ -12,7 +12,6 @@ export const DAY = 24 * HOUR;
 export const STALE_DATA_TIMEOUT = 2 * MINUTE; // Default timeout
 export const STALE_DATA_TIMEOUT_FULL_HP = 5 * MINUTE; // For 100% HP
 export const STALE_DATA_TIMEOUT_HIGH_HP = 3 * MINUTE; // For 80-99% HP
-export const DPS_METER_TOAST_DURATION = 10 * SECOND;
 export const MOB_NOTIFICATION_DURATION = 60 * SECOND;
 export const GAME_TIMEZONE_OFFSET = -2; // UTC-2 (deprecated)
 export const DAILY_RESET_HOUR = 7; // 5AM UTC-2 = 7AM UTC
@@ -138,6 +137,7 @@ export const MODULES_OPTIMIZER_MODULES_STORAGE_KEY = 'modules-optimizer-modules'
 export const MODULES_OPTIMIZER_PRIORITY_EFFECTS_STORAGE_KEY = 'modules-optimizer-priority-effects';
 export const MODULES_OPTIMIZER_NUM_SLOTS_STORAGE_KEY = 'modules-optimizer-num-slots';
 export const MOB_NOTIFICATIONS_STORAGE_KEY = 'mob-notifications';
+export const REGION_STORAGE_KEY = 'selected-region';
 
 // import Discord from '$lib/components/icons/discord.svelte';
 import {
@@ -297,6 +297,12 @@ export const MODULE_OPTIMIZER_LOCAL_SEARCH_MIN_RELEVANT_MODULES = 10;
 export const MODULE_OPTIMIZER_LOCAL_SEARCH_SAMPLE_SIZE = 15;
 export const MODULE_OPTIMIZER_YIELD_INTERVAL = 10;
 
+export const DEFAULT_REGION = 'NA';
+export const REGIONS: { value: string; label: string }[] = [
+	{ value: 'NA', label: 'GLOBAL' },
+	{ value: 'SEA', label: 'SEA' },
+	{ value: 'JPKR', label: 'JP/KR' }
+];
 // Tools & Resources constants
 export const TOOLS_SECTIONS: ToolsSections = {
 	officialTools: {

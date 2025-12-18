@@ -8,6 +8,7 @@ export async function createReport(
 	channel: number,
 	hp_percentage: number,
 	reporter_id: string,
+	region: string,
 	locationImage?: number | null
 ): Promise<HpReport> {
 	try {
@@ -30,9 +31,16 @@ export async function createReport(
 			throw new Error('Boss not found');
 		}
 
-		if (channel < 1 || channel > boss.expand?.map?.total_channels) {
+		const regionData = boss.expand?.map?.region_data;
+		const totalChannels = regionData?.[region] || 0;
+
+		if (!totalChannels) {
+			throw new Error(`No channel data found for region ${region}`);
+		}
+
+		if (channel < 1 || channel > totalChannels) {
 			throw new Error(
-				`Channel must be between 1 and ${boss.expand?.map?.total_channels} for this boss`
+				`Channel must be between 1 and ${totalChannels} for this boss in region ${region}`
 			);
 		}
 
@@ -41,7 +49,8 @@ export async function createReport(
 			mob: boss_id,
 			channel_number: channel,
 			hp_percentage: hp_percentage,
-			reporter: reporter_id
+			reporter: reporter_id,
+			region: region
 		};
 
 		// Add location image number if provided and valid

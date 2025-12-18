@@ -875,6 +875,20 @@ migrate(
             type: 'number'
           },
           {
+            autogeneratePattern: '',
+            hidden: false,
+            id: 'text258142582',
+            max: 5,
+            min: 1,
+            name: 'region',
+            pattern: '',
+            presentable: false,
+            primaryKey: false,
+            required: true,
+            system: false,
+            type: 'text'
+          },
+          {
             hidden: false,
             id: 'bool3766473888',
             name: 'full',
@@ -960,7 +974,8 @@ migrate(
           'CREATE INDEX `idx_hp_reports_reporter_created` ON `hp_reports` (`reporter`, `created` DESC)',
           'CREATE INDEX `idx_hp_reports_mob_channel_created` ON `hp_reports` (`mob`, `channel_number`, `created` DESC)',
           'CREATE INDEX `idx_hp_reports_reporter_mob_channel_hp_created` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `hp_percentage`, `created` DESC)',
-          'CREATE INDEX `idx_hp_reports_reporter_mob_channel_created` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `created` DESC)'
+          'CREATE INDEX `idx_hp_reports_reporter_mob_channel_created` ON `hp_reports` (`reporter`, `mob`, `channel_number`, `created` DESC)',
+          'CREATE INDEX `idx_hp_reports_mob_region` ON `hp_reports` (`mob`, `region`)'
         ],
         listRule: '',
         name: 'hp_reports',
@@ -1015,15 +1030,13 @@ migrate(
           },
           {
             hidden: false,
-            id: 'number1307307527',
-            max: 1000,
-            min: 1,
-            name: 'total_channels',
-            onlyInt: true,
+            id: 'json1951786068',
+            maxSize: 0,
+            name: 'region_data',
             presentable: false,
             required: true,
             system: false,
-            type: 'number'
+            type: 'json'
           }
         ],
         id: 'pbc_1612934933',
@@ -1079,6 +1092,20 @@ migrate(
             type: 'number'
           },
           {
+            autogeneratePattern: '',
+            hidden: false,
+            id: 'text258142582',
+            max: 5,
+            min: 1,
+            name: 'region',
+            pattern: '',
+            presentable: false,
+            primaryKey: false,
+            required: true,
+            system: false,
+            type: 'text'
+          },
+          {
             hidden: false,
             id: 'number3527176666',
             max: 100,
@@ -1115,7 +1142,8 @@ migrate(
         ],
         id: 'pbc_3682110470',
         indexes: [
-          'CREATE UNIQUE INDEX `idx_mob_channel_status_mob_channel` ON `mob_channel_status` (`mob`, `channel_number`)'
+          'CREATE UNIQUE INDEX `idx_mob_channel_status_mob_channel_region` ON `mob_channel_status` (`mob`, `channel_number`, `region`)',
+          'CREATE INDEX `idx_mob_channel_status_mob_region` ON `mob_channel_status` (`mob`, `region`)'
         ],
         listRule: '',
         name: 'mob_channel_status',

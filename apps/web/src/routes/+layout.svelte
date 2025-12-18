@@ -6,6 +6,8 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import { setContext } from 'svelte';
 	import '../app.css';
+	import { page } from '$app/state';
+	import { toast } from 'svelte-sonner';
 
 	let { children } = $props();
 
@@ -50,17 +52,18 @@
 			});
 	});
 
-	/* DISABLED AS NO LONGER NEEDED - KEEPING FOR FUTURE NOTIFICATIONS
 	$effect(() => {
 		if (!browser || page.url.pathname !== '/magical-creatures') {
 			return;
 		}
-		toast.warning(DpsMeterToast, {
-			duration: DPS_METER_TOAST_DURATION,
-			position: 'top-center'
-		});
+		toast.warning(
+			'Website is being updated for multi-region support. Expect random downtime during these updates.',
+			{
+				duration: 10000,
+				position: 'top-center'
+			}
+		);
 	});
-	*/
 
 	setContext('token', getToken);
 	setContext('user', getUser);

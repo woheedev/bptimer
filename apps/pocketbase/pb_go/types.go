@@ -41,6 +41,7 @@ type MobUpdate struct {
 	MobID         string // PocketBase mob record ID
 	ChannelNumber int    // Channel number
 	HPPercentage  int    // HP percentage
+	Region        string // Region code
 	LocationImage *int   // Location image ID (nil if not set)
 }
 

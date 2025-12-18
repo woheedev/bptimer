@@ -219,47 +219,127 @@ func handleCleanupHpReports(app core.App) {
 	}
 }
 
-// handleCleanupMobChannelStatus removes channel status records where channel number exceeds map's total channels.
-// This handles cases where maps reduce their channel count. Runs daily at 00:15
+// handleCleanupMobChannelStatus removes channel status records where channel number exceeds map's region-specific channel count.
+// This handles cases where maps reduce their channel count for a region. Runs daily at 00:15
 func handleCleanupMobChannelStatus(app core.App) {
-	countResult := struct {
-		Count int `db:"count"`
-	}{}
-
-	countQuery := `
-		SELECT COUNT(*) as count
-		FROM mob_channel_status mcs
-		JOIN mobs m ON mcs.mob = m.id
-		JOIN maps mp ON m.map = mp.id
-		WHERE mcs.channel_number > mp.total_channels
-	`
-
-	err := app.DB().NewQuery(countQuery).One(&countResult)
-
+	statusRecords, err := app.FindRecordsByFilter(
+		COLLECTION_MOB_CHANNEL_STATUS,
+		"",
+		"",
+		10000,
+		0,
+	)
 	if err != nil {
-		log.Printf("[CLEANUP] mob_channel_status count error=%v", err)
+		log.Printf("[CLEANUP] mob_channel_status query error=%v", err)
 		return
 	}
 
-	if countResult.Count > 0 {
-		deleteQuery := `
-			DELETE FROM mob_channel_status
-			WHERE id IN (
-				SELECT mcs.id
-				FROM mob_channel_status mcs
-				JOIN mobs m ON mcs.mob = m.id
-				JOIN maps mp ON m.map = mp.id
-				WHERE mcs.channel_number > mp.total_channels
-			)
-		`
+	if len(statusRecords) == 0 {
+		return
+	}
 
-		_, err := app.DB().NewQuery(deleteQuery).Execute()
+	// Group by mob ID to fetch each mob once
+	mobIDs := make(map[string]bool)
+	for _, statusRecord := range statusRecords {
+		mobIDs[statusRecord.GetString("mob")] = true
+	}
 
+	// Fetch all unique mobs with expanded maps
+	mobMapCache := make(map[string]*core.Record)
+	for mobID := range mobIDs {
+		mob, err := app.FindRecordById(COLLECTION_MOBS, mobID)
 		if err != nil {
-			log.Printf("[CLEANUP] mob_channel_status error=%v", err)
-			return
+			log.Printf("[CLEANUP] mob not found: %s, error=%v", mobID, err)
+			continue
+		}
+		if errs := app.ExpandRecord(mob, []string{"map"}, nil); len(errs) > 0 {
+			log.Printf("[CLEANUP] failed to expand map for mob %s: %v", mobID, errs)
+			continue
+		}
+		mobMapCache[mobID] = mob
+	}
+
+	// Check each status record
+	var recordsToDelete []string
+	for _, statusRecord := range statusRecords {
+		mobID := statusRecord.GetString("mob")
+		channelNumber := statusRecord.GetInt("channel_number")
+		region := statusRecord.GetString("region")
+
+		mob, exists := mobMapCache[mobID]
+		if !exists {
+			continue
 		}
 
-		log.Printf("[CLEANUP] mob_channel_status deleted=%d", countResult.Count)
+		mapRecord := mob.ExpandedOne("map")
+		if mapRecord == nil {
+			continue
+		}
+
+		regionData := mapRecord.Get("region_data")
+		if regionData == nil {
+			continue
+		}
+
+		regionMap, ok := regionData.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		regionChannels, exists := regionMap[region]
+		if !exists {
+			continue
+		}
+
+		var totalChannels int
+		if channels, ok := regionChannels.(float64); ok {
+			totalChannels = int(channels)
+		} else if channels, ok := regionChannels.(int); ok {
+			totalChannels = channels
+		} else {
+			continue
+		}
+
+		if channelNumber > totalChannels {
+			recordsToDelete = append(recordsToDelete, statusRecord.Id)
+		}
 	}
+
+	if len(recordsToDelete) == 0 {
+		log.Printf("[CLEANUP] mob_channel_status: no records to delete")
+		return
+	}
+
+	// Delete in batches
+	batchSize := 100
+	for i := 0; i < len(recordsToDelete); i += batchSize {
+		end := i + batchSize
+		if end > len(recordsToDelete) {
+			end = len(recordsToDelete)
+		}
+
+		batch := recordsToDelete[i:end]
+		placeholders := make([]string, len(batch))
+		params := dbx.Params{}
+
+		for j, id := range batch {
+			key := fmt.Sprintf("id%d", j)
+			placeholders[j] = fmt.Sprintf("{:%s}", key)
+			params[key] = id
+		}
+
+		deleteQuery := fmt.Sprintf(
+			"DELETE FROM %s WHERE id IN (%s)",
+			COLLECTION_MOB_CHANNEL_STATUS,
+			strings.Join(placeholders, ","),
+		)
+
+		_, err := app.DB().NewQuery(deleteQuery).Bind(params).Execute()
+		if err != nil {
+			log.Printf("[CLEANUP] mob_channel_status delete error=%v", err)
+			return
+		}
+	}
+
+	log.Printf("[CLEANUP] mob_channel_status deleted=%d", len(recordsToDelete))
 }

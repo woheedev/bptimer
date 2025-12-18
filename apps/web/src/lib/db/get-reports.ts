@@ -34,16 +34,20 @@ function mapReportToMobReport(
 
 export async function getLatestMobReports(
 	mobId: string,
-	reportCount: number
+	reportCount: number,
+	region: string
 ): Promise<MobReport[]> {
 	try {
 		// Fetch the latest X reports for this mob, sorted by newest
+		const filter = 'mob = {:mobId} && region = {:region}';
+		const params = { mobId, region };
+
 		const reports = await pb.collection('hp_reports').getList(1, reportCount, {
-			filter: pb.filter('mob = {:mobId}', { mobId }),
+			filter: pb.filter(filter, params),
 			sort: '-created',
 			expand: 'reporter',
 			skipTotal: true,
-			requestKey: `mob-reports-${mobId}` // Unique key per mob for parallel requests (prevent auto-cancellation)
+			requestKey: `mob-reports-${mobId}-${region}` // Unique key per mob for parallel requests (prevent auto-cancellation)
 		});
 
 		validateHpReports(reports.items);
@@ -60,20 +64,21 @@ export async function getLatestMobReports(
 
 export async function getChannelReports(
 	mobId: string,
-	channelNumber: number
+	channelNumber: number,
+	region: string
 ): Promise<MobReport[]> {
 	try {
 		// Query directly by channel number
 		// Using pb.filter() for safe parameter binding
+		const filter = 'mob = {:mobId} && channel_number = {:channelNumber} && region = {:region}';
+		const params = { mobId, channelNumber, region };
+
 		const reports = await pb.collection('hp_reports').getList(1, MAX_REPORTS_LIMIT, {
-			filter: pb.filter('mob = {:mobId} && channel_number = {:channelNumber}', {
-				mobId,
-				channelNumber
-			}),
+			filter: pb.filter(filter, params),
 			sort: '-created',
 			expand: 'reporter',
 			skipTotal: true,
-			requestKey: `channel-reports-${mobId}-${channelNumber}` // Unique key per channel
+			requestKey: `channel-reports-${mobId}-${channelNumber}-${region}` // Unique key per channel
 		});
 
 		validateHpReports(reports.items);

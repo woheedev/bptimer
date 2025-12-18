@@ -58,7 +58,7 @@ export const mapSchema = z.object({
 		.max(15),
 	uid: z.number().int().min(1).max(10),
 	name: z.string().min(1).max(100),
-	total_channels: z.number().int().min(1).max(1000)
+	region_data: z.record(z.string(), z.number().int())
 });
 
 export type Map = z.infer<typeof mapSchema>;
@@ -111,7 +111,8 @@ export const hpReportSchema = z.object({
 	location_image: z
 		.union([z.number().int().min(1).max(20), z.literal(0), z.literal(null)])
 		.optional()
-		.transform((val) => (val === 0 || val === null ? undefined : val))
+		.transform((val) => (val === 0 || val === null ? undefined : val)),
+	region: z.string()
 });
 
 export type HpReport = z.infer<typeof hpReportSchema>;
@@ -158,7 +159,8 @@ export const mobChannelStatusSchema = z.object({
 	location_image: z
 		.union([z.number().int().min(1).max(20), z.literal(0), z.literal(null)])
 		.optional()
-		.transform((val) => (val === 0 || val === null ? undefined : val))
+		.transform((val) => (val === 0 || val === null ? undefined : val)),
+	region: z.string()
 });
 
 export type MobChannelStatus = z.infer<typeof mobChannelStatusSchema>;

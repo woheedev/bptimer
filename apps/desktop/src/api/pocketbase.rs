@@ -336,10 +336,15 @@ impl PocketBaseClient {
                     Ok(mut mob) => {
                         if let Some(expand) = item.get("expand") {
                             if let Some(map) = expand.get("map") {
-                                if let Some(total_channels) =
-                                    map.get("total_channels").and_then(|v| v.as_i64())
-                                {
-                                    mob.total_channels = total_channels as i32;
+                                // Read from region_data["NA"] instead of total_channels
+                                if let Some(region_data) = map.get("region_data") {
+                                    if let Some(region_data_obj) = region_data.as_object() {
+                                        if let Some(na_channels) = region_data_obj.get("NA") {
+                                            if let Some(total_channels) = na_channels.as_i64() {
+                                                mob.total_channels = total_channels as i32;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -373,11 +378,13 @@ impl PocketBaseClient {
         let mob_list: Vec<String> = mob_ids.iter().cloned().collect();
 
         for chunk in mob_list.chunks(STATUS_CHUNK_SIZE) {
-            let filter = chunk
+            // Filter by mob IDs and region='NA' (hardcoded for now)
+            let mob_filter = chunk
                 .iter()
                 .map(|id| format!("mob='{}'", id))
                 .collect::<Vec<_>>()
                 .join(" || ");
+            let filter = format!("({}) && region='NA'", mob_filter);
 
             let mut page = 1;
             loop {

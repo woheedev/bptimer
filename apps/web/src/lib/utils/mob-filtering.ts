@@ -82,28 +82,32 @@ export function filterAndSortChannels<T extends ChannelEntry>(
  * @param mobIds - Optional favorites filter
  * @returns Promise resolving to mob data with channel lookup
  */
-export async function loadMobsData(type: 'boss' | 'magical_creature', mobIds?: string[]) {
+export async function loadMobsData(
+	type: 'boss' | 'magical_creature',
+	region: string,
+	mobIds?: string[]
+) {
 	try {
 		let response;
 		if (mobIds !== undefined) {
 			const { getMobsByIds } = await import('$lib/db/get-mobs');
-			response = await getMobsByIds(mobIds);
+			response = await getMobsByIds(mobIds, region);
 		} else if (type === 'boss') {
 			const { getBosses } = await import('$lib/db/get-mobs');
-			response = await getBosses();
+			response = await getBosses(region);
 		} else {
 			const { getMagicalCreatures } = await import('$lib/db/get-mobs');
-			response = await getMagicalCreatures();
+			response = await getMagicalCreatures(region);
 		}
 
 		if ('data' in response) {
 			return { data: response.data };
 		} else {
-			console.error(`Failed to fetch ${type}s:`, response.error);
+			console.error(`Failed to fetch ${type}:`, response.error);
 			return { data: [] };
 		}
 	} catch (error) {
-		console.error(`Error fetching ${type}s:`, error);
+		console.error(`Error fetching ${type}:`, error);
 		return { data: [] };
 	}
 }

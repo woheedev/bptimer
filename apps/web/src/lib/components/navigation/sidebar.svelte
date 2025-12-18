@@ -8,7 +8,8 @@
 	// import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
-	import { PAGES, PARTNER_PAGES } from '$lib/constants';
+	import { PAGES, PARTNER_PAGES, REGIONS } from '$lib/constants';
+	import { regionStore } from '$lib/stores/region.svelte';
 	// import { HeartHandshake } from '@lucide/svelte/icons';
 	import type { ComponentProps } from 'svelte';
 
@@ -17,8 +18,6 @@
 		collapsible = 'icon',
 		...restProps
 	}: ComponentProps<typeof Sidebar.Root> = $props();
-
-	let selectedRegionTab = $state('NA');
 
 	const sidebar = Sidebar.useSidebar();
 </script>
@@ -30,12 +29,12 @@
 	<Sidebar.Content class="gap-0">
 		<Sidebar.Group class="pb-0">
 			<!-- Region Selection -->
-			<div class="mb-2 hidden {sidebar.state === 'collapsed' ? 'hidden' : ''}">
-				<Tabs.Root bind:value={selectedRegionTab}>
+			<div class="mb-2 {sidebar.state === 'collapsed' ? 'hidden' : ''}">
+				<Tabs.Root bind:value={regionStore.value}>
 					<Tabs.List class="h-8 w-full">
-						<Tabs.Trigger value="NA" class="h-6 ">NA</Tabs.Trigger>
-						<Tabs.Trigger value="SEA" class="h-6 ">SEA</Tabs.Trigger>
-						<Tabs.Trigger value="JPKR" class="h-6 ">JP/KR</Tabs.Trigger>
+						{#each REGIONS as region (region.value)}
+							<Tabs.Trigger value={region.value} class="h-6 ">{region.label}</Tabs.Trigger>
+						{/each}
 					</Tabs.List>
 				</Tabs.Root>
 			</div>
@@ -101,7 +100,7 @@
 					rel="noopener noreferrer"
 					class="hover:underline"
 				>
-					Buy me a coffee ☕ | v1.3.3
+					Buy me a coffee ☕ | v1.4.0
 				</a>
 			</p>
 		{/if}

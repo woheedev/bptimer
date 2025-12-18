@@ -1,16 +1,18 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
   (app) => {
+    const regions = ['NA', 'SEA', 'JPKR'];
+
     // Seed maps first (upsert)
     const mapsCollection = app.findCollectionByNameOrId('maps');
     const mapsData = [
-      { uid: 1, name: 'Asterleeds', total_channels: 200 },
-      { uid: 2, name: 'Underground District', total_channels: 50 },
-      { uid: 3, name: 'Asteria Plains', total_channels: 200 },
-      { uid: 4, name: 'Windhowl Canyon', total_channels: 50 },
-      { uid: 5, name: "Skimmer's Lair", total_channels: 150 },
-      { uid: 6, name: 'Duskdye Woods', total_channels: 120 },
-      { uid: 7, name: 'Everfall Forest', total_channels: 200 }
+      { uid: 1, name: 'Asterleeds', region_data: { NA: 101, SEA: 500, JPKR: 500 } },
+      { uid: 2, name: 'Underground District', region_data: { NA: 10, SEA: 200, JPKR: 200 } },
+      { uid: 3, name: 'Asteria Plains', region_data: { NA: 70, SEA: 500, JPKR: 500 } },
+      { uid: 4, name: 'Windhowl Canyon', region_data: { NA: 10, SEA: 200, JPKR: 200 } },
+      { uid: 5, name: "Skimmer's Lair", region_data: { NA: 10, SEA: 200, JPKR: 200 } },
+      { uid: 6, name: 'Duskdye Woods', region_data: { NA: 10, SEA: 200, JPKR: 200 } },
+      { uid: 7, name: 'Everfall Forest', region_data: { NA: 10, SEA: 200, JPKR: 200 } }
     ];
 
     const mapRecords = [];
@@ -27,9 +29,10 @@ migrate(
         mapsCreated++;
       } else {
         record = existing[0];
-        // Update if total_channels changed
-        if (record.getInt('total_channels') !== data.total_channels) {
-          record.set('total_channels', data.total_channels);
+        // Update if region_data changed
+        const existingRegionData = record.get('region_data');
+        if (JSON.stringify(existingRegionData) !== JSON.stringify(data.region_data)) {
+          record.set('region_data', data.region_data);
           app.save(record);
         }
       }
@@ -228,33 +231,38 @@ migrate(
     for (const mobRecord of mobRecords) {
       const mobMapId = mobRecord.get('map');
 
-      // Find the map record to get total_channels
+      // Find the map record to get region_data
       const mapRecord = mapRecords.find((m) => m.id === mobMapId);
       if (!mapRecord) continue;
 
-      const totalChannels = mapRecord.getInt('total_channels');
+      const regionData = mapRecord.get('region_data');
 
-      // Create mob_channel_status for each channel
-      for (let channelNum = 1; channelNum <= totalChannels; channelNum++) {
-        // Check if entry already exists
-        const existingRecords = app.findRecordsByFilter(
-          mobChannelStatusCollection,
-          'mob = {:mobId} && channel_number = {:channelNum}',
-          '',
-          1,
-          0,
-          { mobId: mobRecord.id, channelNum: channelNum }
-        );
+      // Create mob_channel_status for each region
+      for (const region of regions) {
+        const totalChannels = regionData?.[region] || 0;
 
-        if (existingRecords.length === 0) {
-          const statusRecord = new Record(mobChannelStatusCollection);
-          statusRecord.set('mob', mobRecord.id);
-          statusRecord.set('channel_number', channelNum);
-          statusRecord.set('last_hp', 100);
-          app.save(statusRecord);
-          statusRecord.set('last_update', statusRecord.getDateTime('created'));
-          app.save(statusRecord);
-          mobChannelStatusCount++;
+        for (let channelNum = 1; channelNum <= totalChannels; channelNum++) {
+          // Check if entry already exists
+          const existingRecords = app.findRecordsByFilter(
+            mobChannelStatusCollection,
+            'mob = {:mobId} && channel_number = {:channelNum} && region = {:region}',
+            '',
+            1,
+            0,
+            { mobId: mobRecord.id, channelNum: channelNum, region: region }
+          );
+
+          if (existingRecords.length === 0) {
+            const statusRecord = new Record(mobChannelStatusCollection);
+            statusRecord.set('mob', mobRecord.id);
+            statusRecord.set('channel_number', channelNum);
+            statusRecord.set('region', region);
+            statusRecord.set('last_hp', 100);
+            app.save(statusRecord);
+            statusRecord.set('last_update', statusRecord.getDateTime('created'));
+            app.save(statusRecord);
+            mobChannelStatusCount++;
+          }
         }
       }
     }

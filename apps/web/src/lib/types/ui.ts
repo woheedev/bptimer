@@ -12,6 +12,11 @@ export type PageItem = {
 	badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline';
 };
 
+export interface RegionOption {
+	value: string;
+	label: string;
+}
+
 // Filter and Sort Types
 export type SortField = 'channel' | 'hp' | 'report_time';
 export type SortDirection = 'ascending' | 'descending';

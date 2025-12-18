@@ -181,24 +181,28 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			})
 		}
 
-		// Get mob data from cache by monster ID (auto-refreshes if expired)
-		mobData, err := MobCache.GetByMonsterID(e.App, data.MonsterID)
+		// Get mob data from cache by monster ID and region (auto-refreshes if expired)
+		mobData, err := MobCache.GetByMonsterID(e.App, data.MonsterID, region)
 		if err != nil {
 			return e.BadRequestError("Unknown monster ID", LogData{
 				"monster_id": data.MonsterID,
+				"region":     region,
 			})
 		}
 
 		// Check if submissions are currently blocked for this mob
-		if isInSubmissionBlackout(data.MonsterID) {
-			return e.BadRequestError("HP reports are currently closed for this mob. Please wait for the next reset.", LogData{
-				"mob_name": mobData.Name,
-			})
-		}
+		// TODO: Temporarily disabled - needs region-specific implementation
+		/*
+			if isInSubmissionBlackout(data.MonsterID) {
+				return e.BadRequestError("HP reports are currently closed for this mob. Please wait for the next reset.", LogData{
+					"mob_name": mobData.Name,
+				})
+			}
+		*/
 
-		// Validate channel number
+		// Validate channel number against region-specific channel count
 		if data.Channel < 1 || data.Channel > mobData.TotalChannels {
-			return e.BadRequestError(fmt.Sprintf("Line must be between 1 and %d for this mob", mobData.TotalChannels), nil)
+			return e.BadRequestError(fmt.Sprintf("Line must be between 1 and %d for this mob in region %s", mobData.TotalChannels, region), nil)
 		}
 
 		// Validate position if mob requires location tracking
@@ -226,6 +230,7 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		hpReport.Set("channel_number", data.Channel)
 		hpReport.Set("hp_percentage", data.HPPct)
 		hpReport.Set("reporter", userId)
+		hpReport.Set("region", region)
 
 		// Match the received position to the closest known location
 		if locationID, distSq := findClosestLocation(data.MonsterID, data.PosX, data.PosY, data.PosZ); locationID > 0 {
@@ -308,13 +313,14 @@ func calculateBossRespawnCutoff(e *core.RecordEvent, mobId string, defaultCutoff
 }
 
 // validateHPReport ensures users can't spam identical HP reports
-// within 5 minutes and that HP only decreases for same mob/channel.
+// within 5 minutes and that HP only decreases for same mob/channel/region.
 func validateHPReport(e *core.RecordEvent) error {
 	hpReport := e.Record
 	reporterId := hpReport.GetString("reporter")
 	mobId := hpReport.GetString("mob")
 	channelNumber := hpReport.GetInt("channel_number")
 	hpPercentage := hpReport.GetInt("hp_percentage")
+	region := hpReport.GetString("region")
 
 	defaultCutoff := time.Now().Add(-time.Duration(DUPLICATE_CHECK_WINDOW_MINUTES) * time.Minute)
 	cutoffTime := calculateBossRespawnCutoff(e, mobId, defaultCutoff)
@@ -325,6 +331,7 @@ func validateHPReport(e *core.RecordEvent) error {
 		"reporter": reporterId,
 		"mob":      mobId,
 		"channel":  channelNumber,
+		"region":   region,
 		"cutoff":   cutoffStr,
 	}
 
@@ -333,7 +340,7 @@ func validateHPReport(e *core.RecordEvent) error {
 	}{}
 
 	err := e.App.DB().
-		NewQuery("SELECT hp_percentage FROM hp_reports WHERE reporter = {:reporter} AND mob = {:mob} AND channel_number = {:channel} AND created > {:cutoff} ORDER BY created DESC LIMIT 1").
+		NewQuery("SELECT hp_percentage FROM hp_reports WHERE reporter = {:reporter} AND mob = {:mob} AND channel_number = {:channel} AND region = {:region} AND created > {:cutoff} ORDER BY created DESC LIMIT 1").
 		Bind(params).
 		One(&lastHpResult)
 
@@ -351,7 +358,7 @@ func validateHPReport(e *core.RecordEvent) error {
 
 	params["hp"] = hpPercentage
 	err = e.App.DB().
-		NewQuery("SELECT COUNT(*) as count FROM hp_reports WHERE reporter = {:reporter} AND mob = {:mob} AND channel_number = {:channel} AND hp_percentage = {:hp} AND created > {:cutoff}").
+		NewQuery("SELECT COUNT(*) as count FROM hp_reports WHERE reporter = {:reporter} AND mob = {:mob} AND channel_number = {:channel} AND region = {:region} AND hp_percentage = {:hp} AND created > {:cutoff}").
 		Bind(params).
 		One(&duplicateResult)
 

@@ -27,7 +27,7 @@ function createRealtimeMobsStore() {
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 	let eventQueue: RealtimeEventData[] = []; // Queue to store events during debounce
 
-	function subscribeToMobs(callback: MobUpdateCallback) {
+	function subscribeToMobs(callback: MobUpdateCallback, region: string) {
 		if (!browser) {
 			// No polling fallback - realtime only
 			return () => {};
@@ -56,7 +56,11 @@ function createRealtimeMobsStore() {
 		try {
 			// Subscribe to HP updates topic
 			// Format: [[mobId, channel, hp, locationImage], ...] (batched)
-			pbRealtime.realtime.subscribe('mob_hp_updates', (e) => {
+			// Topic depends on region: mob_hp_updates (NA), mob_hp_updates_sea, mob_hp_updates_jpkr
+			const topicSuffix = region === 'NA' ? '' : `_${region.toLowerCase()}`;
+			const hpTopic = `mob_hp_updates${topicSuffix}`;
+
+			pbRealtime.realtime.subscribe(hpTopic, (e) => {
 				const batch = typeof e === 'string' ? JSON.parse(e) : e;
 
 				// Process each update in the batch
@@ -83,7 +87,10 @@ function createRealtimeMobsStore() {
 
 			// Subscribe to reset events topic
 			// Format: array of mobIds
-			pbRealtime.realtime.subscribe('mob_resets', (e) => {
+			//const resetsTopic = `mob_resets${topicSuffix}`;
+			const resetsTopic = `mob_resets`;
+
+			pbRealtime.realtime.subscribe(resetsTopic, (e) => {
 				const mobIds = typeof e === 'string' ? JSON.parse(e) : e;
 
 				for (const mobId of mobIds) {
@@ -103,8 +110,8 @@ function createRealtimeMobsStore() {
 					debounceTimer = null;
 				}
 				eventQueue = []; // Clear any pending events
-				await pbRealtime.realtime.unsubscribe('mob_hp_updates');
-				await pbRealtime.realtime.unsubscribe('mob_resets');
+				await pbRealtime.realtime.unsubscribe(hpTopic);
+				await pbRealtime.realtime.unsubscribe(resetsTopic);
 				isConnected = false;
 			};
 		} catch (error) {
@@ -115,7 +122,7 @@ function createRealtimeMobsStore() {
 			if (connectionAttempts < MAX_REALTIME_RETRIES) {
 				connectionAttempts++;
 				setTimeout(() => {
-					subscribeToMobs(callback);
+					subscribeToMobs(callback, region);
 				}, REALTIME_RETRY_BASE_DELAY * connectionAttempts);
 			}
 
