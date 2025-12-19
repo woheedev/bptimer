@@ -11,8 +11,8 @@
 
 <div class="flex min-h-screen items-center justify-center p-4">
 	<div class="text-center">
-		<h1 class="text-destructive mb-4 text-2xl font-bold">Something went wrong</h1>
-		<p class="text-muted-foreground mb-4">
+		<h1 class="mb-4 text-2xl font-bold text-destructive">Something went wrong</h1>
+		<p class="mb-4 text-muted-foreground">
 			{error instanceof Error ? error.message : 'An unexpected error occurred'}
 		</p>
 		<Button onclick={reset}>Try again</Button>

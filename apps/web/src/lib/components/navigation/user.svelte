@@ -127,7 +127,7 @@
 					e.preventDefault();
 					handleSignIn();
 				}}
-				class="bg-muted/50 justify-center"
+				class="justify-center bg-muted/50"
 			>
 				<LogIn />
 				{#if sidebar.state !== 'collapsed'}

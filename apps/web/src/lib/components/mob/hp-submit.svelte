@@ -100,7 +100,7 @@
 					class="w-full"
 				/>
 				{#if validationError}
-					<p class="text-destructive text-sm">{validationError}</p>
+					<p class="text-sm text-destructive">{validationError}</p>
 				{/if}
 			</div>
 			{#if requiresLocation}
@@ -136,7 +136,7 @@
 {:else if selectedChannel && !user}
 	<Card.Root class="py-4">
 		<Card.Content class="text-center">
-			<p class="text-muted-foreground text-sm">Sign in to submit reports</p>
+			<p class="text-sm text-muted-foreground">Sign in to submit reports</p>
 		</Card.Content>
 	</Card.Root>
 {/if}

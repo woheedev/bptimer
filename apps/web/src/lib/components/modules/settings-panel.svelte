@@ -63,15 +63,15 @@
 
 		<div class="space-y-2">
 			<div class="flex items-center gap-2">
-				<Info class="text-muted-foreground h-4 w-4" />
+				<Info class="h-4 w-4 text-muted-foreground" />
 				<span class="text-sm font-medium">Priority Effects</span>
 			</div>
-			<p class="text-muted-foreground text-xs">
+			<p class="text-xs text-muted-foreground">
 				Selected: {priorityEffects.length}/{MODULE_MAX_PRIORITY_EFFECTS}
 			</p>
 			<div class="flex flex-wrap gap-1">
 				{#if priorityEffects.length === 0}
-					<span class="text-muted-foreground text-xs">None selected</span>
+					<span class="text-xs text-muted-foreground">None selected</span>
 				{:else}
 					{#each priorityEffects as effect (effect)}
 						<Badge variant="default" class="text-xs">
@@ -109,7 +109,7 @@
 		</Button>
 
 		{#if !canCalculate && validModulesCount > 0}
-			<div class="text-muted-foreground text-xs">
+			<div class="text-xs text-muted-foreground">
 				{#if validModulesCount < parseInt(numSlots)}
 					Need {parseInt(numSlots) - validModulesCount} more valid modules
 				{:else}

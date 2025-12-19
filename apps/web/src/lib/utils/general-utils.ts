@@ -11,6 +11,7 @@ import {
 	MINUTE,
 	SECOND,
 	SEA_LAUNCH_REFERENCE_DATE,
+	SEA_TIME_OFFSET_HOURS,
 	SPECIAL_MAGICAL_CREATURES_DEAD_TIMEOUT,
 	STALE_DATA_TIMEOUT,
 	STALE_DATA_TIMEOUT_FULL_HP,
@@ -324,6 +325,9 @@ export function calculateGameDay(region: string = 'NA'): number {
 	const gameLaunch = new Date(launchDate);
 	gameLaunch.setUTCHours(DAILY_RESET_HOUR, 0, 0, 0);
 	const gameNow = new Date();
+	if (region === 'SEA') {
+		gameNow.setUTCHours(gameNow.getUTCHours() + SEA_TIME_OFFSET_HOURS);
+	}
 	return Math.floor((gameNow.getTime() - gameLaunch.getTime()) / DAY) + 1;
 }
 

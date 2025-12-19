@@ -15,6 +15,7 @@ export const STALE_DATA_TIMEOUT_HIGH_HP = 3 * MINUTE; // For 80-99% HP
 export const MOB_NOTIFICATION_DURATION = 60 * SECOND;
 export const GAME_TIMEZONE_OFFSET = -2; // UTC-2 (deprecated)
 export const DAILY_RESET_HOUR = 7; // 5AM UTC-2 = 7AM UTC
+export const SEA_TIME_OFFSET_HOURS = -9; // Temporary offset for SEA timers
 export const DEBOUNCE_DELAY = 300; // ms
 export const SMALL_DELAY = 100; // ms
 export const JUST_NOW_THRESHOLD = 15; // seconds

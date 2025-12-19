@@ -1,5 +1,13 @@
-import { DAY, HOUR, MINUTE, SECOND } from '$lib/constants';
+import { DAY, HOUR, MINUTE, SECOND, SEA_TIME_OFFSET_HOURS } from '$lib/constants';
 import type { EventConfig, EventStatus } from '$lib/types/events';
+
+export function getAdjustedNow(region: string = 'NA'): Date {
+	const now = new Date();
+	if (region === 'SEA') {
+		now.setUTCHours(now.getUTCHours() + SEA_TIME_OFFSET_HOURS);
+	}
+	return now;
+}
 
 export const EVENT_CONFIGS: EventConfig[] = [
 	{
@@ -106,8 +114,8 @@ export function formatCountdown(milliseconds: number): string {
 	}
 }
 
-export function calculateNextEventTime(config: EventConfig): Date {
-	const now = new Date();
+export function calculateNextEventTime(config: EventConfig, region: string = 'NA'): Date {
+	const now = getAdjustedNow(region);
 	const currentDay = now.getUTCDay();
 	const currentHour = now.getUTCHours();
 	const currentMinute = now.getUTCMinutes();
@@ -148,10 +156,10 @@ export function calculateNextEventTime(config: EventConfig): Date {
 	return targetStart;
 }
 
-export function calculateCurrentEventEnd(config: EventConfig): Date | null {
+export function calculateCurrentEventEnd(config: EventConfig, region: string = 'NA'): Date | null {
 	if (!config.schedule.durationHours) return null;
 
-	const now = new Date();
+	const now = getAdjustedNow(region);
 	const currentDay = now.getUTCDay();
 
 	const todayStart = new Date(now);
@@ -188,10 +196,10 @@ export function calculateCurrentEventEnd(config: EventConfig): Date | null {
 	return null;
 }
 
-export function isEventActive(config: EventConfig): boolean {
+export function isEventActive(config: EventConfig, region: string = 'NA'): boolean {
 	if (!config.schedule.durationHours) return false;
 
-	const now = new Date();
+	const now = getAdjustedNow(region);
 	const currentDay = now.getUTCDay();
 
 	const todayStart = new Date(now);
@@ -230,6 +238,6 @@ export function isEventActive(config: EventConfig): boolean {
 	return config.schedule.inverted ? !isCurrentlyActive : isCurrentlyActive;
 }
 
-export function getEventStatus(config: EventConfig): EventStatus {
-	return isEventActive(config) ? 'active' : 'upcoming';
+export function getEventStatus(config: EventConfig, region: string = 'NA'): EventStatus {
+	return isEventActive(config, region) ? 'active' : 'upcoming';
 }

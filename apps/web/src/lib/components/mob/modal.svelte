@@ -553,7 +553,7 @@
 						{#if ui_state.isLoading}
 							<div class="flex h-32 items-center justify-center">
 								<div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
-								<p class="text-muted-foreground ml-3 text-sm">Loading mob data...</p>
+								<p class="ml-3 text-sm text-muted-foreground">Loading mob data...</p>
 							</div>
 						{:else if channelGrid.length > 0}
 							<div class="grid grid-cols-5 gap-1 lg:grid-cols-10">
@@ -570,7 +570,7 @@
 								{/each}
 							</div>
 						{:else}
-							<p class="text-muted-foreground py-8 text-center">No channel data available</p>
+							<p class="py-8 text-center text-muted-foreground">No channel data available</p>
 						{/if}
 					</Card.Content>
 				</Card.Root>

@@ -220,9 +220,9 @@
 												<img
 													src={getLocationImagePath(mob.name, type, location.locationImage)}
 													alt="Line {location.channelNumber}"
-													class="ring-primary h-36 w-36 rounded object-cover ring-2 md:h-48 md:w-48"
+													class="h-36 w-36 rounded object-cover ring-2 ring-primary md:h-48 md:w-48"
 												/>
-												<p class="text-muted-foreground text-xs">
+												<p class="text-xs text-muted-foreground">
 													Line {location.channelNumber} - {location.hpPercentage}%
 												</p>
 											</div>
@@ -236,7 +236,7 @@
 						<div class="h-8 w-8" aria-hidden="true"></div>
 					{/if}
 					<div class="flex items-center gap-2">
-						<label for="notifications-{mob.id}" class="text-muted-foreground text-sm">
+						<label for="notifications-{mob.id}" class="text-sm text-muted-foreground">
 							Notifications
 						</label>
 						<Switch
@@ -257,7 +257,7 @@
 			{:else if nextRespawnTime}
 				<!-- Progress bar for regular mobs -->
 				<div class="space-y-2">
-					<div class="text-muted-foreground flex justify-between text-xs">
+					<div class="flex justify-between text-xs text-muted-foreground">
 						<span>Time Until Respawn</span>
 						<span>{countdownText}</span>
 					</div>

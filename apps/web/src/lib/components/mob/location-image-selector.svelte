@@ -76,7 +76,7 @@
 				<Button
 					variant="outline"
 					class="w-full justify-between {required && !hasUserSelected
-						? 'border-destructive! ring-destructive/25! ring-2!'
+						? 'border-destructive! ring-2! ring-destructive/25!'
 						: ''}"
 				>
 					<MapPin class="h-4 w-4" />
@@ -103,12 +103,12 @@
 										onclick={() => handleLocationSelect(locationNumber)}
 										class="relative w-full overflow-hidden rounded-md border-2 transition-all {selectedLocation ===
 										locationNumber
-											? 'border-primary ring-primary ring-2 ring-offset-2'
+											? 'border-primary ring-2 ring-primary ring-offset-2'
 											: 'border-border hover:border-primary/50'}"
 										aria-label="Select {locationName}"
 										aria-pressed={selectedLocation === locationNumber}
 									>
-										<div class="bg-muted relative aspect-square overflow-hidden">
+										<div class="relative aspect-square overflow-hidden bg-muted">
 											<img
 												src={locationPath}
 												alt={locationName}
@@ -119,7 +119,7 @@
 											/>
 										</div>
 										<div class="absolute right-1 bottom-1">
-											<span class="bg-background/80 rounded px-1.5 py-0.5 text-xs font-medium">
+											<span class="rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium">
 												{locationNumber}
 											</span>
 										</div>

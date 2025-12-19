@@ -40,7 +40,7 @@
 		{#if isLoadingReports}
 			<div class="flex h-32 items-center justify-center">
 				<div class="h-6 w-6 animate-spin rounded-full border-b-2 border-gray-900"></div>
-				<p class="text-muted-foreground ml-3 text-sm">Loading reports...</p>
+				<p class="ml-3 text-sm text-muted-foreground">Loading reports...</p>
 			</div>
 		{:else if reports.length > 0}
 			{#each reports as report (report.id)}
@@ -51,7 +51,7 @@
 				/>
 			{/each}
 		{:else}
-			<p class="text-muted-foreground py-4 text-center text-sm">No reports yet</p>
+			<p class="py-4 text-center text-sm text-muted-foreground">No reports yet</p>
 		{/if}
 	</Card.Content>
 </Card.Root>

@@ -253,10 +253,10 @@
 					<Tabs.Content value="modules" class="space-y-6">
 						<div class="grid gap-6 lg:grid-cols-3">
 							<div class="flex max-h-[calc(100vh-12rem)] flex-col overflow-hidden lg:col-span-2">
-								<div class="bg-background flex shrink-0 items-center justify-between border-b pb-4">
+								<div class="flex shrink-0 items-center justify-between border-b bg-background pb-4">
 									<div>
 										<h2 class="text-xl font-semibold">Your Modules</h2>
-										<p class="text-muted-foreground text-sm">
+										<p class="text-sm text-muted-foreground">
 											Valid modules: {validModulesCount}/{modules.length}
 										</p>
 									</div>

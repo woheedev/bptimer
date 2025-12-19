@@ -151,7 +151,7 @@
 		<Card.Content>
 			{#if !currentUser}
 				<div class="space-y-6 text-center">
-					<p class="text-muted-foreground text-lg">
+					<p class="text-lg text-muted-foreground">
 						You need to sign in to generate an API key for your DPS meter app.
 					</p>
 					<div class="space-y-4">
@@ -168,7 +168,7 @@
 				</div>
 			{:else}
 				<div class="space-y-6">
-					<p class="text-muted-foreground mb-4">Control API access for your applications.</p>
+					<p class="mb-4 text-muted-foreground">Control API access for your applications.</p>
 
 					<div class="mb-4 flex items-center space-x-2">
 						<Switch
@@ -229,7 +229,7 @@
 
 							<div class="flex items-center justify-between border-t pt-4">
 								<button
-									class="text-muted-foreground hover:text-foreground text-sm"
+									class="text-sm text-muted-foreground hover:text-foreground"
 									onclick={() => goto(resolve('/'))}
 								>
 									← Back to home

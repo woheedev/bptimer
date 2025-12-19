@@ -1,11 +1,13 @@
 import { browser } from '$app/environment';
 import { EVENT_TIMERS_COLLAPSED_STORAGE_KEY } from '$lib/constants';
+import { regionStore } from '$lib/stores/region.svelte';
 import type { EventTimer } from '$lib/types/events';
 import {
 	calculateCurrentEventEnd,
 	calculateNextEventTime,
 	EVENT_CONFIGS,
 	formatCountdown,
+	getAdjustedNow,
 	getEventStatus,
 	isEventActive
 } from '$lib/utils/event-timer';
@@ -20,19 +22,20 @@ function createEventTimersStore() {
 	}
 
 	function updateTimers() {
-		const now = new Date();
+		const region = regionStore.value;
+		const now = getAdjustedNow(region);
 
 		timers = EVENT_CONFIGS.map((config) => {
-			const active = isEventActive(config);
-			const status = getEventStatus(config);
-			const nextEventTime = calculateNextEventTime(config);
+			const active = isEventActive(config, region);
+			const status = getEventStatus(config, region);
+			const nextEventTime = calculateNextEventTime(config, region);
 
 			const targetTime: Date = config.schedule.inverted
 				? active
 					? nextEventTime
-					: calculateCurrentEventEnd(config)!
+					: calculateCurrentEventEnd(config, region)!
 				: active && config.schedule.durationHours
-					? calculateCurrentEventEnd(config)!
+					? calculateCurrentEventEnd(config, region)!
 					: nextEventTime;
 
 			const timeUntil = targetTime.getTime() - now.getTime();

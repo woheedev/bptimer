@@ -178,7 +178,7 @@
 			<!-- Search result count -->
 			{#if searchQuery && !loading}
 				<div class="px-4 lg:px-6">
-					<p class="text-muted-foreground text-sm">
+					<p class="text-sm text-muted-foreground">
 						Found {filteredMobs.length}
 						{filteredMobs.length === 1 ? singularName : pluralName}
 						{#if searchQuery}
@@ -193,15 +193,15 @@
 			{:else if isFavorites && filteredMobs.length === 0}
 				<!-- Empty state for no favorites -->
 				<Empty class="min-h-96">
-					<p class="text-muted-foreground mb-2 text-lg">No favorite mobs yet</p>
-					<p class="text-muted-foreground text-sm">
+					<p class="mb-2 text-lg text-muted-foreground">No favorite mobs yet</p>
+					<p class="text-sm text-muted-foreground">
 						Click the heart icon on mob cards to add favorites
 					</p>
 				</Empty>
 			{:else if filteredMobs.length === 0 && searchQuery}
 				<!-- Empty state for no search results -->
 				<Empty class="min-h-96">
-					<p class="text-muted-foreground mb-2 text-lg">
+					<p class="mb-2 text-lg text-muted-foreground">
 						No {pluralName} found for "{searchQuery}"
 					</p>
 					<Button onclick={() => (searchQuery = '')} variant="outline" size="sm"

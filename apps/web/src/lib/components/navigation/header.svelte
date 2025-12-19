@@ -12,7 +12,7 @@
 	const sidebar = Sidebar.useSidebar();
 </script>
 
-<div class="bg-background sticky top-0 z-10">
+<div class="sticky top-0 z-10 bg-background">
 	<header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
 		<Button
 			class="size-8"
@@ -47,7 +47,7 @@
 			href="https://github.com/woheedev/bptimer"
 			variant="outline"
 			size="icon-sm"
-			class="dark:text-foreground flex"
+			class="flex dark:text-foreground"
 			target="_blank"
 			rel="noopener noreferrer"
 			aria-label="View source code on GitHub"

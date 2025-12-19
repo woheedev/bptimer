@@ -23,7 +23,7 @@
 </script>
 
 <Sidebar.Root {collapsible} {...restProps}>
-	<Sidebar.Header class="border-sidebar-border h-16 justify-center border-b">
+	<Sidebar.Header class="h-16 justify-center border-b border-sidebar-border">
 		<NavigationUser />
 	</Sidebar.Header>
 	<Sidebar.Content class="gap-0">
@@ -100,7 +100,7 @@
 					rel="noopener noreferrer"
 					class="hover:underline"
 				>
-					Buy me a coffee ☕ | v1.4.1
+					Buy me a coffee ☕ | v1.4.2
 				</a>
 			</p>
 		{/if}

@@ -204,9 +204,9 @@
 		<!-- Right side: Vote buttons -->
 		<div class="flex shrink-0 items-center gap-1">
 			{#if BYPASS_VOTE_USER_IDS.includes(report.reporter_id)}
-				<span class="text-muted-foreground text-xs">API report</span>
+				<span class="text-xs text-muted-foreground">API report</span>
 			{:else if votingExpired}
-				<span class="text-muted-foreground text-xs">Voting closed</span>
+				<span class="text-xs text-muted-foreground">Voting closed</span>
 			{:else}
 				<button
 					class="flex items-center gap-1 rounded-md px-2 py-1 transition-colors disabled:opacity-50"
@@ -238,7 +238,7 @@
 
 	<!-- Bottom: Timestamp -->
 	<div class="absolute right-2 bottom-2">
-		<p class="text-muted-foreground text-xs">
+		<p class="text-xs text-muted-foreground">
 			{formatTimeAgo(report.create_time, new Date(now))}
 		</p>
 	</div>

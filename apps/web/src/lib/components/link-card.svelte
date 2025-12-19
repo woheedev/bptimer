@@ -32,11 +32,11 @@
 		{/if}
 		<Card.Title class="leading-snug {badge ? 'max-w-[calc(100%-4rem)]' : ''}">{title}</Card.Title>
 		{#if author}
-			<p class="text-muted-foreground text-xs">by {author}</p>
+			<p class="text-xs text-muted-foreground">by {author}</p>
 		{/if}
 	</Card.Header>
 	<Card.Content class="flex-1 pt-0">
-		<p class="text-muted-foreground text-xs whitespace-pre-line">{description}</p>
+		<p class="text-xs whitespace-pre-line text-muted-foreground">{description}</p>
 	</Card.Content>
 	<Card.Footer class="flex flex-col gap-2">
 		{#if driver === 'npcap'}

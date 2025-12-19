@@ -52,7 +52,7 @@
 			<Card.Content class="space-y-1.5">
 				{#each result.optimalModules as module (module.id)}
 					<div class="rounded-md border-2 border-dashed p-2.5">
-						<div class="text-muted-foreground mb-1 text-xs font-medium">{module.id}</div>
+						<div class="mb-1 text-xs font-medium text-muted-foreground">{module.id}</div>
 						<div class="space-y-0.5">
 							{#each module.effects.filter((e) => e.name && e.level > 0) as effect (`${effect.name}-${effect.level}`)}
 								<div class="flex items-center justify-between text-sm">
@@ -74,7 +74,7 @@
 		<Card.Root>
 			<Card.Header>
 				<Card.Title>Combined Effects</Card.Title>
-				<p class="text-muted-foreground text-sm">Total effects from optimal combination</p>
+				<p class="text-sm text-muted-foreground">Total effects from optimal combination</p>
 			</Card.Header>
 			<Card.Content>
 				<div class="space-y-2">
@@ -105,7 +105,7 @@
 						</h4>
 						<div class="space-y-1">
 							{#each Object.entries(result.prioritizedEffects) as [effect, level] (effect)}
-								<div class="bg-muted/50 flex justify-between rounded p-2 text-sm">
+								<div class="flex justify-between rounded bg-muted/50 p-2 text-sm">
 									<span>{effect}</span>
 									<span class="font-medium">+{level}/{getNextTierThreshold(level)}</span>
 								</div>
@@ -118,9 +118,9 @@
 	</div>
 {:else}
 	<div class="py-12 text-center">
-		<Calculator class="text-muted-foreground mx-auto mb-4 h-16 w-16" />
+		<Calculator class="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
 		<h3 class="mb-2 text-lg font-medium">No Results Yet</h3>
-		<p class="text-muted-foreground mb-4">
+		<p class="mb-4 text-muted-foreground">
 			Configure your modules and priority effects, then calculate the optimal setup
 		</p>
 	</div>

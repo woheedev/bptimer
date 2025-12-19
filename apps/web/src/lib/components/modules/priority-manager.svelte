@@ -21,7 +21,7 @@
 	<Card.Root>
 		<Card.Header>
 			<Card.Title>Available Effects</Card.Title>
-			<p class="text-muted-foreground text-sm">
+			<p class="text-sm text-muted-foreground">
 				Click to add to priority effects (max {MODULE_MAX_PRIORITY_EFFECTS})
 			</p>
 		</Card.Header>
@@ -29,7 +29,7 @@
 			<div class="grid max-h-96 gap-2 overflow-y-auto">
 				{#each availableEffects as effect (effect)}
 					<div
-						class="hover:bg-muted/50 flex items-center justify-between rounded-lg border p-3 transition-colors"
+						class="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
 					>
 						<span class="text-sm font-medium">{effect}</span>
 						<Button
@@ -44,7 +44,7 @@
 					</div>
 				{/each}
 				{#if availableEffects.length === 0}
-					<div class="text-muted-foreground py-8 text-center">
+					<div class="py-8 text-center text-muted-foreground">
 						<Info class="mx-auto mb-2 h-8 w-8" />
 						<p class="text-sm">All effects have been selected</p>
 					</div>
@@ -61,16 +61,16 @@
 					<Badge variant="outline">{priorityEffects.length} selected</Badge>
 				{/if}
 			</Card.Title>
-			<p class="text-muted-foreground text-sm">
+			<p class="text-sm text-muted-foreground">
 				Use arrows to reorder • Higher priority = higher score multiplier
 			</p>
 		</Card.Header>
 		<Card.Content>
 			{#if priorityEffects.length === 0}
 				<div class="flex flex-col items-center justify-center py-8 text-center">
-					<Target class="text-muted-foreground mb-4 h-12 w-12" />
+					<Target class="mb-4 h-12 w-12 text-muted-foreground" />
 					<p class="text-muted-foreground">No priority effects selected</p>
-					<p class="text-muted-foreground text-sm">
+					<p class="text-sm text-muted-foreground">
 						Add effects from the available list to get started
 					</p>
 				</div>
@@ -110,7 +110,7 @@
 									variant="ghost"
 									size="sm"
 									onclick={() => onToggle(effect)}
-									class="text-destructive hover:text-destructive h-8 w-8 p-0"
+									class="h-8 w-8 p-0 text-destructive hover:text-destructive"
 								>
 									<Trash class="h-3 w-3" />
 								</Button>

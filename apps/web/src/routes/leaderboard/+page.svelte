@@ -133,7 +133,7 @@
 								<!-- Stats -->
 								<div class="relative flex shrink-0 text-sm">
 									<div class="text-center">
-										<div class="text-muted-foreground text-xs">Reputation</div>
+										<div class="text-xs text-muted-foreground">Reputation</div>
 										<div class="font-semibold {getReputationColorClass(reputation)}">
 											{reputation}
 										</div>

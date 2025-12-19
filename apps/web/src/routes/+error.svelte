@@ -14,7 +14,7 @@
 <div class="flex min-h-screen items-center justify-center p-4">
 	<Card.Root class="w-full max-w-md">
 		<Card.Header class="text-center">
-			<Card.Title class="text-destructive text-2xl font-bold">
+			<Card.Title class="text-2xl font-bold text-destructive">
 				{page.status || 'Error'}
 			</Card.Title>
 		</Card.Header>

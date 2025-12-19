@@ -23,7 +23,7 @@
 	<Card.Header>
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-2">
-				<GripVertical class="text-muted-foreground h-4 w-4" />
+				<GripVertical class="h-4 w-4 text-muted-foreground" />
 				<Card.Title class="text-lg">{module.id}</Card.Title>
 				{#if hasActiveEffects}
 					<Badge variant="secondary" class="text-xs">Active</Badge>
