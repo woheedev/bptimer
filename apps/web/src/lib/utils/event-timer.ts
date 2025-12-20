@@ -1,12 +1,21 @@
-import { DAY, HOUR, MINUTE, SECOND, SEA_TIME_OFFSET_HOURS } from '$lib/constants';
-import type { EventConfig, EventStatus } from '$lib/types/events';
+import { DAY, DEFAULT_REGION, HOUR, MINUTE, REGIONS, SECOND } from '$lib/constants';
+import type { EventConfig, EventSchedule, EventStatus } from '$lib/types/events';
 
-export function getAdjustedNow(region: string = 'NA'): Date {
-	const now = new Date();
-	if (region === 'SEA') {
-		now.setUTCHours(now.getUTCHours() + SEA_TIME_OFFSET_HOURS);
+function isRegionSpecificSchedule(
+	schedule: EventSchedule | Record<string, EventSchedule>
+): schedule is Record<string, EventSchedule> {
+	const regionKeys = REGIONS.map((r) => r.value);
+	return regionKeys.every((key) => key in schedule);
+}
+
+export function getScheduleForRegion(
+	config: EventConfig,
+	region: string = DEFAULT_REGION
+): EventSchedule {
+	if (isRegionSpecificSchedule(config.schedule)) {
+		return config.schedule[region] || config.schedule[DEFAULT_REGION];
 	}
-	return now;
+	return config.schedule;
 }
 
 export const EVENT_CONFIGS: EventConfig[] = [
@@ -15,10 +24,18 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		name: 'Guild Hunt',
 		icon: '/images/events/guild-hunt.webp',
 		schedule: {
-			days: [5, 6, 0],
-			hour: 16, // 2PM UTC-2
-			minute: 0,
-			durationHours: 14
+			NA: {
+				days: [5, 6, 0],
+				hour: 16, // 2PM UTC-2
+				minute: 0,
+				durationHours: 14
+			},
+			SEA: {
+				days: [5, 6, 0],
+				hour: 1, // 1AM UTC-2
+				minute: 0,
+				durationHours: 14
+			}
 		}
 	},
 	{
@@ -26,10 +43,19 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		name: 'World Boss',
 		icon: '/images/events/world-boss.webp',
 		schedule: {
-			days: [0, 1, 2, 3, 4, 5, 6],
-			hour: 18, // 4PM UTC-2
-			minute: 0,
-			durationHours: 6
+			NA: {
+				days: [0, 1, 2, 3, 4, 5, 6],
+				hour: 18, // 4PM UTC-2
+				minute: 0,
+				durationHours: 6
+			},
+			SEA: {
+				days: [0, 1, 2, 3, 4, 5, 6],
+				hour: 13, // 11:30AM UTC-2
+				minute: 30,
+				durationHours: 1,
+				durationMinutes: 30
+			}
 		}
 	},
 	{
@@ -37,10 +63,18 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		name: 'Guild Dance',
 		icon: '/images/events/guild-dance.webp',
 		schedule: {
-			days: [5],
-			hour: 17, // 3PM UTC-2
-			minute: 30,
-			durationHours: 12
+			NA: {
+				days: [5],
+				hour: 17, // 3:30PM UTC-2
+				minute: 30,
+				durationHours: 12
+			},
+			SEA: {
+				days: [5],
+				hour: 4, // 2:30AM UTC-2
+				minute: 30,
+				durationHours: 12
+			}
 		}
 	},
 	{
@@ -48,13 +82,24 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		name: 'Stimen Vaults',
 		icon: '/images/events/stimen-vault.webp',
 		schedule: {
-			days: [1],
-			hour: 4, // 2AM UTC-2
-			minute: 0,
-			durationHours: 3,
-			intervalWeeks: 2,
-			referenceDate: '2025-10-20',
-			inverted: true
+			NA: {
+				days: [1],
+				hour: 4, // 2AM UTC-2
+				minute: 0,
+				durationHours: 3,
+				intervalWeeks: 2,
+				referenceDate: '2025-10-20',
+				inverted: true
+			},
+			SEA: {
+				days: [0], // TODO: NEED TO VERIFY ACTUAL TIME / RESET DATE
+				hour: 19,
+				minute: 0,
+				durationHours: 3,
+				intervalWeeks: 2,
+				referenceDate: '2025-10-20',
+				inverted: true
+			}
 		}
 	},
 	{
@@ -62,9 +107,16 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		name: 'Daily Reset',
 		icon: '/images/events/daily-reset.webp',
 		schedule: {
-			days: [0, 1, 2, 3, 4, 5, 6],
-			hour: 7, // 5AM UTC-2
-			minute: 0
+			NA: {
+				days: [0, 1, 2, 3, 4, 5, 6],
+				hour: 7, // 5AM UTC-2
+				minute: 0
+			},
+			SEA: {
+				days: [0, 1, 2, 3, 4, 5, 6],
+				hour: 22, // 8PM UTC-2
+				minute: 0
+			}
 		}
 	},
 	{
@@ -72,9 +124,16 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		name: 'Weekly Reset',
 		icon: '/images/events/weekly-reset.webp',
 		schedule: {
-			days: [1],
-			hour: 7, // 5AM UTC-2
-			minute: 0
+			NA: {
+				days: [1],
+				hour: 7, // 5AM UTC-2
+				minute: 0
+			},
+			SEA: {
+				days: [0],
+				hour: 22, // 8PM UTC-2
+				minute: 0
+			}
 		}
 	}
 ];
@@ -85,15 +144,57 @@ function getWeeksSinceReference(referenceDate: string, targetDate: Date): number
 	return Math.floor(diffMs / (7 * DAY));
 }
 
-function isValidIntervalWeek(config: EventConfig, date: Date): boolean {
-	if (!config.schedule.intervalWeeks || config.schedule.intervalWeeks <= 1) {
+function isValidIntervalWeek(
+	config: EventConfig,
+	date: Date,
+	region: string = DEFAULT_REGION
+): boolean {
+	const schedule = getScheduleForRegion(config, region);
+	if (!schedule.intervalWeeks || schedule.intervalWeeks <= 1) {
 		return true;
 	}
-	if (!config.schedule.referenceDate) {
+	if (!schedule.referenceDate) {
 		return true;
 	}
-	const weeksSince = getWeeksSinceReference(config.schedule.referenceDate, date);
-	return weeksSince % config.schedule.intervalWeeks === 0;
+	const weeksSince = getWeeksSinceReference(schedule.referenceDate, date);
+	return weeksSince % schedule.intervalWeeks === 0;
+}
+
+function addDurationToDate(date: Date, schedule: EventSchedule): Date {
+	const result = new Date(date);
+	result.setUTCHours(
+		result.getUTCHours() + (schedule.durationHours || 0),
+		result.getUTCMinutes() + (schedule.durationMinutes || 0),
+		0,
+		0
+	);
+	return result;
+}
+
+function checkEventActiveForDay(
+	config: EventConfig,
+	schedule: EventSchedule,
+	now: Date,
+	dayOffset: number,
+	region: string
+): { isActive: boolean; start: Date; end: Date } | null {
+	const currentDay = now.getUTCDay();
+	const targetDay = (currentDay + dayOffset + 7) % 7;
+
+	if (!schedule.days?.includes(targetDay)) {
+		return null;
+	}
+
+	const eventStart = new Date(now);
+	eventStart.setUTCDate(eventStart.getUTCDate() + dayOffset);
+	eventStart.setUTCHours(schedule.hour, schedule.minute, 0, 0);
+	const eventEnd = addDurationToDate(eventStart, schedule);
+
+	if (isValidIntervalWeek(config, eventStart, region) && now >= eventStart && now < eventEnd) {
+		return { isActive: true, start: eventStart, end: eventEnd };
+	}
+
+	return null;
 }
 
 export function formatCountdown(milliseconds: number): string {
@@ -114,24 +215,25 @@ export function formatCountdown(milliseconds: number): string {
 	}
 }
 
-export function calculateNextEventTime(config: EventConfig, region: string = 'NA'): Date {
-	const now = getAdjustedNow(region);
+export function calculateNextEventTime(config: EventConfig, region: string = DEFAULT_REGION): Date {
+	const schedule = getScheduleForRegion(config, region);
+	const now = new Date();
 	const currentDay = now.getUTCDay();
 	const currentHour = now.getUTCHours();
 	const currentMinute = now.getUTCMinutes();
 
 	const targetStart = new Date(now);
-	targetStart.setUTCHours(config.schedule.hour, config.schedule.minute, 0, 0);
+	targetStart.setUTCHours(schedule.hour, schedule.minute, 0, 0);
 
 	const eventHasPassed =
-		currentHour > config.schedule.hour ||
-		(currentHour === config.schedule.hour && currentMinute >= config.schedule.minute);
+		currentHour > schedule.hour ||
+		(currentHour === schedule.hour && currentMinute >= schedule.minute);
 
 	let daysToAdd = 0;
-	if (!config.schedule.days?.includes(currentDay) || eventHasPassed) {
+	if (!schedule.days?.includes(currentDay) || eventHasPassed) {
 		for (let i = 1; i <= 7; i++) {
 			const nextDay = (currentDay + i) % 7;
-			if (config.schedule.days?.includes(nextDay)) {
+			if (schedule.days?.includes(nextDay)) {
 				daysToAdd = i;
 				break;
 			}
@@ -140,15 +242,11 @@ export function calculateNextEventTime(config: EventConfig, region: string = 'NA
 
 	targetStart.setUTCDate(targetStart.getUTCDate() + daysToAdd);
 
-	if (
-		config.schedule.intervalWeeks &&
-		config.schedule.intervalWeeks > 1 &&
-		config.schedule.referenceDate
-	) {
-		const weeksSince = getWeeksSinceReference(config.schedule.referenceDate, targetStart);
-		const remainder = weeksSince % config.schedule.intervalWeeks;
+	if (schedule.intervalWeeks && schedule.intervalWeeks > 1 && schedule.referenceDate) {
+		const weeksSince = getWeeksSinceReference(schedule.referenceDate, targetStart);
+		const remainder = weeksSince % schedule.intervalWeeks;
 		if (remainder !== 0) {
-			const weeksToAdd = config.schedule.intervalWeeks - remainder;
+			const weeksToAdd = schedule.intervalWeeks - remainder;
 			targetStart.setUTCDate(targetStart.getUTCDate() + weeksToAdd * 7);
 		}
 	}
@@ -156,88 +254,41 @@ export function calculateNextEventTime(config: EventConfig, region: string = 'NA
 	return targetStart;
 }
 
-export function calculateCurrentEventEnd(config: EventConfig, region: string = 'NA'): Date | null {
-	if (!config.schedule.durationHours) return null;
+export function calculateCurrentEventEnd(
+	config: EventConfig,
+	region: string = DEFAULT_REGION
+): Date | null {
+	const schedule = getScheduleForRegion(config, region);
+	if (!schedule.durationHours && !schedule.durationMinutes) return null;
 
-	const now = getAdjustedNow(region);
-	const currentDay = now.getUTCDay();
+	const now = new Date();
 
-	const todayStart = new Date(now);
-	todayStart.setUTCHours(config.schedule.hour, config.schedule.minute, 0, 0);
-	const todayEnd = new Date(todayStart);
-	todayEnd.setUTCHours(todayEnd.getUTCHours() + config.schedule.durationHours);
-
-	if (
-		config.schedule.days?.includes(currentDay) &&
-		isValidIntervalWeek(config, todayStart) &&
-		now >= todayStart &&
-		now < todayEnd
-	) {
-		return todayEnd;
+	const todayCheck = checkEventActiveForDay(config, schedule, now, 0, region);
+	if (todayCheck) {
+		return todayCheck.end;
 	}
 
-	const previousDay = (currentDay - 1 + 7) % 7;
-	if (config.schedule.days?.includes(previousDay)) {
-		const yesterdayStart = new Date(now);
-		yesterdayStart.setUTCDate(yesterdayStart.getUTCDate() - 1);
-		yesterdayStart.setUTCHours(config.schedule.hour, config.schedule.minute, 0, 0);
-		const yesterdayEnd = new Date(yesterdayStart);
-		yesterdayEnd.setUTCHours(yesterdayEnd.getUTCHours() + config.schedule.durationHours);
-
-		if (
-			isValidIntervalWeek(config, yesterdayStart) &&
-			now >= yesterdayStart &&
-			now < yesterdayEnd
-		) {
-			return yesterdayEnd;
-		}
+	const yesterdayCheck = checkEventActiveForDay(config, schedule, now, -1, region);
+	if (yesterdayCheck) {
+		return yesterdayCheck.end;
 	}
 
 	return null;
 }
 
-export function isEventActive(config: EventConfig, region: string = 'NA'): boolean {
-	if (!config.schedule.durationHours) return false;
+export function isEventActive(config: EventConfig, region: string = DEFAULT_REGION): boolean {
+	const schedule = getScheduleForRegion(config, region);
+	if (!schedule.durationHours && !schedule.durationMinutes) return false;
 
-	const now = getAdjustedNow(region);
-	const currentDay = now.getUTCDay();
+	const now = new Date();
 
-	const todayStart = new Date(now);
-	todayStart.setUTCHours(config.schedule.hour, config.schedule.minute, 0, 0);
-	const todayEnd = new Date(todayStart);
-	todayEnd.setUTCHours(todayEnd.getUTCHours() + config.schedule.durationHours);
+	const todayCheck = checkEventActiveForDay(config, schedule, now, 0, region);
+	const yesterdayCheck = checkEventActiveForDay(config, schedule, now, -1, region);
+	const isCurrentlyActive = todayCheck?.isActive || yesterdayCheck?.isActive || false;
 
-	let isCurrentlyActive = false;
-
-	if (
-		config.schedule.days?.includes(currentDay) &&
-		isValidIntervalWeek(config, todayStart) &&
-		now >= todayStart &&
-		now < todayEnd
-	) {
-		isCurrentlyActive = true;
-	}
-
-	const previousDay = (currentDay - 1 + 7) % 7;
-	if (config.schedule.days?.includes(previousDay)) {
-		const yesterdayStart = new Date(now);
-		yesterdayStart.setUTCDate(yesterdayStart.getUTCDate() - 1);
-		yesterdayStart.setUTCHours(config.schedule.hour, config.schedule.minute, 0, 0);
-		const yesterdayEnd = new Date(yesterdayStart);
-		yesterdayEnd.setUTCHours(yesterdayEnd.getUTCHours() + config.schedule.durationHours);
-
-		if (
-			isValidIntervalWeek(config, yesterdayStart) &&
-			now >= yesterdayStart &&
-			now < yesterdayEnd
-		) {
-			isCurrentlyActive = true;
-		}
-	}
-
-	return config.schedule.inverted ? !isCurrentlyActive : isCurrentlyActive;
+	return schedule.inverted ? !isCurrentlyActive : isCurrentlyActive;
 }
 
-export function getEventStatus(config: EventConfig, region: string = 'NA'): EventStatus {
+export function getEventStatus(config: EventConfig, region: string = DEFAULT_REGION): EventStatus {
 	return isEventActive(config, region) ? 'active' : 'upcoming';
 }

@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import {
+	DEFAULT_REGION,
 	LATEST_CHANNELS_DISPLAY_COUNT,
 	MAX_REALTIME_RETRIES,
 	REALTIME_DEBOUNCE_DELAY,
@@ -57,7 +58,7 @@ function createRealtimeMobsStore() {
 			// Subscribe to HP updates topic
 			// Format: [[mobId, channel, hp, locationImage], ...] (batched)
 			// Topic depends on region: mob_hp_updates (NA), mob_hp_updates_sea, mob_hp_updates_jpkr
-			const topicSuffix = region === 'NA' ? '' : `_${region.toLowerCase()}`;
+			const topicSuffix = region === DEFAULT_REGION ? '' : `_${region.toLowerCase()}`;
 			const hpTopic = `mob_hp_updates${topicSuffix}`;
 
 			pbRealtime.realtime.subscribe(hpTopic, (e) => {

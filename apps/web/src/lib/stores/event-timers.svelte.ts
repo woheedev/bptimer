@@ -7,8 +7,8 @@ import {
 	calculateNextEventTime,
 	EVENT_CONFIGS,
 	formatCountdown,
-	getAdjustedNow,
 	getEventStatus,
+	getScheduleForRegion,
 	isEventActive
 } from '$lib/utils/event-timer';
 
@@ -23,18 +23,19 @@ function createEventTimersStore() {
 
 	function updateTimers() {
 		const region = regionStore.value;
-		const now = getAdjustedNow(region);
+		const now = new Date();
 
 		timers = EVENT_CONFIGS.map((config) => {
+			const schedule = getScheduleForRegion(config, region);
 			const active = isEventActive(config, region);
 			const status = getEventStatus(config, region);
 			const nextEventTime = calculateNextEventTime(config, region);
 
-			const targetTime: Date = config.schedule.inverted
+			const targetTime: Date = schedule.inverted
 				? active
 					? nextEventTime
 					: calculateCurrentEventEnd(config, region)!
-				: active && config.schedule.durationHours
+				: active && (schedule.durationHours || schedule.durationMinutes)
 					? calculateCurrentEventEnd(config, region)!
 					: nextEventTime;
 

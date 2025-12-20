@@ -2,7 +2,7 @@
  * Constants for common values used throughout the app
  */
 
-import type { PageItem, ToolsSections } from '$lib/types/ui';
+import type { PageItem, ToolsSections, RegionOption } from '$lib/types/ui';
 
 // Time constants
 export const SECOND = 1000;
@@ -14,13 +14,9 @@ export const STALE_DATA_TIMEOUT_FULL_HP = 5 * MINUTE; // For 100% HP
 export const STALE_DATA_TIMEOUT_HIGH_HP = 3 * MINUTE; // For 80-99% HP
 export const MOB_NOTIFICATION_DURATION = 60 * SECOND;
 export const GAME_TIMEZONE_OFFSET = -2; // UTC-2 (deprecated)
-export const DAILY_RESET_HOUR = 7; // 5AM UTC-2 = 7AM UTC
-export const SEA_TIME_OFFSET_HOURS = -9; // Temporary offset for SEA timers
 export const DEBOUNCE_DELAY = 300; // ms
 export const SMALL_DELAY = 100; // ms
 export const JUST_NOW_THRESHOLD = 15; // seconds
-export const LAUNCH_REFERENCE_DATE = '2025-10-09';
-export const SEA_LAUNCH_REFERENCE_DATE = '2025-12-17';
 
 // Realtime
 export const REALTIME_DEBOUNCE_DELAY = 20; // ms
@@ -299,11 +295,17 @@ export const MODULE_OPTIMIZER_LOCAL_SEARCH_MIN_RELEVANT_MODULES = 10;
 export const MODULE_OPTIMIZER_LOCAL_SEARCH_SAMPLE_SIZE = 15;
 export const MODULE_OPTIMIZER_YIELD_INTERVAL = 10;
 
+// Region constants
 export const DEFAULT_REGION = 'NA';
-export const REGIONS: { value: string; label: string }[] = [
+export const REGION_LAUNCH_DATES: Record<string, string> = {
+	NA: '2025-10-09',
+	SEA: '2025-12-17'
+};
+export const REGIONS: RegionOption[] = [
 	{ value: 'NA', label: 'GLOBAL' },
 	{ value: 'SEA', label: 'SEA' }
 ];
+
 // Tools & Resources constants
 export const TOOLS_SECTIONS: ToolsSections = {
 	officialTools: {

@@ -24,7 +24,7 @@ global-hotkey = "0.7"
 image = { version = "0.25.9", features = ["webp"] }
 instant = "0.1.13"
 log = "0.4"
-netdev = "0.39.0"
+netdev = "0.40.0"
 open = "5.3"
 pcap = { version = "2.4.0", features = ["capture-stream"] }
 prost = "0.14.1"

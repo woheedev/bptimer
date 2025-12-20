@@ -1,22 +1,21 @@
 import {
-	DAILY_RESET_HOUR,
 	DAY,
+	DEFAULT_REGION,
 	GAME_TIMEZONE_OFFSET,
 	HOUR,
 	HP_HIGH_THRESHOLD,
 	JUST_NOW_THRESHOLD,
-	LAUNCH_REFERENCE_DATE,
 	MAGICAL_CREATURE_RESET_HOURS,
 	MAX_HP_VALUE,
 	MINUTE,
+	REGION_LAUNCH_DATES,
 	SECOND,
-	SEA_LAUNCH_REFERENCE_DATE,
-	SEA_TIME_OFFSET_HOURS,
 	SPECIAL_MAGICAL_CREATURES_DEAD_TIMEOUT,
 	STALE_DATA_TIMEOUT,
 	STALE_DATA_TIMEOUT_FULL_HP,
 	STALE_DATA_TIMEOUT_HIGH_HP
 } from '$lib/constants';
+import { EVENT_CONFIGS, getScheduleForRegion } from '$lib/utils/event-timer';
 import type { ChannelEntry } from '$lib/types/mobs';
 
 /**
@@ -315,19 +314,25 @@ export function sortChannelsForMobCard<T extends ChannelEntry>(channels: T[]): T
 
 /**
  * Calculates the current game day based on launch date and daily reset time
- * Daily reset is at 7AM UTC (5AM UTC-2)
+ * Uses the daily reset schedule from event configs for the given region
  *
- * @param region - The region to use for launch date
+ * @param region - The region to use for launch date and reset time
  * @returns The current game day number
  */
-export function calculateGameDay(region: string = 'NA'): number {
-	const launchDate = region === 'SEA' ? SEA_LAUNCH_REFERENCE_DATE : LAUNCH_REFERENCE_DATE;
-	const gameLaunch = new Date(launchDate);
-	gameLaunch.setUTCHours(DAILY_RESET_HOUR, 0, 0, 0);
-	const gameNow = new Date();
-	if (region === 'SEA') {
-		gameNow.setUTCHours(gameNow.getUTCHours() + SEA_TIME_OFFSET_HOURS);
+export function calculateGameDay(region: string = DEFAULT_REGION): number {
+	const dailyResetConfig = EVENT_CONFIGS.find((config) => config.id === 'daily-reset');
+	if (!dailyResetConfig) {
+		throw new Error('Daily reset config not found');
 	}
+
+	const launchDate = REGION_LAUNCH_DATES[region];
+	const gameLaunch = new Date(launchDate);
+
+	// Get the daily reset hour for this region
+	const schedule = getScheduleForRegion(dailyResetConfig, region);
+
+	gameLaunch.setUTCHours(schedule.hour, schedule.minute || 0, 0, 0);
+	const gameNow = new Date();
 	return Math.floor((gameNow.getTime() - gameLaunch.getTime()) / DAY) + 1;
 }
 

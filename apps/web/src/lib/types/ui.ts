@@ -12,8 +12,10 @@ export type PageItem = {
 	badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline';
 };
 
+export type Region = 'NA' | 'SEA';
+
 export interface RegionOption {
-	value: string;
+	value: Region;
 	label: string;
 }
 
