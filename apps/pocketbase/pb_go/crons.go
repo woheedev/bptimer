@@ -29,8 +29,8 @@ func InitCronJobs(app core.App) {
 }
 
 // handleMobRespawn checks for mobs that should respawn based on current time.
-// Bosses respawn every hour at their respawn_time minute.
-// Magical creatures respawn at specific UTC hours.
+// Bosses respawn every hour at their respawn_time minute and broadcast to all regions.
+// Magical creatures respawn at region-specific UTC hours.
 func handleMobRespawn(app core.App) {
 	now := time.Now().UTC()
 	currentMinute := now.Minute()
@@ -55,6 +55,8 @@ func handleMobRespawn(app core.App) {
 		return
 	}
 
+	// Group mobs by topic (topic -> []mobIds)
+	mobsByTopic := make(map[string][]string)
 	var resetMobIds []string
 
 	for _, mob := range respawningMobs {
@@ -63,23 +65,35 @@ func handleMobRespawn(app core.App) {
 		mobType := mob.GetString("type")
 		monsterID := mob.GetInt("monster_id")
 
-		shouldReset := false
+		var topics []string
+
 		if mobType == "boss" {
-			shouldReset = true
+			// Bosses reset for all regions
+			topics = []string{SSE_TOPIC_RESETS, SSE_TOPIC_RESETS_SEA}
 		} else if mobType == "magical_creature" {
-			// Check if current hour matches any reset hour for this magical creature
-			if resetHours, exists := MagicalCreatureResetHours[monsterID]; exists {
-				for _, hour := range resetHours {
-					if hour == currentHour {
-						shouldReset = true
-						break
+			// Check if current hour matches any reset hour for any region
+			if regionHours, exists := MagicalCreatureResetHours[monsterID]; exists {
+				for region, hours := range regionHours {
+					for _, hour := range hours {
+						if hour == currentHour {
+							switch region {
+							case "NA":
+								topics = append(topics, SSE_TOPIC_RESETS)
+							case "SEA":
+								topics = append(topics, SSE_TOPIC_RESETS_SEA)
+							}
+							break
+						}
 					}
 				}
 			}
 		}
 
-		if shouldReset {
+		if len(topics) > 0 {
 			resetMobIds = append(resetMobIds, mobId)
+			for _, topic := range topics {
+				mobsByTopic[topic] = append(mobsByTopic[topic], mobId)
+			}
 		} else {
 			log.Printf("[MOB_RESPAWN] skipped mob=%s type=%s hour=%d", mobName, mobType, currentHour)
 		}
@@ -97,10 +111,11 @@ func handleMobRespawn(app core.App) {
 
 	log.Printf("[MOB_RESPAWN] reset mobs=%d time=%02d:%02d", len(resetMobIds), currentHour, currentMinute)
 
-	if err := broadcastMobResets(app, resetMobIds); err != nil {
-		log.Printf("[MOB_RESPAWN] broadcast error=%v", err)
-	} else {
-		log.Printf("[MOB_RESPAWN] broadcast sent=%d", len(resetMobIds))
+	// Broadcast each topic with its mobs
+	for topic, mobIds := range mobsByTopic {
+		if err := broadcastMobResets(app, mobIds, topic); err != nil {
+			log.Printf("[MOB_RESPAWN] broadcast error topic=%s: %v", topic, err)
+		}
 	}
 }
 
@@ -128,7 +143,7 @@ func batchUpdateMobChannelStatus(app core.App, mobIds []string) error {
 	return err
 }
 
-func broadcastMobResets(app core.App, mobIds []string) error {
+func broadcastMobResets(app core.App, mobIds []string, topic string) error {
 	if len(mobIds) == 0 {
 		return nil
 	}
@@ -139,7 +154,7 @@ func broadcastMobResets(app core.App, mobIds []string) error {
 	}
 
 	message := subscriptions.Message{
-		Name: SSE_TOPIC_RESETS,
+		Name: topic,
 		Data: data,
 	}
 
@@ -150,7 +165,7 @@ func broadcastMobResets(app core.App, mobIds []string) error {
 	droppedCount := 0
 
 	for _, client := range clients {
-		if !client.HasSubscription(SSE_TOPIC_RESETS) {
+		if !client.HasSubscription(topic) {
 			continue
 		}
 
@@ -178,7 +193,7 @@ func broadcastMobResets(app core.App, mobIds []string) error {
 	}
 
 	if droppedCount > 0 {
-		log.Printf("[MOB_RESPAWN] broadcast complete: sent=%d dropped=%d total_clients=%d", sentCount, droppedCount, len(clients))
+		log.Printf("[MOB_RESPAWN] broadcast complete topic=%s: sent=%d dropped=%d total_clients=%d", topic, sentCount, droppedCount, len(clients))
 	}
 
 	return nil

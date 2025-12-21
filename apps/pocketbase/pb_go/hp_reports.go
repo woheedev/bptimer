@@ -13,11 +13,16 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
-// isInSubmissionBlackout checks if we're in the blackout period for a mob.
-func isInSubmissionBlackout(monsterID int) bool {
-	resetHours, exists := MagicalCreatureResetHours[monsterID]
+// isInSubmissionBlackout checks if we're in the blackout period for a mob in a specific region.
+func isInSubmissionBlackout(monsterID int, region string) bool {
+	regionHours, exists := MagicalCreatureResetHours[monsterID]
+	if !exists {
+		return false // Not a magical creature
+	}
+
+	resetHours, exists := regionHours[region]
 	if !exists || len(resetHours) == 0 {
-		return false // Not a magical creature or no resets configured
+		return false // No resets configured for this region
 	}
 
 	currentHour := time.Now().UTC().Hour()
@@ -191,14 +196,12 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		}
 
 		// Check if submissions are currently blocked for this mob
-		// TODO: Temporarily disabled - needs region-specific implementation
-		/*
-			if isInSubmissionBlackout(data.MonsterID) {
-				return e.BadRequestError("HP reports are currently closed for this mob. Please wait for the next reset.", LogData{
-					"mob_name": mobData.Name,
-				})
-			}
-		*/
+		if isInSubmissionBlackout(data.MonsterID, region) {
+			return e.BadRequestError("HP reports are currently closed for this mob. Please wait for the next reset.", LogData{
+				"mob_name": mobData.Name,
+				"region":   region,
+			})
+		}
 
 		// Validate channel number against region-specific channel count
 		if data.Channel < 1 || data.Channel > mobData.TotalChannels {

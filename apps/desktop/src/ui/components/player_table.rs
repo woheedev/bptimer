@@ -171,7 +171,13 @@ enum ColumnValue<'a> {
 }
 
 impl<'a> ColumnValue<'a> {
-    fn render(&self, ui: &mut Ui, text_color: Color32, local_player_uid: Option<i64>) {
+    fn render(
+        &self,
+        ui: &mut Ui,
+        text_color: Color32,
+        local_player_uid: Option<i64>,
+        settings: &Settings,
+    ) {
         match self {
             ColumnValue::LiveDps(player) => {
                 crate::ui::components::dps_graph::render_dps_graph(ui, player, text_color);
@@ -196,7 +202,12 @@ impl<'a> ColumnValue<'a> {
                         text_color,
                     );
                     ui.add_space(player_table::ICON_NAME_SPACING);
-                    let label = ui.colored_label(text_color, *name);
+                    let display_name = metadata
+                        .ability_score
+                        .filter(|_| settings.show_ability_score_in_name)
+                        .map(|score| format!("{} ({})", name, score))
+                        .unwrap_or_else(|| name.to_string());
+                    let label = ui.colored_label(text_color, display_name);
                     label.on_hover_ui(|ui| {
                         ui.vertical(|ui| {
                             ui.label(format!("UID: {}", uid));
@@ -342,7 +353,7 @@ pub fn render_player_table(
                                         info_cache,
                                         icon_cache,
                                     );
-                                    value.render(ui, text_color, local_player_uid);
+                                    value.render(ui, text_color, local_player_uid, settings);
                                 });
                             }
                         });

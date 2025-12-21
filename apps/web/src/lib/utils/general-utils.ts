@@ -163,13 +163,17 @@ export function toSnakeCase(str: string): string {
 /**
  * Calculates the next respawn time for a mob based on its type and respawn_time
  * @param mob - The mob object
+ * @param region - The region to use for magical creature reset hours (defaults to DEFAULT_REGION)
  * @returns Date object for next respawn, or null if no specific respawn schedule is found such as the nappos and gold boarlet
  */
-export function getNextRespawnTime(mob: {
-	name: string;
-	type: string;
-	respawn_time?: number;
-}): Date | null {
+export function getNextRespawnTime(
+	mob: {
+		name: string;
+		type: string;
+		respawn_time?: number;
+	},
+	region: string = DEFAULT_REGION
+): Date | null {
 	const now = new Date();
 	const currentHour = now.getUTCHours();
 	const currentMinute = now.getUTCMinutes();
@@ -192,13 +196,15 @@ export function getNextRespawnTime(mob: {
 
 		return nextRespawn;
 	} else if (mob.type === 'magical_creature') {
-		// Magical creatures have specific reset hours (in UTC)
-		const hours =
-			MAGICAL_CREATURE_RESET_HOURS[mob.name as keyof typeof MAGICAL_CREATURE_RESET_HOURS];
+		// Magical creatures have region-specific reset hours (in UTC)
+		const regionHours = MAGICAL_CREATURE_RESET_HOURS[mob.name];
+		if (!regionHours) return null;
+
+		const hours = regionHours[region];
 		if (!hours) return null;
 
 		// Find next reset hour
-		let nextHour = hours.find((hour) => hour > currentHour);
+		let nextHour = hours.find((hour: number) => hour > currentHour);
 		if (!nextHour) {
 			// Wrap to next day
 			nextHour = hours[0];
@@ -224,15 +230,23 @@ export function getNextRespawnTime(mob: {
  * Gets the respawn cycle length in milliseconds for a mob
  * @param type - The mob type
  * @param mobName - The mob name (needed for magical creatures)
+ * @param region - The region to use for magical creature reset hours (defaults to DEFAULT_REGION)
  * @returns Cycle length in milliseconds
  */
-function getRespawnCycleLength(type: 'boss' | 'magical_creature', mobName?: string): number {
+function getRespawnCycleLength(
+	type: 'boss' | 'magical_creature',
+	mobName?: string,
+	region: string = DEFAULT_REGION
+): number {
 	if (type === 'boss') {
 		return HOUR;
 	}
 
 	// For magical creatures, calculate the actual cycle length between last and next spawn
-	const hours = MAGICAL_CREATURE_RESET_HOURS[mobName as keyof typeof MAGICAL_CREATURE_RESET_HOURS];
+	const regionHours = mobName ? MAGICAL_CREATURE_RESET_HOURS[mobName] : undefined;
+	if (!regionHours) return 0;
+
+	const hours = regionHours[region];
 	if (!hours) return 0;
 
 	const currentHour = new Date().getUTCHours();
@@ -264,19 +278,21 @@ function getRespawnCycleLength(type: 'boss' | 'magical_creature', mobName?: stri
  * @param nextRespawnTime - The next respawn time
  * @param type - The mob type
  * @param mobName - The mob name (needed for magical creatures)
+ * @param region - The region to use for magical creature reset hours (defaults to DEFAULT_REGION)
  * @returns Progress percentage (0-100, 100 = just respawned, 0 = about to respawn)
  */
 export function calculateRespawnProgress(
 	nextRespawnTime: Date,
 	type: 'boss' | 'magical_creature',
-	mobName?: string
+	mobName?: string,
+	region: string = DEFAULT_REGION
 ): number {
 	const now = Date.now();
 	const timeLeft = nextRespawnTime.getTime() - now;
 
 	if (timeLeft <= 0) return 0;
 
-	const totalTime = getRespawnCycleLength(type, mobName);
+	const totalTime = getRespawnCycleLength(type, mobName, region);
 	if (totalTime === 0) return 0;
 
 	return Math.max(0, Math.min(100, (timeLeft / totalTime) * 100));

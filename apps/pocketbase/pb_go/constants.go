@@ -13,6 +13,7 @@ const SSE_BATCH_INTERVAL_MS = 200
 const SSE_IDLE_TIMEOUT_MINUTES = 2
 const SSE_TOPIC_HP_UPDATES = "mob_hp_updates"
 const SSE_TOPIC_RESETS = "mob_resets"
+const SSE_TOPIC_RESETS_SEA = "mob_resets_sea"
 const COLLECTION_CACHE_KEY = "pb_mob_channel_status_collection"
 
 // Collection names
@@ -53,10 +54,17 @@ var (
 	rateLimitedCooldown = time.Duration(RATE_LIMITED_COOLDOWN_MINUTES) * time.Minute
 )
 
-// Maps magical creature monster_ids to UTC hours when they respawn
-var MagicalCreatureResetHours = map[int][]int{
-	10902: {12, 16, 20}, // Lovely Boarlet: 10AM, 2PM, 6PM UTC-2
-	10903: {14, 18, 22}, // Breezy Boarlet: 12PM, 4PM, 8PM UTC-2
+// Maps magical creature monster_ids to region-specific UTC hours when they respawn
+// Format: monsterID -> region -> []hours
+var MagicalCreatureResetHours = map[int]map[string][]int{
+	10902: { // Lovely Boarlet
+		"NA":  {12, 16, 20}, // 10AM, 2PM, 6PM UTC-2
+		"SEA": {3, 7, 11},   // 1AM, 5AM, 9AM UTC-2
+	},
+	10903: { // Breezy Boarlet
+		"NA":  {14, 18, 22}, // 12PM, 4PM, 8PM UTC-2
+		"SEA": {5, 9, 13},   // 3AM, 7AM, 11AM UTC-2
+	},
 }
 
 // Hours after last magical creature reset to stop accepting HP report submissions

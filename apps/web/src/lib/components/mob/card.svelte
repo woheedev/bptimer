@@ -8,6 +8,7 @@
 	import { Switch } from '$lib/components/ui/switch/index.js';
 	import { Toggle } from '$lib/components/ui/toggle';
 	import {
+		DEFAULT_REGION,
 		LATEST_CHANNELS_DISPLAY_COUNT,
 		MAGICAL_CREATURE_RESET_HOURS,
 		SECOND,
@@ -33,7 +34,8 @@
 		latestChannels = [],
 		onViewDetails,
 		onChannelClick,
-		type = 'boss'
+		type = 'boss',
+		region = DEFAULT_REGION
 	}: {
 		mob: {
 			id: string;
@@ -52,6 +54,7 @@
 			channel: number
 		) => void;
 		type?: 'boss' | 'magical_creature' | string;
+		region?: string;
 	} = $props();
 
 	function handleViewDetails() {
@@ -102,15 +105,15 @@
 
 	// Respawn countdown logic
 	const nextRespawnTime = $derived.by(() => {
-		if (
-			type === 'boss' ||
-			MAGICAL_CREATURE_RESET_HOURS[mob.name as keyof typeof MAGICAL_CREATURE_RESET_HOURS]
-		) {
-			return getNextRespawnTime({
-				name: mob.name,
-				type,
-				respawn_time: mob.respawn_time
-			});
+		if (type === 'boss' || MAGICAL_CREATURE_RESET_HOURS[mob.name]) {
+			return getNextRespawnTime(
+				{
+					name: mob.name,
+					type,
+					respawn_time: mob.respawn_time
+				},
+				region
+			);
 		}
 		return null;
 	});
@@ -137,7 +140,8 @@
 					progressValue = calculateRespawnProgress(
 						nextRespawnTime!,
 						type as 'boss' | 'magical_creature',
-						mob.name
+						mob.name,
+						region
 					);
 				}
 			};

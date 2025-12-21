@@ -51,6 +51,8 @@ pub struct Settings {
     pub clear_combat_data_idle_seconds: Option<u64>, // None = disabled, Some(seconds) = clear after idle
     #[serde(default = "default_true")]
     pub clear_combat_data_on_server_change: bool, // Clear data when server/channel changes
+    #[serde(default)]
+    pub show_ability_score_in_name: bool, // Show ability score appended to player name
     // DPS calculation settings
     #[serde(default = "default_dps_cutoff_seconds")]
     pub dps_calculation_cutoff_seconds: f32, // Seconds after last hit to stop DPS calculation
@@ -192,6 +194,7 @@ impl Default for Settings {
             hidden_columns: default_hidden_columns(),
             clear_combat_data_idle_seconds: None,
             clear_combat_data_on_server_change: true,
+            show_ability_score_in_name: false,
             text_color: [255, 255, 255, 255], // White text by default (RGBA)
             show_console: false,              // Console hidden by default
             hotkeys: default_hotkeys(),

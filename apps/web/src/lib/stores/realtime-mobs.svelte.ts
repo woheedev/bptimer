@@ -88,8 +88,7 @@ function createRealtimeMobsStore() {
 
 			// Subscribe to reset events topic
 			// Format: array of mobIds
-			//const resetsTopic = `mob_resets${topicSuffix}`;
-			const resetsTopic = `mob_resets`;
+			const resetsTopic = `mob_resets${topicSuffix}`;
 
 			pbRealtime.realtime.subscribe(resetsTopic, (e) => {
 				const mobIds = typeof e === 'string' ? JSON.parse(e) : e;

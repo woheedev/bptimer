@@ -212,18 +212,19 @@ pub mod account_id_regions {
         REGIONS.iter().find(|r| r.region.as_ref() == Some(region))
     }
 
-    /// Get SSE topic name for a region (e.g., "mob_hp_updates", "mob_hp_updates_sea")
-    pub fn get_sse_topic(region: &MobTimersRegion) -> String {
+    /// Get topic name for a region, adding region suffix if not NA
+    /// (e.g., "mob_hp_updates" for NA, "mob_hp_updates_sea" for SEA)
+    pub fn get_topic_name(region: &MobTimersRegion, base_name: &str) -> String {
         let region_info = get_region_info(region);
         match region_info {
             Some(info) => {
                 if info.name == "NA" {
-                    "mob_hp_updates".to_string()
+                    base_name.to_string()
                 } else {
-                    format!("mob_hp_updates_{}", info.name.to_lowercase())
+                    format!("{}_{}", base_name, info.name.to_lowercase())
                 }
             }
-            None => "mob_hp_updates".to_string(), // Fallback
+            None => base_name.to_string(), // Fallback
         }
     }
 

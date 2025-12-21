@@ -418,7 +418,19 @@ pub fn render_settings_view(
             if ui
                 .checkbox(
                     &mut settings.clear_combat_data_on_server_change,
-                    "Clear on Server/Channel Change",
+                    "Clear on Server/Channel change",
+                )
+                .changed()
+            {
+                *settings_save_timer = Some(Instant::now());
+            }
+
+            ui.add_space(spacing::SM);
+
+            if ui
+                .checkbox(
+                    &mut settings.show_ability_score_in_name,
+                    "Show ability score in player name",
                 )
                 .changed()
             {

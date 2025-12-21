@@ -219,6 +219,7 @@
 							onViewDetails={handleViewDetails}
 							onChannelClick={handleViewDetails}
 							type={isFavorites ? mob.type : type}
+							region={regionStore.value}
 						/>
 					{/each}
 				</div>

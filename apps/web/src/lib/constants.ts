@@ -51,9 +51,16 @@ export const DEFAULT_FILTER_SORT_SETTINGS: FilterSortSettings = {
 };
 
 // Mob respawn constants (all times in UTC)
-export const MAGICAL_CREATURE_RESET_HOURS = {
-	'Lovely Boarlet': [12, 16, 20], // 10AM, 2PM, 6PM UTC-2
-	'Breezy Boarlet': [14, 18, 22] // 12PM, 4PM, 8PM UTC-2
+// Format: mobName -> region -> []hours
+export const MAGICAL_CREATURE_RESET_HOURS: Record<string, Record<string, number[]>> = {
+	'Lovely Boarlet': {
+		NA: [12, 16, 20], // 10AM, 2PM, 6PM UTC-2
+		SEA: [3, 7, 11] // 1AM, 5AM, 9AM UTC-2
+	},
+	'Breezy Boarlet': {
+		NA: [14, 18, 22], // 12PM, 4PM, 8PM UTC-2
+		SEA: [5, 9, 13] // 3AM, 7AM, 11AM UTC-2
+	}
 };
 
 export const SPECIAL_MAGICAL_CREATURES_DEAD_TIMEOUT: Record<string, number> = {

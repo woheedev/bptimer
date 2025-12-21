@@ -23,8 +23,9 @@ const DEAD_STALE_SECS: i64 = 30 * 60;
 const ALIVE_STALE_SECS: i64 = 5 * 60;
 
 fn get_realtime_topics(region: &MobTimersRegion) -> Vec<String> {
-    let hp_updates_topic = account_id_regions::get_sse_topic(region);
-    vec![hp_updates_topic, "mob_resets".to_string()]
+    let hp_updates_topic = account_id_regions::get_topic_name(region, "mob_hp_updates");
+    let resets_topic = account_id_regions::get_topic_name(region, "mob_resets");
+    vec![hp_updates_topic, resets_topic]
 }
 
 fn get_region_string(region: &MobTimersRegion) -> String {
@@ -260,7 +261,7 @@ impl PocketBaseClient {
                         }
                     } else if event.event.starts_with("mob_hp_updates") {
                         self.handle_hp_updates(&event.data).await?;
-                    } else if event.event == "mob_resets" {
+                    } else if event.event.starts_with("mob_resets") {
                         self.handle_reset_events(&event.data).await?;
                     } else if event.event.starts_with("PB_") {
                         debug!("Realtime control event: {}", event.event);
