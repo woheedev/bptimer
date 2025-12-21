@@ -4,7 +4,7 @@ go 1.25.3
 
 require (
 	github.com/pocketbase/dbx v1.11.0
-	github.com/pocketbase/pocketbase v0.34.2
+	github.com/pocketbase/pocketbase v0.35.0
 	github.com/prometheus/client_golang v1.23.2
 )
 

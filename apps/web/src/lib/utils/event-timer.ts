@@ -97,7 +97,7 @@ export const EVENT_CONFIGS: EventConfig[] = [
 				minute: 0,
 				durationHours: 3,
 				intervalWeeks: 2,
-				referenceDate: '2025-10-20',
+				referenceDate: '2025-12-08',
 				inverted: true
 			}
 		}
