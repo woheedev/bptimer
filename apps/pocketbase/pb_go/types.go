@@ -51,3 +51,8 @@ type RegionInfo struct {
 	Name    string // Region code
 	Enabled bool   // Whether to handle this region's reports
 }
+
+type MobReset struct {
+	MobID  string // PocketBase mob record ID
+	Region string // Region code (NA, SEA, etc.)
+}

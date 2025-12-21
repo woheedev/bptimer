@@ -57,7 +57,7 @@ func handleMobRespawn(app core.App) {
 
 	// Group mobs by topic (topic -> []mobIds)
 	mobsByTopic := make(map[string][]string)
-	var resetMobIds []string
+	var mobResets []MobReset
 
 	for _, mob := range respawningMobs {
 		mobName := mob.GetString("name")
@@ -66,10 +66,12 @@ func handleMobRespawn(app core.App) {
 		monsterID := mob.GetInt("monster_id")
 
 		var topics []string
+		var regions []string
 
 		if mobType == "boss" {
 			// Bosses reset for all regions
 			topics = []string{SSE_TOPIC_RESETS, SSE_TOPIC_RESETS_SEA}
+			regions = []string{"NA", "SEA"}
 		} else if mobType == "magical_creature" {
 			// Check if current hour matches any reset hour for any region
 			if regionHours, exists := MagicalCreatureResetHours[monsterID]; exists {
@@ -79,8 +81,10 @@ func handleMobRespawn(app core.App) {
 							switch region {
 							case "NA":
 								topics = append(topics, SSE_TOPIC_RESETS)
+								regions = append(regions, "NA")
 							case "SEA":
 								topics = append(topics, SSE_TOPIC_RESETS_SEA)
+								regions = append(regions, "SEA")
 							}
 							break
 						}
@@ -90,7 +94,12 @@ func handleMobRespawn(app core.App) {
 		}
 
 		if len(topics) > 0 {
-			resetMobIds = append(resetMobIds, mobId)
+			for _, region := range regions {
+				mobResets = append(mobResets, MobReset{
+					MobID:  mobId,
+					Region: region,
+				})
+			}
 			for _, topic := range topics {
 				mobsByTopic[topic] = append(mobsByTopic[topic], mobId)
 			}
@@ -99,17 +108,17 @@ func handleMobRespawn(app core.App) {
 		}
 	}
 
-	if len(resetMobIds) == 0 {
+	if len(mobResets) == 0 {
 		log.Printf("[MOB_RESPAWN] no mobs to reset")
 		return
 	}
 
-	if err := batchUpdateMobChannelStatus(app, resetMobIds); err != nil {
+	if err := batchUpdateMobChannelStatus(app, mobResets); err != nil {
 		log.Printf("[MOB_RESPAWN] reset error=%v", err)
 		return
 	}
 
-	log.Printf("[MOB_RESPAWN] reset mobs=%d time=%02d:%02d", len(resetMobIds), currentHour, currentMinute)
+	log.Printf("[MOB_RESPAWN] reset mobs=%d time=%02d:%02d", len(mobResets), currentHour, currentMinute)
 
 	// Broadcast each topic with its mobs
 	for topic, mobIds := range mobsByTopic {
@@ -119,24 +128,27 @@ func handleMobRespawn(app core.App) {
 	}
 }
 
-func batchUpdateMobChannelStatus(app core.App, mobIds []string) error {
-	if len(mobIds) == 0 {
+func batchUpdateMobChannelStatus(app core.App, mobResets []MobReset) error {
+	if len(mobResets) == 0 {
 		return nil
 	}
 
-	placeholders := make([]string, len(mobIds))
+	// Build conditions for (mob, region) pairs
+	conditions := make([]string, 0, len(mobResets))
 	params := dbx.Params{"timestamp": time.Now().Format("2006-01-02 15:04:05")}
 
-	for i, mobId := range mobIds {
-		key := fmt.Sprintf("mob%d", i)
-		placeholders[i] = fmt.Sprintf("{:%s}", key)
-		params[key] = mobId
+	for i, reset := range mobResets {
+		mobKey := fmt.Sprintf("mob%d", i)
+		regionKey := fmt.Sprintf("region%d", i)
+		conditions = append(conditions, fmt.Sprintf("(mob = {:%s} AND region = {:%s})", mobKey, regionKey))
+		params[mobKey] = reset.MobID
+		params[regionKey] = reset.Region
 	}
 
 	query := fmt.Sprintf(
-		"UPDATE %s SET last_hp = 100, last_update = {:timestamp} WHERE mob IN (%s)",
+		"UPDATE %s SET last_hp = 100, last_update = {:timestamp} WHERE %s",
 		COLLECTION_MOB_CHANNEL_STATUS,
-		strings.Join(placeholders, ","),
+		strings.Join(conditions, " OR "),
 	)
 
 	_, err := app.DB().NewQuery(query).Bind(params).Execute()
