@@ -71,7 +71,7 @@ export const mobSchema = z.object({
 		.min(15)
 		.max(15),
 	uid: z.number().int().min(1).max(40),
-	monster_id: z.number().int().min(10000).max(11000),
+	monster_id: z.number().int().min(10000).max(100000),
 	type: z.enum(['boss', 'magical_creature']),
 	name: z.string().min(1).max(100),
 	map: z
