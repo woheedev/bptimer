@@ -180,7 +180,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libpcap-dev protobuf-compiler
+          sudo apt-get install -y libpcap-dev protobuf-compiler patchelf
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -204,6 +204,10 @@ jobs:
       - name: Build release binary
         working-directory: apps/desktop
         run: cargo build --release --target x86_64-unknown-linux-gnu
+
+      - name: Fix libpcap dependency
+        working-directory: apps/desktop
+        run: patchelf --replace-needed libpcap.so.0.8 libpcap.so.1 target/x86_64-unknown-linux-gnu/release/bptimer-desktop
 
       - name: Rename release binary
         id: rename_binary
