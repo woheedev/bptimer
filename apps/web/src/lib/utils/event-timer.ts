@@ -20,21 +20,36 @@ export function getScheduleForRegion(
 
 export const EVENT_CONFIGS: EventConfig[] = [
 	{
-		id: 'guild-hunt',
-		name: 'Guild Hunt',
-		icon: '/images/events/guild-hunt.webp',
+		id: 'daily-reset',
+		name: 'Daily Reset',
+		icon: '/images/events/daily-reset.webp',
 		schedule: {
 			NA: {
-				days: [5, 6, 0],
-				hour: 16, // 2PM UTC-2
-				minute: 0,
-				durationHours: 14
+				days: [0, 1, 2, 3, 4, 5, 6],
+				hour: 7, // 5AM UTC-2
+				minute: 0
 			},
 			SEA: {
-				days: [5, 6, 0],
-				hour: 1, // 1AM UTC-2
-				minute: 0,
-				durationHours: 14
+				days: [0, 1, 2, 3, 4, 5, 6],
+				hour: 22, // 8PM UTC-2
+				minute: 0
+			}
+		}
+	},
+	{
+		id: 'weekly-reset',
+		name: 'Weekly Reset',
+		icon: '/images/events/weekly-reset.webp',
+		schedule: {
+			NA: {
+				days: [1],
+				hour: 7, // 5AM UTC-2
+				minute: 0
+			},
+			SEA: {
+				days: [0],
+				hour: 22, // 8PM UTC-2
+				minute: 0
 			}
 		}
 	},
@@ -55,6 +70,25 @@ export const EVENT_CONFIGS: EventConfig[] = [
 				minute: 30,
 				durationHours: 1,
 				durationMinutes: 30
+			}
+		}
+	},
+	{
+		id: 'guild-hunt',
+		name: 'Guild Hunt',
+		icon: '/images/events/guild-hunt.webp',
+		schedule: {
+			NA: {
+				days: [5, 6, 0],
+				hour: 16, // 2PM UTC-2
+				minute: 0,
+				durationHours: 14
+			},
+			SEA: {
+				days: [5, 6, 0],
+				hour: 1, // 1AM UTC-2
+				minute: 0,
+				durationHours: 14
 			}
 		}
 	},
@@ -99,40 +133,6 @@ export const EVENT_CONFIGS: EventConfig[] = [
 				intervalWeeks: 2,
 				referenceDate: '2025-12-08',
 				inverted: true
-			}
-		}
-	},
-	{
-		id: 'daily-reset',
-		name: 'Daily Reset',
-		icon: '/images/events/daily-reset.webp',
-		schedule: {
-			NA: {
-				days: [0, 1, 2, 3, 4, 5, 6],
-				hour: 7, // 5AM UTC-2
-				minute: 0
-			},
-			SEA: {
-				days: [0, 1, 2, 3, 4, 5, 6],
-				hour: 22, // 8PM UTC-2
-				minute: 0
-			}
-		}
-	},
-	{
-		id: 'weekly-reset',
-		name: 'Weekly Reset',
-		icon: '/images/events/weekly-reset.webp',
-		schedule: {
-			NA: {
-				days: [1],
-				hour: 7, // 5AM UTC-2
-				minute: 0
-			},
-			SEA: {
-				days: [0],
-				hour: 22, // 8PM UTC-2
-				minute: 0
 			}
 		}
 	}
