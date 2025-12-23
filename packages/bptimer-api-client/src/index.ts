@@ -1,8 +1,10 @@
 import {
   CACHE_EXPIRY_MS,
   HP_REPORT_INTERVAL,
-  LOCATION_TRACKED_MOBS,
-  MOB_MAPPING,
+  getLocationTrackedMobs,
+  getMobMapping,
+  setLocationTrackedMobs,
+  setMobMapping,
   VERSION
 } from './constants.js';
 import type {
@@ -10,6 +12,7 @@ import type {
   ClientConfig,
   Logger,
   LogLevel,
+  MobRecord,
   ReportHPParams,
   ReportPayload,
   ReportResponse
@@ -74,14 +77,16 @@ export class BPTimerClient {
     }
 
     const monster_key = String(monster_id);
-    if (!MOB_MAPPING.has(monster_key)) {
+    const mobMapping = getMobMapping();
+    const locationTrackedMobs = getLocationTrackedMobs();
+
+    if (!mobMapping.has(monster_key)) {
       this.log('debug', `Monster ${monster_key} not tracked`);
       return { success: false, message: 'Monster ID not tracked' };
     }
 
-    // Check if this mob requires position data
     if (
-      LOCATION_TRACKED_MOBS.has(Number(monster_id)) &&
+      locationTrackedMobs.has(Number(monster_id)) &&
       (pos_x === undefined || pos_y === undefined || pos_z === undefined)
     ) {
       this.log('debug', `Monster ${monster_key} requires position data`);
@@ -160,7 +165,7 @@ export class BPTimerClient {
 
       const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
       entry.last_reported_hp = current_hp;
-      const monster_name = MOB_MAPPING.get(monster_key) || monster_key;
+      const monster_name = mobMapping.get(monster_key) || monster_key;
       const pos_info =
         rounded_pos_x !== undefined && rounded_pos_y !== undefined && rounded_pos_z !== undefined
           ? ` X: ${rounded_pos_x}, Y: ${rounded_pos_y}, Z: ${rounded_pos_z}`
@@ -232,6 +237,68 @@ export class BPTimerClient {
     } catch (error) {
       const error_message = error instanceof Error ? error.message : 'Unknown error';
       this.log('info', `API test failed: ${error_message}`);
+      return { success: false, message: error_message };
+    }
+  }
+
+  async prefetchMobs(): Promise<ReportResponse> {
+    this.log('debug', 'Prefetching mobs from database...');
+
+    try {
+      const fields = ['monster_id', 'name', 'location'].join(',');
+      const url = `${this.api_url}/api/collections/mobs/records?fields=${fields}&perPage=100&skipTotal=true`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'User-Agent': this.user_agent
+        }
+      });
+
+      if (!response.ok) {
+        const error_message = `Failed to fetch mobs: ${response.status}`;
+        this.log('info', `Prefetch failed: ${error_message}`);
+        return { success: false, message: error_message };
+      }
+
+      const data = (await response.json().catch(() => ({}))) as {
+        items?: MobRecord[];
+      };
+
+      if (!data.items || !Array.isArray(data.items)) {
+        const error_message = 'Invalid response format from mobs endpoint';
+        this.log('info', `Prefetch failed: ${error_message}`);
+        return { success: false, message: error_message };
+      }
+
+      const mobMapping = new Map<string, string>();
+      const locationTrackedMobs = new Set<number>();
+
+      for (const mob of data.items) {
+        if (mob.monster_id && mob.name) {
+          const monster_key = String(mob.monster_id);
+          mobMapping.set(monster_key, mob.name);
+
+          if (mob.location === true) {
+            locationTrackedMobs.add(mob.monster_id);
+          }
+        }
+      }
+
+      setMobMapping(mobMapping);
+      setLocationTrackedMobs(locationTrackedMobs);
+
+      this.log(
+        'info',
+        `Prefetched ${mobMapping.size} mobs (${locationTrackedMobs.size} location-tracked)`
+      );
+      return {
+        success: true,
+        data: { mobs: mobMapping.size, locationTracked: locationTrackedMobs.size }
+      };
+    } catch (error) {
+      const error_message = error instanceof Error ? error.message : 'Unknown error';
+      this.log('info', `Prefetch failed: ${error_message}`);
       return { success: false, message: error_message };
     }
   }

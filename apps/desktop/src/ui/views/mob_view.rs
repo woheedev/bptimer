@@ -3,7 +3,7 @@ use crate::models::mob::Mob;
 use crate::ui::app::determine_effective_region;
 use crate::ui::constants::{spacing, style, theme};
 use crate::utils::constants::{
-    account_id_regions, get_game_mob_id_from_name, get_location_name, requires_location_number,
+    account_id_regions, get_location_name, get_monster_id_from_name, is_location_tracked_mob,
 };
 use egui::{Align2, Color32, FontId, Pos2, Rect, RichText, Sense, Stroke, StrokeKind, Ui, Vec2};
 
@@ -136,8 +136,8 @@ pub fn render_mob_view(
                                             let label = if let Some(loc_num) =
                                                 channel.location_image
                                                 && let Some(game_mob_id) =
-                                                    get_game_mob_id_from_name(&mob.name)
-                                                && requires_location_number(game_mob_id)
+                                                    get_monster_id_from_name(&mob.name)
+                                                && is_location_tracked_mob(game_mob_id)
                                                 && let Some(loc_name) =
                                                     get_location_name(game_mob_id, loc_num)
                                             {

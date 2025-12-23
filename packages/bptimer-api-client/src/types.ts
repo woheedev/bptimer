@@ -40,3 +40,9 @@ export interface CacheEntry {
   last_reported_hp: number | null;
   is_pending: boolean;
 }
+
+export interface MobRecord {
+  monster_id: number;
+  name: string;
+  location?: boolean;
+}

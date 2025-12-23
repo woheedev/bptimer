@@ -1,5 +1,5 @@
 use crate::utils::constants;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -11,6 +11,18 @@ struct CacheEntry {
     timestamp: u64,
     last_reported_hp: Option<f32>,
     is_pending: bool,
+}
+
+#[derive(serde::Deserialize)]
+struct MobRecord {
+    monster_id: u32,
+    name: String,
+    location: Option<bool>,
+}
+
+#[derive(serde::Deserialize)]
+struct MobsResponse {
+    items: Vec<MobRecord>,
 }
 
 pub struct BPTimerClient {
@@ -49,15 +61,17 @@ impl BPTimerClient {
             return;
         }
 
-        // Check if mob is tracked and requires position data
-        if !constants::is_location_tracked_mob(monster_id) {
+        // Check if mob is tracked
+        if constants::get_mob_name(monster_id).is_none() {
             return;
         }
 
-        // All tracked mobs require complete position data (all or none)
-        let has_all_positions = pos_x.is_some() && pos_y.is_some() && pos_z.is_some();
-        if !has_all_positions {
-            return;
+        // Check if this mob requires position data
+        if constants::is_location_tracked_mob(monster_id) {
+            let has_all_positions = pos_x.is_some() && pos_y.is_some() && pos_z.is_some();
+            if !has_all_positions {
+                return;
+            }
         }
 
         // Round HP% to nearest HP_REPORT_INTERVAL
@@ -142,7 +156,7 @@ impl BPTimerClient {
                 "uid": uid,
             });
 
-            let _success = match client
+            match client
                 .post(&url)
                 .header("X-API-Key", &api_key)
                 .header("Content-Type", "application/json")
@@ -151,17 +165,13 @@ impl BPTimerClient {
             {
                 Ok(resp) => {
                     if resp.status().is_success() {
-                        let mob_name = constants::get_boss_or_magical_creature_name(monster_id)
-                            .unwrap_or("Unknown");
-                        let pos_info = if rounded_pos_x.is_some() {
-                            format!(
-                                " X: {:.2}, Y: {:.2}, Z: {:.2}",
-                                rounded_pos_x.unwrap(),
-                                rounded_pos_y.unwrap(),
-                                rounded_pos_z.unwrap()
-                            )
-                        } else {
-                            String::new()
+                        let mob_name = constants::get_mob_name(monster_id)
+                            .unwrap_or_else(|| format!("Unknown Monster ({monster_id})"));
+                        let pos_info = match (rounded_pos_x, rounded_pos_y, rounded_pos_z) {
+                            (Some(x), Some(y), Some(z)) => {
+                                format!(" X: {:.2}, Y: {:.2}, Z: {:.2}", x, y, z)
+                            }
+                            _ => String::new(),
                         };
                         log::info!(
                             "[BPTimer] Reported {}% HP for {} ({}) on Line {}{}",
@@ -171,16 +181,13 @@ impl BPTimerClient {
                             line,
                             pos_info
                         );
-                        true
                     } else {
                         let status = resp.status();
-                        let status_code = status.as_u16();
-                        if status_code == 409 {
+                        if status.as_u16() == 409 {
                             // 409 Conflict is expected when multiple clients are on the same line
                             log::info!(
                                 "[BPTimer] HP Report skipped: Already reported by another user."
                             );
-                            false
                         } else {
                             let message = resp.text().ok().and_then(|body| {
                                 serde_json::from_str::<serde_json::Value>(&body)
@@ -197,14 +204,11 @@ impl BPTimerClient {
                                 .map(|m| format!("{} - {}", status, m))
                                 .unwrap_or_else(|| status.to_string());
                             log::warn!("[BPTimer] Failed to report HP: {}", error_msg);
-                            false
                         }
                     }
                 }
                 Err(e) => {
-                    let error_msg = e.to_string();
-                    log::warn!("[BPTimer] Failed to report HP: {}", error_msg);
-                    false
+                    log::warn!("[BPTimer] Failed to report HP: {}", e);
                 }
             };
 
@@ -213,6 +217,74 @@ impl BPTimerClient {
                 if let Some(entry) = cache_guard.get_mut(&cache_key_clone) {
                     entry.is_pending = false;
                     entry.last_reported_hp = Some(rounded_hp_pct);
+                }
+            }
+        });
+    }
+
+    /// Prefetch mobs from the database endpoint
+    pub fn prefetch_mobs(self: Arc<Self>) {
+        if self.api_key.is_empty() || self.api_url.is_empty() {
+            return;
+        }
+
+        let api_url = self.api_url.clone();
+        let user_agent = crate::utils::constants::user_agent();
+
+        std::thread::spawn(move || {
+            let client = reqwest::blocking::Client::builder()
+                .user_agent(&user_agent)
+                .use_rustls_tls()
+                .build()
+                .unwrap_or_else(|_| reqwest::blocking::Client::new());
+
+            let fields = "monster_id,name,location";
+            let url = format!(
+                "{}/api/collections/mobs/records?fields={}&perPage=100&skipTotal=true",
+                api_url, fields
+            );
+
+            match client.get(&url).send() {
+                Ok(resp) => {
+                    if !resp.status().is_success() {
+                        log::warn!("[BPTimer] Prefetch failed: status {}", resp.status());
+                        return;
+                    }
+
+                    match resp.json::<MobsResponse>() {
+                        Ok(data) => {
+                            let mut mob_mapping = HashMap::new();
+                            let mut location_tracked_mobs = HashSet::new();
+
+                            for mob in data.items {
+                                if mob.monster_id > 0 && !mob.name.is_empty() {
+                                    mob_mapping.insert(mob.monster_id, mob.name.clone());
+
+                                    if mob.location == Some(true) {
+                                        location_tracked_mobs.insert(mob.monster_id);
+                                    }
+                                }
+                            }
+
+                            let mob_count = mob_mapping.len();
+                            let location_count = location_tracked_mobs.len();
+
+                            constants::set_mob_mapping(mob_mapping);
+                            constants::set_location_tracked_mobs(location_tracked_mobs);
+
+                            log::info!(
+                                "[BPTimer] Prefetched {} mobs ({} location-tracked)",
+                                mob_count,
+                                location_count
+                            );
+                        }
+                        Err(e) => {
+                            log::warn!("[BPTimer] Prefetch failed to parse response: {}", e);
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::warn!("[BPTimer] Prefetch failed: {}", e);
                 }
             }
         });

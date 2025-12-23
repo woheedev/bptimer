@@ -1,31 +1,10 @@
+use std::collections::{HashMap, HashSet};
+use std::sync::{LazyLock, Mutex};
+
 pub const BPTIMER_BASE_URL: &str = "https://bptimer.com";
 
-// Macro to generate bidirectional mappings between mob IDs and names
-// Data source: boss-meter-ids.json
-macro_rules! define_mob_mappings {
-    ($(($id:expr, $name:expr)),* $(,)?) => {
-        // All boss and magical creature IDs
-        pub const BOSS_AND_MAGICAL_CREATURE_IDS: &[u32] = &[$($id),*];
-
-        // Get mob name from ID
-        pub fn get_boss_or_magical_creature_name(mob_id: u32) -> Option<&'static str> {
-            match mob_id {
-                $($id => Some($name),)*
-                _ => None,
-            }
-        }
-
-        // Get mob ID from name
-        pub fn get_game_mob_id_from_name(mob_name: &str) -> Option<u32> {
-            match mob_name {
-                $($name => Some($id),)*
-                _ => None,
-            }
-        }
-    };
-}
-
-define_mob_mappings! {
+// Fallback mob mappings (used if prefetch fails or hasn't been called)
+const FALLBACK_MOB_MAPPINGS: &[(u32, &str)] = &[
     (10007, "Storm Goblin King"),
     (10009, "Frost Ogre"),
     (10010, "Tempest Ogre"),
@@ -45,14 +24,51 @@ define_mob_mappings! {
     (10902, "Lovely Boarlet"),
     (10903, "Breezy Boarlet"),
     (10904, "Loyal Boarlet"),
+];
+
+// Fallback location-tracked mob IDs
+const FALLBACK_LOCATION_TRACKED_MOBS: &[u32] = &[10900, 10901, 10904];
+
+// Dynamic mob mapping (populated by prefetch)
+static MOB_MAPPING: LazyLock<Mutex<HashMap<u32, String>>> = LazyLock::new(|| {
+    let mut map = HashMap::new();
+    for (id, name) in FALLBACK_MOB_MAPPINGS {
+        map.insert(*id, name.to_string());
+    }
+    Mutex::new(map)
+});
+
+static LOCATION_TRACKED_MOBS: LazyLock<Mutex<HashSet<u32>>> = LazyLock::new(|| {
+    let mut set = HashSet::new();
+    for &id in FALLBACK_LOCATION_TRACKED_MOBS {
+        set.insert(id);
+    }
+    Mutex::new(set)
+});
+
+pub fn get_mob_name(mob_id: u32) -> Option<String> {
+    MOB_MAPPING.lock().unwrap().get(&mob_id).cloned()
+}
+
+pub fn get_monster_id_from_name(mob_name: &str) -> Option<u32> {
+    MOB_MAPPING
+        .lock()
+        .unwrap()
+        .iter()
+        .find(|(_, name)| name.as_str() == mob_name)
+        .map(|(id, _)| *id)
 }
 
 pub fn is_location_tracked_mob(mob_id: u32) -> bool {
-    BOSS_AND_MAGICAL_CREATURE_IDS.contains(&mob_id)
+    LOCATION_TRACKED_MOBS.lock().unwrap().contains(&mob_id)
 }
 
-pub fn requires_location_number(mob_id: u32) -> bool {
-    matches!(mob_id, 10900 | 10901 | 10904)
+pub fn set_mob_mapping(mapping: HashMap<u32, String>) {
+    *MOB_MAPPING.lock().unwrap() = mapping;
+}
+
+pub fn set_location_tracked_mobs(mobs: HashSet<u32>) {
+    *LOCATION_TRACKED_MOBS.lock().unwrap() = mobs;
 }
 
 pub fn get_location_name(mob_id: u32, location_image: i32) -> Option<&'static str> {

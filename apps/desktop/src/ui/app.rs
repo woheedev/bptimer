@@ -239,6 +239,10 @@ impl DpsMeterApp {
                     let client =
                         std::sync::Arc::new(BPTimerClient::new(api_url.clone(), api_key.clone()));
 
+                    // Prefetch mobs from database
+                    client.clone().prefetch_mobs();
+
+                    // Test API connection
                     let api_url_clone = api_url.clone();
                     let api_key_clone = api_key.clone();
                     std::thread::spawn(move || {
@@ -552,13 +556,20 @@ impl eframe::App for DpsMeterApp {
                                                 continue;
                                             }
                                         } else {
-                                            let mob_name = self.mobs.iter()
-                                                .find(|m| m.id.parse::<u32>().unwrap_or(0) == mob_base_id)
+                                            let mob_name = self
+                                                .mobs
+                                                .iter()
+                                                .find(|m| {
+                                                    m.id.parse::<u32>().unwrap_or(0) == mob_base_id
+                                                })
                                                 .map(|m| m.name.clone())
                                                 .unwrap_or_else(|| {
-                                                    crate::utils::constants::get_boss_or_magical_creature_name(mob_base_id)
-                                                        .map(|s| s.to_string())
-                                                        .unwrap_or_else(|| format!("Mob {}", mob_base_id))
+                                                    crate::utils::constants::get_mob_name(
+                                                        mob_base_id,
+                                                    )
+                                                    .unwrap_or_else(|| {
+                                                        format!("Mob {}", mob_base_id)
+                                                    })
                                                 });
 
                                             self.radar_state.update_mob_position(

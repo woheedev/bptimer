@@ -1,6 +1,6 @@
 {
   "name": "@woheedev/bptimer-api-client",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Wohee",
   "description": "An API client for tracking and submitting boss HP data to bptimer.com",
   "license": "AGPL-3.0-or-later",

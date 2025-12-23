@@ -1243,6 +1243,15 @@ migrate(
             required: false,
             system: false,
             type: 'number'
+          },
+          {
+            hidden: false,
+            id: 'bool1587448267',
+            name: 'location',
+            presentable: false,
+            required: false,
+            system: false,
+            type: 'bool'
           }
         ],
         id: 'pbc_1470589867',
