@@ -43,6 +43,15 @@ impl BPTimerClient {
         }
     }
 
+    /// Create a blocking HTTP client with user agent
+    fn create_http_client() -> reqwest::blocking::Client {
+        reqwest::blocking::Client::builder()
+            .user_agent(&crate::utils::constants::user_agent())
+            .use_rustls_tls()
+            .build()
+            .unwrap_or_else(|_| reqwest::blocking::Client::new())
+    }
+
     /// Report HP to BPTimer API
     /// Handles validation, caching, and HTTP request internally
     pub fn report_hp(
@@ -137,11 +146,7 @@ impl BPTimerClient {
 
         // Spawn thread for blocking HTTP call
         std::thread::spawn(move || {
-            let client = reqwest::blocking::Client::builder()
-                .user_agent(&crate::utils::constants::user_agent())
-                .use_rustls_tls()
-                .build()
-                .unwrap_or_else(|_| reqwest::blocking::Client::new());
+            let client = Self::create_http_client();
 
             let url = format!("{}/api/create-hp-report", api_url);
 
@@ -222,21 +227,47 @@ impl BPTimerClient {
         });
     }
 
-    /// Prefetch mobs from the database endpoint
-    pub fn prefetch_mobs(self: Arc<Self>) {
-        if self.api_key.is_empty() || self.api_url.is_empty() {
+    /// Test API connection
+    pub fn test_connection(self: Arc<Self>) {
+        if self.api_url.is_empty() {
             return;
         }
 
         let api_url = self.api_url.clone();
-        let user_agent = crate::utils::constants::user_agent();
 
         std::thread::spawn(move || {
-            let client = reqwest::blocking::Client::builder()
-                .user_agent(&user_agent)
-                .use_rustls_tls()
-                .build()
-                .unwrap_or_else(|_| reqwest::blocking::Client::new());
+            let client = Self::create_http_client();
+
+            let url = format!("{}/api/health", api_url);
+
+            match client.get(&url).send() {
+                Ok(resp) => {
+                    if resp.status().is_success() {
+                        log::info!("[BPTimer] API connection test successful");
+                    } else {
+                        log::warn!(
+                            "[BPTimer] API connection test failed: status {}",
+                            resp.status()
+                        );
+                    }
+                }
+                Err(e) => {
+                    log::warn!("[BPTimer] API connection test error: {:?}", e);
+                }
+            }
+        });
+    }
+
+    /// Prefetch mobs from the database endpoint
+    pub fn prefetch_mobs(self: Arc<Self>) {
+        if self.api_url.is_empty() {
+            return;
+        }
+
+        let api_url = self.api_url.clone();
+
+        std::thread::spawn(move || {
+            let client = Self::create_http_client();
 
             let fields = "monster_id,name,location";
             let url = format!(

@@ -221,7 +221,6 @@ export class BPTimerClient {
       const response = await fetch(`${this.api_url}/api/health`, {
         method: 'GET',
         headers: {
-          'X-API-Key': this.api_key,
           'User-Agent': this.user_agent
         }
       });

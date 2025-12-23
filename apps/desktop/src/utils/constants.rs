@@ -59,6 +59,10 @@ pub fn get_monster_id_from_name(mob_name: &str) -> Option<u32> {
         .map(|(id, _)| *id)
 }
 
+pub fn is_tracked_mob(mob_id: u32) -> bool {
+    MOB_MAPPING.lock().unwrap().contains_key(&mob_id)
+}
+
 pub fn is_location_tracked_mob(mob_id: u32) -> bool {
     LOCATION_TRACKED_MOBS.lock().unwrap().contains(&mob_id)
 }

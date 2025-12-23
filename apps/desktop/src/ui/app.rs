@@ -26,7 +26,7 @@ use crate::api::bptimer::BPTimerClient;
 use crate::api::pocketbase::PocketBaseClient;
 use crate::models::mob::Mob;
 use crate::models::radar::RadarState;
-use crate::utils::constants::is_location_tracked_mob;
+use crate::utils::constants::is_tracked_mob;
 use std::sync::Arc;
 use tokio::sync::mpsc::{Receiver, channel};
 
@@ -239,36 +239,11 @@ impl DpsMeterApp {
                     let client =
                         std::sync::Arc::new(BPTimerClient::new(api_url.clone(), api_key.clone()));
 
+                    // Test API connection
+                    client.clone().test_connection();
+
                     // Prefetch mobs from database
                     client.clone().prefetch_mobs();
-
-                    // Test API connection
-                    let api_url_clone = api_url.clone();
-                    let api_key_clone = api_key.clone();
-                    std::thread::spawn(move || {
-                        let client = reqwest::blocking::Client::builder()
-                            .user_agent(&crate::utils::constants::user_agent())
-                            .use_rustls_tls()
-                            .build()
-                            .unwrap_or_else(|_| reqwest::blocking::Client::new());
-                        let url = format!("{}/api/health", api_url_clone);
-
-                        match client.get(&url).header("X-API-Key", &api_key_clone).send() {
-                            Ok(resp) => {
-                                if resp.status().is_success() {
-                                    info!("[BPTimer] API connection test successful");
-                                } else {
-                                    warn!(
-                                        "[BPTimer] API connection test failed: status {}",
-                                        resp.status()
-                                    );
-                                }
-                            }
-                            Err(e) => {
-                                warn!("[BPTimer] API connection test error: {:?}", e);
-                            }
-                        }
-                    });
 
                     Some(client)
                 } else {
@@ -539,7 +514,7 @@ impl eframe::App for DpsMeterApp {
                                 if self.settings.show_radar || self.settings.bptimer_enabled {
                                     self.radar_state.register_mob_uuid(update.uuid, mob_base_id);
 
-                                    if is_location_tracked_mob(mob_base_id) {
+                                    if is_tracked_mob(mob_base_id) {
                                         let is_hp_only_update = update.position.x
                                             == f32::NEG_INFINITY
                                             && update.position.y == f32::NEG_INFINITY

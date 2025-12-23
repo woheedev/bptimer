@@ -52,7 +52,7 @@ await bptimer.reportHP({
 });
 
 // Optional helpers
-await bptimer.testConnection(); // Check connection to api_url with api_key
+await bptimer.testConnection(); // Check connection to api_url
 bptimer.setEnabled(false); // Disable reporting
 bptimer.resetMonster(monster_id, line); // Force reset cache
 bptimer.clearAll(); // Clear all cache

@@ -1,6 +1,6 @@
 export const CACHE_EXPIRY_MS = 5 * 60 * 1000;
 export const HP_REPORT_INTERVAL = 5;
-export const VERSION = '0.2.1';
+export const VERSION = '0.2.2';
 
 // Fallback mob IDs that require position data for location tracking
 const FALLBACK_LOCATION_TRACKED_MOBS = new Set([10900, 10901, 10904]);

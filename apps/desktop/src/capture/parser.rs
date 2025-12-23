@@ -16,6 +16,7 @@ use crate::protocol::pb::{
     AoiSyncDelta, AttrCollection, EDamageType, EEntityType, Position, SyncContainerData,
     SyncNearDeltaInfo, SyncNearEntities, SyncToMeDeltaInfo,
 };
+use crate::utils::constants::is_tracked_mob;
 
 /// Global state for local player tracking
 static mut LOCAL_PLAYER_UUID: i64 = 0;
@@ -267,8 +268,7 @@ fn process_sync_near_delta(payload: &[u8]) -> Result<Vec<CombatEvent>, Box<dyn s
 
         if let Some(base_id) = base_id {
             if let Some(attrs) = &delta.attrs {
-                let should_log = crate::utils::constants::is_location_tracked_mob(base_id);
-                if should_log {
+                if is_tracked_mob(base_id) {
                     let position = extract_position_from_attrs(&Some(attrs.clone()));
                     let (current_hp, max_hp) = extract_hp_from_attrs(&Some(attrs.clone()));
 
@@ -619,7 +619,7 @@ fn process_sync_near_entities(
                 }
             }
 
-            if crate::utils::constants::is_location_tracked_mob(monster_base_id) {
+            if is_tracked_mob(monster_base_id) {
                 let position = extract_position_from_attrs(&entity.attrs);
                 let (current_hp, max_hp) = extract_hp_from_attrs(&entity.attrs);
                 if let Some(pos) = position {
