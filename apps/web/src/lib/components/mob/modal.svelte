@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { SvelteMap } from 'svelte/reactivity';
 	import ChannelPill from '$lib/components/mob/channel-pill.svelte';
 	import FilterMenu from '$lib/components/mob/filter-menu.svelte';
 	import MobHpSubmit from '$lib/components/mob/hp-submit.svelte';
@@ -149,13 +150,9 @@
 		}
 
 		// Merge live channel data with existing grid
-		const liveChannelsMap = new Map(liveChannels.map((ch) => [ch.channel, ch]));
-		const updated = currentChannels.map((ch) => {
-			const liveData = liveChannelsMap.get(ch.channel);
-			return liveData || ch; // Use live data if available, otherwise keep existing
-		});
-
-		data_state.channels = updated;
+		const channelMap = new SvelteMap(currentChannels.map((ch) => [ch.channel, ch]));
+		liveChannels.forEach((ch) => channelMap.set(ch.channel, ch));
+		data_state.channels = Array.from(channelMap.values());
 	});
 
 	async function fetchMobDetails(skipLoading = false) {
