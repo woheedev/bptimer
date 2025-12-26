@@ -127,7 +127,7 @@ export const API_USERS: Record<string, string> = {
 	gw8hsqxlvvbok37: 'BPTL - blueprotocol.fr', // kaws & solaray
 	fftlpj0jgvmmoge: 'tinyurl.com/mrsnakke', // mrsnakke
 	zdc1lhi31t05zco: 'tinyurl.com/gabrielsanbs', // gabrielsanbs
-	g9bavfjybj4ezhb: 'ZDPS - Damage Meter' // ZDPS Meter - xennma
+	g9bavfjybj4ezhb: 'tinyurl.com/zdpsmeter' // xennma
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 
@@ -322,13 +322,26 @@ export const TOOLS_SECTIONS: ToolsSections = {
 			{
 				title: 'BPTimer Companion App',
 				description:
-					'Official BPTimer.com companion app for Blue Protocol: Star Resonance. It includes mob timers just like the website, a mob radar to better track mob locations, and a simple DPS meter. Is fully native and written in Rust. Currently only supports Windows but should support Linux with minor changes.',
+					'Official BPTimer.com companion app for Blue Protocol: Star Resonance. It includes mob timers just like the website, a mob radar to better track mob locations, and a simple DPS meter.',
 				author: 'woheedev',
-				badge: 'Beta',
+				badge: 'Official',
 				badgeVariant: 'default',
 				driver: 'npcap',
-				tags: 'EN|Rust|EGUI|Windows',
-				url: 'https://github.com/woheedev/bptimer'
+				tags: 'EN|Rust|EGUI|Windows|Linux',
+				url: 'https://github.com/woheedev/bptimer',
+				previewImage: '/images/tools/bptimer-companion-app.webp'
+			},
+			{
+				title: 'ZDPS Meter',
+				description:
+					'ZDPS is a Damage Meter for Blue Protocol: Star Resonance along with supporting a Module Optimizer, Log Reporting, and so much more.',
+				author: 'xennma',
+				badge: 'BPTimer',
+				badgeVariant: 'default',
+				driver: 'npcap',
+				tags: 'EN|C#|.NET|Windows',
+				url: 'https://github.com/Blue-Protocol-Source/BPSR-ZDPS',
+				previewImage: '/images/tools/zdps-meter.webp'
 			},
 			{
 				title: 'BPSR Logs',
@@ -339,7 +352,8 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				badgeVariant: 'default',
 				driver: 'windivert',
 				tags: 'EN|Rust|Svelte|Tauri|WinDivert|Windows',
-				url: 'https://github.com/winjwinj/bpsr-logs'
+				url: 'https://github.com/winjwinj/bpsr-logs',
+				previewImage: '/images/tools/bpsr-logs.webp'
 			},
 			{
 				title: 'BPSR Meter',
@@ -350,18 +364,20 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				badgeVariant: 'default',
 				driver: 'both',
 				tags: 'EN|React|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/Denoder/BPSR-Meter'
+				url: 'https://github.com/Denoder/BPSR-Meter',
+				previewImage: '/images/tools/bpsr-meter-denoder.webp'
 			},
 			{
 				title: 'BPSR-Meter',
 				description:
-					'A real-time DPS meter for Blue Protocol: Star Resonance. It captures game data and converts it into performance statistics.\n\nUn medidor de DPS en tiempo real para Blue Protocol: Star Resonance. Captura datos del juego y los convierte en estadísticas de rendimiento.',
+					'A real-time DPS meter for Blue Protocol: Star Resonance. It captures game data and converts it into performance statistics.',
 				author: 'mrsnakke',
 				badge: 'BPTimer',
 				badgeVariant: 'default',
 				driver: 'npcap',
 				tags: 'EN|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/mrsnakke/BPSR-Meter'
+				url: 'https://github.com/mrsnakke/BPSR-Meter',
+				previewImage: '/images/tools/bpsr-meter-mrsnakke.webp'
 			},
 			{
 				title: 'BPSR Meter',
@@ -372,7 +388,8 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				badgeVariant: 'default',
 				driver: 'npcap',
 				tags: 'EN|ES|PT-BR|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/gabrielsanbs/BPSR-Meter'
+				url: 'https://github.com/gabrielsanbs/BPSR-Meter',
+				previewImage: '/images/tools/bpsr-meter-gabrielsanbs.webp'
 			},
 			{
 				title: 'BPSR-PSO-SX',
@@ -382,17 +399,8 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				badge: 'Fork',
 				driver: 'npcap',
 				tags: 'EN|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/Sola-Ray/BPSR-PSO-SX'
-			},
-			{
-				title: 'Infamous BPSR DPS Meter',
-				description:
-					'The Ultimate Blue Protocol Combat Tracker - Real-time DPS/HPS analysis with modern UI',
-				author: 'ssalihsrz',
-				badge: 'Fork',
-				driver: 'npcap',
-				tags: 'EN|AI|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/ssalihsrz/InfamousBPSRDPSMeter'
+				url: 'https://github.com/Sola-Ray/BPSR-PSO-SX',
+				previewImage: '/images/tools/bpsr-pso-sx.webp'
 			},
 			{
 				title: 'Star Resonance DPS EN',
@@ -402,7 +410,8 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				badge: 'Fork',
 				driver: 'npcap',
 				tags: 'CN|EN-Translated|C#|.NET|WPF|Windows',
-				url: 'https://github.com/DannyDog/StarResonanceDps'
+				url: 'https://github.com/DannyDog/StarResonanceDps',
+				previewImage: '/images/tools/star-resonance-dps-dannydog.webp'
 			},
 			{
 				title: 'Star Resonance DPS',
@@ -411,8 +420,9 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				author: 'anying1073',
 				badge: 'Original',
 				driver: 'npcap',
-				tags: 'CN|EN-Translated|C#|.NET|WPF|Windows',
-				url: 'https://github.com/anying1073/StarResonanceDps'
+				tags: 'CN|C#|.NET|WPF|Windows',
+				url: 'https://github.com/anying1073/StarResonanceDps',
+				previewImage: '/images/tools/star-resonance-dps-anying1073.webp'
 			},
 			{
 				title: 'Star Resonance Damage Counter',
@@ -421,8 +431,9 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				author: 'dmlgzs',
 				badge: 'Original',
 				driver: 'npcap',
-				tags: 'CN|EN-Translated|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/dmlgzs/StarResonanceDamageCounter'
+				tags: 'CN|EN|JavaScript|Node.js|Express|Socket.IO',
+				url: 'https://github.com/dmlgzs/StarResonanceDamageCounter',
+				previewImage: '/images/tools/star-resonance-damage-counter-dmlgzs.webp'
 			}
 		]
 	},

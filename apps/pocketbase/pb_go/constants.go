@@ -79,7 +79,7 @@ var BypassVoteUserIDs = map[string]bool{
 	"gw8hsqxlvvbok37": true, // BPTL - blueprotocol.fr
 	"fftlpj0jgvmmoge": true, // tinyurl.com/mrsnakke,
 	"zdc1lhi31t05zco": true, // tinyurl.com/gabrielsanbs
-	"g9bavfjybj4ezhb": true, // ZDPS Meter - xennma
+	"g9bavfjybj4ezhb": true, // tinyurl.com/zdpsmeter
 }
 
 // ACCOUNT_ID_REGIONS maps account_id prefixes to their region information
