@@ -36,7 +36,7 @@ export const HP_HIGH_THRESHOLD = 80; // %
 
 // UI constants
 export const LATEST_CHANNELS_DISPLAY_COUNT = 15;
-export const MAX_REPORTS_LIMIT = 10;
+export const MAX_REPORTS_LIMIT = 50;
 export const MAX_SEARCH_QUERY_LENGTH = 100;
 export const MOBILE_BREAKPOINT = 768; // px
 
