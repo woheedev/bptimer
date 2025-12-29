@@ -26,12 +26,12 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		schedule: {
 			NA: {
 				days: [0, 1, 2, 3, 4, 5, 6],
-				hour: 7, // 5AM UTC-2
+				hour: 7, // 5:00 UTC-2
 				minute: 0
 			},
 			SEA: {
 				days: [0, 1, 2, 3, 4, 5, 6],
-				hour: 22, // 8PM UTC-2
+				hour: 22, // 6:00 UTC+8
 				minute: 0
 			}
 		}
@@ -43,12 +43,12 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		schedule: {
 			NA: {
 				days: [1],
-				hour: 7, // 5AM UTC-2
+				hour: 7, // 5:00 UTC-2
 				minute: 0
 			},
 			SEA: {
 				days: [0],
-				hour: 22, // 8PM UTC-2
+				hour: 22, // 6:00 UTC+8
 				minute: 0
 			}
 		}
@@ -60,13 +60,13 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		schedule: {
 			NA: {
 				days: [0, 1, 2, 3, 4, 5, 6],
-				hour: 18, // 4PM UTC-2
+				hour: 18, // 16:00 - 22:00 UTC-2
 				minute: 0,
 				durationHours: 6
 			},
 			SEA: {
 				days: [0, 1, 2, 3, 4, 5, 6],
-				hour: 13, // 11:30AM UTC-2
+				hour: 13, // 21:30 - 23:00 UTC+8
 				minute: 30,
 				durationHours: 1,
 				durationMinutes: 30
@@ -80,13 +80,13 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		schedule: {
 			NA: {
 				days: [5, 6, 0],
-				hour: 16, // 2PM UTC-2
+				hour: 16, // 14:00 - 04:00 UTC-2
 				minute: 0,
 				durationHours: 14
 			},
 			SEA: {
 				days: [5, 6, 0],
-				hour: 1, // 1AM UTC-2
+				hour: 2, // 10:00 - 24:00 UTC+8
 				minute: 0,
 				durationHours: 14
 			}
@@ -99,15 +99,16 @@ export const EVENT_CONFIGS: EventConfig[] = [
 		schedule: {
 			NA: {
 				days: [5],
-				hour: 17, // 3:30PM UTC-2
+				hour: 17, // 15:30 - 03:30 UTC-2
 				minute: 30,
 				durationHours: 12
 			},
 			SEA: {
 				days: [5],
-				hour: 4, // 2:30AM UTC-2
+				hour: 11, // 19:30 - 19:55 UTC+8
 				minute: 30,
-				durationHours: 12
+				durationHours: 0,
+				durationMinutes: 25
 			}
 		}
 	},
