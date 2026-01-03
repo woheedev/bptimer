@@ -86,7 +86,7 @@ export const EVENT_CONFIGS: EventConfig[] = [
 			},
 			SEA: {
 				days: [5, 6, 0],
-				hour: 2, // 10:00 - 24:00 UTC+8
+				hour: 3, // 11:00 - 01:00 UTC+8
 				minute: 0,
 				durationHours: 14
 			}
@@ -105,7 +105,7 @@ export const EVENT_CONFIGS: EventConfig[] = [
 			},
 			SEA: {
 				days: [5],
-				hour: 11, // 19:30 - 19:55 UTC+8
+				hour: 12, // 20:30 - 20:55 UTC+8
 				minute: 30,
 				durationHours: 0,
 				durationMinutes: 25

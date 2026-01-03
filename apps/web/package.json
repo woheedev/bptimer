@@ -21,8 +21,8 @@
 		"mode-watcher": "^1.1.0",
 		"pako": "^2.1.0",
 		"pocketbase": "^0.26.5",
-		"simple-icons": "^16.2.0",
-		"zod": "^4.2.1"
+		"simple-icons": "^16.3.0",
+		"zod": "^4.3.4"
 	},
 	"devDependencies": {
 		"@internationalized/date": "^3.10.1",

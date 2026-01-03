@@ -1,6 +1,6 @@
 [package]
 name = "bptimer-desktop"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2024"
 
 [dependencies]
@@ -28,7 +28,7 @@ netdev = "0.40.0"
 open = "5.3"
 pcap = { version = "2.4.0", features = ["capture-stream"] }
 prost = "0.14.1"
-reqwest = { version = "0.12.28", features = ["json", "stream", "rustls-tls", "blocking"], default-features = false }
+reqwest = { version = "0.13.1", features = ["json", "stream", "rustls", "blocking"], default-features = false }
 self_update = "0.42.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

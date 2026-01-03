@@ -1,6 +1,7 @@
 use crate::utils::constants;
 use std::collections::{HashMap, HashSet};
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::{self, Sender};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const CACHE_EXPIRY_MS: u64 = 5 * 60 * 1000;
@@ -34,6 +35,110 @@ pub struct BPTimerClient {
 unsafe impl Send for BPTimerClient {}
 unsafe impl Sync for BPTimerClient {}
 
+struct HpReportTask {
+    api_url: String,
+    api_key: String,
+    payload: serde_json::Value,
+    cache: Arc<Mutex<HashMap<String, CacheEntry>>>,
+    cache_key: String,
+    rounded_hp_pct: f32,
+    monster_id: u32,
+    line: i32,
+    rounded_pos_x: Option<f32>,
+    rounded_pos_y: Option<f32>,
+    rounded_pos_z: Option<f32>,
+}
+
+static HP_REPORT_SENDER: OnceLock<Sender<HpReportTask>> = OnceLock::new();
+
+fn get_hp_report_sender() -> &'static Sender<HpReportTask> {
+    HP_REPORT_SENDER.get_or_init(|| {
+        let (tx, rx) = mpsc::channel::<HpReportTask>();
+
+        std::thread::spawn(move || {
+            let client = reqwest::blocking::Client::builder()
+                .user_agent(&crate::utils::constants::user_agent())
+                .tls_backend_rustls()
+                .build()
+                .unwrap_or_else(|_| reqwest::blocking::Client::new());
+
+            while let Ok(task) = rx.recv() {
+                match client
+                    .post(&task.api_url)
+                    .header("X-API-Key", &task.api_key)
+                    .header("Content-Type", "application/json")
+                    .json(&task.payload)
+                    .send()
+                {
+                    Ok(resp) => {
+                        if resp.status().is_success() {
+                            let mob_name =
+                                constants::get_mob_name(task.monster_id).unwrap_or_else(|| {
+                                    format!("Unknown Monster ({})", task.monster_id)
+                                });
+                            let pos_info = match (
+                                task.rounded_pos_x,
+                                task.rounded_pos_y,
+                                task.rounded_pos_z,
+                            ) {
+                                (Some(x), Some(y), Some(z)) => {
+                                    format!(" X: {:.2}, Y: {:.2}, Z: {:.2}", x, y, z)
+                                }
+                                _ => String::new(),
+                            };
+                            log::info!(
+                                "[BPTimer] Reported {}% HP for {} ({}) on Line {}{}",
+                                task.rounded_hp_pct,
+                                mob_name,
+                                task.monster_id,
+                                task.line,
+                                pos_info
+                            );
+                        } else {
+                            let status = resp.status();
+                            if status.as_u16() == 409 {
+                                // 409 Conflict is expected when multiple clients are on the same line
+                                log::info!(
+                                    "[BPTimer] HP Report skipped: Already reported by another user."
+                                );
+                            } else {
+                                let message = resp.text().ok().and_then(|body| {
+                                    serde_json::from_str::<serde_json::Value>(&body)
+                                        .ok()
+                                        .and_then(|json| {
+                                            json.get("message")
+                                                .or_else(|| json.get("error"))
+                                                .and_then(|v| v.as_str())
+                                                .map(|s| s.to_string())
+                                        })
+                                });
+
+                                let error_msg = message
+                                    .map(|m| format!("{} - {}", status, m))
+                                    .unwrap_or_else(|| status.to_string());
+                                log::warn!("[BPTimer] Failed to report HP: {}", error_msg);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        log::warn!("[BPTimer] Failed to report HP: {}", e);
+                    }
+                };
+
+                // Update cache on both success and error to prevent spam retries
+                if let Ok(mut cache_guard) = task.cache.lock() {
+                    if let Some(entry) = cache_guard.get_mut(&task.cache_key) {
+                        entry.is_pending = false;
+                        entry.last_reported_hp = Some(task.rounded_hp_pct);
+                    }
+                }
+            }
+        });
+
+        tx
+    })
+}
+
 impl BPTimerClient {
     pub fn new(api_url: String, api_key: String) -> Self {
         Self {
@@ -47,7 +152,7 @@ impl BPTimerClient {
     fn create_http_client() -> reqwest::blocking::Client {
         reqwest::blocking::Client::builder()
             .user_agent(&crate::utils::constants::user_agent())
-            .use_rustls_tls()
+            .tls_backend_rustls()
             .build()
             .unwrap_or_else(|_| reqwest::blocking::Client::new())
     }
@@ -138,93 +243,41 @@ impl BPTimerClient {
         let rounded_pos_z = pos_z
             .map(|z| (z * POSITION_ROUNDING_MULTIPLIER).round() / POSITION_ROUNDING_MULTIPLIER);
 
-        // Clone values for thread
-        let api_url = self.api_url.clone();
-        let api_key = self.api_key.clone();
-        let cache_key_clone = cache_key.clone();
-        let cache = self.cache.clone();
+        let payload = serde_json::json!({
+            "monster_id": monster_id as i32,
+            "hp_pct": rounded_hp_pct as i32,
+            "line": line,
+            "pos_x": rounded_pos_x,
+            "pos_y": rounded_pos_y,
+            "pos_z": rounded_pos_z,
+            "account_id": account_id,
+            "uid": uid,
+        });
 
-        // Spawn thread for blocking HTTP call
-        std::thread::spawn(move || {
-            let client = Self::create_http_client();
+        let task = HpReportTask {
+            api_url: format!("{}/api/create-hp-report", self.api_url),
+            api_key: self.api_key.clone(),
+            payload,
+            cache: self.cache.clone(),
+            cache_key: cache_key.clone(),
+            rounded_hp_pct,
+            monster_id,
+            line,
+            rounded_pos_x,
+            rounded_pos_y,
+            rounded_pos_z,
+        };
 
-            let url = format!("{}/api/create-hp-report", api_url);
-
-            let payload = serde_json::json!({
-                "monster_id": monster_id as i32,
-                "hp_pct": rounded_hp_pct as i32,
-                "line": line,
-                "pos_x": rounded_pos_x,
-                "pos_y": rounded_pos_y,
-                "pos_z": rounded_pos_z,
-                "account_id": account_id,
-                "uid": uid,
-            });
-
-            match client
-                .post(&url)
-                .header("X-API-Key", &api_key)
-                .header("Content-Type", "application/json")
-                .json(&payload)
-                .send()
-            {
-                Ok(resp) => {
-                    if resp.status().is_success() {
-                        let mob_name = constants::get_mob_name(monster_id)
-                            .unwrap_or_else(|| format!("Unknown Monster ({monster_id})"));
-                        let pos_info = match (rounded_pos_x, rounded_pos_y, rounded_pos_z) {
-                            (Some(x), Some(y), Some(z)) => {
-                                format!(" X: {:.2}, Y: {:.2}, Z: {:.2}", x, y, z)
-                            }
-                            _ => String::new(),
-                        };
-                        log::info!(
-                            "[BPTimer] Reported {}% HP for {} ({}) on Line {}{}",
-                            rounded_hp_pct,
-                            mob_name,
-                            monster_id,
-                            line,
-                            pos_info
-                        );
-                    } else {
-                        let status = resp.status();
-                        if status.as_u16() == 409 {
-                            // 409 Conflict is expected when multiple clients are on the same line
-                            log::info!(
-                                "[BPTimer] HP Report skipped: Already reported by another user."
-                            );
-                        } else {
-                            let message = resp.text().ok().and_then(|body| {
-                                serde_json::from_str::<serde_json::Value>(&body)
-                                    .ok()
-                                    .and_then(|json| {
-                                        json.get("message")
-                                            .or_else(|| json.get("error"))
-                                            .and_then(|v| v.as_str())
-                                            .map(|s| s.to_string())
-                                    })
-                            });
-
-                            let error_msg = message
-                                .map(|m| format!("{} - {}", status, m))
-                                .unwrap_or_else(|| status.to_string());
-                            log::warn!("[BPTimer] Failed to report HP: {}", error_msg);
-                        }
-                    }
-                }
-                Err(e) => {
-                    log::warn!("[BPTimer] Failed to report HP: {}", e);
-                }
-            };
-
-            // Update cache on both success and error to prevent spam retries
-            if let Ok(mut cache_guard) = cache.lock() {
-                if let Some(entry) = cache_guard.get_mut(&cache_key_clone) {
-                    entry.is_pending = false;
+        if let Err(e) = get_hp_report_sender().send(task) {
+            log::error!("[BPTimer] Failed to queue HP report: {}", e);
+            //  Worker thread died - reset cache to prevent blocking future reports
+            if let Ok(mut cache_guard) = self.cache.lock() {
+                if let Some(entry) = cache_guard.get_mut(&cache_key) {
                     entry.last_reported_hp = Some(rounded_hp_pct);
+                    entry.is_pending = false;
                 }
             }
-        });
+        }
     }
 
     /// Test API connection
