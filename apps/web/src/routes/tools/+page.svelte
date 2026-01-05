@@ -38,15 +38,22 @@
 					<HeartHandshake />
 					<Alert.Title class="text-sm font-bold">Looking to Collaborate?</Alert.Title>
 					<Alert.Description class="text-xs">
-						<span
-							>Use our API client to help crowdsource data and join the list of BPTimer-supported
-							clients. Join our Discord to request an API key or more information. <a
+						<span>
+							Use our <a
 								href="https://github.com/woheedev/bptimer/tree/main/packages/bptimer-api-client"
 								target="_blank"
 								rel="noopener noreferrer"
-								class="underline hover:no-underline">Click here!</a
-							></span
-						>
+								class="underline hover:no-underline">API client</a
+							>
+							to help crowdsource data and join the list of BPTimer-supported clients. Join our
+							<a
+								href="https://discord.com/invite/3UTC4pfCyC"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="underline hover:no-underline">Discord</a
+							> to request an API key or more information. Also accepting submissions for new tools and
+							resources.
+						</span>
 					</Alert.Description>
 				</Alert.Root>
 

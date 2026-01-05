@@ -484,16 +484,6 @@ export const TOOLS_SECTIONS: ToolsSections = {
 		shortTitle: 'Websites',
 		cards: [
 			{
-				title: 'Blue Protocol Leaderboard',
-				description:
-					'Automatic leaderboard based on DPS application. All displayed times are real session times, not game times, to ensure fairplay.',
-				badge: 'BPTimer',
-				badgeVariant: 'default',
-				author: 'Kaws & Solaray',
-				tags: 'Closed Source',
-				url: 'https://blueprotocol.fr/'
-			},
-			{
 				title: 'Blue Protocol: Star Resonance Checklist',
 				description:
 					'A simple, responsive web-based checklist for tracking daily and weekly tasks for Blue Protocol: Star Resonance. Built with HTML, CSS, and JavaScript. No external dependencies beyond confetti.js for celebrations.',
@@ -531,14 +521,7 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				description:
 					'Blue Protocol player database and statistics tracker with live player rankings and class distributions',
 				author: 'Lunixx',
-				url: 'https://blueprotocol.lunixx.de/'
-			},
-			{
-				title: 'Blue Protocol Global Timers',
-				description:
-					'Live countdown timers for Blue Protocol: Star Resonance server events, including daily/weekly resets and special events. Automatically adjusts to your local time.',
-				author: 'Natsu',
-				url: 'https://natsume.io/bpsr/'
+				url: 'https://bp-db.de/'
 			}
 		]
 	}
