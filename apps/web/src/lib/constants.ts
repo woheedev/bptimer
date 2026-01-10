@@ -147,12 +147,13 @@ export const REGION_STORAGE_KEY = 'selected-region';
 // import Discord from '$lib/components/icons/discord.svelte';
 import {
 	Calculator,
+	Calendar,
 	Download,
 	Hammer,
 	Heart,
 	ListTodo,
 	Map,
-	Medal,
+	Sparkle,
 	Sparkles,
 	Swords,
 	Tractor,
@@ -213,9 +214,9 @@ export const PARTNER_PAGES: PageItem[] = [
 		external: true
 	},
 	{
-		title: 'Raid Leaderboards',
-		url: 'https://blueprotocol.fr',
-		icon: Medal,
+		title: 'Event Tracker',
+		url: 'https://bpevents.poofcakes.com/',
+		icon: Calendar,
 		external: true
 	},
 	{
@@ -223,15 +224,13 @@ export const PARTNER_PAGES: PageItem[] = [
 		url: 'https://discord.gg/bpsrfarmers',
 		icon: Tractor,
 		external: true
-	}
-	/*
+	},
 	{
-		title: 'Invite Discord Bot',
-		url: 'https://discord.com/oauth2/authorize?client_id=1435655675081396366',
-		icon: Discord,
+		title: 'Rarefarmers Discord',
+		url: 'https://discord.gg/xYeZx28Jc3',
+		icon: Sparkle,
 		external: true
 	}
-	*/
 ];
 
 // Module Optimizer constants
@@ -441,34 +440,39 @@ export const TOOLS_SECTIONS: ToolsSections = {
 		title: 'Community Discords',
 		shortTitle: 'Discords',
 		cards: [
-			/*
+			{
+				title: 'BP:SR Bot',
+				description:
+					'Community Discord bot with raid tools, game news updates, and other features for BP: Star Resonance guild servers.',
+				badge: 'Discord Bot',
+				badgeVariant: 'default',
+				url: 'https://discord.com/oauth2/authorize?client_id=1426398064037462016'
+			},
 			{
 				title: 'BPSR Info',
 				description:
 					'A community Discord bot that provides HP alert notifications with customizable thresholds, event timers, and much more.',
-				badge: 'BP Timer',
+				badge: 'Discord Bot',
 				badgeVariant: 'default',
 				url: 'https://discord.com/oauth2/authorize?client_id=1435655675081396366'
 			},
-			*/
 			{
 				title: 'BPSR Devs',
 				description: "Developer community for BPSR. Home to winj's DPS Meter and BP Timer.",
-				badge: 'BP Timer',
+				badge: 'BPTimer',
 				badgeVariant: 'default',
 				url: 'https://discord.gg/3UTC4pfCyC'
 			},
 			{
 				title: 'BP:SR Farmers',
-				description:
-					'Community focused on Pigs, Nappo, World Boss, and Dungeon farming coordination.',
+				description: 'Community focused on World Bosses and Dungeon farming coordination.',
 				badge: 'Partner',
 				url: 'https://discord.gg/bpsrfarmers'
 			},
 			{
 				title: 'BPSR Rarefarmers',
-				description:
-					'Specialized community dedicated to hunting magical creatures (Boarlets and Nappos).',
+				description: 'Specialized community dedicated to hunting magical creatures.',
+				badge: 'Partner',
 				url: 'https://discord.gg/xYeZx28Jc3'
 			},
 			{
@@ -499,6 +503,14 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				badge: 'Partner',
 				author: 'DevLeon',
 				url: 'https://starresonance.th.gl/'
+			},
+			{
+				title: 'BP:SR Event Tracker',
+				description:
+					'In depth event tracker for Blue Protocol: Star Resonance with detailed information on events, seasonal events, codes, drops, and more. Supports both Global and SEA servers.',
+				badge: 'Partner',
+				author: 'Poofcakes',
+				url: 'https://bpevents.poofcakes.com/'
 			},
 			{
 				title: 'Maxroll',

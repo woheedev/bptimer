@@ -27,7 +27,7 @@ log = "0.4"
 netdev = "0.40.0"
 open = "5.3"
 pcap = { version = "2.4.0", features = ["capture-stream"] }
-prost = "0.14.1"
+prost = "0.14.3"
 reqwest = { version = "0.13.1", features = ["json", "stream", "rustls", "blocking"], default-features = false }
 self_update = "0.42.0"
 serde = { version = "1.0", features = ["derive"] }
@@ -46,5 +46,5 @@ strip = true
 opt-level = 1
 
 [build-dependencies]
-prost-build = "0.14.1"  # protobuf code generation
+prost-build = "0.14.3"  # protobuf code generation
 winres = "0.1.12"

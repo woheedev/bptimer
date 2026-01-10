@@ -3,7 +3,7 @@
 	import Discord from '$lib/components/icons/discord.svelte';
 	import InGameDay from '$lib/components/navigation/ingame-day.svelte';
 	import NavigationMain from '$lib/components/navigation/main.svelte';
-	import SidebarAd from '$lib/components/navigation/sidebar-ad.svelte';
+	// import SidebarAd from '$lib/components/navigation/sidebar-ad.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
 	// import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -66,8 +66,8 @@
 						>
 					</Alert.Description>
 				</Alert.Root>
-				-->
-				<SidebarAd />
+			-->
+				<!-- <SidebarAd /> -->
 			</div>
 		</Sidebar.Group>
 	</Sidebar.Content>

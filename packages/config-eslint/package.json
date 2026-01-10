@@ -8,11 +8,11 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@eslint/compat": "^2.0.0",
+    "@eslint/compat": "^2.0.1",
     "@eslint/js": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-svelte": "^3.13.1",
+    "eslint-plugin-svelte": "^3.14.0",
     "globals": "^17.0.0",
-    "typescript-eslint": "^8.51.0"
+    "typescript-eslint": "^8.53.0"
   }
 }
