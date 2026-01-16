@@ -578,5 +578,15 @@ export const BOSS_LOOT_DROPS: Record<string, string[]> = {
 		'legendary_bracelet_left',
 		'legendary_bracelet_right'
 	],
-	'Muku King': ['legendary_box_weapon', 'legendary_weapon', 'legendary_armor']
+	'Muku King': ['legendary_box_weapon', 'legendary_weapon', 'legendary_armor'],
+	Basilisk: ['legendary_box_gauntlets_earrings', 'legendary_gauntlets', 'legendary_earrings'],
+	'Goblin Chief': ['legendary_box_armor_ring', 'legendary_armor', 'legendary_ring'],
+	'Cabbage Kingpin': [
+		'legendary_box_bracelets',
+		'legendary_bracelet_left',
+		'legendary_bracelet_right'
+	],
+	'Blackstone Captain': ['legendary_box_helmet_necklace', 'legendary_helmet', 'legendary_necklace'],
+	'Crimson Foxen': ['legendary_box_boots_charm', 'legendary_boots', 'legendary_charm'],
+	Flamehorn: ['legendary_box_weapon', 'legendary_weapon']
 };
