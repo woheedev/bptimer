@@ -93,6 +93,7 @@ message Position {
 
 message ProfessionList {
   int32 cur_profession_id = 1;
+}
 
 message SceneData {
   uint32 line_id = 15;

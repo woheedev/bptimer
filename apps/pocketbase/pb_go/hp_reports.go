@@ -143,6 +143,15 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			return e.UnauthorizedError("Authentication required", nil)
 		}
 
+		// Validate user agent version for known apps
+		userAgent := e.Request.Header.Get("User-Agent")
+		if err := validateUserAgentVersion(userAgent); err != nil {
+			return e.BadRequestError("Client version too old. Please update your application.", LogData{
+				"user_agent":  userAgent,
+				"min_version": getMinVersionForUserAgent(userAgent),
+			})
+		}
+
 		data := CreateHPReportRequest{}
 
 		if err := e.BindBody(&data); err != nil {

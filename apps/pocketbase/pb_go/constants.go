@@ -82,6 +82,14 @@ var BypassVoteUserIDs = map[string]bool{
 	"g9bavfjybj4ezhb": true, // tinyurl.com/zdpsmeter
 }
 
+// Minimum required versions for known apps
+// Apps not in this map are allowed (for backwards compatibility with unknown clients)
+var MinAppVersions = map[string]string{
+	"BPSR-Logs": "0.23.0",
+	// "BPTimer-Desktop-Companion": "0.0.0", // Not needed yet
+	// "BPTimer-API-Client":        "0.0.0", // Not needed yet
+}
+
 // ACCOUNT_ID_REGIONS maps account_id prefixes to their region information
 var ACCOUNT_ID_REGIONS = map[string]RegionInfo{
 	"0_": {Name: "DEV", Enabled: false},
