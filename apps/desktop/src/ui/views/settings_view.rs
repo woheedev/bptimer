@@ -11,14 +11,10 @@ const FONT_SCALE_MIN: f32 = 0.5;
 const FONT_SCALE_MAX: f32 = 2.0;
 const FONT_SCALE_STEP: f32 = 0.05;
 
+#[derive(Default)]
 pub struct HotkeyRecordingState {
     pub action: Option<HotkeyAction>,
-}
-
-impl Default for HotkeyRecordingState {
-    fn default() -> Self {
-        Self { action: None }
-    }
+    was_recording: bool,
 }
 
 pub fn render_settings_view(
@@ -37,23 +33,22 @@ pub fn render_settings_view(
     recording_state: &mut HotkeyRecordingState,
 ) {
     // Handle hotkey recording
+    let is_recording = recording_state.action.is_some();
+
+    // When recording starts, disable all hotkeys
+    if is_recording && !recording_state.was_recording {
+        hotkey_manager.unregister_all();
+    }
+
+    recording_state.was_recording = is_recording;
+
     if let Some(action) = recording_state.action {
         ui.input(|i| {
             // Check for Esc to cancel/clear
             if i.key_pressed(egui::Key::Escape) {
                 // Clear the hotkey
                 hotkey_manager.unregister_action(action);
-                match action {
-                    HotkeyAction::ToggleClickThrough => {
-                        settings.hotkeys.toggle_click_through = None
-                    }
-                    HotkeyAction::SwitchToMobView => settings.hotkeys.switch_to_mob_view = None,
-                    HotkeyAction::SwitchToCombatView => {
-                        settings.hotkeys.switch_to_combat_view = None
-                    }
-                    HotkeyAction::MinimizeWindow => settings.hotkeys.minimize_window = None,
-                    HotkeyAction::ResetStats => settings.hotkeys.reset_stats = None,
-                }
+                settings.hotkeys.set(action, None);
                 *settings_save_timer = Some(Instant::now());
                 recording_state.action = None;
                 return;
@@ -124,6 +119,28 @@ pub fn render_settings_view(
                 egui::Key::Enter,
                 egui::Key::Tab,
                 egui::Key::Backspace,
+                egui::Key::Escape,
+                egui::Key::ArrowUp,
+                egui::Key::ArrowDown,
+                egui::Key::ArrowLeft,
+                egui::Key::ArrowRight,
+                egui::Key::Home,
+                egui::Key::End,
+                egui::Key::PageUp,
+                egui::Key::PageDown,
+                egui::Key::Insert,
+                egui::Key::Delete,
+                egui::Key::Backtick,
+                egui::Key::Minus,
+                egui::Key::Equals,
+                egui::Key::OpenBracket,
+                egui::Key::CloseBracket,
+                egui::Key::Semicolon,
+                egui::Key::Quote,
+                egui::Key::Comma,
+                egui::Key::Period,
+                egui::Key::Slash,
+                egui::Key::Backslash,
             ] {
                 if i.key_pressed(key) {
                     let Some(code) = crate::hotkeys::egui_key_to_code(key) else {
@@ -150,21 +167,7 @@ pub fn render_settings_view(
                             },
                             code,
                         );
-                        match action {
-                            HotkeyAction::ToggleClickThrough => {
-                                settings.hotkeys.toggle_click_through = Some(config)
-                            }
-                            HotkeyAction::SwitchToMobView => {
-                                settings.hotkeys.switch_to_mob_view = Some(config)
-                            }
-                            HotkeyAction::SwitchToCombatView => {
-                                settings.hotkeys.switch_to_combat_view = Some(config)
-                            }
-                            HotkeyAction::MinimizeWindow => {
-                                settings.hotkeys.minimize_window = Some(config)
-                            }
-                            HotkeyAction::ResetStats => settings.hotkeys.reset_stats = Some(config),
-                        }
+                        settings.hotkeys.set(action, Some(config));
                         *settings_save_timer = Some(Instant::now());
                     }
 
@@ -482,7 +485,7 @@ pub fn render_settings_view(
                     settings
                         .network_device_index
                         .and_then(|idx| devices.get(idx))
-                        .map(|d| crate::capture::packet::clean_device_name(d))
+                        .map(crate::capture::packet::clean_device_name)
                         .unwrap_or_else(|| "Auto-select".to_string()),
                 )
                 .show_ui(ui, |ui| {

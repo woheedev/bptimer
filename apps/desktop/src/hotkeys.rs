@@ -40,19 +40,17 @@ impl HotkeyManager {
     // Unregister existing hotkey for this action, then register new one
     pub fn register(&mut self, hotkey: HotKey, action: HotkeyAction) -> bool {
         // Check if already registered and identical
-        if let Some(existing) = self.registered_hotkeys.get(&action) {
-            if existing.id() == hotkey.id() {
-                return true;
-            }
+        if matches!(self.registered_hotkeys.get(&action), Some(existing) if existing.id() == hotkey.id())
+        {
+            return true;
         }
 
         // Unregister existing
-        let old_hotkey = self.registered_hotkeys.remove(&action);
-        if let Some(old) = old_hotkey {
+        if let Some(old) = self.registered_hotkeys.remove(&action) {
             if let Some(manager) = &self.manager {
-                if let Err(e) = manager.unregister(old) {
+                let _ = manager.unregister(old).map_err(|e| {
                     warn!("Failed to unregister hotkey for {:?}: {}", action, e);
-                }
+                });
             }
             // Also remove from action_map
             let id = old.id();
@@ -82,9 +80,9 @@ impl HotkeyManager {
     pub fn unregister_action(&mut self, action: HotkeyAction) {
         if let Some(hotkey) = self.registered_hotkeys.remove(&action) {
             if let Some(manager) = &self.manager {
-                if let Err(e) = manager.unregister(hotkey) {
+                let _ = manager.unregister(hotkey).map_err(|e| {
                     warn!("Failed to unregister hotkey for {:?}: {}", action, e);
-                }
+                });
             }
             // Also remove from action_map
             let id = hotkey.id();
@@ -92,8 +90,15 @@ impl HotkeyManager {
         }
     }
 
+    pub fn unregister_all(&mut self) {
+        let actions: Vec<HotkeyAction> = self.registered_hotkeys.keys().copied().collect();
+        for action in actions {
+            self.unregister_action(action);
+        }
+    }
+
     pub fn reload_from_settings(&mut self, settings: &crate::config::Settings) {
-        let mut process = |config: &Option<crate::config::HotkeyConfig>, action: HotkeyAction| {
+        for (action, config) in settings.hotkeys.iter_actions() {
             if let Some(cfg) = config {
                 if let Some(hotkey) = cfg.to_hotkey() {
                     self.register(hotkey, action);
@@ -101,25 +106,7 @@ impl HotkeyManager {
             } else {
                 self.unregister_action(action);
             }
-        };
-
-        process(
-            &settings.hotkeys.toggle_click_through,
-            HotkeyAction::ToggleClickThrough,
-        );
-        process(
-            &settings.hotkeys.switch_to_mob_view,
-            HotkeyAction::SwitchToMobView,
-        );
-        process(
-            &settings.hotkeys.switch_to_combat_view,
-            HotkeyAction::SwitchToCombatView,
-        );
-        process(
-            &settings.hotkeys.minimize_window,
-            HotkeyAction::MinimizeWindow,
-        );
-        process(&settings.hotkeys.reset_stats, HotkeyAction::ResetStats);
+        }
     }
 
     pub fn get_action(&self, event_id: u32) -> Option<HotkeyAction> {
@@ -200,4 +187,25 @@ key_mappings! {
     Tab => "Tab" => Tab,
     Backspace => "Backspace" => Backspace,
     Escape => "Escape" => Escape,
+    ArrowUp => "ArrowUp" => ArrowUp,
+    ArrowDown => "ArrowDown" => ArrowDown,
+    ArrowLeft => "ArrowLeft" => ArrowLeft,
+    ArrowRight => "ArrowRight" => ArrowRight,
+    Home => "Home" => Home,
+    End => "End" => End,
+    PageUp => "PageUp" => PageUp,
+    PageDown => "PageDown" => PageDown,
+    Insert => "Insert" => Insert,
+    Delete => "Delete" => Delete,
+    Backtick => "Backquote" => Backquote,
+    Minus => "Minus" => Minus,
+    Equals => "Equal" => Equal,
+    OpenBracket => "BracketLeft" => BracketLeft,
+    CloseBracket => "BracketRight" => BracketRight,
+    Semicolon => "Semicolon" => Semicolon,
+    Quote => "Quote" => Quote,
+    Comma => "Comma" => Comma,
+    Period => "Period" => Period,
+    Slash => "Slash" => Slash,
+    Backslash => "Backslash" => Backslash,
 }

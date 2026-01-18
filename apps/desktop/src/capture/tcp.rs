@@ -107,7 +107,7 @@ impl TcpStreamProcessor {
             if payload.len() > 4 {
                 let packet_size =
                     u32::from_be_bytes([payload[0], payload[1], payload[2], payload[3]]) as usize;
-                if packet_size < 0x0fffff {
+                if packet_size < tcp::MAX_PACKET_SIZE as usize {
                     self.next_seq = Some(seq);
                 }
             }
@@ -162,7 +162,7 @@ impl TcpStreamProcessor {
             self.stream_buffer[3],
         ]) as usize;
 
-        if packet_size <= 4 || packet_size > 0x0fffff {
+        if packet_size <= 4 || packet_size > tcp::MAX_PACKET_SIZE as usize {
             self.stream_buffer.pop_front();
             return true;
         }

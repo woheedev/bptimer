@@ -37,6 +37,8 @@ pub struct CharBaseInfo {
     pub account_id: ::prost::alloc::string::String,
     #[prost(string, tag = "5")]
     pub name: ::prost::alloc::string::String,
+    #[prost(int32, tag = "35")]
+    pub fight_point: i32,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CharSerialize {
@@ -50,6 +52,8 @@ pub struct CharSerialize {
     pub item_package: ::core::option::Option<ItemPackage>,
     #[prost(message, optional, tag = "57")]
     pub r#mod: ::core::option::Option<Mod>,
+    #[prost(message, optional, tag = "61")]
+    pub profession_list: ::core::option::Option<ProfessionList>,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DisappearEntity {
@@ -103,6 +107,11 @@ pub struct Position {
     pub y: f32,
     #[prost(float, tag = "3")]
     pub z: f32,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct ProfessionList {
+    #[prost(int32, tag = "1")]
+    pub cur_profession_id: i32,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SceneData {

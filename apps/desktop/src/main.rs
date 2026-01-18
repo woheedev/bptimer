@@ -1,7 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use eframe::egui;
-use env_logger;
 use log::{info, warn};
 
 // Load .env file if it exists (non-fatal if missing)
@@ -63,8 +62,8 @@ fn main() -> eframe::Result {
     let mut hotkey_manager = crate::hotkeys::HotkeyManager::new();
 
     // Load settings and register initial hotkeys
-    let settings = crate::config::Settings::load();
-    hotkey_manager.reload_from_settings(&settings);
+    let mut settings = crate::config::Settings::load();
+    hotkey_manager.reload_from_settings(&mut settings);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()

@@ -11,6 +11,7 @@ target
 .wrangler
 reference
 apps/desktop/src/protocol/pb.rs
+submodules
 
 # Ignore files for PNPM, NPM, YARN and BUN
 pnpm-lock.yaml

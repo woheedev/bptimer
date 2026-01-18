@@ -19,34 +19,34 @@ pub fn format_compact(value: f32) -> (String, String) {
     let abs_value = value.abs();
 
     if abs_value < 1000.0 {
-        return (format!("{:.0}", value), raw);
+        (format!("{:.0}", value), raw)
     } else if abs_value < 1_000_000.0 {
         let k = value / 1000.0;
         if k >= 100.0 {
-            return (format!("{:.0}K", k), raw);
+            (format!("{:.0}K", k), raw)
         } else {
-            return (format!("{:.1}K", k), raw);
+            (format!("{:.1}K", k), raw)
         }
     } else if abs_value < 1_000_000_000.0 {
         let m = value / 1_000_000.0;
         if m >= 100.0 {
-            return (format!("{:.0}M", m), raw);
+            (format!("{:.0}M", m), raw)
         } else {
-            return (format!("{:.1}M", m), raw);
+            (format!("{:.1}M", m), raw)
         }
     } else if abs_value < 1_000_000_000_000.0 {
         let b = value / 1_000_000_000.0;
         if b >= 100.0 {
-            return (format!("{:.0}B", b), raw);
+            (format!("{:.0}B", b), raw)
         } else {
-            return (format!("{:.1}B", b), raw);
+            (format!("{:.1}B", b), raw)
         }
     } else {
         let t = value / 1_000_000_000_000.0;
         if t >= 100.0 {
-            return (format!("{:.0}T", t), raw);
+            (format!("{:.0}T", t), raw)
         } else {
-            return (format!("{:.1}T", t), raw);
+            (format!("{:.1}T", t), raw)
         }
     }
 }

@@ -50,52 +50,43 @@ pub fn extract_modules(
 ) -> Result<Vec<Module>, Box<dyn std::error::Error>> {
     let mut modules = Vec::new();
 
-    let v_data = match &sync_data.v_data {
-        Some(v) => v,
-        None => {
-            return Ok(modules);
-        }
+    let Some(v_data) = &sync_data.v_data else {
+        return Ok(modules);
     };
 
-    let mod_infos = match &v_data.r#mod {
-        Some(mod_data) => &mod_data.mod_infos,
-        None => {
-            return Ok(modules);
-        }
+    let Some(mod_data) = &v_data.r#mod else {
+        return Ok(modules);
+    };
+    let mod_infos = &mod_data.mod_infos;
+
+    let Some(item_package) = &v_data.item_package else {
+        return Ok(modules);
     };
 
-    let item_package = match &v_data.item_package {
-        Some(pkg) => pkg,
-        None => {
-            return Ok(modules);
-        }
-    };
-
-    for (_package_type, package) in &item_package.packages {
+    for package in item_package.packages.values() {
         for (item_key, item) in &package.items {
-            if let Some(mod_new_attr) = &item.mod_new_attr {
-                if !mod_new_attr.mod_parts.is_empty() {
-                    let mod_info = mod_infos.get(item_key);
-                    let mut effects = Vec::new();
-                    let mod_parts = &mod_new_attr.mod_parts;
-                    let empty_vec = Vec::new();
-                    let init_link_nums =
-                        mod_info.map(|mi| &mi.init_link_nums).unwrap_or(&empty_vec);
+            if let Some(mod_new_attr) = &item.mod_new_attr
+                && !mod_new_attr.mod_parts.is_empty()
+            {
+                let mod_info = mod_infos.get(item_key);
+                let mut effects = Vec::new();
+                let mod_parts = &mod_new_attr.mod_parts;
+                let empty_vec = Vec::new();
+                let init_link_nums = mod_info.map_or(&empty_vec, |mi| &mi.init_link_nums);
 
-                    let n = mod_parts.len().min(init_link_nums.len());
+                let n = mod_parts.len().min(init_link_nums.len());
 
-                    for i in 0..n {
-                        let part_id = mod_parts[i];
-                        let level = init_link_nums[i] as u32;
+                for i in 0..n {
+                    let part_id = mod_parts[i];
+                    let level = u32::try_from(init_link_nums[i]).unwrap_or(0);
 
-                        if is_valid_effect_id(part_id) {
-                            effects.push(ModuleEffect { id: part_id, level });
-                        }
+                    if is_valid_effect_id(part_id) {
+                        effects.push(ModuleEffect { id: part_id, level });
                     }
+                }
 
-                    if !effects.is_empty() {
-                        modules.push(Module { effects });
-                    }
+                if !effects.is_empty() {
+                    modules.push(Module { effects });
                 }
             }
         }

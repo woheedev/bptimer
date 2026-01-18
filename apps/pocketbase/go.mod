@@ -4,7 +4,7 @@ go 1.25.3
 
 require (
 	github.com/pocketbase/dbx v1.11.0
-	github.com/pocketbase/pocketbase v0.36.0
+	github.com/pocketbase/pocketbase v0.36.1
 	github.com/prometheus/client_golang v1.23.2
 )
 
@@ -53,5 +53,5 @@ require (
 	modernc.org/libc v1.67.6 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.44.1 // indirect
+	modernc.org/sqlite v1.44.2 // indirect
 )

@@ -7,7 +7,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR")?);
 
     prost_build::Config::new()
-        .out_dir(&manifest_dir.join("src/protocol"))
+        .out_dir(manifest_dir.join("src/protocol"))
         .compile_protos(&["src/pb.proto"], &["src/"])?;
 
     let out_dir = env::var("OUT_DIR")?;
@@ -32,23 +32,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     writeln!(
         config_file,
-        "pub const BPTIMER_API_URL: &str = \"{}\";",
-        api_url
+        "pub const BPTIMER_API_URL: &str = \"{api_url}\";"
     )?;
     writeln!(
         config_file,
-        "pub const BPTIMER_API_KEY: &str = \"{}\";",
-        api_key
+        "pub const BPTIMER_API_KEY: &str = \"{api_key}\";"
     )?;
     writeln!(
         config_file,
-        "pub const GITHUB_REPO_OWNER: &str = \"{}\";",
-        repo_owner
+        "pub const GITHUB_REPO_OWNER: &str = \"{repo_owner}\";"
     )?;
     writeln!(
         config_file,
-        "pub const GITHUB_REPO_NAME: &str = \"{}\";",
-        repo_name
+        "pub const GITHUB_REPO_NAME: &str = \"{repo_name}\";"
     )?;
 
     #[cfg(windows)]

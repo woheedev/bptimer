@@ -124,7 +124,7 @@ pub fn render_mob_view(
                             let total_rows = if channels_to_show.is_empty() {
                                 0
                             } else {
-                                (channels_to_show.len() + CHANNELS_PER_ROW - 1) / CHANNELS_PER_ROW
+                                channels_to_show.len().div_ceil(CHANNELS_PER_ROW)
                             };
                             ui.vertical(|rows_ui| {
                                 let text_color = rows_ui.visuals().text_color();

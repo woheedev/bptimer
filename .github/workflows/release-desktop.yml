@@ -34,7 +34,7 @@ jobs:
 
       - name: Install protoc
         run: |
-          $protocVersion = "33.1"
+          $protocVersion = "33.4"
           $protocUrl = "https://github.com/protocolbuffers/protobuf/releases/download/v$protocVersion/protoc-$protocVersion-win64.zip"
           $protocZip = "$env:TEMP\protoc.zip"
           $protocDir = "$env:TEMP\protoc"

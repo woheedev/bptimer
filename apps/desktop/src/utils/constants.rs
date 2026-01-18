@@ -219,7 +219,7 @@ pub mod account_id_regions {
         REGIONS
             .iter()
             .find(|r| r.prefix == prefix && r.enabled)
-            .and_then(|r| r.region.clone())
+            .and_then(|r| r.region)
     }
 
     /// Check if a prefix exists in REGIONS but is not enabled

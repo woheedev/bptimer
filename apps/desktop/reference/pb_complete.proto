@@ -3353,22 +3353,16 @@ message AITableBase {
   string vigilance_action_json_name = 1933;
 }
 
-message AITableMgr {
-  map<int32, bokura.AITableBase> datas = 1;
-}
+message AITableMgr { map<int32, bokura.AITableBase> datas = 1; }
 
-message AcceptProfessionQuestRequest {
-  int32 profession_id = 1;
-}
+message AcceptProfessionQuestRequest { int32 profession_id = 1; }
 
 message AcceptQuestInfo {
   int32 quest_id = 1;
   repeated int32 param_list = 2;
 }
 
-message AcceptTransferBeLeaderRequest {
-  bool agree = 2;
-}
+message AcceptTransferBeLeaderRequest { bool agree = 2; }
 
 message AccountData {
   string open_id = 1;
@@ -3392,12 +3386,9 @@ message AccumulateEnd {
   string end_time = 2;
 }
 
-message Ace {
-}
+message Ace {}
 
-message AceSdkNtf {
-  NotifyLoginAntiDataRequest v_request = 1;
-}
+message AceSdkNtf { NotifyLoginAntiDataRequest v_request = 1; }
 
 message Achievement {
   uint32 finish_num = 1;
@@ -3515,61 +3506,33 @@ message ActorUuidStru {
   int32 instance_id = 3;
 }
 
-message AffixData {
-  repeated int32 affix_ids = 1;
-}
+message AffixData { repeated int32 affix_ids = 1; }
 
-message AiBotActiveTrigger {
-  BotActiveTrigger active_trigger_param = 1;
-}
+message AiBotActiveTrigger { BotActiveTrigger active_trigger_param = 1; }
 
-message AiBotAddBuffByConfigId {
-  BotAddBuff add_buff_param = 1;
-}
+message AiBotAddBuffByConfigId { BotAddBuff add_buff_param = 1; }
 
-message AiBotMove {
-  BotMoveInfo move_param = 1;
-}
+message AiBotMove { BotMoveInfo move_param = 1; }
 
-message AiBotPlayAction {
-  BotPlayActionParam play_action_param = 1;
-}
+message AiBotPlayAction { BotPlayActionParam play_action_param = 1; }
 
-message AiBotRemoveBuffByConfigId {
-  BotRemoveBuff remove_buff_param = 1;
-}
+message AiBotRemoveBuffByConfigId { BotRemoveBuff remove_buff_param = 1; }
 
-message AiBotResurrection {
-  BotResurrectionParam v_request = 1;
-}
+message AiBotResurrection { BotResurrectionParam v_request = 1; }
 
-message AiBotSendChitChatMsg {
-  BotSendChitChatMsgReq v_request = 1;
-}
+message AiBotSendChitChatMsg { BotSendChitChatMsgReq v_request = 1; }
 
-message AiBotSendGmMsg {
-  GmCmd msg = 1;
-}
+message AiBotSendGmMsg { GmCmd msg = 1; }
 
-message AiBotStartRide {
-  BotStartRideParam start_ride_param = 1;
-}
+message AiBotStartRide { BotStartRideParam start_ride_param = 1; }
 
-message AiBotTeleportToPos {
-  BotTeleportParam teleport_param = 1;
-}
+message AiBotTeleportToPos { BotTeleportParam teleport_param = 1; }
 
-message AiBotUseSkill {
-  BotUseSkillInfo use_skill_param = 1;
-}
+message AiBotUseSkill { BotUseSkillInfo use_skill_param = 1; }
 
-message AnswerList {
-  repeated int32 answers = 1;
-}
+message AnswerList { repeated int32 answers = 1; }
 
-message AntiAddictionInfo {
-  uint32 last_time = 1;
-}
+message AntiAddictionInfo { uint32 last_time = 1; }
 
 message AoiSyncDelta {
   optional int64 uuid = 1;
@@ -3584,7 +3547,8 @@ message AoiSyncDelta {
   BuffInfoSync buff_infos = 10;
   BuffEffectSync buff_effect = 11;
   repeated FakeBulletInfo fake_bullets = 12;
-  repeated MagneticRideQueueChangeInfo magnetic_ride_queue_change_info_list = 13;
+  repeated MagneticRideQueueChangeInfo magnetic_ride_queue_change_info_list =
+      13;
 }
 
 message AoiSyncToMeDelta {
@@ -3615,9 +3579,7 @@ message AttrCollection {
   repeated MapAttr map_attrs = 3;
 }
 
-message AttrInBattleShowSync {
-  string attr_in_battle_show = 1;
-}
+message AttrInBattleShowSync { string attr_in_battle_show = 1; }
 
 message AvatarInfo {
   int32 avatar_id = 1;
@@ -3667,17 +3629,11 @@ message BattlePassAwardInfo {
   bool paid_award = 2;
 }
 
-message BattlePassData {
-  map<int32, BattlePass> battle_map = 1;
-}
+message BattlePassData { map<int32, BattlePass> battle_map = 1; }
 
-message BossProgress {
-  int32 total_award_cnt = 1;
-}
+message BossProgress { int32 total_award_cnt = 1; }
 
-message BotActiveTrigger {
-  string trigger_id = 1;
-}
+message BotActiveTrigger { string trigger_id = 1; }
 
 message BotAddBuff {
   string actor_id = 1;
@@ -3698,22 +3654,16 @@ message BotPlayActionParam {
   string action_source = 2;
 }
 
-message BotRemoveBuff {
-  string buff_id = 1;
-}
+message BotRemoveBuff { string buff_id = 1; }
 
 message BotResurrectionParam {
   string target_id = 1;
   string revive_id = 2;
 }
 
-message BotSendChitChatMsgReq {
-  string emoji_id = 1;
-}
+message BotSendChitChatMsgReq { string emoji_id = 1; }
 
-message BotStartRideParam {
-  string ride_id = 1;
-}
+message BotStartRideParam { string ride_id = 1; }
 
 message BotTeleportParam {
   string actor_id = 1;
@@ -3738,9 +3688,7 @@ message BounceJump {
   string vel_dir_z = 5;
 }
 
-message BubbleActData {
-  map<int32, BubbleInfo> bubble_info = 5;
-}
+message BubbleActData { map<int32, BubbleInfo> bubble_info = 5; }
 
 message BubbleInfo {
   uint32 bubble_score = 1;
@@ -3749,9 +3697,7 @@ message BubbleInfo {
   int64 last_refresh_time = 4;
 }
 
-message BuffAttrEffect {
-  repeated BuffAttrShowInfo attr_show_info = 1;
-}
+message BuffAttrEffect { repeated BuffAttrShowInfo attr_show_info = 1; }
 
 message BuffAttrShowInfo {
   int32 id = 1;
@@ -3853,18 +3799,14 @@ message BuffProfessionEffectData {
   repeated bool profession_switch = 3;
 }
 
-message BufferStream {
-  bytes buffer_s = 1;
-}
+message BufferStream { bytes buffer_s = 1; }
 
 message BulletEvent {
   optional int64 uuid = 1;
   optional int32 enter_stage_id = 2;
 }
 
-message CameraSchemeCache {
-  map<string, string> camera_scheme_dict = 1;
-}
+message CameraSchemeCache { map<string, string> camera_scheme_dict = 1; }
 
 message CameraSchemeInfo {
   CameraPatternType camera_pattern_type = 1;
@@ -3893,18 +3835,14 @@ message CameraSchemeInfo {
   string id = 24;
 }
 
-message CameraSelectSchemeCache {
-  CameraSchemeInfo camera_scheme_cache = 1;
-}
+message CameraSelectSchemeCache { CameraSchemeInfo camera_scheme_cache = 1; }
 
 message ChallengeDungeonInfo {
   map<int32, DungeonInfo> dungeon_info = 1;
   map<int32, DungeonTargetAward> dungeon_target_award = 2;
 }
 
-message ChangeCharFunctionState {
-  EActorState state_type = 1;
-}
+message ChangeCharFunctionState { EActorState state_type = 1; }
 
 message ChannelingEnd {
   string skill_uuid = 1;
@@ -4071,9 +4009,7 @@ message CharTeam {
   ETeamMemberType team_member_type = 9;
 }
 
-message ClientBreakState {
-  string v_operator = 1;
-}
+message ClientBreakState { string v_operator = 1; }
 
 message ClientHitInfo {
   EDamageSource source_type = 1;
@@ -4125,9 +4061,7 @@ message Clutter {
   int32 position_id = 3;
 }
 
-message ClutterGenerationRecord {
-  bool generated = 1;
-}
+message ClutterGenerationRecord { bool generated = 1; }
 
 message CollectingItem {
   int32 item_id = 1;
@@ -4136,18 +4070,14 @@ message CollectingItem {
   bool is_high = 4;
 }
 
-message CollectionBook {
-  map<uint32, bool> mod_book_map = 1;
-}
+message CollectionBook { map<uint32, bool> mod_book_map = 1; }
 
 message CommonAwardInfo {
   int32 id = 1;
   EReceiveRewardStatus award_status = 2;
 }
 
-message CommunityAuthorityInfo {
-  map<int32, bool> authority = 1;
-}
+message CommunityAuthorityInfo { map<int32, bool> authority = 1; }
 
 message CommunityBuildFurnitureInfo {
   int64 build_uuid = 1;
@@ -4203,13 +4133,9 @@ message CommunityHomeData {
   int32 level = 5;
 }
 
-message CommunityHomelandRecipe {
-  int32 id = 1;
-}
+message CommunityHomelandRecipe { int32 id = 1; }
 
-message CommunityPlayerAuthorityInfo {
-  map<int32, bool> authority = 1;
-}
+message CommunityPlayerAuthorityInfo { map<int32, bool> authority = 1; }
 
 message CommunityPlayerInfo {
   CommunityCharBasicData community_char = 1;
@@ -4260,13 +4186,9 @@ message CompensationStatistics {
   map<uint32, int32> last_week = 5;
 }
 
-message CompletedTargetInfo {
-  map<int32, bool> completed_target_list = 1;
-}
+message CompletedTargetInfo { map<int32, bool> completed_target_list = 1; }
 
-message ConnectWorld {
-  RequestConnectWorld v_request = 1;
-}
+message ConnectWorld { RequestConnectWorld v_request = 1; }
 
 message ConnectWorldResult {
   WorldReconnectStatus result = 1;
@@ -4276,13 +4198,9 @@ message ConnectWorldResult {
   string connect_guid = 5;
 }
 
-message CookBook {
-  uint32 create_time = 1;
-}
+message CookBook { uint32 create_time = 1; }
 
-message CookList {
-  map<uint32, CookBook> book_data = 1;
-}
+message CookList { map<uint32, CookBook> book_data = 1; }
 
 message CounterInfo {
   int32 id = 1;
@@ -4290,13 +4208,9 @@ message CounterInfo {
   int64 accumulate_limit = 3;
 }
 
-message CounterList {
-  map<int32, CounterInfo> counter_map = 1;
-}
+message CounterList { map<int32, CounterInfo> counter_map = 1; }
 
-message CraftEnergyRecord {
-  map<int32, int32> records = 1;
-}
+message CraftEnergyRecord { map<int32, int32> records = 1; }
 
 message CurrencyData {
   int32 config_id = 1;
@@ -4316,17 +4230,11 @@ message CutSceneInfos {
   map<int64, bool> finished_infos = 3;
 }
 
-message CutScenePlayEnd {
-  string v_cut_scene_id = 1;
-}
+message CutScenePlayEnd { string v_cut_scene_id = 1; }
 
-message CutScenePointInfo {
-  int32 cut_scene_id = 1;
-}
+message CutScenePointInfo { int32 cut_scene_id = 1; }
 
-message CutsState {
-  map<int32, int32> state_info = 1;
-}
+message CutsState { map<int32, int32> state_info = 1; }
 
 message DanceBall {
   int32 dance_id = 1;
@@ -4363,13 +4271,9 @@ message DelayHitTargetInfo {
   float delay_time = 3;
 }
 
-message DetachRideMagnetic {
-  EDetachMagneticType detach_type = 1;
-}
+message DetachRideMagnetic { EDetachMagneticType detach_type = 1; }
 
-message DirtyMask {
-  repeated int64 dirty_key = 1;
-}
+message DirtyMask { repeated int64 dirty_key = 1; }
 
 message DisappearEntity {
   optional int64 uuid = 1;
@@ -4410,9 +4314,7 @@ message DroughtRecord {
   bool is_expired = 6;
 }
 
-message DungeonAffixData {
-  repeated uint32 affix_data = 1;
-}
+message DungeonAffixData { repeated uint32 affix_data = 1; }
 
 message DungeonAward {
   map<int64, Item> items = 1;
@@ -4421,26 +4323,18 @@ message DungeonAward {
   repeated int64 first_items = 4;
 }
 
-message DungeonBossRank {
-  map<int32, RankData> boss_rank = 1;
-}
+message DungeonBossRank { map<int32, RankData> boss_rank = 1; }
 
-message DungeonDamage {
-  map<int64, int64> damages = 1;
-}
+message DungeonDamage { map<int64, int64> damages = 1; }
 
 message DungeonEnterCount {
   uint32 enter_time = 1;
   int32 enter_count = 2;
 }
 
-message DungeonEnterLimit {
-  map<int32, DungeonEnterCount> enter_count = 1;
-}
+message DungeonEnterLimit { map<int32, DungeonEnterCount> enter_count = 1; }
 
-message DungeonEvent {
-  map<int32, DungeonEventData> dungeon_event_data = 1;
-}
+message DungeonEvent { map<int32, DungeonEventData> dungeon_event_data = 1; }
 
 message DungeonEventData {
   int32 event_id = 1;
@@ -4491,21 +4385,16 @@ message DungeonPioneer {
   map<int32, CompletedTargetInfo> completed_target_this_time = 1;
 }
 
-message DungeonPlanetMemoryRoom {
-  int32 room_id = 1;
-}
+message DungeonPlanetMemoryRoom { int32 room_id = 1; }
 
 message DungeonPlayerInfo {
   int64 char_id = 1;
   SocialData social_data = 2;
 }
 
-message DungeonPlayerList {
-  map<uint32, DungeonPlayerInfo> player_infos = 1;
-}
+message DungeonPlayerList { map<uint32, DungeonPlayerInfo> player_infos = 1; }
 
-message DungeonRaidInfo {
-}
+message DungeonRaidInfo {}
 
 message DungeonRandomEntityConfigIdInfo {
   map<int64, int32> random_entity_map = 1;
@@ -4516,18 +4405,14 @@ message DungeonRankInfo {
   int32 rank = 2;
 }
 
-message DungeonRankList {
-  map<int32, DungeonRankInfo> dungeon_rank_map = 1;
-}
+message DungeonRankList { map<int32, DungeonRankInfo> dungeon_rank_map = 1; }
 
 message DungeonReviveInfo {
   repeated int32 revive_ids = 1;
   map<int32, int32> revive_map = 2;
 }
 
-message DungeonSceneInfo {
-  int32 difficulty = 1;
-}
+message DungeonSceneInfo { int32 difficulty = 1; }
 
 message DungeonScore {
   int32 total_score = 1;
@@ -4569,9 +4454,7 @@ message DungeonSyncData {
   EErrorCode err_code = 24;
 }
 
-message DungeonTarget {
-  map<int32, DungeonTargetData> target_data = 1;
-}
+message DungeonTarget { map<int32, DungeonTargetData> target_data = 1; }
 
 message DungeonTargetAward {
   map<int32, DungeonTargetProgress> dungeon_target_progress = 1;
@@ -4603,18 +4486,14 @@ message DungeonTimerInfo {
   int32 cur_pause_timestamp = 11;
 }
 
-message DungeonTitle {
-  map<int64, DungeonTitleList> title_list = 1;
-}
+message DungeonTitle { map<int64, DungeonTitleList> title_list = 1; }
 
 message DungeonTitleInfo {
   int64 uuid = 1;
   int32 title_id = 2;
 }
 
-message DungeonTitleList {
-  map<int32, DungeonTitleInfo> title_info = 1;
-}
+message DungeonTitleList { map<int32, DungeonTitleInfo> title_info = 1; }
 
 message DungeonUnionInfo {
   int64 union_id = 1;
@@ -4623,22 +4502,16 @@ message DungeonUnionInfo {
   DanceBall dance_ball = 4;
 }
 
-message DungeonVar {
-  repeated DungeonVarData dungeon_var_data = 1;
-}
+message DungeonVar { repeated DungeonVarData dungeon_var_data = 1; }
 
-message DungeonVarAll {
-  map<int64, DungeonVar> dungeon_var_all_map = 1;
-}
+message DungeonVarAll { map<int64, DungeonVar> dungeon_var_all_map = 1; }
 
 message DungeonVarData {
   string name = 1;
   int32 value = 2;
 }
 
-message DungeonVote {
-  map<int64, int32> vote = 1;
-}
+message DungeonVote { map<int64, int32> vote = 1; }
 
 message DungeonWeekTargetList {
   map<int32, DungeonTargetProgress> week_target = 1;
@@ -4684,9 +4557,7 @@ message EnergyItemInfo {
   int64 gain_time = 4;
 }
 
-message EnterScene {
-  EnterSceneInfo enter_scene_info = 1;
-}
+message EnterScene { EnterSceneInfo enter_scene_info = 1; }
 
 message EnterSceneInfo {
   AttrCollection scene_attrs = 1;
@@ -4731,9 +4602,7 @@ message EquipAttrSet {
   map<int32, int32> rare_quality_attr = 4;
 }
 
-message EquipData {
-  repeated EquipNine equip_infos = 1;
-}
+message EquipData { repeated EquipNine equip_infos = 1; }
 
 message EquipEnchantInfo {
   int32 enchant_item_type_id = 1;
@@ -4792,9 +4661,7 @@ message ExchangeInfo {
   map<int32, ExchangeData> exchange_data = 2;
 }
 
-message ExchangeItem {
-  map<int32, ExchangeInfo> exchange_info = 1;
-}
+message ExchangeItem { map<int32, ExchangeInfo> exchange_info = 1; }
 
 message FaceData {
   map<int32, int32> face_info = 1;
@@ -4861,9 +4728,7 @@ message FashionColorInfo {
   map<int32, IntVec3> attachment_color = 3;
 }
 
-message FashionData {
-  repeated FashionInfo fashion_infos = 1;
-}
+message FashionData { repeated FashionInfo fashion_infos = 1; }
 
 message FashionInfo {
   int32 slot = 1;
@@ -4891,9 +4756,7 @@ message FashionMgr {
   bool is_weapon_skin_init = 17;
 }
 
-message FashionQualityCollectInfo {
-  map<int32, int32> quality_count = 1;
-}
+message FashionQualityCollectInfo { map<int32, int32> quality_count = 1; }
 
 message FightPoint {
   int32 total_fight_point = 1;
@@ -4960,9 +4823,7 @@ message FishSetting {
   map<int32, int64> zero_fish_times = 9;
 }
 
-message FishSocialData {
-  map<int32, FishRecord> fish_records = 1;
-}
+message FishSocialData { map<int32, FishRecord> fish_records = 1; }
 
 message FishingData {
   int32 rod_id = 1;
@@ -4973,17 +4834,11 @@ message FishingData {
   int32 size = 6;
 }
 
-message FishingSetStage {
-  FishingSetStageRequest v_request = 1;
-}
+message FishingSetStage { FishingSetStageRequest v_request = 1; }
 
-message FishingSetStageRequest {
-  int32 stage = 1;
-}
+message FishingSetStageRequest { int32 stage = 1; }
 
-message FlowPlayEnd {
-  string v_flow_id = 1;
-}
+message FlowPlayEnd { string v_flow_id = 1; }
 
 message ForcedPullBack {
   Position cur_pos = 1;
@@ -5044,30 +4899,23 @@ message GashaInfo {
   uint32 wish_limit = 12;
 }
 
-message GetClientOptions {
-  GetClientOptionsRequest v_request = 1;
-}
+message GetClientOptions { GetClientOptionsRequest v_request = 1; }
 
 message GetClientOptionsReply {
   map<string, string> options = 1;
   EErrorCode err_code = 2;
 }
 
-message GetClientOptionsRequest {
-  repeated string keys = 1;
-}
+message GetClientOptionsRequest { repeated string keys = 1; }
 
-message GetGitVersion {
-  GetGitVersionRequest v_request = 1;
-}
+message GetGitVersion { GetGitVersionRequest v_request = 1; }
 
 message GetGitVersionReply {
   string git_version = 1;
   EErrorCode err_code = 2;
 }
 
-message GetGitVersionRequest {
-}
+message GetGitVersionRequest {}
 
 message GetHomelandBuildFurnitureInfo {
   GetHomelandBuildFurnitureInfoRequest v_request = 1;
@@ -5078,30 +4926,20 @@ message GetHomelandBuildFurnitureInfoReply {
   EErrorCode err_code = 2;
 }
 
-message GetHomelandBuildFurnitureInfoRequest {
-  int32 build_type = 1;
-}
+message GetHomelandBuildFurnitureInfoRequest { int32 build_type = 1; }
 
-message GetLuaSceneAttr {
-  string v_attribute_name = 1;
-}
+message GetLuaSceneAttr { string v_attribute_name = 1; }
 
-message GetPath {
-  GetPathRequest v_request = 1;
-}
+message GetPath { GetPathRequest v_request = 1; }
 
 message GetPathReply {
   EErrorCode err_code = 1;
   bytes reply_bytes = 2;
 }
 
-message GetPathRequest {
-  bytes request_bytes = 1;
-}
+message GetPathRequest { bytes request_bytes = 1; }
 
-message GetSocialData {
-  GetSocialDataRequest v_request = 1;
-}
+message GetSocialData { GetSocialDataRequest v_request = 1; }
 
 message GetSocialDataReply {
   int64 mask = 1;
@@ -5121,9 +4959,7 @@ message GmCmd {
   string parameter = 4;
 }
 
-message GmCommand {
-  GmCmd cmd = 1;
-}
+message GmCommand { GmCmd cmd = 1; }
 
 message GmResult {
   bool success = 1;
@@ -5162,9 +4998,7 @@ message HomeLandClutterGenerationRecord {
   map<int32, ClutterGenerationRecord> home_land_clutter_record = 1;
 }
 
-message HomeLandClutterInfo {
-  map<int64, Clutter> home_land_clutter = 1;
-}
+message HomeLandClutterInfo { map<int64, Clutter> home_land_clutter = 1; }
 
 message HomeLandItemInstance {
   int64 instance_id = 1;
@@ -5184,9 +5018,7 @@ message HomeLandSellShopInfo {
   map<int32, CollectingItem> collecting_items = 3;
 }
 
-message HomeLandTask {
-  bool finished = 1;
-}
+message HomeLandTask { bool finished = 1; }
 
 message HomelandBaseInfo {
   int64 homeland_id = 1;
@@ -5274,9 +5106,7 @@ message IntVec3Db {
   int32 z = 3;
 }
 
-message Interaction {
-  InteractionTemplateData v_info = 1;
-}
+message Interaction { InteractionTemplateData v_info = 1; }
 
 message InteractionActionEnd {
   string cur_stage = 1;
@@ -5375,9 +5205,7 @@ message LaunchPrivilegeData {
   bool bak_privilege = 4;
 }
 
-message LearnExpressionAction {
-  string expression_id = 1;
-}
+message LearnExpressionAction { string expression_id = 1; }
 
 message LevelProficiency {
   map<int32, int32> using_proficiency_map = 1;
@@ -5444,9 +5272,7 @@ message LiftProfessionSpecialization {
   int32 level = 2;
 }
 
-message LineDrawing {
-  DrawingLines lines = 1;
-}
+message LineDrawing { DrawingLines lines = 1; }
 
 message LinkingInfo {
   bool is_delete = 1;
@@ -5455,9 +5281,7 @@ message LinkingInfo {
   repeated ActorUuidStru target_uuids = 4;
 }
 
-message LoadMapSuccess {
-  LoadMapSuccessParam v_param = 1;
-}
+message LoadMapSuccess { LoadMapSuccessParam v_param = 1; }
 
 message LoadMapSuccessParam {
   string scene_guid = 1;
@@ -5527,9 +5351,7 @@ message MapBookInfo {
   uint32 award_flag = 3;
 }
 
-message MapBookInfoList {
-  map<uint32, MapBookInfo> map_book_map = 1;
-}
+message MapBookInfoList { map<uint32, MapBookInfo> map_book_map = 1; }
 
 message MapData {
   map<int32, MarkData> mark_data_map = 1;
@@ -5567,9 +5389,7 @@ message MarkPosition {
   int32 y = 2;
 }
 
-message MasterModeDiffDungeonInfo {
-  map<int32, DungeonInfo> dungeon_info = 1;
-}
+message MasterModeDiffDungeonInfo { map<int32, DungeonInfo> dungeon_info = 1; }
 
 message MasterModeDungeonData {
   int32 season_score = 1;
@@ -5594,13 +5414,9 @@ message MedalNode {
   int32 slot = 4;
 }
 
-message MiscInfo {
-  map<int32, int32> expression_ids_learned = 1;
-}
+message MiscInfo { map<int32, int32> expression_ids_learned = 1; }
 
-message Mlstring {
-  int64 id = 1;
-}
+message Mlstring { int64 id = 1; }
 
 message Mod {
   map<int32, int64> mod_slots = 1;
@@ -5638,9 +5454,7 @@ message ModPartUpgradeRecord {
   bool is_success = 2;
 }
 
-message MonitorBehaviorTreeOfEntity {
-  string entity_id = 1;
-}
+message MonitorBehaviorTreeOfEntity { string entity_id = 1; }
 
 message MonsterCastSkill {
   string self_uuid = 1;
@@ -5672,9 +5486,7 @@ message MonsterHuntTarget {
   map<int32, MonsterTargetInfo> target_info_list = 2;
 }
 
-message MonsterHuntUnlockMonster {
-  UnlockInfo info = 1;
-}
+message MonsterHuntUnlockMonster { UnlockInfo info = 1; }
 
 message MonsterTargetInfo {
   int32 id = 1;
@@ -5713,9 +5525,7 @@ message MonthlyCardInfo {
   int64 end_time = 5;
 }
 
-message NewMove {
-  UserControlInfo info = 1;
-}
+message NewMove { UserControlInfo info = 1; }
 
 message NewbieData {
   int64 total_online_time = 1;
@@ -5723,17 +5533,11 @@ message NewbieData {
   bool is_cancel_newbie = 3;
 }
 
-message NotGetProceedAwardInfo {
-  map<uint32, uint32> award_id_times = 1;
-}
+message NotGetProceedAwardInfo { map<uint32, uint32> award_id_times = 1; }
 
-message NotifyAntiData {
-  NotifyAntiDataRequest v_request = 1;
-}
+message NotifyAntiData { NotifyAntiDataRequest v_request = 1; }
 
-message NotifyAntiDataRequest {
-  TssAccountInfoProto tss_info = 1;
-}
+message NotifyAntiDataRequest { TssAccountInfoProto tss_info = 1; }
 
 message NotifyBuffChange {
   string old_buff_id = 1;
@@ -5745,9 +5549,7 @@ message NotifyBuildFurnitureOp {
   CommunityBuildFurnitureInfo furniture = 2;
 }
 
-message NotifyClientKickOff {
-  EErrorCode err_code = 1;
-}
+message NotifyClientKickOff { EErrorCode err_code = 1; }
 
 message NotifyCommunityHomeLandDecorationInfo {
   NotifyCommunityHomeLandDecorationInfoRequest request = 1;
@@ -5776,9 +5578,7 @@ message NotifyCommunityHomeLandUnlockedAreasUpdateRequest {
   repeated string unlock_outer_areas = 3;
 }
 
-message NotifyEnterWorld {
-  NotifyEnterWorldRequest v_request = 1;
-}
+message NotifyEnterWorld { NotifyEnterWorldRequest v_request = 1; }
 
 message NotifyEnterWorldRequest {
   string account_id = 1;
@@ -5789,9 +5589,7 @@ message NotifyEnterWorldRequest {
   SceneLineData scene_line_data = 6;
 }
 
-message NotifyFunctionParams {
-  repeated int32 close_function = 1;
-}
+message NotifyFunctionParams { repeated int32 close_function = 1; }
 
 message NotifyHomelandBuildFurnitureOp {
   NotifyHomelandBuildFurnitureOpRequest request = 1;
@@ -5805,17 +5603,11 @@ message NotifyHomelandBuildFurnitureOpRequest {
   repeated NotifyBuildFurnitureOp build_furniture_infos = 5;
 }
 
-message NotifyKickOutOff {
-  NotifyKickOutOffRequest v_request = 1;
-}
+message NotifyKickOutOff { NotifyKickOutOffRequest v_request = 1; }
 
-message NotifyKickOutOffRequest {
-  EErrorCode err_code = 1;
-}
+message NotifyKickOutOffRequest { EErrorCode err_code = 1; }
 
-message NotifyLoadSceneEnd {
-  NotifyLoadSceneEndResponse resp = 1;
-}
+message NotifyLoadSceneEnd { NotifyLoadSceneEndResponse resp = 1; }
 
 message NotifyLoadSceneEndResponse {
   string scene_id = 1;
@@ -5831,41 +5623,23 @@ message NotifyPlayerBeginInteractionParam {
   string template_id = 2;
 }
 
-message NotifyReviveUser {
-  string v_actor_uuid = 1;
-}
+message NotifyReviveUser { string v_actor_uuid = 1; }
 
-message NotifyServerCloseFunction {
-  NotifyFunctionParams v_param = 1;
-}
+message NotifyServerCloseFunction { NotifyFunctionParams v_param = 1; }
 
-message NotifySwitchScene {
-  NotifySwitchSceneRequest request = 1;
-}
+message NotifySwitchScene { NotifySwitchSceneRequest request = 1; }
 
-message NotifySwitchSceneEnd {
-  SwitchSceneResponse resp = 1;
-}
+message NotifySwitchSceneEnd { SwitchSceneResponse resp = 1; }
 
-message NotifySwitchSceneRequest {
-  TransferParam transfer_param = 1;
-}
+message NotifySwitchSceneRequest { TransferParam transfer_param = 1; }
 
-message NotifyTimerList {
-  NotifyTimerListParam timer_info = 1;
-}
+message NotifyTimerList { NotifyTimerListParam timer_info = 1; }
 
-message NotifyTimerListParam {
-  repeated TimerInfo timer_info_list = 1;
-}
+message NotifyTimerListParam { repeated TimerInfo timer_info_list = 1; }
 
-message NotifyTimerUpdate {
-  TimerInfo timer_info = 1;
-}
+message NotifyTimerUpdate { TimerInfo timer_info = 1; }
 
-message NotifyUserCloseFunction {
-  NotifyFunctionParams v_param = 1;
-}
+message NotifyUserCloseFunction { NotifyFunctionParams v_param = 1; }
 
 message Package {
   int32 type = 1;
@@ -5882,9 +5656,7 @@ message ParkourRecord {
   uint32 perfect_time = 3;
 }
 
-message ParkourRecordList {
-  map<uint32, ParkourRecord> record_list = 1;
-}
+message ParkourRecordList { map<uint32, ParkourRecord> record_list = 1; }
 
 message PassengerChangeParam {
   optional bool is_add_passenger = 1;
@@ -5922,9 +5694,7 @@ message PathPointChangeParam {
   optional int32 remove_point_count = 3;
 }
 
-message PayData {
-  map<int32, FirstPayInfo> pay_data = 1;
-}
+message PayData { map<int32, FirstPayInfo> pay_data = 1; }
 
 message PayOrderList {
   repeated string pay_order_list = 1;
@@ -5939,17 +5709,11 @@ message PersonalGroupObjectUpdate {
   ServerStateObjectInteractionList v_param_list = 1;
 }
 
-message PersonalObject {
-  map<int32, ScenePersonalObject> scene_obj_data = 1;
-}
+message PersonalObject { map<int32, ScenePersonalObject> scene_obj_data = 1; }
 
-message PersonalObjectAction {
-  string v_obj_uuid = 1;
-}
+message PersonalObjectAction { string v_obj_uuid = 1; }
 
-message PersonalObjectUpdate {
-  ServerStateObjectInteractionParam v_param = 1;
-}
+message PersonalObjectUpdate { ServerStateObjectInteractionParam v_param = 1; }
 
 message PersonalWorldBossInfo {
   int32 score = 1;
@@ -5982,9 +5746,7 @@ message PersonalZone {
   map<int32, int32> photos_wall = 21;
 }
 
-message PersonalZoneShow {
-  map<int32, int32> medals = 1;
-}
+message PersonalZoneShow { map<int32, int32> medals = 1; }
 
 message PhotoGraphShow {
   uint32 photo_id = 1;
@@ -5994,9 +5756,7 @@ message PhotoGraphShow {
   PhotoOwnerData owner_info = 5;
 }
 
-message PhotoInfo {
-  repeated string temp_photo_keys = 1;
-}
+message PhotoInfo { repeated string temp_photo_keys = 1; }
 
 message PhotoOwnerData {
   int64 upload_char_id = 1;
@@ -6017,9 +5777,7 @@ message PictureVerify {
   int64 version = 4;
 }
 
-message PioneerData {
-  map<uint32, PioneerInfo> info_map = 1;
-}
+message PioneerData { map<uint32, PioneerInfo> info_map = 1; }
 
 message PioneerInfo {
   uint32 current_total = 1;
@@ -6042,9 +5800,7 @@ message PivotInfo {
   int32 reward_full_state = 4;
 }
 
-message PlaceHolderBuff {
-  int32 buff_id = 1;
-}
+message PlaceHolderBuff { int32 buff_id = 1; }
 
 message PlaceHolderFishItem {
   int32 fish_id = 1;
@@ -6086,29 +5842,17 @@ message PlaceHolderPlayer {
   string name = 2;
 }
 
-message PlaceHolderStr {
-  string text = 1;
-}
+message PlaceHolderStr { string text = 1; }
 
-message PlaceHolderTimestamp {
-  int64 timestamp = 1;
-}
+message PlaceHolderTimestamp { int64 timestamp = 1; }
 
-message PlaceHolderUnion {
-  uint32 build = 1;
-}
+message PlaceHolderUnion { uint32 build = 1; }
 
-message PlaceHolderVal {
-  uint32 value = 1;
-}
+message PlaceHolderVal { uint32 value = 1; }
 
-message PlanetMemory {
-  repeated int32 pass_room = 1;
-}
+message PlanetMemory { repeated int32 pass_room = 1; }
 
-message PlayAction {
-  PlayActionParam play_action_param = 1;
-}
+message PlayAction { PlayActionParam play_action_param = 1; }
 
 message PlayActionParam {
   int32 action_id = 1;
@@ -6118,18 +5862,14 @@ message PlayActionParam {
   int32 mount_size = 5;
 }
 
-message PlayEmote {
-  string emote_id = 1;
-}
+message PlayEmote { string emote_id = 1; }
 
 message PlayHelper {
   map<int32, bool> displayed_helper_list = 1;
   map<int32, bool> completed_guide = 2;
 }
 
-message PlayerBox {
-  map<uint64, PlayerBoxData> scenes = 1;
-}
+message PlayerBox { map<uint64, PlayerBoxData> scenes = 1; }
 
 message PlayerBoxData {
   uint64 scene_uuid = 1;
@@ -6141,17 +5881,11 @@ message PlayerBuyRecord {
   int64 buy_timestamp = 3;
 }
 
-message PlayerOrderComtainerInfo {
-  int32 index = 1;
-}
+message PlayerOrderComtainerInfo { int32 index = 1; }
 
-message PlayerRecord {
-  map<int32, PlayerRecordInfo> player_record_infos = 1;
-}
+message PlayerRecord { map<int32, PlayerRecordInfo> player_record_infos = 1; }
 
-message PlayerRecordInfo {
-  map<int32, PlayerRecordSingle> player_records = 1;
-}
+message PlayerRecordInfo { map<int32, PlayerRecordSingle> player_records = 1; }
 
 message PlayerRecordSingle {
   int32 id = 1;
@@ -6160,9 +5894,7 @@ message PlayerRecordSingle {
   int64 cycle_time = 4;
 }
 
-message PlayerRefreshShopRecord {
-  repeated int32 items = 2;
-}
+message PlayerRefreshShopRecord { repeated int32 items = 2; }
 
 message Position {
   optional float x = 1;
@@ -6238,9 +5970,7 @@ message ProfileInfo {
   string half_body_url = 3;
 }
 
-message ProfileList {
-  map<int32, bool> unlock_profile_list = 1;
-}
+message ProfileList { map<int32, bool> unlock_profile_list = 1; }
 
 message QuestData {
   uint32 id = 1;
@@ -6273,13 +6003,9 @@ message QuestDataList {
   uint64 version = 16;
 }
 
-message QuestHistory {
-  map<uint32, uint32> step_history = 1;
-}
+message QuestHistory { map<uint32, uint32> step_history = 1; }
 
-message RaidRecord {
-  map<int32, BossProgress> boss_progress = 2;
-}
+message RaidRecord { map<int32, BossProgress> boss_progress = 2; }
 
 message RankData {
   int32 rank = 1;
@@ -6306,30 +6032,20 @@ message RecommendPlayData {
   ETimerType timer_type = 10;
 }
 
-message RecvAntiData {
-  RecvAntiDataRequest v_request = 1;
-}
+message RecvAntiData { RecvAntiDataRequest v_request = 1; }
 
-message RecvAntiDataRequest {
-  TssAccountInfoProto tss_info = 1;
-}
+message RecvAntiDataRequest { TssAccountInfoProto tss_info = 1; }
 
 message RedDotData {
   map<int32, bool> permanent_closed_red_dot = 1;
   map<int32, int32> red_dot_count = 2;
 }
 
-message RefundItemInfo {
-  map<int32, int64> item_list = 1;
-}
+message RefundItemInfo { map<int32, int64> item_list = 1; }
 
-message ReqServerTime {
-  string client_milliseconds = 1;
-}
+message ReqServerTime { string client_milliseconds = 1; }
 
-message ReqSwitchScene {
-  SwitchSceneRequest resp = 1;
-}
+message ReqSwitchScene { SwitchSceneRequest resp = 1; }
 
 message RequestConnectWorld {
   string account_id = 1;
@@ -6351,17 +6067,11 @@ message Resonance {
   repeated uint32 installed = 2;
 }
 
-message ReturnMessageWrapper {
-  GetSocialDataReply message = 1;
-}
+message ReturnMessageWrapper { GetSocialDataReply message = 1; }
 
-message ReviveInfo {
-  map<int32, int32> revive_count = 1;
-}
+message ReviveInfo { map<int32, int32> revive_count = 1; }
 
-message RideData {
-  int32 ride_id = 1;
-}
+message RideData { int32 ride_id = 1; }
 
 message RideList {
   map<int32, RideData> rides = 1;
@@ -6369,22 +6079,16 @@ message RideList {
   map<int32, RideSkinContainer> skin_data = 3;
 }
 
-message RideMagneticAttachTo {
-  string target_uuid = 1;
-}
+message RideMagneticAttachTo { string target_uuid = 1; }
 
-message RideQualityCollectInfo {
-  map<int32, int32> quality_count = 1;
-}
+message RideQualityCollectInfo { map<int32, int32> quality_count = 1; }
 
 message RideSkinContainer {
   int32 ride_skin_id = 1;
   map<uint32, RideSkinData> sinks = 2;
 }
 
-message RideSkinData {
-  int64 activate_time = 1;
-}
+message RideSkinData { int64 activate_time = 1; }
 
 message RoleFace {
   map<int32, bool> unlock_item_map = 1;
@@ -6445,9 +6149,7 @@ message SceneLineData {
   string scene_guid = 3;
 }
 
-message SceneLuaData {
-  map<uint32, string> scene_lua_info = 1;
-}
+message SceneLuaData { map<uint32, string> scene_lua_info = 1; }
 
 message ScenePersonalObject {
   map<int64, ServerStateObjectInteractionParam> personal_obj_data = 1;
@@ -6459,22 +6161,16 @@ message ScenePointInfo {
   int32 scene_area_id = 3;
 }
 
-message ScenePosIdInfo {
-  int32 scene_pos_id = 1;
-}
+message ScenePosIdInfo { int32 scene_pos_id = 1; }
 
 message SceneRecord {
   uint64 cnt = 1;
   map<int32, uint64> group_cnts = 2;
 }
 
-message SchemeInfo {
-  repeated string scheme_info_keys = 1;
-}
+message SchemeInfo { repeated string scheme_info_keys = 1; }
 
-message SeasonAchievement {
-  map<uint32, Achievement> season_achievement = 1;
-}
+message SeasonAchievement { map<uint32, Achievement> season_achievement = 1; }
 
 message SeasonAchievementList {
   map<uint32, SeasonAchievement> season_achievement_list = 1;
@@ -6548,9 +6244,7 @@ message SeasonQuestList {
   int64 refresh_time_stamp = 3;
 }
 
-message SeasonRankData {
-  map<uint32, uint32> season_ranks = 1;
-}
+message SeasonRankData { map<uint32, uint32> season_ranks = 1; }
 
 message SeasonRankInfo {
   uint32 cur_ran_k_star = 1;
@@ -6562,9 +6256,7 @@ message SeasonRankList {
   uint32 show_armband_id = 2;
 }
 
-message SeasonTarget {
-  map<int32, SeasonTargetInfo> target_info = 1;
-}
+message SeasonTarget { map<int32, SeasonTargetInfo> target_info = 1; }
 
 message SeasonTargetInfo {
   int32 target_id = 1;
@@ -6582,9 +6274,7 @@ message SeqPassiveSkillInfo {
   repeated PassiveSkillInfo passive_infos = 2;
 }
 
-message ServerData {
-  string open_server_time = 1;
-}
+message ServerData { string open_server_time = 1; }
 
 message ServerSkillStageEnd {
   string skill_uuid = 1;
@@ -6607,13 +6297,9 @@ message ServerStateObjectUpdate {
   ServerStateObjectInteractionList v_object = 1;
 }
 
-message SetAiming {
-  bool is_aiming = 1;
-}
+message SetAiming { bool is_aiming = 1; }
 
-message SetAoiSyncUserCount {
-  string v_count = 1;
-}
+message SetAoiSyncUserCount { string v_count = 1; }
 
 message SetInteractionPartnerPos {
   Position v_cur_pos = 1;
@@ -6627,30 +6313,20 @@ message SetPersonalState {
   bool v_is_remove = 2;
 }
 
-message SetSlotAutoBattle {
-  SetSlotAutoBattleRequest v_request = 1;
-}
+message SetSlotAutoBattle { SetSlotAutoBattleRequest v_request = 1; }
 
-message SetSlotAutoBattleRequest {
-  map<int32, bool> slots = 1;
-}
+message SetSlotAutoBattleRequest { map<int32, bool> slots = 1; }
 
-message SetTunnel {
-  string tunnel_id = 1;
-}
+message SetTunnel { string tunnel_id = 1; }
 
-message SettingData {
-  map<int32, string> setting_map = 1;
-}
+message SettingData { map<int32, string> setting_map = 1; }
 
 message SettlementPosition {
   Position pos = 1;
   Position rotate = 2;
 }
 
-message ShopCompensationData {
-  map<uint32, ShopCompensationInfo> items = 1;
-}
+message ShopCompensationData { map<uint32, ShopCompensationInfo> items = 1; }
 
 message ShopCompensationInfo {
   int64 entor_store_num = 1;
@@ -6676,9 +6352,7 @@ message ShowPieceAttr {
   int64 end_time = 3;
 }
 
-message ShowPieceAttrList {
-  repeated ShowPieceAttr show_piece_attrs = 1;
-}
+message ShowPieceAttrList { repeated ShowPieceAttr show_piece_attrs = 1; }
 
 message ShowPieceData {
   map<int32, ShowPieceIdList> often_use_type_list = 1;
@@ -6686,18 +6360,14 @@ message ShowPieceData {
   map<int32, ShowPiecePair> roulette_pos_piece_info = 3;
 }
 
-message ShowPieceIdList {
-  repeated int32 piece_ids = 1;
-}
+message ShowPieceIdList { repeated int32 piece_ids = 1; }
 
 message ShowPiecePair {
   EShowPieceType piece_type = 1;
   int32 piece_id = 2;
 }
 
-message SignInfo {
-  map<int32, SignStatusList> sign_info = 1;
-}
+message SignInfo { map<int32, SignStatusList> sign_info = 1; }
 
 message SignStatus {
   bool is_signed = 1;
@@ -6707,9 +6377,7 @@ message SignStatus {
   int64 reward_time = 5;
 }
 
-message SignStatusList {
-  map<int32, SignStatus> sign_status_data = 1;
-}
+message SignStatusList { map<int32, SignStatus> sign_status_data = 1; }
 
 message SkillCD {
   int32 skill_level_id = 1;
@@ -6765,13 +6433,9 @@ message SkillSkin {
   uint32 skin_id = 2;
 }
 
-message Slot {
-  map<int32, SlotInfo> slots = 1;
-}
+message Slot { map<int32, SlotInfo> slots = 1; }
 
-message SlotData {
-  map<int32, SlotInfoData> slots = 1;
-}
+message SlotData { map<int32, SlotInfoData> slots = 1; }
 
 message SlotInfo {
   int32 id = 1;
@@ -6825,13 +6489,9 @@ message StatRecord {
   map<int32, SceneRecord> scene_records = 3;
 }
 
-message StatisticsData {
-  map<int32, StatRecord> stat_record_map = 1;
-}
+message StatisticsData { map<int32, StatRecord> stat_record_map = 1; }
 
-message StopRide {
-  bool is_force = 1;
-}
+message StopRide { bool is_force = 1; }
 
 message Structure {
   int64 uuid = 1;
@@ -6868,9 +6528,7 @@ message StructureFarmlandInfo {
   map<int64, int32> pick_up_players = 17;
 }
 
-message StructureLamplightInfo {
-  EHomelandLamplightState state = 1;
-}
+message StructureLamplightInfo { EHomelandLamplightState state = 1; }
 
 message StructureMaterialInfo {
   int32 material_id = 1;
@@ -6882,9 +6540,7 @@ message StructureOp {
   Structure structure = 2;
 }
 
-message SwitchSceneRequest {
-  TransferParam transfer_param = 1;
-}
+message SwitchSceneRequest { TransferParam transfer_param = 1; }
 
 message SwitchSceneResponse {
   TransferParam transfer_param = 1;
@@ -6895,30 +6551,20 @@ message SyncAllServerStateObject {
   ServerStateObjectInteractionList v_object = 1;
 }
 
-message SyncAwardData {
-  map<uint32, LevelUpAward> level_up_award_infos = 1;
-}
+message SyncAwardData { map<uint32, LevelUpAward> level_up_award_infos = 1; }
 
-message SyncBulletHitInfo {
-  repeated ClientHitInfo hit_infos = 1;
-}
+message SyncBulletHitInfo { repeated ClientHitInfo hit_infos = 1; }
 
-message SyncCirclePathLength {
-  string path_length = 1;
-}
+message SyncCirclePathLength { string path_length = 1; }
 
 message SyncClientUseSkill {
   string skill_target_uuid = 1;
   string skill_level_id = 2;
 }
 
-message SyncContainerData {
-  optional bytes v_data = 1;
-}
+message SyncContainerData { optional bytes v_data = 1; }
 
-message SyncContainerDirtyData {
-  optional bytes v_data = 1;
-}
+message SyncContainerDirtyData { optional bytes v_data = 1; }
 
 message SyncDamageInfo {
   optional EDamageSource damage_source = 1;
@@ -6953,75 +6599,45 @@ message SyncDirWhenAiming {
   string aim_dir = 2;
 }
 
-message SyncDungeonData {
-  DungeonSyncData v_data = 1;
-}
+message SyncDungeonData { DungeonSyncData v_data = 1; }
 
-message SyncDungeonDirtyData {
-  BufferStream v_data = 1;
-}
+message SyncDungeonDirtyData { BufferStream v_data = 1; }
 
 message SyncEntityBehaviorTree {
   string entity_id = 1;
   string json = 2;
 }
 
-message SyncFakeBulletHitInfo {
-  repeated ClientHitInfo hit_infos = 1;
-}
+message SyncFakeBulletHitInfo { repeated ClientHitInfo hit_infos = 1; }
 
-message SyncFieldOfView {
-  string json = 1;
-}
+message SyncFieldOfView { string json = 1; }
 
-message SyncHitInfo {
-  repeated ClientHitInfo hit_infos = 1;
-}
+message SyncHitInfo { repeated ClientHitInfo hit_infos = 1; }
 
-message SyncLog {
-  string log = 1;
-}
+message SyncLog { string log = 1; }
 
-message SyncNearDeltaInfo {
-  repeated AoiSyncDelta delta_infos = 1;
-}
+message SyncNearDeltaInfo { repeated AoiSyncDelta delta_infos = 1; }
 
 message SyncNearEntities {
   repeated Entity appear = 1;
   repeated DisappearEntity disappear = 2;
 }
 
-message SyncPathNode {
-  string entity_id = 1;
-}
+message SyncPathNode { string entity_id = 1; }
 
-message SyncPersonalObject {
-  ScenePersonalObject v_datas = 1;
-}
+message SyncPersonalObject { ScenePersonalObject v_datas = 1; }
 
-message SyncPlayCameraAnimation {
-  string id = 1;
-}
+message SyncPlayCameraAnimation { string id = 1; }
 
-message SyncSceneArea {
-  string scene_area_id = 1;
-}
+message SyncSceneArea { string scene_area_id = 1; }
 
-message SyncSceneAttrs {
-  AttrCollection attrs = 1;
-}
+message SyncSceneAttrs { AttrCollection attrs = 1; }
 
-message SyncSceneEvents {
-  EventDataList evt = 1;
-}
+message SyncSceneEvents { EventDataList evt = 1; }
 
-message SyncServerData {
-  ServerData server_data = 1;
-}
+message SyncServerData { ServerData server_data = 1; }
 
-message SyncServerSkillEnd {
-  string skill_uuid = 1;
-}
+message SyncServerSkillEnd { string skill_uuid = 1; }
 
 message SyncServerSkillSingingTimeSub {
   string skill_uuid = 1;
@@ -7055,34 +6671,22 @@ message SyncSubSceneAttrs {
   bool is_first_enter = 2;
 }
 
-message SyncToMeDeltaInfo {
-  AoiSyncToMeDelta delta_info = 1;
-}
+message SyncToMeDeltaInfo { AoiSyncToMeDelta delta_info = 1; }
 
-message SyncUserBeHitInfo {
-  repeated ClientHitInfo behit_infos = 1;
-}
+message SyncUserBeHitInfo { repeated ClientHitInfo behit_infos = 1; }
 
 message TakeOffShowPiece {
   EShowPieceType v_piece_type = 1;
   string v_piece_id = 2;
 }
 
-message TakeOnActivateRideSkin {
-  TakeOnActivateRideSkinParam param = 1;
-}
+message TakeOnActivateRideSkin { TakeOnActivateRideSkinParam param = 1; }
 
-message TakeOnActivateRideSkinParam {
-  int32 skin_id = 1;
-}
+message TakeOnActivateRideSkinParam { int32 skin_id = 1; }
 
-message TakeOnSetRideSkin {
-  TakeOnSetRideSkinParam param = 1;
-}
+message TakeOnSetRideSkin { TakeOnSetRideSkinParam param = 1; }
 
-message TakeOnSetRideSkinParam {
-  int32 skin_id = 1;
-}
+message TakeOnSetRideSkinParam { int32 skin_id = 1; }
 
 message TakeOnShowPiece {
   EShowPieceType v_piece_type = 1;
@@ -7113,26 +6717,18 @@ message TeamMemberSocialData {
   PersonalZoneShow personal_zone = 9;
 }
 
-message Teleport {
-  TeleportParams teleport_params = 1;
-}
+message Teleport { TeleportParams teleport_params = 1; }
 
-message TeleportParams {
-  TransferParam transfer_params = 1;
-}
+message TeleportParams { TransferParam transfer_params = 1; }
 
 message TempAttr {
   optional int32 id = 1;
   optional int32 value = 2;
 }
 
-message TempAttrCollection {
-  repeated TempAttr attrs = 1;
-}
+message TempAttrCollection { repeated TempAttr attrs = 1; }
 
-message TempPhotoCache {
-  map<string, string> temp_photo_cache_dict = 1;
-}
+message TempPhotoCache { map<string, string> temp_photo_cache_dict = 1; }
 
 message TempPhotoCacheInfo {
   string id = 1;
@@ -7172,13 +6768,9 @@ message TimerRefreshDataList {
   map<uint32, TimerRefreshList> refresh_data_list = 1;
 }
 
-message TimerRefreshInfo {
-  int64 last_refresh_time = 1;
-}
+message TimerRefreshInfo { int64 last_refresh_time = 1; }
 
-message TimerRefreshList {
-  map<uint32, TimerRefreshInfo> refresh_data = 1;
-}
+message TimerRefreshList { map<uint32, TimerRefreshInfo> refresh_data = 1; }
 
 message TransferParam {
   int32 scene_id = 1;
@@ -7193,9 +6785,7 @@ message TransferParam {
   bool is_revive = 10;
 }
 
-message TransferPoint {
-  map<int32, int32> points = 1;
-}
+message TransferPoint { map<int32, int32> points = 1; }
 
 message Treasure {
   map<int32, TreasureItemRow> rows = 1;
@@ -7294,21 +6884,13 @@ message UnlockColorInfo {
   map<int32, bool> color_block_info_map = 2;
 }
 
-message UnlockEmojiData {
-  map<int32, bool> unlock_map = 1;
-}
+message UnlockEmojiData { map<int32, bool> unlock_map = 1; }
 
-message UnlockInfo {
-  uint64 object_id = 1;
-}
+message UnlockInfo { uint64 object_id = 1; }
 
-message UnlockProficiency {
-  repeated int32 unlock_buffer_id = 1;
-}
+message UnlockProficiency { repeated int32 unlock_buffer_id = 1; }
 
-message UpdateStructure {
-  UpdateStructureRequest v_request = 1;
-}
+message UpdateStructure { UpdateStructureRequest v_request = 1; }
 
 message UpdateStructureRequest {
   int64 home_id = 1;
@@ -7320,9 +6902,7 @@ message UploadTLogBody {
   string t_log_body = 2;
 }
 
-message UseSkill {
-  UseSkillParam param = 1;
-}
+message UseSkill { UseSkillParam param = 1; }
 
 message UseSkillParam {
   string skill_uuid = 1;
@@ -7338,9 +6918,7 @@ message UseSkillParam {
   bool is_activate_roulette = 11;
 }
 
-message UseSlot {
-  UseSlotRequest v_request = 1;
-}
+message UseSlot { UseSlotRequest v_request = 1; }
 
 message UseSlotRequest {
   int32 slot_id = 1;
@@ -7354,9 +6932,7 @@ message UserActivityInfo {
   map<uint32, UserActivityRewardInfo> rewards = 4;
 }
 
-message UserActivityList {
-  map<int64, UserActivityInfo> activities = 1;
-}
+message UserActivityList { map<int64, UserActivityInfo> activities = 1; }
 
 message UserActivityRewardInfo {
   uint32 id = 1;
@@ -7386,9 +6962,7 @@ message UserControlInfo {
   string move_version = 14;
 }
 
-message UserDoAction {
-  string v_selected_str = 1;
-}
+message UserDoAction { string v_selected_str = 1; }
 
 message UserFightAttr {
   int64 cur_hp = 1;
@@ -7402,9 +6976,7 @@ message UserFightAttr {
   repeated SkillCDInfo cd_info = 9;
 }
 
-message UserNotifyTrigger {
-  UserNotifyTriggerInfo v_info = 1;
-}
+message UserNotifyTrigger { UserNotifyTriggerInfo v_info = 1; }
 
 message UserNotifyTriggerInfo {
   ENotifyTrigger type = 1;
@@ -7415,9 +6987,7 @@ message UserNotifyTriggerInfo {
   string trigger_actor_table_uid = 6;
 }
 
-message UserRecommendPlayData {
-  map<int32, int64> play_mail = 1;
-}
+message UserRecommendPlayData { map<int32, int64> play_mail = 1; }
 
 message UserSceneInfo {
   int32 scene_id = 1;
@@ -7441,9 +7011,7 @@ message UserUnion {
   UserUnionHuntInfo user_union_hunt_info = 14;
 }
 
-message UserUnionHuntInfo {
-  int32 hunt_rank = 1;
-}
+message UserUnionHuntInfo { int32 hunt_rank = 1; }
 
 message Vector2 {
   optional float x = 1;
@@ -7463,9 +7031,7 @@ message Vector4 {
   string w = 4;
 }
 
-message WarehouseData {
-  int64 warehouse_id = 1;
-}
+message WarehouseData { int64 warehouse_id = 1; }
 
 message WeeklyTowerRecord {
   int64 begin_time = 1;
@@ -7487,9 +7053,7 @@ message WorldEventMap {
   int64 refresh_time = 4;
 }
 
-message WorldNtfSyncPathNode {
-  PathNodeList lists = 1;
-}
+message WorldNtfSyncPathNode { PathNodeList lists = 1; }
 
 message WorldQuestInfo {
   uint32 finish_points = 1;
@@ -7497,6 +7061,4 @@ message WorldQuestInfo {
   uint32 exceeding_points = 3;
 }
 
-message WorldQuestList {
-  repeated int32 quest_list = 1;
-}
+message WorldQuestList { repeated int32 quest_list = 1; }

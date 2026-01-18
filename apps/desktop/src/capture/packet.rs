@@ -190,7 +190,7 @@ fn capture_loop(
     loop {
         match cap.next_packet() {
             Ok(packet) => {
-                processor.process_packet(&packet.data);
+                processor.process_packet(packet.data);
             }
             Err(pcap::Error::TimeoutExpired) => {}
             Err(e) => {

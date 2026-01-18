@@ -390,7 +390,7 @@ impl eframe::App for DpsMeterApp {
             }
         } else {
             // Drain receiver to prevent buffer buildup when disabled
-            while let Ok(_) = self.mob_receiver.try_recv() {}
+            while self.mob_receiver.try_recv().is_ok() {}
         }
 
         // Determine effective region for Auto mode

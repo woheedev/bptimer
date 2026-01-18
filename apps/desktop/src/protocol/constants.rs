@@ -1,6 +1,5 @@
 /// Blue Protocol protocol constants and types
 /// Protocol-level constants not part of protobuf definitions
-
 /// Service UUID for Blue Protocol combat service
 pub const SERVICE_UUID: u64 = 0x63335342;
 
@@ -110,7 +109,7 @@ pub mod server_detection {
 
     pub const LOGIN_RETURN_SIGNATURE: &[u8] = &[
         0x00, 0x00, 0x00, 0x62, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x11, 0x45, 0x14, 0x00,
-        0x00, 0x00, 0x00, 0x0a, 0x4e, 0x08, 0x01, 0x22, 0x24,
+        0x00, 0x00, 0x00, 0x0A, 0x4E, 0x08, 0x01, 0x22, 0x24,
     ];
 
     /// Size of login return signature packets (0x62 = 98 bytes)
@@ -123,6 +122,7 @@ pub mod tcp {
 
     pub const GAP_TIMEOUT: Duration = Duration::from_secs(2);
     pub const IDLE_TIMEOUT: Duration = Duration::from_secs(10);
+    pub const MAX_PACKET_SIZE: u32 = 0x000FFFFF;
 }
 
 /// Entity attribute type enumeration

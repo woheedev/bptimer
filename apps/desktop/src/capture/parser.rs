@@ -676,6 +676,22 @@ fn process_sync_container_data(
                     uid: player_uid,
                 }));
             }
+
+            if char_base.fight_point > 0 {
+                events.push(CombatEvent::PlayerAbilityScore(PlayerAbilityScoreUpdate {
+                    player_uid,
+                    ability_score: char_base.fight_point,
+                }));
+            }
+        }
+
+        if let Some(profession_list) = &v_data.profession_list {
+            if profession_list.cur_profession_id > 0 {
+                events.push(CombatEvent::PlayerClass(PlayerClassUpdate {
+                    player_uid,
+                    class_id: profession_list.cur_profession_id,
+                }));
+            }
         }
 
         if let Some(scene_data) = &v_data.scene_data {

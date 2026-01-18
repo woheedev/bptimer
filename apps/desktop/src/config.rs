@@ -81,6 +81,39 @@ pub struct HotkeySettings {
     pub reset_stats: Option<HotkeyConfig>,
 }
 
+impl HotkeySettings {
+    pub fn set(&mut self, action: crate::hotkeys::HotkeyAction, config: Option<HotkeyConfig>) {
+        use crate::hotkeys::HotkeyAction;
+        match action {
+            HotkeyAction::ToggleClickThrough => self.toggle_click_through = config,
+            HotkeyAction::SwitchToMobView => self.switch_to_mob_view = config,
+            HotkeyAction::SwitchToCombatView => self.switch_to_combat_view = config,
+            HotkeyAction::MinimizeWindow => self.minimize_window = config,
+            HotkeyAction::ResetStats => self.reset_stats = config,
+        }
+    }
+
+    fn actions_with_configs(&self) -> [(crate::hotkeys::HotkeyAction, &Option<HotkeyConfig>); 5] {
+        use crate::hotkeys::HotkeyAction;
+        [
+            (HotkeyAction::ToggleClickThrough, &self.toggle_click_through),
+            (HotkeyAction::SwitchToMobView, &self.switch_to_mob_view),
+            (
+                HotkeyAction::SwitchToCombatView,
+                &self.switch_to_combat_view,
+            ),
+            (HotkeyAction::MinimizeWindow, &self.minimize_window),
+            (HotkeyAction::ResetStats, &self.reset_stats),
+        ]
+    }
+
+    pub fn iter_actions(
+        &self,
+    ) -> impl Iterator<Item = (crate::hotkeys::HotkeyAction, &Option<HotkeyConfig>)> {
+        self.actions_with_configs().into_iter()
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum MobTimersRegion {
@@ -142,6 +175,21 @@ impl HotkeyConfig {
         let key_display = match self.key_name.as_str() {
             s if s.starts_with("Key") => &s[3..],
             s if s.starts_with("Digit") => &s[5..],
+            "ArrowRight" => "→",
+            "ArrowLeft" => "←",
+            "ArrowUp" => "↑",
+            "ArrowDown" => "↓",
+            "Backquote" => "`",
+            "BracketLeft" => "[",
+            "BracketRight" => "]",
+            "Equal" => "=",
+            "Minus" => "-",
+            "Semicolon" => ";",
+            "Quote" => "'",
+            "Backslash" => "\\",
+            "Comma" => ",",
+            "Period" => ".",
+            "Slash" => "/",
             s => s,
         };
         parts.push(key_display);

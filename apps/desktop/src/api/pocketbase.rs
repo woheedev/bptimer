@@ -64,7 +64,7 @@ impl PocketBaseClient {
         region: MobTimersRegion,
     ) -> Self {
         let client = Client::builder()
-            .user_agent(&crate::utils::constants::user_agent())
+            .user_agent(crate::utils::constants::user_agent())
             .timeout(Duration::from_secs(600))
             .tls_backend_rustls()
             .build()
@@ -180,7 +180,7 @@ impl PocketBaseClient {
         for status in all_channel_statuses {
             statuses_by_mob
                 .entry(status.mob.clone())
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(status);
         }
 
@@ -373,10 +373,10 @@ impl PocketBaseClient {
                     }
                     Err(e) => {
                         error!("Failed to deserialize mob page {} idx {}: {}", page, idx, e);
-                        if idx < 3 {
-                            if let Ok(data) = serde_json::to_string_pretty(item) {
-                                debug!("Mob payload: {}", data);
-                            }
+                        if idx < 3
+                            && let Ok(data) = serde_json::to_string_pretty(item)
+                        {
+                            debug!("Mob payload: {}", data);
                         }
                     }
                 }
@@ -460,10 +460,10 @@ impl PocketBaseClient {
                 for item in items {
                     if let Ok(mut status) = serde_json::from_value::<MobChannelStatus>(item.clone())
                     {
-                        if status.last_update.trim().is_empty() {
-                            if let Some(updated) = item.get("updated").and_then(|v| v.as_str()) {
-                                status.last_update = updated.to_string();
-                            }
+                        if status.last_update.trim().is_empty()
+                            && let Some(updated) = item.get("updated").and_then(|v| v.as_str())
+                        {
+                            status.last_update = updated.to_string();
                         }
                         all_statuses.push(status);
                     }
@@ -494,13 +494,12 @@ impl PocketBaseClient {
         let mut changed = false;
 
         for entry in entries {
-            if let Some((mob_id, channel, hp, location)) = parse_hp_entry(entry) {
-                if let Some(mob) = state.iter_mut().find(|m| m.id == mob_id) {
-                    if update_channel_entry(mob, channel, hp, location, &timestamp) {
-                        sanitize_channels(mob);
-                        changed = true;
-                    }
-                }
+            if let Some((mob_id, channel, hp, location)) = parse_hp_entry(entry)
+                && let Some(mob) = state.iter_mut().find(|m| m.id == mob_id)
+                && update_channel_entry(mob, channel, hp, location, &timestamp)
+            {
+                sanitize_channels(mob);
+                changed = true;
             }
         }
 
@@ -552,7 +551,7 @@ impl PocketBaseClient {
 
 fn parse_hp_entry(entry: &Value) -> Option<(String, i32, f32, Option<i32>)> {
     let arr = entry.as_array()?;
-    let mob_id = arr.get(0)?.as_str()?;
+    let mob_id = arr.first()?.as_str()?;
     let channel = arr.get(1)?.as_i64()? as i32;
     let hp = arr.get(2)?.as_f64()? as f32;
     let location = arr.get(3).and_then(|v| {
@@ -596,7 +595,7 @@ fn update_channel_entry(
 }
 
 fn reset_mob_channels(mob: &mut Mob) -> bool {
-    if mob.latest_channels.as_ref().map_or(true, |c| c.is_empty()) {
+    if mob.latest_channels.as_ref().map_or(true, Vec::is_empty) {
         return false;
     }
     mob.latest_channels = Some(Vec::new());
@@ -647,12 +646,11 @@ fn sanitize_channels_list(channels: &mut Vec<MobChannel>) {
 fn is_channel_stale(channel: &MobChannel, now: &DateTime<Utc>) -> bool {
     if let Some(ts) = channel.last_updated.as_deref() {
         if let Ok(parsed) = DateTime::parse_from_rfc3339(ts) {
-            let age = (now.timestamp() - parsed.with_timezone(&Utc).timestamp()).abs() as i64;
+            let age = (now.timestamp() - parsed.with_timezone(&Utc).timestamp()).abs();
             if channel.hp_percentage <= 0.0 {
                 return age > DEAD_STALE_SECS;
-            } else {
-                return age > ALIVE_STALE_SECS;
             }
+            return age > ALIVE_STALE_SECS;
         }
     }
     false

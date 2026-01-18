@@ -57,7 +57,7 @@ fn get_hp_report_sender() -> &'static Sender<HpReportTask> {
 
         std::thread::spawn(move || {
             let client = reqwest::blocking::Client::builder()
-                .user_agent(&crate::utils::constants::user_agent())
+                .user_agent(crate::utils::constants::user_agent())
                 .tls_backend_rustls()
                 .build()
                 .unwrap_or_else(|_| reqwest::blocking::Client::new());
@@ -126,11 +126,11 @@ fn get_hp_report_sender() -> &'static Sender<HpReportTask> {
                 };
 
                 // Update cache on both success and error to prevent spam retries
-                if let Ok(mut cache_guard) = task.cache.lock() {
-                    if let Some(entry) = cache_guard.get_mut(&task.cache_key) {
-                        entry.is_pending = false;
-                        entry.last_reported_hp = Some(task.rounded_hp_pct);
-                    }
+                if let Ok(mut cache_guard) = task.cache.lock()
+                    && let Some(entry) = cache_guard.get_mut(&task.cache_key)
+                {
+                    entry.is_pending = false;
+                    entry.last_reported_hp = Some(task.rounded_hp_pct);
                 }
             }
         });
@@ -151,7 +151,7 @@ impl BPTimerClient {
     /// Create a blocking HTTP client with user agent
     fn create_http_client() -> reqwest::blocking::Client {
         reqwest::blocking::Client::builder()
-            .user_agent(&crate::utils::constants::user_agent())
+            .user_agent(crate::utils::constants::user_agent())
             .tls_backend_rustls()
             .build()
             .unwrap_or_else(|_| reqwest::blocking::Client::new())
@@ -271,11 +271,11 @@ impl BPTimerClient {
         if let Err(e) = get_hp_report_sender().send(task) {
             log::error!("[BPTimer] Failed to queue HP report: {}", e);
             //  Worker thread died - reset cache to prevent blocking future reports
-            if let Ok(mut cache_guard) = self.cache.lock() {
-                if let Some(entry) = cache_guard.get_mut(&cache_key) {
-                    entry.last_reported_hp = Some(rounded_hp_pct);
-                    entry.is_pending = false;
-                }
+            if let Ok(mut cache_guard) = self.cache.lock()
+                && let Some(entry) = cache_guard.get_mut(&cache_key)
+            {
+                entry.last_reported_hp = Some(rounded_hp_pct);
+                entry.is_pending = false;
             }
         }
     }
