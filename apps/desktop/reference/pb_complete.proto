@@ -2,354 +2,21 @@ syntax = "proto3";
 
 package pb;
 
-message AccountData {
-  string open_id = 1;
-  int32 sdk_type = 2;
-  string account_id = 3;
-  string account_uuid = 4;
-  SystemType os = 5;
-}
-
-message AccumulateEnd {
-  string skill_uuid = 1;
-  string end_time = 2;
-}
-
-message Achievement {
-  string finish_num = 1;
-  bool has_received = 2;
-  string begin_progress = 3;
-}
-
-message ActionInfo {
-  int32 action_id = 1;
-  int32 period = 2;
-  float percent = 3;
-}
-
-message ActorBodyPartInfo {
-  int32 part_id = 1;
-  uint64 hp = 2;
-  uint64 max_hp = 3;
-  BodyPartState state = 4;
-  int32 fleshy_id = 5;
-}
-
-message ActorBodyPartInfos {
-  int64 uuid = 1;
-  repeated ActorBodyPartInfo infos = 2;
-}
-
-message ActorUuidStru {
-  string actor_type = 1;
-  bool is_summon = 2;
-  string instance_id = 3;
-}
-
-message AffixData { repeated int32 affix_ids = 1; }
-
-message AiBotActiveTrigger { BotActiveTrigger active_trigger_param = 1; }
-
-message AiBotAddBuffByConfigId { BotAddBuff add_buff_param = 1; }
-
-message AiBotMove { BotMoveInfo move_param = 1; }
-
-message AiBotPlayAction { BotPlayActionParam play_action_param = 1; }
-
-message AiBotRemoveBuffByConfigId { BotRemoveBuff remove_buff_param = 1; }
-
-message AiBotResurrection { BotResurrectionParam v_request = 1; }
-
-message AiBotSendChitChatMsg { BotSendChitChatMsgReq v_request = 1; }
-
-message AiBotSendGmMsg { GmCmd msg = 1; }
-
-message AiBotStartRide { BotStartRideParam start_ride_param = 1; }
-
-message AiBotTeleportToPos { BotTeleportParam teleport_param = 1; }
-
-message AiBotUseSkill { BotUseSkillInfo use_skill_param = 1; }
-
-message AnswerList { repeated string answers = 1; }
-
-message AntiAddictionInfo { string last_time = 1; }
-
-message AoiSyncDelta {
-  int64 uuid = 1;
-  AttrCollection attrs = 2;
-  TempAttrCollection temp_attrs = 3;
-  EventDataList event_data_list = 4;
-  BulletEvent bullet_event = 5;
-  ActorBodyPartInfos body_part_infos = 6;
-  SkillEffect skill_effects = 7;
-  SeqPassiveSkillInfo passive_skill_infos = 8;
-  SeqPassiveSkillEndInfo passive_skill_end_infos = 9;
-  BuffInfoSync buff_infos = 10;
-  BuffEffectSync buff_effect = 11;
-  repeated FakeBulletInfo fake_bullets = 12;
-  repeated MagneticRideQueueChangeInfo magnetic_ride_queue_change_info_list =
-      13;
-}
-
-message AoiSyncToMeDelta {
-  AoiSyncDelta base_delta = 1;
-  repeated int64 sync_hate_ids = 2;
-  repeated SkillCD sync_skill_c_ds = 3;
-  repeated FightResCD fight_res_c_ds = 4;
-  int64 uuid = 5;
-}
-
-message AttachVelocity {
-  string attach_speed = 1;
-  string vel_dir_x = 2;
-  string vel_dir_y = 3;
-  string vel_dir_z = 4;
-  string attach_source = 5;
-  string source_ent_uuid = 6;
-}
-
-message Attr {
-  int32 id = 1;
-  bytes raw_data = 2;
-}
-
-message AttrCollection {
-  int64 uuid = 1;
-  repeated Attr attrs = 2;
-  repeated MapAttr map_attrs = 3;
-}
-
-message AttrInBattleShowSync { string attr_in_battle_show = 1; }
-
-message AvatarInfo {
-  int32 avatar_id = 1;
-  PictureInfo profile = 2;
-  PictureInfo half_body = 3;
-  int32 business_card_style_id = 4;
-  int32 avatar_frame_id = 5;
-}
-
-message BasicData {
-  int64 char_id = 1;
-  int64 show_id = 2;
-  string name = 3;
-  int32 gender = 4;
-  EBodySize body_size = 5;
-  int32 level = 6;
-  int32 scene_id = 7;
-  repeated int32 personal_state = 8;
-  int64 offline_time = 9;
-  string scene_guid = 10;
-  int64 create_time = 11;
-  uint32 cur_talent_pool_id = 12;
-  uint32 bot_ai_id = 13;
-  int32 register_channel = 14;
-  uint64 char_state = 15;
-  int64 online_time = 16;
-  int64 sum_save_diamond = 17;
-  bool is_newbie = 18;
-}
-
-message BattlePass {
-  string id = 1;
-  string level = 2;
-  string curexp = 3;
-  string week_exp = 4;
-  string exp_last_time = 5;
-  bool is_unlock = 6;
-  bool buy_normal_pas = 7;
-  bool buy_prime_pass = 8;
-  map<string, string> award = 9;
-  bool is_valid = 10;
-  bool is_sended_mail = 11;
-}
-
-message BattlePassAwardInfo {
-  bool free_award = 1;
-  bool paid_award = 2;
-}
-
-message BattlePassData { map<string, string> battle_map = 1; }
-
 enum BodyPartState {
-  BodyPartStateDefault = 0;
-  BodyPartStateInjury = 1;
-  BodyPartStateDead = 2;
+  BODY_PART_STATE_DEFAULT = 0;
+  BODY_PART_STATE_INJURY = 1;
+  BODY_PART_STATE_DEAD = 2;
 }
 
-message BossProgress { string total_award_cnt = 1; }
-
-message BotActiveTrigger { string trigger_id = 1; }
-
-message BotAddBuff {
-  string actor_id = 1;
-  string buff_id = 2;
-  string layer = 3;
-  string duration = 4;
-}
-
-message BotMoveInfo {
-  Vector3 dest_pos = 1;
-  EMoveType move_type = 2;
-  bool is_set_dir = 3;
-  string cur_move_flag = 4;
-}
-
-message BotPlayActionParam {
-  string action_id = 1;
-  string action_source = 2;
-}
-
-message BotRemoveBuff { string buff_id = 1; }
-
-message BotResurrectionParam {
-  string target_id = 1;
-  string revive_id = 2;
-}
-
-message BotSendChitChatMsgReq { string emoji_id = 1; }
-
-message BotStartRideParam { string ride_id = 1; }
-
-message BotTeleportParam {
-  string actor_id = 1;
-  Position pos = 2;
-}
-
-message BotUseSkillInfo {
-  string actor_id = 1;
-  string skill_id = 2;
-  string begin_time = 3;
-  string target_uuid = 4;
-  Vector3 target_pos = 5;
-  Vector3 dmg_target_pos = 6;
-  Vector3 face_target_pos = 7;
-}
-
-message BounceJump {
-  string bounce_jump_id = 1;
-  string axis_ref_uuid = 2;
-  string vel_dir_x = 3;
-  string vel_dir_y = 4;
-  string vel_dir_z = 5;
-}
-
-message BubbleActData { map<string, string> bubble_info = 1; }
-
-message BubbleInfo {
-  string bubble_score = 1;
-  string bubble_award_count = 2;
-  repeated string additional_target_uuid_list = 3;
-  string last_refresh_time = 4;
-}
-
-message BuffAttrEffect { repeated BuffAttrShowInfo attr_show_info = 1; }
-
-message BuffAttrShowInfo {
-  string id = 1;
-  bool is_gain = 2;
-}
-
-message BuffDBData {
-  int64 buff_uuid = 1;
-  int64 firer_id = 2;
-  uint32 buff_config_id = 3;
-  uint32 base_id = 4;
-  uint32 level = 5;
-  uint32 layer = 6;
-  int32 duration = 7;
-  int32 count = 8;
-  int64 create_time = 9;
-  int32 part_id = 10;
-  int32 create_scene_id = 11;
-  repeated string custom_params_key = 12;
-  repeated int32 custom_params = 13;
-}
-
-message BuffDbData {
-  string buff_uuid = 1;
-  string firer_id = 2;
-  string buff_config_id = 3;
-  string base_id = 4;
-  string level = 5;
-  string layer = 6;
-  string duration = 7;
-  string count = 8;
-  string create_time = 9;
-  string part_id = 10;
-  string create_scene_id = 11;
-  repeated string custom_params_key = 12;
-  repeated string custom_params = 13;
-}
-
-message BuffDBInfo {
-  uint32 max_id = 1;
-  map<uint32, BuffDBData> all_buff_db_data = 2;
-}
-
-message BuffDbInfo {
-  string max_id = 1;
-  map<string, string> all_buff_db_data = 2;
-}
-
-message BuffEffect {
-  EBuffEventType type = 1;
-  int32 buff_uuid = 2;
-  int64 host_uuid = 3;
-  int64 trigger_time = 4;
-  repeated BuffEffectLogicInfo logic_effect = 5;
-}
-
-message BuffEffectLogicInfo {
-  EBuffEffectLogicPbType effect_type = 1;
-  bytes raw_data = 2;
-  bool is_loop = 3;
-}
-
-message BuffEffectLogicTension {
-  string target_uuid = 1;
-  repeated string strength = 2;
-  string strength_length = 3;
-  string max_length = 4;
-}
-
-message BuffEffectSync {
-  int64 uuid = 1;
-  repeated BuffEffect buff_effects = 2;
+enum BodyPartType {
+  BodyPartTypeDefault = 0;
+  BodyPartTypePart = 1;
+  BodyPartTypeMod = 2;
 }
 
 enum BufferOneofCase {
   None = 0;
   BufferS = 1;
-}
-
-message BufferStream { bytes buffer_s = 1; }
-
-message BuffInfo {
-  int32 buff_uuid = 1;
-  int32 base_id = 2;
-  int32 level = 3;
-  int64 host_uuid = 4;
-  int32 table_uuid = 5;
-  int64 create_time = 6;
-  int64 fire_uuid = 7;
-  int32 layer = 8;
-  int32 part_id = 9;
-  int32 count = 10;
-  int32 duration = 11;
-  FightSourceInfo fight_source_info = 12;
-  BuffEffectLogicInfo logic_effect = 13;
-}
-
-message BuffInfoSync {
-  int64 uuid = 1;
-  repeated BuffInfo buff_infos = 2;
-}
-
-message BuffProfessionEffectData {
-  string profession_type = 1;
-  repeated string profession_point = 2;
-  repeated bool profession_switch = 3;
 }
 
 enum BuildFurnitureOpType {
@@ -358,44 +25,124 @@ enum BuildFurnitureOpType {
   BuildFurnitureOpDelete = 2;
 }
 
-message BulletEvent {
-  int64 uuid = 1;
-  int32 enter_stage_id = 2;
+enum CHAT_CLIENT_CMD {
+  CHAT_CLIENT_CMD_INVALID = 0;
+  CHAT_CLIENT_REGISTER_REQ = 101;
+  CHAT_CLIENT_REGISTER_RSP = 102;
+  CHAT_CLIENT_UNREGISTER_REQ = 103;
+  CHAT_CLIENT_UNREGISTER_RSP = 104;
+  CHAT_CLIENT_PRIVATE_CHAT_REQ = 105;
+  CHAT_CLIENT_PRIVATE_CHAT_RSP = 106;
+  CHAT_CLIENT_CHANNEL_CHAT_REQ = 107;
+  CHAT_CLIENT_CHANNEL_CHAT_RSP = 108;
+  CHAT_CLIENT_WORLD_CHAT_REQ = 109;
+  CHAT_CLIENT_WORLD_CHAT_RSP = 110;
+  CHAT_CLIENT_GET_PRIVATE_CHAT_RECORD_REQ = 111;
+  CHAT_CLIENT_GET_PRIVATE_CHAT_RECORD_RSP = 112;
+  CHAT_CLIENT_GET_CHANNEL_CHAT_RECORD_REQ = 113;
+  CHAT_CLIENT_GET_CHANNEL_CHAT_RECORD_RSP = 114;
+  CHAT_CLIENT_GET_WORLD_CHAT_RECORD_REQ = 115;
+  CHAT_CLIENT_GET_WORLD_CHAT_RECORD_RSP = 116;
+  CHAT_CLIENT_DEL_PRIVATE_CHAT_RECORD_REQ = 117;
+  CHAT_CLIENT_DEL_PRIVATE_CHAT_RECORD_RSP = 118;
+  CHAT_CLIENT_GET_CHANNEL_GROUP_INFO_REQ = 119;
+  CHAT_CLIENT_GET_CHANNEL_GROUP_INFO_RSP = 120;
+  CHAT_CLIENT_CHANNEL_GROUP_SWITCH_REQ = 121;
+  CHAT_CLIENT_CHANNEL_GROUP_SWITCH_RSP = 122;
+  CHAT_CLIENT_ADD_BLACKLIST_REQ = 123;
+  CHAT_CLIENT_ADD_BLACKLIST_RSP = 124;
+  CHAT_CLIENT_REMOVE_BLACKLIST_REQ = 125;
+  CHAT_CLIENT_REMOVE_BLACKLIST_RSP = 126;
+  CHAT_CLIENT_GET_BLACKLIST_REQ = 127;
+  CHAT_CLIENT_GET_BLACKLIST_RSP = 128;
+  CHAT_CLIENT_SYNC_BLACKLIST_REQ = 129;
+  CHAT_CLIENT_SYNC_BLACKLIST_RSP = 130;
+  CHAT_CLIENT_GET_PERSONAL_BAN_INFO_REQ = 131;
+  CHAT_CLIENT_GET_PERSONAL_BAN_INFO_RSP = 132;
+  CHAT_CLIENT_DEL_CHANNEL_CHAT_RECORD_REQ = 133;
+  CHAT_CLIENT_DEL_CHANNEL_CHAT_RECORD_RSP = 134;
+  CHAT_CLIENT_DEL_WORLD_CHAT_RECORD_REQ = 135;
+  CHAT_CLIENT_DEL_WORLD_CHAT_RECORD_RSP = 136;
+  CHAT_CLIENT_READ_PRIVATE_LAST_MSG_INDEX_REQ = 137;
+  CHAT_CLIENT_READ_PRIVATE_LAST_MSG_INDEX_RSP = 138;
+  CHAT_CLIENT_PRIVATE_CHAT_RECEIVE = 152;
+  CHAT_CLIENT_CHANNEL_CHAT_RECEIVE = 154;
+  CHAT_CLIENT_WORLD_CHAT_RECEIVE = 156;
+  CHAT_CLIENT_EVENT_NOTICE = 158;
+}
+
+enum CHAT_SERVER_CMD {
+  CHAT_SERVER_CMD_INVALID = 0;
+  CHAT_SERVER_REGISTER_REQ = 201;
+  CHAT_SERVER_REGISTER_RSP = 202;
+  CHAT_SERVER_GET_CLIENT_TOKEN_REQ = 203;
+  CHAT_SERVER_GET_CLIENT_TOKEN_RSP = 204;
+  CHAT_SERVER_CREATE_CHANNEL_REQ = 205;
+  CHAT_SERVER_CREATE_CHANNEL_RSP = 206;
+  CHAT_SERVER_DEL_CHANNEL_REQ = 207;
+  CHAT_SERVER_DEL_CHANNEL_RSP = 208;
+  CHAT_SERVER_JOIN_CHANNEL_REQ = 209;
+  CHAT_SERVER_JOIN_CHANNEL_RSP = 210;
+  CHAT_SERVER_OUT_CHANNEL_REQ = 211;
+  CHAT_SERVER_OUT_CHANNEL_RSP = 212;
+  CHAT_SERVER_GET_CHANNEL_MEMBER_REQ = 213;
+  CHAT_SERVER_GET_CHANNEL_MEMBER_RSP = 214;
+  CHAT_SERVER_SYNC_CHANNEL_MEMBER_REQ = 215;
+  CHAT_SERVER_SYNC_CHANNEL_MEMBER_RSP = 216;
+  CHAT_SERVER_ADD_BLACKLIST_REQ = 217;
+  CHAT_SERVER_ADD_BLACKLIST_RSP = 218;
+  CHAT_SERVER_REMOVE_BLACKLIST_REQ = 219;
+  CHAT_SERVER_REMOVE_BLACKLIST_RSP = 220;
+  CHAT_SERVER_GET_BLACKLIST_REQ = 221;
+  CHAT_SERVER_GET_BLACKLIST_RSP = 222;
+  CHAT_SERVER_SYNC_BLACKLIST_REQ = 223;
+  CHAT_SERVER_SYNC_BLACKLIST_RSP = 224;
+  CHAT_SERVER_CHANNEL_BAN_REQ = 225;
+  CHAT_SERVER_CHANNEL_BAN_RSP = 226;
+  CHAT_SERVER_CHANNEL_GROUP_BAN_REQ = 227;
+  CHAT_SERVER_CHANNEL_GROUP_BAN_RSP = 228;
+  CHAT_SERVER_PERSONAL_BAN_REQ = 229;
+  CHAT_SERVER_PERSONAL_BAN_RSP = 230;
+  CHAT_SERVER_GET_PERSONAL_BAN_INFO_REQ = 231;
+  CHAT_SERVER_GET_PERSONAL_BAN_INFO_RSP = 232;
+  CHAT_SERVER_GET_PERSONAL_CHANNEL_LEVEL_REQ = 233;
+  CHAT_SERVER_GET_PERSONAL_CHANNEL_LEVEL_RSP = 234;
+  CHAT_SERVER_UPDATE_PERSONAL_CHANNEL_LEVEL_REQ = 235;
+  CHAT_SERVER_UPDATE_PERSONAL_CHANNEL_LEVEL_RSP = 236;
+  CHAT_SERVER_SYNC_USER_CHANNEL_REQ = 237;
+  CHAT_SERVER_SYNC_USER_CHANNEL_RSP = 238;
+  CHAT_SERVER_SYSTEM_PRIVATE_CHAT_REQ = 239;
+  CHAT_SERVER_SYSTEM_PRIVATE_CHAT_RSP = 240;
+  CHAT_SERVER_SYSTEM_CHANNEL_CHAT_REQ = 241;
+  CHAT_SERVER_SYSTEM_CHANNEL_CHAT_RSP = 242;
+  CHAT_SERVER_SYSTEM_WORLD_CHAT_REQ = 243;
+  CHAT_SERVER_SYSTEM_WORLD_CHAT_RSP = 244;
+  CHAT_SERVER_CREATE_CHANNEL_GROUP_REQ = 245;
+  CHAT_SERVER_CREATE_CHANNEL_GROUP_RSP = 246;
+  CHAT_SERVER_DEL_CHANNEL_GROUP_REQ = 247;
+  CHAT_SERVER_DEL_CHANNEL_GROUP_RSP = 248;
+  CHAT_SERVER_GET_CHANNEL_GROUP_INFO_REQ = 249;
+  CHAT_SERVER_GET_CHANNEL_GROUP_INFO_RSP = 250;
+  CHAT_SERVER_CHANNEL_GROUP_SWITCH_REQ = 251;
+  CHAT_SERVER_CHANNEL_GROUP_SWITCH_RSP = 252;
+  CHAT_SERVER_DEL_PRIVATE_CHAT_RECORD_REQ = 253;
+  CHAT_SERVER_DEL_PRIVATE_CHAT_RECORD_RSP = 254;
+  CHAT_SERVER_DEL_CHANNEL_CHAT_RECORD_REQ = 255;
+  CHAT_SERVER_DEL_CHANNEL_CHAT_RECORD_RSP = 256;
+  CHAT_SERVER_DEL_WORLD_CHAT_RECORD_REQ = 257;
+  CHAT_SERVER_DEL_WORLD_CHAT_RECORD_RSP = 258;
+  CHAT_SERVER_CLEAR_USER_REQ = 259;
+  CHAT_SERVER_CLEAR_USER_RSP = 260;
+  CHAT_SERVER_USERID_REGISTER_REQ = 261;
+  CHAT_SERVER_USERID_REGISTER_RSP = 262;
+  CHAT_SERVER_CROSS_PRIVATE_CHAT_REQ = 263;
+  CHAT_SERVER_CROSS_PRIVATE_CHAT_RSP = 264;
 }
 
 enum CameraPatternType {
   Default = 0;
   SelfPhoto = 1;
-  Ar = 2;
-}
-
-message CameraSchemeCache { map<string, string> camera_scheme_dict = 1; }
-
-message CameraSchemeInfo {
-  CameraPatternType camera_pattern_type = 1;
-  CameraSchemeType camera_scheme_type = 2;
-  string scheme_key = 3;
-  string scheme_name = 4;
-  string scheme_time = 5;
-  string exposure = 6;
-  string contrast = 7;
-  string saturation = 8;
-  string horizontal = 9;
-  string vertical = 10;
-  string angle = 11;
-  bool depth_tag = 12;
-  string aperture = 13;
-  string near_blend = 14;
-  string far_blend = 15;
-  bool focus_tag = 16;
-  string focus = 17;
-  string world_time = 18;
-  bool is_head_follow = 19;
-  bool is_eye_follow = 20;
-  map<string, bool> show_entity_dicts = 21;
-  map<string, bool> show_ui_dicts = 22;
-  string filter_path = 23;
-  string id = 24;
+  AR = 2;
 }
 
 enum CameraSchemeType {
@@ -403,684 +150,98 @@ enum CameraSchemeType {
   CustomScheme = 1;
 }
 
-message CameraSelectSchemeCache { CameraSchemeInfo camera_scheme_cache = 1; }
-
-message ChallengeDungeonInfo {
-  map<string, string> dungeon_info = 1;
-  map<string, string> dungeon_target_award = 2;
+enum ChitChatChannelType {
+  ChannelNull = 0;
+  ChannelWorld = 1;
+  ChannelScene = 2;
+  ChannelTeam = 3;
+  ChannelUnion = 4;
+  ChannelPrivate = 5;
+  ChannelGroup = 6;
+  ChannelTopNotice = 7;
+  ChannelSystem = 99;
 }
 
-message ChangeCharFunctionState { EActorState state_type = 1; }
-
-message ChannelingEnd {
-  string skill_uuid = 1;
-  string time = 2;
+enum ChitChatMsgType {
+  ChatMsgTextMessage = 0;
+  ChatMsgTextNotice = 1;
+  ChatMsgMultiLangNotice = 2;
+  ChatMsgPictureEmoji = 3;
+  ChatMsgPicture = 4;
+  ChatMsgVoice = 5;
+  ChatMsgHypertext = 6;
 }
 
-message CharBaseInfo {
-  int64 char_id = 1;
-  string account_id = 2;
-  uint32 show_id = 3;
-  uint32 server_id = 4;
-  string name = 5;
-  EGender gender = 6;
-  bool is_deleted = 7;
-  bool is_forbid = 8;
-  bool is_mute = 9;
-  float x = 10;
-  float y = 11;
-  float z = 12;
-  float dir = 13;
-  FaceData face_data = 14;
-  uint32 card_id = 15;
-  int64 create_time = 16;
-  int64 online_time = 17;
-  int64 offline_time = 18;
-  ProfileInfo profile_info = 19;
-  CharTeam team_info = 20;
-  uint64 char_state = 21;
-  EBodySize body_size = 22;
-  UserUnion union_info = 23;
-  repeated int32 personal_state = 24;
-  AvatarInfo avatar_info = 25;
-  uint64 total_online_time = 26;
-  string open_id = 27;
-  int32 sdk_type = 28;
-  int32 os = 29;
-  int32 init_profession_id = 31;
-  uint64 last_cal_total_time = 32;
-  int32 area_id = 33;
-}
-
-message CharSerialize {
-  int64 char_id = 1;
-  CharBaseInfo char_base = 2;
-  SceneData scene_data = 3;
-  SceneLuaData scene_lua_data = 4;
-  PioneerData pioneer_data = 5;
-  BuffDBInfo buff_info = 6;
-  ItemPackage item_package = 7;
-  QuestDataList quest_list = 8;
-  SettingData setting_data = 9;
-  MiscInfo misc_info = 10;
-  ExchangeItem exchange_items = 11;
-  EquipList equip = 12;
-  EnergyItem energy_item = 13;
-  MapData map_data = 14;
-  DungeonList dungeon_list = 15;
-  UserFightAttr attr = 16;
-  FashionMgr fashion = 17;
-  ProfileList profile_list = 18;
-  PlayHelper help = 19;
-  CounterList counter_list = 20;
-  PersonalObject personal_obj = 21;
-  RoleLevel role_level = 22;
-  Pivot pivot = 23;
-  TransferPoint transfer_point = 24;
-  PlanetMemory planet_memory = 25;
-  SeasonTarget planet_memory_target = 26;
-  RedDotData red_dot = 27;
-  Resonance resonance = 28;
-  CutsState cuts_state = 29;
-  InvestigateList investigate_list = 30;
-  ParkourRecordList records = 31;
-  InteractionInfo interaction = 32;
-  SeasonQuestList season_quest_list = 33;
-  RoleFace role_face = 34;
-  MapBookInfoList map_book_list = 35;
-  FunctionData function_data = 36;
-  AntiAddictionInfo anti_info = 37;
-  MonsterExploreList monster_explore_list = 38;
-  ShowPieceData show_piece_data = 39;
-  CollectionBook collection_book = 42;
-  NotGetProceedAwardInfo not_get_proceed_award_times = 43;
-  CookList cook_list = 44;
-  TimerRefreshDataList refresh_data_list = 45;
-  ChallengeDungeonInfo challenge_dungeon_info = 46;
-  SyncAwardData sync_award_data = 47;
-  SeasonAchievementList season_achievement_list = 48;
-  SeasonRankList season_rank_list = 49;
-  SeasonCenter season_center = 50;
-  SeasonMedalInfo season_medal_info = 52;
-  CommunityHomeData community_home_info = 53;
-  SeasonActivation season_activation = 54;
-  Slot slots = 55;
-  MonsterHuntInfo monster_hunt_info = 56;
-  Mod mod = 57;
-  WorldEventMap world_event_map = 58;
-  FishSetting fish_setting = 59;
-  FreightData freight_data = 60;
-  TrialRoad trial_road = 62;
-  GashaData gasha_data = 63;
-  ShopData shop_data = 64;
-  PersonalWorldBossInfo personal_world_boss_info = 65;
-  CraftEnergyRecord craft_energy = 66;
-  WeeklyTowerRecord weekly_tower = 67;
-  CutSceneInfos cut_scene_infos = 68;
-  UserRecommendPlayData recommend_play_data = 69;
-  RideList ride_list = 70;
-  PayOrderList pay_order_list = 71;
-  LifeProfession life_profession = 72;
-  LifeProfessionWork life_profession_work = 73;
-  UserActivityList user_activity_list = 74;
-  PlayerRecord player_record = 75;
-  ProfessionList profession_list = 76;
-  MonthlyCard monthly_card = 77;
-  FashionBenefit fashion_benefit = 78;
-  ItemCurrency item_currency = 79;
-  PrivilegeEffectData privilege_effect_data = 80;
-  Treasure treasure = 81;
-  UnlockEmojiData unlock_emoji_data = 82;
-  PlayerOrderComtainerInfo player_order_comtainer_info = 83;
-  PlayerBox player_box = 84;
-  LaunchPrivilegeData launch_privilege_data = 85;
-  BattlePassData battle_pass_data = 86;
-  RechargeData recharge_data = 87;
-  LuckyValueMgr lucky_value_mgr = 88;
-  HandbookData handbook_data = 89;
-  MasterModeDungeonInfo master_mode_dungeon_info = 90;
-  StatisticsData statistics_data = 91;
-  CompensationStatistics compenstion_statistics = 92;
-  BubbleActData bubble_act_data = 93;
-  MailClaimedInfo mail_claimed_info = 94;
-  NewbieData newbie_data = 95;
-  FightPoint fight_point = 96;
-  SignInfo sign = 97;
-  CharStatisticsData char_statistics_data = 98;
-}
-
-message CharStatisticsData {
-  string login_days = 1;
-  string last_login_time = 2;
-}
-
-message CharTeam {
-  int64 team_id = 1;
-  int64 leader_id = 2;
-  uint32 team_target_id = 3;
-  uint32 team_num = 4;
-  repeated int64 char_ids = 5;
-  bool is_matching = 6;
-  int32 char_team_version = 7;
-  map<int64, TeamMemData> team_member_data = 8;
-}
-
-message ClientBreakState { string v_operator = 1; }
-
-message ClientHitInfo {
-  EDamageSource source_type = 1;
-  string uuid = 2;
-  string id = 3;
-  string level = 4;
-  string stage = 5;
-  string event_id = 6;
-  string attack_time = 7;
-  string attack_uuid = 8;
-  string target_uuid = 9;
-  Vector3 attack_pos = 10;
-  Vector3 target_pos = 11;
-  Vector3 damage_pos = 12;
-  repeated ClientHitPartInfo part_infos = 13;
-  bool is_dodge_success = 14;
-  string skill_uuid = 15;
-}
-
-message ClientHitPartInfo {
-  int32 part_id = 1;
-  Vector3 damage_pos = 2;
-  int64 damage_val = 3;
-}
-
-message ClientStageEnd {
-  string cur_stage_index = 1;
-  string next_stage_index = 2;
-  string time = 3;
-  string condition_id = 4;
-  string skill_uuid = 5;
-}
-
-message ClientTargetChange {
-  string skillid = 1;
-  string skill_level = 2;
-  string cur_stage_index = 3;
-  string target_uuid = 4;
-  Position target_pos = 5;
-  Position cur_pos = 6;
-  string target_part_id = 7;
-  Position target_part_pos = 8;
-  string skill_uuid = 9;
-}
-
-message Clutter {
-  string uuid = 1;
-  string config_id = 2;
-  string position_id = 3;
-}
-
-message ClutterGenerationRecord { bool generated = 1; }
-
-message CollectingItem {
-  string item_id = 1;
-  string collected_num = 2;
-  string collect_price = 3;
-  bool is_high = 4;
-}
-
-message CollectionBook { map<string, bool> mod_book_map = 1; }
-
-message CommonAwardInfo {
-  string id = 1;
-  EReceiveRewardStatus award_status = 2;
-}
-
-message CommunityAuthorityInfo { map<string, bool> authority = 1; }
-
-message CommunityBuildFurnitureInfo {
-  string build_uuid = 1;
-  string furniture_id = 2;
-  string furniture_count = 3;
-  string char_id = 4;
-  string start_time = 5;
-  string end_time = 6;
-  string accelerate_count = 7;
-  map<string, string> accelerate_items = 8;
-}
-
-message CommunityCharBasicData {
-  BasicData basic_data = 1;
-  AvatarInfo avatar_info = 2;
-  ProfessionData profession_data = 3;
-}
-
-message CommunityData {
-  int64 community_id = 1;
-  int64 homeland_id = 2;
-  repeated int64 cohabitant_ids = 3;
-  int64 last_exit_cohabitation_time = 4;
-  int32 buy_count = 5;
-  int32 level = 6;
-}
-
-message CommunityGetHomeLandBaseInfo {
-  CommunityGetHomeLandBaseInfoRequest v_request = 1;
-}
-
-message CommunityGetHomeLandBaseInfoReply {
-  HomelandBaseInfo homeland_base_info = 1;
-  EErrorCode err_code = 2;
-}
-
-message CommunityGetHomeLandBaseInfoRequest {
-  string community_id = 1;
-  string homeland_id = 2;
-}
-
-message CommunityGrainUpdateStructureReply {
-  EErrorCode err_code = 1;
-  repeated CommunityUpdateStructureReplyOpt structures = 2;
-}
-
-message CommunityHomeData {
-  string community_id = 1;
-  string homeland_id = 2;
-  string buy_count = 3;
-  map<string, string> unlocked_recipes = 4;
-  string level = 5;
-}
-
-message CommunityHomelandRecipe { string id = 1; }
-
-message CommunityPlayerAuthorityInfo { map<string, bool> authority = 1; }
-
-message CommunityPlayerInfo {
-  CommunityCharBasicData community_char = 1;
-  CommunityPlayerAuthorityInfo player_authority_info = 2;
-  CommunityQuitCohabitant quit_cohabitant = 3;
-  HomeLandPlayerTaskInfo home_land_player_task_info = 4;
-}
-
-message CommunityQuitCohabitant {
-  bool is_initiative_quit = 1;
-  string time = 2;
-}
-
-message CommunityTransfer {
-  string char_id = 1;
-  string time = 2;
-  string last_time = 3;
-}
-
-message CommunityUpdateStructureReplyOpt {
-  EErrorCode err_code = 1;
-  StructureOp structure_op = 2;
-}
-
-message CompensationData {
-  string overflow_energy = 1;
-  string finish_times = 2;
-  string climb_up_layer_id = 3;
-}
-
-message CompensationRecord { map<string, string> compensation_data = 1; }
-
-message CompensationSeasonStatistics {
-  map<string, string> week_data = 1;
-  map<string, string> compensation = 2;
-}
-
-message CompensationStatistics {
-  map<string, string> season_data = 1;
-  string last_season_id = 2;
-  string cur_point = 3;
-  string max_point = 4;
-  map<string, string> last_week = 5;
-}
-
-message CompletedTargetInfo { map<string, bool> completed_target_list = 1; }
-
-message ConnectWorld { RequestConnectWorld v_request = 1; }
-
-message ConnectWorldResult {
-  WorldReconnectStatus result = 1;
-  EErrorCode err_code = 2;
-  string ack_client_sequence = 3;
-  string session_token = 4;
-  string connect_guid = 5;
-}
-
-message CookBook { string create_time = 1; }
-
-message CookList { map<string, string> book_data = 1; }
-
-message CounterInfo {
-  string id = 1;
-  string counter = 2;
-}
-
-message CounterList { map<string, string> counter_map = 1; }
-
-message CraftEnergyRecord { map<string, string> records = 1; }
-
-message CurrencyData {
-  string config_id = 1;
-  string count = 2;
-}
-
-message CutSceneInfo {
-  string cut_scene_id = 1;
-  string flag = 2;
-  string scene_id = 3;
-  EventData event_data = 4;
-}
-
-message CutSceneInfos {
-  map<string, string> cut_scene_infos = 1;
-  map<string, bool> finished_cut_scenes = 2;
-  map<string, bool> finished_infos = 3;
-}
-
-message CutScenePlayEnd { string v_cut_scene_id = 1; }
-
-message CutScenePointInfo { int32 cut_scene_id = 1; }
-
-message CutsState { map<string, string> state_info = 1; }
-
-message DanceBall {
-  string dance_id = 1;
-  string begin_time = 2;
-  string end_time = 3;
-  string rand_index = 4;
-  map<string, string> dancers = 5;
-  string buff_id = 6;
-  string npc_id = 7;
-  string npc_pos_index = 8;
-  string sum_dance_score = 9;
-  bool has_notify_npc = 10;
-}
-
-message DancerInfo {
-  string char_id = 1;
-  string dance_secs = 2;
-  bool is_dancing = 3;
-  bool has_drawn = 4;
-  bool has_send = 5;
-}
-
-message DelayHitInfo {
-  string effect_id = 1;
-  string buff_uuid = 2;
-  string event_id = 3;
-  string play_time = 4;
-  repeated DelayHitTargetInfo target_infos = 5;
-}
-
-message DelayHitTargetInfo {
-  string target_uuid = 1;
-  Vector3 hit_pos = 2;
-  string delay_time = 3;
-}
-
-message DetachRideMagnetic { EDetachMagneticType detach_type = 1; }
-
-message DirtyMask { repeated string dirty_key = 1; }
-
-message DisappearEntity {
-  int64 uuid = 1;
-  EDisappearType type = 2;
-}
-
-message DrawingLines {
-  Vector3 color = 1;
-  string width = 2;
-  string delete_time = 3;
-  repeated Position points = 4;
-}
-
-message DropAwardHistory {
-  string id = 1;
-  string count = 2;
-  string cycle_time = 3;
-}
-
-message DropContainerInfo {
-  map<string, string> drop_containers = 1;
-  map<string, string> drop_award_histories = 2;
-}
-
-message DropContainerSingle {
-  string id = 1;
-  string count = 2;
-  string cycle_time = 3;
-  string history_count = 4;
-}
-
-message DroughtRecord {
-  string trigger_time = 1;
-  string segment_id = 2;
-  string duration = 3;
-  string actual_end_time = 4;
-  bool is_watered = 5;
-  bool is_expired = 6;
-}
-
-message DungeonAffixData { repeated string affix_data = 1; }
-
-message DungeonAward {
-  map<string, string> items = 1;
-  string flag_assist = 2;
-  string award_count = 3;
-  repeated string first_items = 4;
-}
-
-message DungeonBossRank { map<string, string> boss_rank = 1; }
-
-message DungeonDamage { map<string, string> damages = 1; }
-
-message DungeonEnterCount {
-  string enter_time = 1;
-  string enter_count = 2;
-}
-
-message DungeonEnterLimit { map<string, string> enter_count = 1; }
-
-message DungeonEvent { map<string, string> dungeon_event_data = 1; }
-
-message DungeonEventData {
-  string event_id = 1;
-  string start_time = 2;
-  DungeonEventState state = 3;
-  DungeonEventResult result = 4;
-  map<string, string> dungeon_target = 5;
+enum CommunityWarehouseOpType {
+  CommunityWarehouseOpTypeAdd = 0;
+  CommunityWarehouseOpTypeUpdate = 1;
+  CommunityWarehouseOpTypeDelete = 2;
 }
 
 enum DungeonEventResult {
-  Null = 0;
-  Success = 1;
-  TimeOut = 2;
-  Failed = 3;
-  End = 4;
+  DungeonEventResultNull = 0;
+  DungeonEventResultSuccess = 1;
+  DungeonEventResultTimeOut = 2;
+  DungeonEventResultFailed = 3;
+  DungeonEventResultEnd = 4;
 }
 
 enum DungeonEventState {
-  Null = 0;
-  Running = 1;
-  End = 2;
+  DungeonEventStateNull = 0;
+  DungeonEventStateRunning = 1;
+  DungeonEventStateEnd = 2;
 }
 
-message DungeonFlowInfo {
-  EDungeonState state = 1;
-  string active_time = 2;
-  string ready_time = 3;
-  string play_time = 4;
-  string end_time = 5;
-  string settlement_time = 6;
-  string dungeon_times = 7;
-  string result = 8;
+enum EAccessType {
+  AccessFinishQuest = 0;
+  AccessLevelUp = 1;
+  AccessEquipProfessionType = 2;
+  AccessItemCount = 11;
+  AccessInScene = 12;
+  AccessNotInScene = 13;
+  AccessInVisualLayer = 15;
+  AccessNotInVisualLayer = 16;
+  AccessEnterZone = 17;
+  AccessTimer = 18;
+  AccessInZone = 19;
+  AccessNotInZone = 20;
+  AccessFinishQuestStep = 21;
+  AccessTimeLimit = 80;
+  AccessMastery = 82;
+  AccessSex = 1000;
+  AccessSeason = 1001;
 }
 
-message DungeonHeroKeyInfo {
-  string char_id = 1;
-  repeated Item hero_key_item = 2;
-  map<string, string> key_info = 3;
-  Item use_item = 4;
-  repeated Item hero_key_award_item = 5;
+enum EActionEventType {
+  ReqSwitchScene = 0;
 }
 
-message DungeonInfo {
-  string dungeon_id = 1;
-  string complete_count = 2;
-  string award_flg = 3;
-  string score = 4;
-  string pass_time = 5;
+enum EActionSource {
+  EActionSource_Default = 0;
+  EActionSource_Dance = 1;
 }
 
-message DungeonList {
-  map<string, string> complete_dungeon = 1;
-  string reset_time = 2;
-  string normal_dungeon_pass_count = 3;
-  DungeonEnterLimit dungeon_enter_limit = 4;
-  DungeonWeekTargetList week_target = 5;
-  bool is_assist = 6;
+enum EActivityObtainStatus {
+  ActivityObtainStatusNone = 0;
+  ActivityObtainStatusCan = 1;
+  ActivityObtainStatusAlready = 2;
 }
 
-message DungeonPioneer { map<string, string> completed_target_this_time = 1; }
-
-message DungeonPlanetMemoryRoom { string room_id = 1; }
-
-message DungeonPlayerInfo {
-  string char_id = 1;
-  SocialData social_data = 2;
+enum EActivityStatus {
+  ActivityStatusNone = 0;
+  ActivityStatusOnline = 1;
+  ActivityStatusOffline = 2;
 }
 
-message DungeonPlayerList { map<string, string> player_infos = 1; }
-
-message DungeonRaidInfo {}
-
-message DungeonRandomEntityConfigIdInfo {
-  map<string, string> random_entity_map = 1;
+enum EActivityType {
+  ActivityTypeNone = 0;
+  ActivityTypeBuyGift = 1;
 }
 
-message DungeonRankInfo {
-  string num = 1;
-  string rank = 2;
-}
-
-message DungeonRankList { map<string, string> dungeon_rank_map = 1; }
-
-message DungeonReviveInfo {
-  repeated string revive_ids = 1;
-  map<string, string> revive_map = 2;
-}
-
-message DungeonSceneInfo { string difficulty = 1; }
-
-message DungeonScore {
-  string total_score = 1;
-  string cur_ratio = 2;
-}
-
-message DungeonSettlement {
-  string pass_time = 1;
-  map<string, string> award = 2;
-  map<string, string> settlement_pos = 3;
-  DungeonWorldBossSettlement world_boss_settlement = 4;
-  string master_mode_score = 5;
-}
-
-message DungeonSyncData {
-  string scene_uuid = 1;
-  DungeonFlowInfo flow_info = 2;
-  DungeonTitle title = 3;
-  DungeonTarget target = 4;
-  DungeonDamage damage = 5;
-  DungeonVote vote = 6;
-  DungeonSettlement settlement = 7;
-  DungeonPioneer dungeon_pioneer = 8;
-  DungeonPlanetMemoryRoom planet_room_info = 9;
-  DungeonVar dungeon_var = 10;
-  DungeonRankList dungeon_rank = 11;
-  DungeonAffixData dungeon_affix_data = 12;
-  DungeonEvent dungeon_event = 13;
-  DungeonScore dungeon_score = 14;
-  DungeonTimerInfo timer_info = 15;
-  DungeonHeroKeyInfo hero_key = 16;
-  DungeonUnionInfo dungeon_union_info = 17;
-  DungeonPlayerList dungeon_player_list = 18;
-  DungeonReviveInfo revive_info = 19;
-  DungeonRandomEntityConfigIdInfo random_entity_config_id_info = 20;
-  DungeonSceneInfo dungeon_scene_info = 21;
-  DungeonVarAll dungeon_var_all = 22;
-  DungeonRaidInfo dungeon_raid_info = 23;
-  EErrorCode err_code = 24;
-}
-
-message DungeonTarget { map<string, string> target_data = 1; }
-
-message DungeonTargetAward { map<string, string> dungeon_target_progress = 1; }
-
-message DungeonTargetData {
-  string target_id = 1;
-  string nums = 2;
-  string complete = 3;
-}
-
-message DungeonTargetProgress {
-  string target_id = 1;
-  string target_progress = 2;
-  string award_state = 3;
-}
-
-message DungeonTimerInfo {
-  EDungeonTimerType type = 1;
-  string start_time = 2;
-  string dungeon_times = 3;
-  EDungeonTimerDirection direction = 4;
-  string index = 5;
-  string change_time = 6;
-  EDungeonTimerEffectType effect_type = 7;
-  string pause_time = 8;
-  string pause_total_time = 9;
-  EDungeonTimerTimerLookType out_look_type = 10;
-}
-
-message DungeonTitle { map<string, string> title_list = 1; }
-
-message DungeonTitleInfo {
-  string uuid = 1;
-  string title_id = 2;
-}
-
-message DungeonTitleList { map<string, string> title_info = 1; }
-
-message DungeonUnionInfo {
-  string union_id = 1;
-  map<string, string> union_buildings = 2;
-  map<string, string> e_screen_infos = 3;
-  DanceBall dance_ball = 4;
-}
-
-message DungeonVar { repeated DungeonVarData dungeon_var_data = 1; }
-
-message DungeonVarAll { map<string, string> dungeon_var_all_map = 1; }
-
-message DungeonVarData {
-  string name = 1;
-  string value = 2;
-}
-
-message DungeonVote { map<string, string> vote = 1; }
-
-message DungeonWeekTargetList {
-  map<string, string> week_target = 1;
-  string refresh_time = 2;
-}
-
-message DungeonWorldBossSettlement {
-  string boss_hp_percent = 1;
-  DungeonBossRank dungeon_boss_rank = 2;
-  map<string, string> award = 3;
-  map<string, string> boss_rank_award = 4;
-  map<string, string> last_hit_award = 5;
+enum EActorRideStateSwitchType {
+  ActorRideStateSwitchTypeParallel = 0;
+  ActorRideStateSwitchTypeSwitch = 1;
+  ActorRideStateSwitchTypeStopAction = 2;
 }
 
 enum EActorState {
@@ -1121,12 +282,38 @@ enum EActorState {
   ActorStateAll = 35;
 }
 
+enum EAffixEffectType {
+  AffixEffectAll = 0;
+  AffixEffectGain = 1;
+  AffixEffectNegative = 2;
+  AffixEffectHarmonize = 3;
+}
+
+enum EAlbumRight {
+  EveryOneAccess = 0;
+  FriendAccess = 1;
+  SelfAccess = 2;
+  UnionAccess = 3;
+}
+
 enum EAppearType {
-  PAppearNone = 0;
-  PAppearInRange = 1;
-  PAppearTransferIn = 2;
+  E_APPEAR_TYPE_E_APPEAR_NULL = 0;
+  E_APPEAR_TYPE_E_APPEAR_TRANSFER_IN = 1;
+  E_APPEAR_TYPE_E_APPEAR_TRANSFER_PASS_LINE_IN = 2;
   PAppearFlyLineIn = 3;
   PAppearNpcCreate = 5;
+}
+
+enum EApplyRideResult {
+  ApplyRideResultNone = 0;
+  ApplyRideResultAgree = 1;
+  ApplyRideResultRefuse = 2;
+  ApplyRideResultTimeOut = 3;
+}
+
+enum EAssignSceneSourceType {
+  AssignSceneSourceTypeSilo = 0;
+  AssignSceneSourceTypeWorld = 1;
 }
 
 enum EAttrType {
@@ -2347,6 +1534,26 @@ enum EAttrType {
   AttrUpLift = 60071;
 }
 
+enum EAwardType {
+  EAwardTypeNull = 0;
+  EAwardTypeBdMod = 1;
+  EAwardTypeSelect = 2;
+}
+
+enum EBehitType {
+  BehitNormal = 0;
+  BehitStiff = 1;
+  BehitStiffBack = 2;
+  BehitStiffDown = 3;
+  BehitStiffAir = 4;
+  BehitStiffFall = 5;
+  BehitStiffFlow = 6;
+  BehitStiffAction = 7;
+  BehitStiffThrowMove = 8;
+  BehitStiffThrowEnd = 9;
+  BehitStiffBackBlocked = 10;
+}
+
 enum EBodySize {
   BodySizeNull = 0;
   BodySizeS = 1;
@@ -2354,112 +1561,117 @@ enum EBodySize {
   BodySizeL = 3;
 }
 
+enum EBreakingStage {
+  Breaking = 0;
+  BreakEnd = 1;
+}
+
 enum EBuffEffectLogicPbType {
-  PlayEffect = 0;
-  Gravity = 1;
-  ParabolaEffect = 2;
-  Linking = 3;
-  ConfusionEffect = 4;
-  ZoomScale = 5;
-  BuffProfessionEffect = 7;
-  TeleportBelt = 8;
-  BuffEffectRainbow = 9;
-  BuffEffectAttrHUD = 11;
-  BuffEffectStop = 12;
-  BuffEffectProgress = 13;
-  BuffEffectEnergyDisplay = 14;
-  BuffEffectStopAll = 15;
-  BuffEffectLayerChange = 16;
-  Tension = 17;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_PLAY_EFFECT = 0;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_GRAVITY = 1;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_PARABOLA_EFFECT = 2;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_LINKING = 3;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_CONFUSION_EFFECT = 4;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_ZOOM_SCALE = 5;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_BUFF_PROFESSION_EFFECT = 7;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_TELEPORT_BELT = 8;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_BUFF_EFFECT_RAINBOW = 9;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_BUFF_EFFECT_ATTR_HUD = 11;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_BUFF_EFFECT_STOP = 12;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_BUFF_EFFECT_PROGRESS = 13;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_BUFF_EFFECT_ENERGY_DISPLAY = 14;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_BUFF_EFFECT_STOP_ALL = 15;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_BUFF_EFFECT_LAYER_CHANGE = 16;
+  E_BUFF_EFFECT_LOGIC_PB_TYPE_TENSION = 17;
 }
 
 enum EBuffEventType {
-  BuffEventUnknown = 0;
-  BuffEventAddTo = 1;
-  BuffEventRemove = 2;
-  BuffEventReplace = 3;
-  BuffEventTimer = 4;
-  BuffEventStackLayer = 5;
-  BuffEventRemoveLayer = 6;
-  BuffEventOnHitTargetBefore = 7;
-  BuffEventOnHitTargetAfter = 8;
-  BuffEventOnHittedBefore = 9;
-  BuffEventOnHittedAfter = 10;
-  BuffEventOnReachMaxLayer = 11;
-  BuffEventHostDeath = 12;
-  BuffEventOnSkillHitAfter = 13;
-  BuffEventTrigTimingAura = 14;
-  BuffEventBodyPartDead = 15;
-  BuffEventBodyPartHit = 16;
-  BuffEventBodyPartStateChange = 17;
-  BuffEventOnPartHittedBefore = 18;
-  BuffEventOnPartHittedAfter = 19;
-  BuffEventGravitational = 20;
-  BuffEventFightResChange = 21;
-  BuffEventOnKillActor = 23;
-  BuffEventAttrWatcher = 24;
-  BuffEventOnHittedLHBefore = 25;
-  BuffEventOnBeHittedLHBefore = 26;
-  BuffEventAddByTarget = 27;
-  BuffEventRemoveByTarget = 28;
-  BuffEventInCombatState = 29;
-  BuffEventOutCombatState = 30;
-  BuffEventSkillBegin = 31;
-  BuffEventSkillEnd = 32;
-  BuffEventSingingEnd = 34;
-  BuffEventSummonBuffAdd = 35;
-  BuffEventSummonEntity = 36;
-  BuffEventGuideEnd = 37;
-  BuffEventOnDelayHit = 39;
-  BuffEventTeamBuffAdd = 40;
-  BuffEventChangeProfession = 41;
-  BuffEventDodgeSuccess = 42;
-  BuffEventHealBefore = 43;
-  BuffEventHealAfter = 44;
-  BuffEventProduceHealBefore = 45;
-  BuffEventProduceHealAfter = 46;
-  BuffEventShieldBroken = 47;
-  BuffEventLinkingStart = 48;
-  BuffEventLinkingEnd = 49;
-  BuffEventLinkingWatcher = 50;
-  BuffEventSuperArmorBroken = 51;
-  BuffEventAddedByTargetTag = 52;
-  BuffEventAddToTargetTag = 53;
-  BuffEventOnBeHitLessenHp = 57;
-  BuffEventEnterBreaking = 58;
-  BuffEventTeleportBelt = 59;
-  BuffEventOnBeHitAfterOnly = 63;
-  BuffEventOnHitAfterOnly = 64;
-  BuffEventOnBeHealAfterOnly = 65;
-  BuffEventOnHealAfterOnly = 66;
-  BuffEventHealCalcAttrBefore = 67;
-  BuffEventProduceHealCalcAttrBefore = 68;
-  BuffEventReviveSuccessEnd = 69;
-  BuffEventAfterReviveFirstMove = 70;
-  BuffEventMonsterIntoAlert = 71;
-  BuffEventMonsterOutAlert = 72;
-  BuffEventOnAddShieldCalcBefore = 73;
-  BuffEventOnAddShieldBefore = 74;
-  BuffEventOnAddShieldAfter = 75;
-  BuffEventOnBeAddedShieldCalcBefore = 76;
-  BuffEventOnBeAddedShieldBefore = 77;
-  BuffEventOnBeAddedShieldAfter = 78;
-  BuffEventProgressWatcher = 79;
-  BuffEventOnLuckyDamage = 80;
-  BuffEventSkillCDEnd = 81;
-  BuffEventMotionless = 82;
-  BuffEventParticipateKill = 83;
-  BuffEventProfessionBDTypeChange = 84;
-  BuffEventSingingBegin = 85;
-  BuffEventGuideBegin = 86;
-  BuffEventRandTimer = 87;
-  BuffEventIntoFractureState = 88;
-  BuffEventTakeOnRide = 89;
-  BuffEventTakeOffRide = 90;
-  BuffEventStartJump = 91;
-  BuffEventPlayAction = 92;
-  BuffEventPlayEmote = 93;
-  BuffEventCheck = 1001;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_UNKNOWN = 0;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ADD_TO = 1;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_REMOVE = 2;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_REPLACE = 3;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_TIMER = 4;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_STACK_LAYER = 5;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_REMOVE_LAYER = 6;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_HIT_TARGET_BEFORE = 7;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_HIT_TARGET_AFTER = 8;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_HITTED_BEFORE = 9;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_HITTED_AFTER = 10;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_REACH_MAX_LAYER = 11;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_HOST_DEATH = 12;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_SKILL_HIT_AFTER = 13;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_TRIG_TIMING_AURA = 14;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_BODY_PART_DEAD = 15;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_BODY_PART_HIT = 16;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_BODY_PART_STATE_CHANGE = 17;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_PART_HITTED_BEFORE = 18;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_PART_HITTED_AFTER = 19;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_GRAVITATIONAL = 20;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_FIGHT_RES_CHANGE = 21;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_KILL_ACTOR = 23;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ATTR_WATCHER = 24;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_HITTED_LH_BEFORE = 25;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_BE_HITTED_LH_BEFORE = 26;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ADD_BY_TARGET = 27;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_REMOVE_BY_TARGET = 28;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_IN_COMBAT_STATE = 29;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_OUT_COMBAT_STATE = 30;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_SKILL_BEGIN = 31;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_SKILL_END = 32;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_SINGING_END = 34;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_SUMMON_BUFF_ADD = 35;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_SUMMON_ENTITY = 36;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_GUIDE_END = 37;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_DELAY_HIT = 39;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_TEAM_BUFF_ADD = 40;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_CHANGE_PROFESSION = 41;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_DODGE_SUCCESS = 42;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_HEAL_BEFORE = 43;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_HEAL_AFTER = 44;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_PRODUCE_HEAL_BEFORE = 45;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_PRODUCE_HEAL_AFTER = 46;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_SHIELD_BROKEN = 47;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_LINKING_START = 48;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_LINKING_END = 49;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_LINKING_WATCHER = 50;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_SUPER_ARMOR_BROKEN = 51;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ADDED_BY_TARGET_TAG = 52;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ADD_TO_TARGET_TAG = 53;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_BE_HIT_LESSEN_HP = 57;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ENTER_BREAKING = 58;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_TELEPORT_BELT = 59;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_BE_HIT_AFTER_ONLY = 63;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_HIT_AFTER_ONLY = 64;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_BE_HEAL_AFTER_ONLY = 65;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_HEAL_AFTER_ONLY = 66;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_HEAL_CALC_ATTR_BEFORE = 67;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_PRODUCE_HEAL_CALC_ATTR_BEFORE = 68;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_REVIVE_SUCCESS_END = 69;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_AFTER_REVIVE_FIRST_MOVE = 70;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_MONSTER_INTO_ALERT = 71;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_MONSTER_OUT_ALERT = 72;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_ADD_SHIELD_CALC_BEFORE = 73;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_ADD_SHIELD_BEFORE = 74;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_ADD_SHIELD_AFTER = 75;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_BE_ADDED_SHIELD_CALC_BEFORE = 76;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_BE_ADDED_SHIELD_BEFORE = 77;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_BE_ADDED_SHIELD_AFTER = 78;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_PROGRESS_WATCHER = 79;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_ON_LUCKY_DAMAGE = 80;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_SKILL_CD_END = 81;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_MOTIONLESS = 82;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_PARTICIPATE_KILL = 83;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_PROFESSION_BD_TYPE_CHANGE = 84;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_SINGING_BEGIN = 85;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_GUIDE_BEGIN = 86;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_RAND_TIMER = 87;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_INTO_FRACTURE_STATE = 88;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_TAKE_ON_RIDE = 89;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_TAKE_OFF_RIDE = 90;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_START_JUMP = 91;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_PLAY_ACTION = 92;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_PLAY_EMOTE = 93;
+  E_BUFF_EVENT_TYPE_BUFF_EVENT_CHECK = 1001;
   BuffEventCustomize = 1002;
   BuffEventShapeshiftEndEvent = 1003;
   BuffEventAttrRefresh = 1004;
@@ -2468,40 +1680,40 @@ enum EBuffEventType {
 }
 
 enum EDamageMode {
-  DamageNormal = 0;
-  DamagePhysical = 1;
-  DamageMagical = 2;
+  E_DAMAGE_MODE_DAMAGE_NORMAL = 0;
+  E_DAMAGE_MODE_DAMAGE_PHYSICAL = 1;
+  E_DAMAGE_MODE_DAMAGE_MAGICAL = 2;
 }
 
 enum EDamageProperty {
-  General = 0;
-  Fire = 1;
-  Water = 2;
-  Electricity = 3;
-  Wood = 4;
-  Wind = 5;
-  Rock = 6;
-  Light = 7;
-  Dark = 8;
-  Count = 9;
+  E_DAMAGE_PROPERTY_GENERAL = 0;
+  E_DAMAGE_PROPERTY_FIRE = 1;
+  E_DAMAGE_PROPERTY_WATER = 2;
+  E_DAMAGE_PROPERTY_ELECTRICITY = 3;
+  E_DAMAGE_PROPERTY_WOOD = 4;
+  E_DAMAGE_PROPERTY_WIND = 5;
+  E_DAMAGE_PROPERTY_ROCK = 6;
+  E_DAMAGE_PROPERTY_LIGHT = 7;
+  E_DAMAGE_PROPERTY_DARK = 8;
+  E_DAMAGE_PROPERTY_COUNT = 9;
 }
 
 enum EDamageSource {
-  EDamageSourceSkill = 0;
-  EDamageSourceBullet = 1;
-  EDamageSourceBuff = 2;
-  EDamageSourceFall = 3;
-  EDamageSourceFakeBullet = 4;
-  EDamageSourceOther = 100;
+  E_DAMAGE_SOURCE_SKILL = 0;
+  E_DAMAGE_SOURCE_BULLET = 1;
+  E_DAMAGE_SOURCE_BUFF = 2;
+  E_DAMAGE_SOURCE_FALL = 3;
+  E_DAMAGE_SOURCE_FAKE_BULLET = 4;
+  E_DAMAGE_SOURCE_OTHER = 100;
 }
 
 enum EDamageType {
-  Normal = 0;
-  Miss = 1;
-  Heal = 2;
-  Immune = 3;
-  Fall = 4;
-  Absorbed = 5;
+  E_DAMAGE_TYPE_NORMAL = 0;
+  E_DAMAGE_TYPE_MISS = 1;
+  E_DAMAGE_TYPE_HEAL = 2;
+  E_DAMAGE_TYPE_IMMUNE = 3;
+  E_DAMAGE_TYPE_FALL = 4;
+  E_DAMAGE_TYPE_ABSORBED = 5;
 }
 
 enum EDetachMagneticType {
@@ -2510,23 +1722,11 @@ enum EDetachMagneticType {
 }
 
 enum EDisappearType {
-  EDisappearNull = 0;
-  EDisappearDistance = 1;
-  EDisappearTransferOut = 2;
-  EDisappearTransferPassLineOut = 3;
-  EDisappearDead = 4;
-}
-
-message EditorUIPosition {
-  int32 id = 1;
-  float x = 2;
-  float y = 3;
-}
-
-message EditorUiPosition {
-  string id = 1;
-  string x = 2;
-  string y = 3;
+  E_DISAPPEAR_TYPE_E_DISAPPEAR_NORMAL = 0;
+  E_DISAPPEAR_TYPE_E_DISAPPEAR_DEAD = 1;
+  E_DISAPPEAR_TYPE_E_DISAPPEAR_DESTROY = 2;
+  E_DISAPPEAR_TYPE_E_DISAPPEAR_TRANSFER_LEAVE = 3;
+  E_DISAPPEAR_TYPE_E_DISAPPEAR_TRANSFER_PASS_LINE_LEAVE = 4;
 }
 
 enum EDungeonState {
@@ -2545,15 +1745,15 @@ enum EDungeonTimerDirection {
 }
 
 enum EDungeonTimerEffectType {
-  Null = 0;
-  Add = 1;
-  Sub = 2;
-  Change = 3;
+  EDungeonTimerEffectTypeNull = 0;
+  EDungeonTimerEffectTypeAdd = 1;
+  EDungeonTimerEffectTypeSub = 2;
+  EDungeonTimerEffectTypeChange = 3;
 }
 
 enum EDungeonTimerTimerLookType {
-  Default = 0;
-  Red = 1;
+  EDungeonTimerTimerLookTypeDefault = 0;
+  EDungeonTimerTimerLookTypeRed = 1;
 }
 
 enum EDungeonTimerType {
@@ -2566,26 +1766,26 @@ enum EDungeonTimerType {
 }
 
 enum EEntityType {
-  EntErrType = 0;
-  EntMonster = 1;
-  EntNpc = 2;
-  EntSceneObject = 3;
-  EntZone = 5;
-  EntBullet = 6;
-  EntClientBullet = 7;
-  EntPet = 8;
-  EntChar = 10;
-  EntDummy = 11;
-  EntDrop = 12;
-  EntField = 14;
-  EntTrap = 15;
-  EntCollection = 16;
-  EntStaticObject = 18;
-  EntVehicle = 19;
-  EntToy = 20;
-  EntCommunityHouse = 21;
-  EntHouseItem = 22;
-  EntCount = 23;
+  E_ENTITY_TYPE_ENT_ERR_TYPE = 0;
+  E_ENTITY_TYPE_ENT_MONSTER = 1;
+  E_ENTITY_TYPE_ENT_NPC = 2;
+  E_ENTITY_TYPE_ENT_SCENE_OBJECT = 3;
+  E_ENTITY_TYPE_ENT_ZONE = 5;
+  E_ENTITY_TYPE_ENT_BULLET = 6;
+  E_ENTITY_TYPE_ENT_CLIENT_BULLET = 7;
+  E_ENTITY_TYPE_ENT_PET = 8;
+  E_ENTITY_TYPE_ENT_CHAR = 10;
+  E_ENTITY_TYPE_ENT_DUMMY = 11;
+  E_ENTITY_TYPE_ENT_DROP = 12;
+  E_ENTITY_TYPE_ENT_FIELD = 14;
+  E_ENTITY_TYPE_ENT_TRAP = 15;
+  E_ENTITY_TYPE_ENT_COLLECTION = 16;
+  E_ENTITY_TYPE_ENT_STATIC_OBJECT = 18;
+  E_ENTITY_TYPE_ENT_VEHICLE = 19;
+  E_ENTITY_TYPE_ENT_TOY = 20;
+  E_ENTITY_TYPE_ENT_COMMUNITY_HOUSE = 21;
+  E_ENTITY_TYPE_ENT_HOUSE_ITEM = 22;
+  E_ENTITY_TYPE_ENT_COUNT = 23;
 }
 
 enum EEquipEnchantType {
@@ -2599,10 +1799,10 @@ enum EErrorCode {
   ErrSuccess = 0;
   ErrNoRecord = 101;
   ErrExceptionCancel = 102;
-  ErrDbException = 103;
-  ErrDbSeqException = 104;
-  ErrDbSceneException = 105;
-  ErrDbTokenException = 106;
+  ErrDBException = 103;
+  ErrDBSeqException = 104;
+  ErrDBSceneException = 105;
+  ErrDBTokenException = 106;
   ErrCancelled = 201;
   ErrUnknownRpc = 202;
   ErrInvalidArgument = 203;
@@ -2620,7 +1820,7 @@ enum EErrorCode {
   ErrDataLoss = 215;
   ErrUnauthenticated = 216;
   ErrSystemMax = 999;
-  ErrDbError = 1000;
+  ErrDBError = 1000;
   ErrCreateOpenInfo = 1001;
   ErrCreateAccountInfo = 1002;
   ErrCreateCharInfo = 1003;
@@ -2644,7 +1844,7 @@ enum EErrorCode {
   ErrDelayOffLineKickOff = 1021;
   ErrServiceLanguageError = 1022;
   NoEnterScene = 1023;
-  ModIdNotOpen = 1024;
+  ModIDNotOpen = 1024;
   ErrFaceData = 1025;
   ErrInitProfession = 1026;
   ErrSceneCloseKickoff = 1027;
@@ -2669,6 +1869,7 @@ enum EErrorCode {
   ErrCancelDeleteChar = 1046;
   ErrCancelDeleteCharIsDelete = 1047;
   ErrIntoSceneOwnerFail = 1048;
+  ErrLoginNoEnoughToken = 1049;
   ErrSceneQueueUp = 1050;
   ErrProtocolVersionErr = 1051;
   ErrConfigVersionErr = 1052;
@@ -2679,7 +1880,7 @@ enum EErrorCode {
   ErrDeleteAccountKick = 1057;
   ErrIsDeleteAccount = 1058;
   ErrIsVersionKick = 1059;
-  ErrNotQqChnnel = 1060;
+  ErrNotQQChnnel = 1060;
   ErrIncorrectLaunchPlatform = 1061;
   ErrConditionWrong = 1062;
   ErrNotSupportLoginType = 1063;
@@ -2714,7 +1915,7 @@ enum EErrorCode {
   ErrPackageFull = 2302;
   ErrItemExpireTime = 2303;
   ErrItemPackageGridNotEnough = 2304;
-  ErrItemUuidError = 2305;
+  ErrItemUUIDError = 2305;
   ErrItemNotEnough = 2306;
   ErrOptTypeError = 2307;
   ErrItemInCoolDown = 2308;
@@ -2742,6 +1943,8 @@ enum EErrorCode {
   ErrItemToySceneUseExceeded = 2330;
   ErrItemToyUseInDisableArea = 2331;
   ErrItemToySingleCellUseExceeded = 2332;
+  ErrItemToyCantUse = 2333;
+  ErrItemLifeProfessionExceeded = 2334;
   ErrMonthlyCardNotExists = 2380;
   ErrMonthlyCardDataError = 2381;
   ErrMonthlyCardDayAwardReceived = 2382;
@@ -2750,22 +1953,22 @@ enum EErrorCode {
   ErrNotHouseOwner = 2401;
   ErrHomeLandExisted = 2402;
   ErrHomeLandContentWrongful = 2403;
-  ErrHouseLivetogetherCd = 2404;
+  ErrHouseLivetogetherCD = 2404;
   ErrHomeLandNotExisted = 2405;
   ErrHomeLandNotInScene = 2406;
   ErrHomeLandIsInvitation = 2407;
   ErrHomeLandInsufficientAuthority = 2408;
   ErrHomeLandTransferRequestPending = 2409;
   ErrHomeLandTransferRequestTimeout = 2410;
-  ErrHomeLandTransferCd = 2411;
+  ErrHomeLandTransferCD = 2411;
   ErrHomelandTargetIsHasHome = 2412;
   ErrHomelandTargetIsOwner = 2413;
   ErrHomelandNotOwnerCannotOperate = 2414;
   ErrHomeLandHasHouse = 2415;
   ErrHomeLandContentTooLong = 2416;
   ErrHomeLandClutterNotExist = 2417;
-  ErrHouseNameOrStatementCd = 2418;
-  ErrHouseIntroductionStatementCd = 2419;
+  ErrHouseNameOrStatementCD = 2418;
+  ErrHouseIntroductionStatementCD = 2419;
   ErrCommunityBuildInvalidRecipeId = 2420;
   ErrCommunityBuildRecipeIsUnlock = 2421;
   ErrCommunityBuildMax = 2422;
@@ -2843,6 +2046,7 @@ enum EErrorCode {
   ErrHomeLandGainNotOwner = 2500;
   ErrHomeLandItemFullGrid = 2501;
   ErrHomeLandFurnitureFull = 2502;
+  ErrCommunityWarehouseNotBindOrCooldown = 2503;
   ErrComposeItemNotEnough = 2571;
   ErrComposeFailed = 2572;
   ErrRedemptionItemNotExist = 2573;
@@ -2878,6 +2082,7 @@ enum EErrorCode {
   ErrAwardRandomTypeNone = 2626;
   ErrAwardRandomTypeNoMatch = 2627;
   ErrAwardActorIsNull = 2628;
+  ErrCounterUpToLimit = 2629;
   ErrEquipWashAttrNotExist = 2700;
   ErrNotEquipInCombat = 2701;
   ErrEquipPart = 2702;
@@ -2904,7 +2109,7 @@ enum EErrorCode {
   ErrTeamNoLeaderTransfer = 2915;
   ErrTeamHasOwnTeam = 2916;
   ErrTeamNoExist = 2917;
-  ErrTeamApplyInCd = 2918;
+  ErrTeamApplyInCD = 2918;
   ErrTeamApplyExpire = 2919;
   ErrTeamJoinOther = 2920;
   ErrTeamMemMax = 2921;
@@ -2920,11 +2125,11 @@ enum EErrorCode {
   ErrTeamNoInVoting = 2933;
   ErrTeamVoteEnd = 2934;
   ErrTeamHasVoted = 2935;
-  ErrTeamInviteCd = 2936;
-  ErrTeamApplyLeadCd = 2937;
+  ErrTeamInviteCD = 2936;
+  ErrTeamApplyLeadCD = 2937;
   ErrTeamMoreMaxWorlds = 2938;
   ErrTeamValidApplyInfo = 2939;
-  ErrTeamInMatchCancelCd = 2940;
+  ErrTeamInMatchCancelCD = 2940;
   ErrTeamMatchFinished = 2941;
   ErrTeamMatchWaitSec = 2942;
   ErrTeamMemWorldFull = 2943;
@@ -2948,6 +2153,7 @@ enum EErrorCode {
   ErrTeamEditGroupNotAllowed = 2961;
   ErrTeamGroupNotExist = 2962;
   ErrTeamTargetNoMatchMemberType = 2963;
+  ErrTeamMemberInDungeon = 2964;
   ErrDecomposeItemNotExist = 3000;
   ErrDecomposeItemNotEnough = 3001;
   ErrRefineEnergyNotEnough = 3002;
@@ -2961,7 +2167,7 @@ enum EErrorCode {
   ErrProfessionNotExist = 3056;
   ErrModSlotNotUnlock = 3058;
   ErrChangeProfessionStateFail = 3065;
-  ErrChangeProfessionCdFail = 3066;
+  ErrChangeProfessionCDFail = 3066;
   ErrProfessionSkinNotActive = 3071;
   ErrProfessionSkinActive = 3072;
   ErrProfessionNotUseSkin = 3073;
@@ -3029,7 +2235,7 @@ enum EErrorCode {
   ErrFashionIsLimit = 3401;
   ErrFashionNotFound = 3402;
   ErrFashionSlotEmpty = 3403;
-  ErrFashionIdNotFound = 3404;
+  ErrFashionIDNotFound = 3404;
   ErrFashionLock = 3405;
   ErrFashCollectionAwardAlread = 3406;
   ErrFashCollectionScoreNotEnough = 3407;
@@ -3050,7 +2256,7 @@ enum EErrorCode {
   ErrCameraNoExistChar = 3510;
   ErrCameraNoDelCloudAlbum = 3511;
   ErrCameraBeyondMaxURlLen = 3512;
-  ErrCameraBeyondMaxXmlLen = 3513;
+  ErrCameraBeyondMaxXMLLen = 3513;
   ErrCameraBeyondMaxNameLen = 3514;
   ErrCameraIllegalUrl = 3515;
   ErrCameraRenderInfoEmpty = 3516;
@@ -3090,7 +2296,7 @@ enum EErrorCode {
   ErrLifeProfessionRecipeIsUnlock = 3614;
   ErrLifeProfessionRecipeNotExist = 3615;
   ErrLifeProfessionRecipeNotUnlock = 3616;
-  ErrLifeProfessionMaxRdRecipeCount = 3617;
+  ErrLifeProfessionMaxRDRecipeCount = 3617;
   ErrLifeProfessionWorkingNotEnd = 3618;
   ErrLifeProfessionAlreadyWorking = 3619;
   ErrLifeProfessionNotWorking = 3620;
@@ -3153,7 +2359,7 @@ enum EErrorCode {
   ErrUnionNameUsed = 4411;
   ErrUnionNameOccupied = 4412;
   ErrApplyMax = 4415;
-  ErrUnionChangeNameCd = 4416;
+  ErrUnionChangeNameCD = 4416;
   ErrUnionNameSizeError = 4417;
   ErrDeclarationSize = 4418;
   ErrDeclarationError = 4419;
@@ -3371,6 +2577,7 @@ enum EErrorCode {
   ErrInteractionConfig = 4950;
   ErrInteractionNotOneself = 4951;
   ErrInteractionDistance = 4952;
+  ErrInteractionNotDoing = 4953;
   ErrShowPieceIllegalPieceType = 4961;
   ErrShowPieceIllegalPieceId = 4962;
   ErrShowPieceNoInOftenUseList = 4963;
@@ -3400,6 +2607,7 @@ enum EErrorCode {
   ErrProfessionEquipInCombat = 5018;
   ErrProfessionSwitchInCombat = 5019;
   ErrProfessionDungeonNotAllowSwitch = 5020;
+  ErrAoYiDecomposeOverflow = 5021;
   ErrTalentIllegalTalentPoolId = 5101;
   ErrTalentBeyondCurTalentMaxPlanNum = 5102;
   ErrTalentPoolNoActive = 5108;
@@ -3417,10 +2625,11 @@ enum EErrorCode {
   ErrTalentNoSupportDownLevelNow = 5121;
   ErrTalentNoMeetPrevTalentLv = 5122;
   ErrTalentNoMeetPrevTalentPoint = 5123;
-  ErrTalentTreeNodeBdExclusive = 5124;
+  ErrTalentTreeNodeBDExclusive = 5124;
   ErrTalentTotalTalentPointNotEnough = 5125;
   ErrTalentPreTalentNodeNotActivated = 5126;
   ErrTalentResetTalentInCombat = 5127;
+  ErrTalentActiveTalentInCombat = 5128;
   ErrCookBookNotExist = 5151;
   ErrCookFoodNotEnough = 5152;
   ErrCookTypeMore = 5153;
@@ -3467,7 +2676,7 @@ enum EErrorCode {
   ErrConditionTimerOpen = 5401;
   ErrConditionOpenServer = 5402;
   ErrSkillDisable = 5700;
-  ErrSkillIsCd = 5701;
+  ErrSkillIsCD = 5701;
   ErrSkillMaxPassiveCount = 5702;
   ErrSkillInit = 5703;
   ErrSkillInfo = 5704;
@@ -3619,6 +2828,7 @@ enum EErrorCode {
   ErrModInitConfigNotExist = 6509;
   ErrModPartOverflow = 6510;
   ErrModCanNotLink = 6511;
+  ErrModDecomposeOverflow = 6512;
   ErrFishingNotUseBait = 6551;
   ErrFishingRandomFailed = 6552;
   ErrFishingAlreadyGetFishItem = 6553;
@@ -3720,6 +2930,7 @@ enum EErrorCode {
   ErrEquipPerfectionNoMatch = 7062;
   ErrEquipNotBreak = 7063;
   ErrEquipPutOnIng = 7064;
+  ErrEquipDecomposeOverflow = 7065;
   ErrUserIsMatching = 7101;
   ErrUserNotInMatching = 7102;
   ErrUseNotWaitReady = 7103;
@@ -3741,6 +2952,7 @@ enum EErrorCode {
   ErrWeeklyTowerNoBox = 7259;
   ErrWeeklyTowerNoStageAward = 7260;
   ErrWeeklyTowerNoTowerDungeon = 7261;
+  ErrWeeklyTowerLayerNotSatisfy = 7262;
   ErrFunctionNoAward = 7271;
   ErrFunctionHasDrawn = 7272;
   ErrTLogIllegalExportArea = 7281;
@@ -3771,16 +2983,24 @@ enum EErrorCode {
   ErrSignNotSigned = 7422;
   ErrSignAlreadySigned = 7423;
   ErrSignTimeError = 7424;
+  CdKeyInvalid = 7501;
+  CdKeyDuplicate = 7502;
+  CdKeyExpired = 7503;
+  CdKeyNotFound = 7504;
+  CdKeyNotActivated = 7505;
+  CdKeyPlayerLevelTooLow = 7506;
+  CdKeyTakeLimitReached = 7507;
+  CdKeyGroupNotFound = 7508;
   ErrTokenBucketLimit = 9998;
   ErrUnknown = 9999;
 }
 
 enum EFarmlandState {
-  Empty = 0;
-  Grow = 1;
-  Pollen = 2;
-  Harvest = 3;
-  Over = 4;
+  EFarmlandStateEmpty = 0;
+  EFarmlandStateGrow = 1;
+  EFarmlandStatePollen = 2;
+  EFarmlandStateHarvest = 3;
+  EFarmlandStateOver = 4;
 }
 
 enum EGender {
@@ -3810,97 +3030,97 @@ enum EHomelandLamplightState {
 }
 
 enum EInteractionAction {
-  None = 0;
-  ToServer = 1;
-  NpcTalk = 2;
-  DungeonEntry = 3;
-  FunctionEntry = 4;
-  ClientSceneEvent = 5;
-  OptionSelect = 6;
-  HeroNormalDungeon = 7;
-  HeroChallengeDungeon = 8;
-  Revive = 9;
-  VmFuction = 10;
-  Tips = 11;
-  OpenUi = 12;
-  WindZone = 13;
-  WindRing = 14;
-  WindTornado = 15;
-  DanceTogether = 16;
-  StartFlow = 17;
-  ShowCutScene = 18;
-  UnionHuntEntry = 19;
-  UnionBuild = 20;
-  UnionBuildFunc = 21;
-  ExploreMonsterDeplete = 22;
-  UseSkill = 23;
-  Fishing = 24;
-  SendClientAiEvent = 25;
-  DoNoThing = 27;
-  CookFunc = 28;
-  MoveToDistance = 29;
-  MoveToPosition = 30;
-  MoveToInteractionSeat = 31;
-  RotateToTarget = 32;
-  RotateToTargetAndWait = 33;
-  AddClientBuff = 34;
-  AddClientBuffAndWait = 35;
-  AddClientBuffToTarget = 36;
-  AddClientBuffToTargetAndWait = 37;
-  ProgressBar = 38;
-  CameraInvoke = 39;
-  WaitUiConfirm = 40;
-  IgnoreInput = 41;
-  HideHud = 42;
-  HideUi = 43;
-  MoveToStaticObj = 44;
-  UnionWarDance = 45;
-  WaitInputMove = 46;
-  RemoveClientBuff = 47;
-  RemoveTargetClientBuff = 48;
-  EnterAutoFlow = 49;
-  NpcTalkFlow = 51;
-  StartFlowAndWait = 52;
-  ShowCutSceneAndWait = 53;
-  SittingControl = 54;
-  MagneticAttach = 55;
-  SwitchCameraTemplate = 56;
-  HomeFarm = 57;
-  Lua = 999;
-  Base = 1000;
-  Pivot = 1001;
-  PivotBreak = 1002;
-  TransferPoint = 1003;
-  LogicResonance = 1004;
-  LogicStatic = 1005;
-  LogicDance = 1006;
-  AddBuff = 1007;
-  Teleport = 1008;
-  EnterDungeon = 1009;
-  EnterVisualLayer = 1010;
-  ExitVisualLayer = 1011;
-  TriggerSceneEvent = 1012;
-  TriggerSceneCustomEvent = 1013;
-  UserDoAction = 1014;
-  Pickup = 1015;
-  OpenEliteTreasureBox = 1016;
-  OpenBossTreasureBox = 1017;
-  Quest = 1018;
-  QuestEvent = 1019;
-  KillSelf = 1020;
-  SendAiEvent = 1021;
-  DanceAwardNpc = 1022;
-  RequestInteractionSeat = 1023;
-  RemoveBuff = 1024;
-  AddBuffToTarget = 1025;
-  RemoveBuffToTarget = 1026;
-  PaintToySwitchPage = 1027;
-  OpenTowerTreasureBox = 1030;
-  RoughCollection = 1031;
-  FineCollection = 1032;
-  BubbleActStart = 1033;
-  BubbleActEnd = 1034;
-  RaidOpenBox = 1035;
+  EInteractionActionNone = 0;
+  EInteractionActionToServer = 1;
+  EInteractionActionNpcTalk = 2;
+  EInteractionActionDungeonEntry = 3;
+  EInteractionActionFunctionEntry = 4;
+  EInteractionActionClientSceneEvent = 5;
+  EInteractionActionOptionSelect = 6;
+  EInteractionActionHeroNormalDungeon = 7;
+  EInteractionActionHeroChallengeDungeon = 8;
+  EInteractionActionRevive = 9;
+  EInteractionActionVMFuction = 10;
+  EInteractionActionTips = 11;
+  EInteractionActionOpenUI = 12;
+  EInteractionActionWindZone = 13;
+  EInteractionActionWindRing = 14;
+  EInteractionActionWindTornado = 15;
+  EInteractionActionDanceTogether = 16;
+  EInteractionActionStartFlow = 17;
+  EInteractionActionShowCutScene = 18;
+  EInteractionActionUnionHuntEntry = 19;
+  EInteractionActionUnionBuild = 20;
+  EInteractionActionUnionBuildFunc = 21;
+  EInteractionActionExploreMonsterDeplete = 22;
+  EInteractionActionUseSkill = 23;
+  EInteractionActionFishing = 24;
+  EInteractionActionSendClientAiEvent = 25;
+  EInteractionActionDoNoThing = 27;
+  EInteractionActionCookFunc = 28;
+  EInteractionActionMoveToDistance = 29;
+  EInteractionActionMoveToPosition = 30;
+  EInteractionActionMoveToInteractionSeat = 31;
+  EInteractionActionRotateToTarget = 32;
+  EInteractionActionRotateToTargetAndWait = 33;
+  EInteractionActionAddClientBuff = 34;
+  EInteractionActionAddClientBuffAndWait = 35;
+  EInteractionActionAddClientBuffToTarget = 36;
+  EInteractionActionAddClientBuffToTargetAndWait = 37;
+  EInteractionActionProgressBar = 38;
+  EInteractionActionCameraInvoke = 39;
+  EInteractionActionWaitUiConfirm = 40;
+  EInteractionActionIgnoreInput = 41;
+  EInteractionActionHideHud = 42;
+  EInteractionActionHideUI = 43;
+  EInteractionActionMoveToStaticObj = 44;
+  EInteractionActionUnionWarDance = 45;
+  EInteractionActionWaitInputMove = 46;
+  EInteractionActionRemoveClientBuff = 47;
+  EInteractionActionRemoveTargetClientBuff = 48;
+  EInteractionActionEnterAutoFlow = 49;
+  EInteractionActionNpcTalkFlow = 51;
+  EInteractionActionStartFlowAndWait = 52;
+  EInteractionActionShowCutSceneAndWait = 53;
+  EInteractionActionSittingControl = 54;
+  EInteractionActionMagneticAttach = 55;
+  EInteractionActionSwitchCameraTemplate = 56;
+  EInteractionActionHomeFarm = 57;
+  EInteractionActionLua = 999;
+  EInteractionActionBase = 1000;
+  EInteractionActionPivot = 1001;
+  EInteractionActionPivotBreak = 1002;
+  EInteractionActionTransferPoint = 1003;
+  EInteractionActionLogicResonance = 1004;
+  EInteractionActionLogicStatic = 1005;
+  EInteractionActionLogicDance = 1006;
+  EInteractionActionAddBuff = 1007;
+  EInteractionActionTeleport = 1008;
+  EInteractionActionEnterDungeon = 1009;
+  EInteractionActionEnterVisualLayer = 1010;
+  EInteractionActionExitVisualLayer = 1011;
+  EInteractionActionTriggerSceneEvent = 1012;
+  EInteractionActionTriggerSceneCustomEvent = 1013;
+  EInteractionActionUserDoAction = 1014;
+  EInteractionActionPickup = 1015;
+  EInteractionActionOpenEliteTreasureBox = 1016;
+  EInteractionActionOpenBossTreasureBox = 1017;
+  EInteractionActionQuest = 1018;
+  EInteractionActionQuestEvent = 1019;
+  EInteractionActionKillSelf = 1020;
+  EInteractionActionSendAiEvent = 1021;
+  EInteractionActionDanceAwardNPC = 1022;
+  EInteractionActionRequestInteractionSeat = 1023;
+  EInteractionActionRemoveBuff = 1024;
+  EInteractionActionAddBuffToTarget = 1025;
+  EInteractionActionRemoveBuffToTarget = 1026;
+  EInteractionActionPaintToySwitchPage = 1027;
+  EInteractionActionOpenTowerTreasureBox = 1030;
+  EInteractionActionRoughCollection = 1031;
+  EInteractionActionFineCollection = 1032;
+  EInteractionActionBubbleActStart = 1033;
+  EInteractionActionBubbleActEnd = 1034;
+  EInteractionActionRaidOpenBox = 1035;
 }
 
 enum EInteractionTemplateAction {
@@ -3944,52 +3164,10 @@ enum EMoveType {
   MoveJumpEndToIdle = 22;
 }
 
-message EnergyInfo {
-  string energy_value = 1;
-  string unlock_num = 2;
-  map<string, string> energy_item_info = 3;
-}
-
-message EnergyItem {
-  string energy_limit = 1;
-  string extra_energy_limit = 2;
-  map<string, string> energy_info = 3;
-}
-
-message EnergyItemInfo {
-  string queue_id = 1;
-  string column_id = 2;
-  string refine_state = 3;
-  string gain_time = 4;
-}
-
 enum ENotifyTrigger {
   ETypeInZone = 0;
   ETypeOutZone = 1;
   ETypeRange = 2;
-}
-
-message EnterScene { EnterSceneInfo enter_scene_info = 1; }
-
-message EnterSceneInfo {
-  AttrCollection scene_attrs = 1;
-  Entity player_ent = 2;
-  string scene_guid = 3;
-  string connect_guid = 4;
-  AttrCollection subscene_attrs = 5;
-}
-
-message Entity {
-  int64 uuid = 1;
-  EEntityType ent_type = 2;
-  AttrCollection attrs = 3;
-  TempAttrCollection temp_attrs = 4;
-  ActorBodyPartInfos body_part_infos = 5;
-  SeqPassiveSkillInfo passive_skill_infos = 6;
-  BuffInfoSync buff_infos = 7;
-  BuffEffectSync buff_effect = 8;
-  EAppearType appear_type = 9;
-  map<int32, MagneticQueueAppearInfo> magnetic_ride_queue_change_info_dict = 10;
 }
 
 enum EPictureType {
@@ -4007,61 +3185,10 @@ enum EQuestStepStatus {
   QuestStepFail = 2;
 }
 
-message EquipAttr {
-  map<uint32, uint32> base_attrs = 4;
-  int32 perfection_value = 7;
-  int32 recast_count = 8;
-  int32 total_recast_count = 9;
-  map<int32, int32> basic_attr = 10;
-  map<int32, int32> advance_attr = 11;
-  map<int32, int32> recast_attr = 12;
-  int32 perfection_level = 13;
-}
-
-message EquipAttrSet {
-  map<string, string> basic_attr = 1;
-  map<string, string> advance_attr = 2;
-  map<string, string> recast_attr = 3;
-  map<string, string> rare_quality_attr = 4;
-}
-
-message EquipData { repeated EquipNine equip_infos = 1; }
-
-message EquipEnchantInfo {
-  string enchant_item_type_id = 1;
-  string enchant_level = 2;
-  EEquipEnchantType enchant_type = 3;
-}
-
-message EquipInfo {
-  string equip_slot = 1;
-  string item_uuid = 2;
-  string equip_slot_refine_level = 3;
-  string equip_slot_refine_failed_count = 4;
-}
-
-message EquipList {
-  map<string, string> equip_list = 1;
-  EquipAttr equip_attr = 2;
-  map<string, string> equip_recast_info = 4;
-  map<string, string> equip_enchant = 5;
-  map<string, string> suit_info_dict = 6;
-}
-
-message EquipNine {
-  int32 slot = 1;
-  int32 equip_id = 2;
-}
-
-message EquipSuitInfo {
-  map<string, string> suit_attr = 1;
-  string attr_type = 2;
-}
-
 enum EReceiveRewardStatus {
-  NotReceive = 0;
-  CanReceive = 1;
-  Received = 2;
+  EReceiveRewardStatusNotReceive = 0;
+  EReceiveRewardStatusCanReceive = 1;
+  EReceiveRewardStatusReceived = 2;
 }
 
 enum ERidePropertyType {
@@ -4094,8 +3221,8 @@ enum ESkillCDType {
 }
 
 enum ESkillCdType {
-  ESkillCdNormal = 0;
-  ESkillCdCharge = 1;
+  E_SKILL_CD_TYPE_E_SKILL_CD_NORMAL = 0;
+  E_SKILL_CD_TYPE_E_SKILL_CD_CHARGE = 1;
 }
 
 enum ETeamMemberType {
@@ -4105,19 +3232,24 @@ enum ETeamMemberType {
 
 enum ETimerExeType {
   TimerExeTypeNull = 0;
-  TimerExeTypeStart = 1;
-  TimerExeTypeEnd = 2;
-  TimerExeTypeCycleStart = 3;
-  TimerExeTypeCycleEnd = 4;
+  TimerExeType_Start = 1;
+  TimerExeType_End = 2;
+  TimerExeType_Cycle_Start = 3;
+  TimerExeType_Cycle_End = 4;
 }
 
 enum ETimerType {
   TimerTypeNull = 0;
-  TimerTypePoint = 1;
-  TimerTypeDay = 2;
-  TimerTypeMonth = 3;
-  TimerTypeWeek = 4;
-  TimerTypeInterval = 5;
+  TimerType_Point = 1;
+  TimerType_Day = 2;
+  TimerType_Month = 3;
+  TimerType_Week = 4;
+  TimerType_Interval = 5;
+}
+
+enum EUseSlotType {
+  UseSlotType_Other = 0;
+  UseSlotType_Skill = 1;
 }
 
 enum EUserTransferType {
@@ -4129,13 +3261,1513 @@ enum EUserTransferType {
   EUserTransferTypeNear = 5;
 }
 
-enum EUseSlotType {
-  UseSlotTypeOther = 0;
-  UseSlotTypeSkill = 1;
+enum LaunchPlatform {
+  LaunchPlatformNull = 0;
+  LaunchPlatformWeXin = 1001;
+  LaunchPlatformQq = 1002;
+}
+
+enum MonsterTargetAward {
+  MonsterTargetAwardNull = 0;
+  MonsterTargetAwardGet = 1;
+  MonsterTargetAwardReceived = 2;
+}
+
+enum StructureOpType {
+  StructureOpTypeAdd = 0;
+  StructureOpTypeUpdate = 1;
+  StructureOpTypeDelete = 2;
+}
+
+enum SystemType {
+  SystemType_Null = 0;
+  SystemType_Android = 1;
+  SystemType_Ios = 2;
+  SystemType_Web = 3;
+  SystemType_Linux = 4;
+  SystemType_Windows = 5;
+}
+
+enum VDataOneofCase {
+  VDataOneofCaseNone = 0;
+  VData = 1;
+}
+
+enum WorldReconnectStatus {
+  FastReconnect = 0;
+  NewSession = 1;
+}
+
+message AITableBase {
+  int32 id = 1463;
+  string remarks = 803;
+  string normal_sub_tree = 1572;
+  bool is_recover_normal = 1494;
+  bool is_patrol = 643;
+  bool is_play_action = 1507;
+  int32 play_action_probability = 269;
+  int32 play_action_mode = 497;
+  int_array play_action_id = 947;
+  bool is_random_move = 1558;
+  int32 random_move_probability = 1498;
+  float random_move_radius = 761;
+  bool is_alert_normal_patrol = 1515;
+  bool is_walking_around = 591;
+  string way_point_name = 620;
+  string alert_normal_patrol_path = 1506;
+  bool is_alert_action = 1551;
+  int_array alert_action_list = 354;
+  string normal_play_sub_tree = 1438;
+  string_array battle_action_id_array = 1985;
+  int32 battle_action_release_probability = 379;
+  bool is_play_action_when_into_battle = 1069;
+  bool is_play_action_only_normal_into_battle = 1738;
+  int32 in_battle_action_id = 1185;
+  int32 alert_in_battle_action_id = 2032;
+  bool is_have_battle_action = 16;
+  int32 battle_skill_release_probability = 1224;
+  int32 battle_skill_id = 326;
+  string normal_battle_sub_tree = 244;
+  int32 skill_release_probability = 218;
+  bool is_not_move = 1006;
+  bool is_skill_release_close = 1078;
+  bool is_release_skill_when_into_battle = 932;
+  int32 normal_into_battle_skill_id = 2000;
+  string battle_alert_sub_tree = 390;
+  bool is_alert_move_require = 2015;
+  int32 chase_and_alert_move_probability = 1274;
+  bool is_chase_monster = 415;
+  bool is_have_back_skill = 850;
+  int32 back_skill_id = 617;
+  bool is_need_translation_alert_move = 270;
+  int32 alert_move_probability = 979;
+  float alert_speed = 1159;
+  float min_alert_dis = 607;
+  float max_alert_dis = 500;
+  int32 min_alert_move_time = 430;
+  int32 max_alert_move_time = 608;
+  int32 min_alert_back_time = 1261;
+  int32 max_alert_back_time = 606;
+  string to_battle_action_json_name = 106;
+  bool is_play_vigilance_action = 149;
+  string vigilance_action_json_name = 1933;
+}
+
+message AITableMgr {
+  map<int32, bokura.AITableBase> datas = 1;
+}
+
+message AcceptProfessionQuestRequest {
+  int32 profession_id = 1;
+}
+
+message AcceptQuestInfo {
+  int32 quest_id = 1;
+  repeated int32 param_list = 2;
+}
+
+message AcceptTransferBeLeaderRequest {
+  bool agree = 2;
+}
+
+message AccountData {
+  string open_id = 1;
+  int32 sdk_type = 2;
+  string account_id = 3;
+  string account_uuid = 4;
+  SystemType os = 5;
+}
+
+message AccountInfo {
+  string account_id = 1;
+  string open_id = 2;
+  repeated SocialData chars = 3;
+  string token = 5;
+  int64 restrict_time = 6;
+  map<int64, int64> delete_char_ids_left_time = 7;
+}
+
+message AccumulateEnd {
+  string skill_uuid = 1;
+  string end_time = 2;
+}
+
+message Ace {
+}
+
+message AceSdkNtf {
+  NotifyLoginAntiDataRequest v_request = 1;
+}
+
+message Achievement {
+  uint32 finish_num = 1;
+  bool has_received = 2;
+  uint64 begin_progress = 3;
+}
+
+message AchievementDateTableBase {
+  int32 id = 1463;
+  mlstring name = 439;
+  int_array target_id = 1432;
+  int_table condition = 1634;
+  int32 pre_achievement = 327;
+  int32 reward_id = 212;
+  string des = 266;
+  string type_icon = 1596;
+  int32 season_id = 1669;
+}
+
+message AchievementDateTableMgr {
+  map<int32, bokura.AchievementDateTableBase> datas = 1;
+}
+
+message AchievementEntryTableBase {
+  int32 id = 1463;
+  int_array achievement_list = 1797;
+}
+
+message AchievementEntryTableMgr {
+  map<int32, bokura.AchievementEntryTableBase> datas = 1;
+}
+
+message AchievementSeasonClassTableBase {
+  int32 id = 1463;
+  mlstring class_name = 1286;
+  string class_background = 1637;
+  string class_des = 1765;
+  int_array entry_list = 343;
+  int32 sort_id = 504;
+}
+
+message AchievementSeasonClassTableMgr {
+  map<int32, bokura.AchievementSeasonClassTableBase> datas = 1;
+}
+
+message AchievementTableBase {
+  int32 id = 1463;
+  string name = 176;
+  int32 main_type = 1850;
+  int32 sub_type = 1973;
+  string desc = 483;
+  int32 show = 601;
+  int32 time_limit = 1869;
+  int_table award = 149;
+  string icon = 1210;
+}
+
+message AchievementTableMgr {
+  map<int32, bokura.AchievementTableBase> datas = 1;
+}
+
+message ActionInfo {
+  int32 action_id = 1;
+  int32 period = 2;
+  float percent = 3;
+}
+
+message ActionSampleTableBase {
+  int64 id = 1463;
+  string name = 439;
+  number_table motion_info = 264;
+  bool has_motion = 1733;
+}
+
+message ActionSampleTableMgr {
+  map<int64, bokura.ActionSampleTableBase> datas = 1;
+}
+
+message ActionShowDataTableBase {
+  int64 id = 1463;
+  float start = 678;
+  float duration = 544;
+  float end = 1415;
+  bool is_attacker = 920;
+  int32 state_id = 308;
+  int32 group_id = 196;
+  string action_name = 1340;
+  string res_path = 548;
+  int32 action_type = 830;
+  bool is_loop = 109;
+  bool is_upend = 494;
+  bool enhance_damping = 1754;
+}
+
+message ActionShowDataTableMgr {
+  map<int64, bokura.ActionShowDataTableBase> datas = 1;
+}
+
+message ActorBodyPartInfo {
+  optional int32 part_id = 1;
+  optional uint64 hp = 2;
+  optional uint64 max_hp = 3;
+  optional BodyPartState state = 4;
+  optional int32 fleshy_id = 5;
+}
+
+message ActorBodyPartInfos {
+  optional int64 uuid = 1;
+  repeated ActorBodyPartInfo infos = 2;
+}
+
+message ActorUuidStru {
+  int32 actor_type = 1;
+  bool is_summon = 2;
+  int32 instance_id = 3;
+}
+
+message AffixData {
+  repeated int32 affix_ids = 1;
+}
+
+message AiBotActiveTrigger {
+  BotActiveTrigger active_trigger_param = 1;
+}
+
+message AiBotAddBuffByConfigId {
+  BotAddBuff add_buff_param = 1;
+}
+
+message AiBotMove {
+  BotMoveInfo move_param = 1;
+}
+
+message AiBotPlayAction {
+  BotPlayActionParam play_action_param = 1;
+}
+
+message AiBotRemoveBuffByConfigId {
+  BotRemoveBuff remove_buff_param = 1;
+}
+
+message AiBotResurrection {
+  BotResurrectionParam v_request = 1;
+}
+
+message AiBotSendChitChatMsg {
+  BotSendChitChatMsgReq v_request = 1;
+}
+
+message AiBotSendGmMsg {
+  GmCmd msg = 1;
+}
+
+message AiBotStartRide {
+  BotStartRideParam start_ride_param = 1;
+}
+
+message AiBotTeleportToPos {
+  BotTeleportParam teleport_param = 1;
+}
+
+message AiBotUseSkill {
+  BotUseSkillInfo use_skill_param = 1;
+}
+
+message AnswerList {
+  repeated int32 answers = 1;
+}
+
+message AntiAddictionInfo {
+  uint32 last_time = 1;
+}
+
+message AoiSyncDelta {
+  optional int64 uuid = 1;
+  AttrCollection attrs = 2;
+  TempAttrCollection temp_attrs = 3;
+  EventDataList event_data_list = 4;
+  BulletEvent bullet_event = 5;
+  ActorBodyPartInfos body_part_infos = 6;
+  SkillEffect skill_effects = 7;
+  SeqPassiveSkillInfo passive_skill_infos = 8;
+  SeqPassiveSkillEndInfo passive_skill_end_infos = 9;
+  BuffInfoSync buff_infos = 10;
+  BuffEffectSync buff_effect = 11;
+  repeated FakeBulletInfo fake_bullets = 12;
+  repeated MagneticRideQueueChangeInfo magnetic_ride_queue_change_info_list = 13;
+}
+
+message AoiSyncToMeDelta {
+  AoiSyncDelta base_delta = 1;
+  repeated int64 sync_hate_ids = 2;
+  repeated SkillCd sync_skill_c_ds = 3;
+  repeated FightResCd fight_res_c_ds = 4;
+  optional int64 uuid = 5;
+}
+
+message AttachVelocity {
+  string attach_speed = 1;
+  string vel_dir_x = 2;
+  string vel_dir_y = 3;
+  string vel_dir_z = 4;
+  string attach_source = 5;
+  string source_ent_uuid = 6;
+}
+
+message Attr {
+  optional int32 id = 1;
+  optional bytes raw_data = 2;
+}
+
+message AttrCollection {
+  optional int64 uuid = 1;
+  repeated Attr attrs = 2;
+  repeated MapAttr map_attrs = 3;
+}
+
+message AttrInBattleShowSync {
+  string attr_in_battle_show = 1;
+}
+
+message AvatarInfo {
+  int32 avatar_id = 1;
+  PictureInfo profile = 2;
+  PictureInfo half_body = 3;
+  int32 business_card_style_id = 4;
+  int32 avatar_frame_id = 5;
+}
+
+message BasicData {
+  int64 char_id = 1;
+  int64 show_id = 2;
+  string name = 3;
+  int32 gender = 4;
+  EBodySize body_size = 5;
+  int32 level = 6;
+  int32 scene_id = 7;
+  repeated int32 personal_state = 8;
+  int64 offline_time = 9;
+  string scene_guid = 10;
+  int64 create_time = 11;
+  uint32 cur_talent_pool_id = 12;
+  uint32 bot_ai_id = 13;
+  int32 register_channel = 14;
+  uint64 char_state = 15;
+  int64 online_time = 16;
+  int64 sum_save_diamond = 17;
+  bool is_newbie = 18;
+}
+
+message BattlePass {
+  int32 id = 1;
+  int32 level = 2;
+  int32 curexp = 3;
+  int32 week_exp = 4;
+  int32 exp_last_time = 5;
+  bool is_unlock = 6;
+  bool buy_normal_pas = 7;
+  bool buy_prime_pass = 8;
+  map<int32, BattlePassAwardInfo> award = 9;
+  bool is_valid = 10;
+  bool is_sended_mail = 11;
+}
+
+message BattlePassAwardInfo {
+  bool free_award = 1;
+  bool paid_award = 2;
+}
+
+message BattlePassData {
+  map<int32, BattlePass> battle_map = 1;
+}
+
+message BossProgress {
+  int32 total_award_cnt = 1;
+}
+
+message BotActiveTrigger {
+  string trigger_id = 1;
+}
+
+message BotAddBuff {
+  string actor_id = 1;
+  string buff_id = 2;
+  string layer = 3;
+  string duration = 4;
+}
+
+message BotMoveInfo {
+  Vector3 dest_pos = 1;
+  EMoveType move_type = 2;
+  bool is_set_dir = 3;
+  string cur_move_flag = 4;
+}
+
+message BotPlayActionParam {
+  string action_id = 1;
+  string action_source = 2;
+}
+
+message BotRemoveBuff {
+  string buff_id = 1;
+}
+
+message BotResurrectionParam {
+  string target_id = 1;
+  string revive_id = 2;
+}
+
+message BotSendChitChatMsgReq {
+  string emoji_id = 1;
+}
+
+message BotStartRideParam {
+  string ride_id = 1;
+}
+
+message BotTeleportParam {
+  string actor_id = 1;
+  Position pos = 2;
+}
+
+message BotUseSkillInfo {
+  string actor_id = 1;
+  string skill_id = 2;
+  string begin_time = 3;
+  string target_uuid = 4;
+  Vector3 target_pos = 5;
+  Vector3 dmg_target_pos = 6;
+  Vector3 face_target_pos = 7;
+}
+
+message BounceJump {
+  string bounce_jump_id = 1;
+  string axis_ref_uuid = 2;
+  string vel_dir_x = 3;
+  string vel_dir_y = 4;
+  string vel_dir_z = 5;
+}
+
+message BubbleActData {
+  map<int32, BubbleInfo> bubble_info = 5;
+}
+
+message BubbleInfo {
+  uint32 bubble_score = 1;
+  uint32 bubble_award_count = 2;
+  repeated uint64 additional_target_uuid_list = 3;
+  int64 last_refresh_time = 4;
+}
+
+message BuffAttrEffect {
+  repeated BuffAttrShowInfo attr_show_info = 1;
+}
+
+message BuffAttrShowInfo {
+  int32 id = 1;
+  bool is_gain = 2;
+}
+
+message BuffDBData {
+  int64 buff_uuid = 1;
+  int64 firer_id = 2;
+  uint32 buff_config_id = 3;
+  uint32 base_id = 4;
+  uint32 level = 5;
+  uint32 layer = 6;
+  int32 duration = 7;
+  int32 count = 8;
+  int64 create_time = 9;
+  int32 part_id = 10;
+  int32 create_scene_id = 11;
+  repeated string custom_params_key = 12;
+  repeated int32 custom_params = 13;
+}
+
+message BuffDBInfo {
+  uint32 max_id = 1;
+  map<uint32, BuffDBData> all_buff_db_data = 2;
+}
+
+message BuffDbData {
+  string buff_uuid = 1;
+  string firer_id = 2;
+  string buff_config_id = 3;
+  string base_id = 4;
+  string level = 5;
+  string layer = 6;
+  string duration = 7;
+  string count = 8;
+  string create_time = 9;
+  string part_id = 10;
+  string create_scene_id = 11;
+  repeated string custom_params_key = 12;
+  repeated string custom_params = 13;
+}
+
+message BuffDbInfo {
+  string max_id = 1;
+  map<string, string> all_buff_db_data = 2;
+}
+
+message BuffEffect {
+  optional EBuffEventType type = 1;
+  optional int32 buff_uuid = 2;
+  optional int64 host_uuid = 3;
+  optional int64 trigger_time = 4;
+  repeated BuffEffectLogicInfo logic_effect = 5;
+}
+
+message BuffEffectLogicInfo {
+  optional EBuffEffectLogicPbType effect_type = 1;
+  optional bytes raw_data = 2;
+  optional bool is_loop = 3;
+}
+
+message BuffEffectLogicTension {
+  int64 target_uuid = 1;
+  repeated int32 strength = 2;
+  int32 strength_length = 3;
+  int32 max_length = 4;
+}
+
+message BuffEffectSync {
+  optional int64 uuid = 1;
+  repeated BuffEffect buff_effects = 2;
+}
+
+message BuffInfo {
+  optional int32 buff_uuid = 1;
+  optional int32 base_id = 2;
+  optional int32 level = 3;
+  optional int64 host_uuid = 4;
+  optional int32 table_uuid = 5;
+  optional int64 create_time = 6;
+  optional int64 fire_uuid = 7;
+  optional int32 layer = 8;
+  optional int32 part_id = 9;
+  optional int32 count = 10;
+  optional int32 duration = 11;
+  FightSourceInfo fight_source_info = 12;
+  repeated BuffEffectLogicInfo logic_effect = 13;
+}
+
+message BuffInfoSync {
+  optional int64 uuid = 1;
+  repeated BuffInfo buff_infos = 2;
+}
+
+message BuffProfessionEffectData {
+  int32 profession_type = 1;
+  repeated int32 profession_point = 2;
+  repeated bool profession_switch = 3;
+}
+
+message BufferStream {
+  bytes buffer_s = 1;
+}
+
+message BulletEvent {
+  optional int64 uuid = 1;
+  optional int32 enter_stage_id = 2;
+}
+
+message CameraSchemeCache {
+  map<string, string> camera_scheme_dict = 1;
+}
+
+message CameraSchemeInfo {
+  CameraPatternType camera_pattern_type = 1;
+  CameraSchemeType camera_scheme_type = 2;
+  string scheme_key = 3;
+  string scheme_name = 4;
+  string scheme_time = 5;
+  string exposure = 6;
+  string contrast = 7;
+  string saturation = 8;
+  string horizontal = 9;
+  string vertical = 10;
+  string angle = 11;
+  bool depth_tag = 12;
+  string aperture = 13;
+  string near_blend = 14;
+  string far_blend = 15;
+  bool focus_tag = 16;
+  string focus = 17;
+  string world_time = 18;
+  bool is_head_follow = 19;
+  bool is_eye_follow = 20;
+  map<string, bool> show_entity_dicts = 21;
+  map<string, bool> show_ui_dicts = 22;
+  string filter_path = 23;
+  string id = 24;
+}
+
+message CameraSelectSchemeCache {
+  CameraSchemeInfo camera_scheme_cache = 1;
+}
+
+message ChallengeDungeonInfo {
+  map<int32, DungeonInfo> dungeon_info = 1;
+  map<int32, DungeonTargetAward> dungeon_target_award = 2;
+}
+
+message ChangeCharFunctionState {
+  EActorState state_type = 1;
+}
+
+message ChannelingEnd {
+  string skill_uuid = 1;
+  string time = 2;
+}
+
+message CharBaseInfo {
+  int64 char_id = 1;
+  string account_id = 2;
+  int64 show_id = 3;
+  uint32 server_id = 4;
+  string name = 5;
+  EGender gender = 6;
+  bool is_deleted = 7;
+  bool is_forbid = 8;
+  bool is_mute = 9;
+  float x = 10;
+  float y = 11;
+  float z = 12;
+  float dir = 13;
+  FaceData face_data = 14;
+  uint32 card_id = 15;
+  int64 create_time = 16;
+  int64 online_time = 17;
+  int64 offline_time = 18;
+  ProfileInfo profile_info = 19;
+  CharTeam team_info = 20;
+  uint64 char_state = 21;
+  EBodySize body_size = 22;
+  UserUnion union_info = 23;
+  repeated int32 personal_state = 24;
+  AvatarInfo avatar_info = 25;
+  uint64 total_online_time = 26;
+  string open_id = 27;
+  int32 sdk_type = 28;
+  int32 os = 29;
+  int32 init_profession_id = 31;
+  uint64 last_cal_total_time = 32;
+  int32 area_id = 33;
+  string client_version = 34;
+  int32 fight_point = 35;
+  int64 sum_save = 36;
+  string client_resource_version = 37;
+  int64 last_offline_time = 38;
+  int32 day_acc_dur_time = 39;
+  int64 last_acc_dur_timestamp = 40;
+  int64 save_serial = 41;
+  int64 last_online_time = 42;
+}
+
+message CharSerialize {
+  int64 char_id = 1;
+  CharBaseInfo char_base = 2;
+  SceneData scene_data = 3;
+  SceneLuaData scene_lua_data = 4;
+  PioneerData pioneer_data = 5;
+  BuffDBInfo buff_info = 6;
+  ItemPackage item_package = 7;
+  QuestDataList quest_list = 8;
+  SettingData setting_data = 9;
+  MiscInfo misc_info = 10;
+  ExchangeItem exchange_items = 11;
+  EquipList equip = 12;
+  EnergyItem energy_item = 13;
+  MapData map_data = 14;
+  DungeonList dungeon_list = 15;
+  UserFightAttr attr = 16;
+  FashionMgr fashion = 17;
+  ProfileList profile_list = 18;
+  PlayHelper help = 19;
+  CounterList counter_list = 20;
+  PersonalObject personal_obj = 21;
+  RoleLevel role_level = 22;
+  Pivot pivot = 23;
+  TransferPoint transfer_point = 24;
+  PlanetMemory planet_memory = 25;
+  SeasonTarget planet_memory_target = 26;
+  RedDotData red_dot = 27;
+  Resonance resonance = 28;
+  CutsState cuts_state = 29;
+  InvestigateList investigate_list = 30;
+  ParkourRecordList records = 31;
+  InteractionInfo interaction = 32;
+  SeasonQuestList season_quest_list = 33;
+  RoleFace role_face = 34;
+  MapBookInfoList map_book_list = 35;
+  FunctionData function_data = 36;
+  AntiAddictionInfo anti_info = 37;
+  MonsterExploreList monster_explore_list = 38;
+  ShowPieceData show_piece_data = 39;
+  CollectionBook collection_book = 42;
+  NotGetProceedAwardInfo not_get_proceed_award_times = 43;
+  CookList cook_list = 44;
+  TimerRefreshDataList refresh_data_list = 45;
+  ChallengeDungeonInfo challenge_dungeon_info = 46;
+  SyncAwardData sync_award_data = 47;
+  SeasonAchievementList season_achievement_list = 48;
+  SeasonRankList season_rank_list = 49;
+  SeasonCenter season_center = 50;
+  PersonalZone personal_zone = 51;
+  SeasonMedalInfo season_medal_info = 52;
+  CommunityHomeData community_home_info = 53;
+  SeasonActivation season_activation = 54;
+  Slot slots = 55;
+  MonsterHuntInfo monster_hunt_info = 56;
+  Mod mod = 57;
+  WorldEventMap world_event_map = 58;
+  FishSetting fish_setting = 59;
+  FreightData freight_data = 60;
+  ProfessionList profession_list = 61;
+  TrialRoad trial_road = 62;
+  GashaData gasha_data = 63;
+  ShopData shop_data = 64;
+  PersonalWorldBossInfo personal_world_boss_info = 65;
+  CraftEnergyRecord craft_energy = 66;
+  WeeklyTowerRecord weekly_tower = 67;
+  CutSceneInfos cut_scene_infos = 68;
+  UserRecommendPlayData recommend_play_data = 69;
+  RideList ride_list = 70;
+  PayOrderList pay_order_list = 71;
+  LifeProfession life_profession = 72;
+  LifeProfessionWork life_profession_work = 73;
+  UserActivityList user_activity_list = 74;
+  PlayerRecord player_record = 75;
+  DropContainerInfo drop_container = 76;
+  MonthlyCard monthly_card = 77;
+  FashionBenefit fashion_benefit = 78;
+  ItemCurrency item_currency = 79;
+  PrivilegeEffectData privilege_effect_data = 80;
+  Treasure treasure = 81;
+  UnlockEmojiData unlock_emoji_data = 82;
+  PlayerOrderComtainerInfo player_order_comtainer_info = 83;
+  PlayerBox player_box = 84;
+  LaunchPrivilegeData launch_privilege_data = 85;
+  BattlePassData battle_pass_data = 86;
+  RechargeData recharge_data = 87;
+  LuckyValueMgr lucky_value_mgr = 88;
+  HandbookData handbook_data = 89;
+  MasterModeDungeonInfo master_mode_dungeon_info = 90;
+  StatisticsData statistics_data = 91;
+  CompensationStatistics compenstion_statistics = 92;
+  BubbleActData bubble_act_data = 93;
+  MailClaimedInfo mail_claimed_info = 94;
+  NewbieData newbie_data = 95;
+  FightPoint fight_point = 96;
+  SignInfo sign = 97;
+  CharStatisticsData char_statistics_data = 98;
+}
+
+message CharStatisticsData {
+  int32 login_days = 1;
+  uint64 last_login_time = 2;
+}
+
+message CharTeam {
+  int64 team_id = 1;
+  int64 leader_id = 2;
+  uint32 team_target_id = 3;
+  uint32 team_num = 4;
+  repeated int64 char_ids = 5;
+  bool is_matching = 6;
+  int32 char_team_version = 7;
+  map<int64, TeamMemData> team_member_data = 8;
+  ETeamMemberType team_member_type = 9;
+}
+
+message ClientBreakState {
+  string v_operator = 1;
+}
+
+message ClientHitInfo {
+  EDamageSource source_type = 1;
+  string uuid = 2;
+  string id = 3;
+  string level = 4;
+  string stage = 5;
+  string event_id = 6;
+  string attack_time = 7;
+  string attack_uuid = 8;
+  string target_uuid = 9;
+  Vector3 attack_pos = 10;
+  Vector3 target_pos = 11;
+  Vector3 damage_pos = 12;
+  repeated ClientHitPartInfo part_infos = 13;
+  bool is_dodge_success = 14;
+  string skill_uuid = 15;
+}
+
+message ClientHitPartInfo {
+  optional int32 part_id = 1;
+  Vector3 damage_pos = 2;
+  optional int64 damage_val = 3;
+}
+
+message ClientStageEnd {
+  string cur_stage_index = 1;
+  string next_stage_index = 2;
+  string time = 3;
+  string condition_id = 4;
+  string skill_uuid = 5;
+}
+
+message ClientTargetChange {
+  string skillid = 1;
+  string skill_level = 2;
+  string cur_stage_index = 3;
+  string target_uuid = 4;
+  Position target_pos = 5;
+  Position cur_pos = 6;
+  string target_part_id = 7;
+  Position target_part_pos = 8;
+  string skill_uuid = 9;
+}
+
+message Clutter {
+  int64 uuid = 1;
+  int32 config_id = 2;
+  int32 position_id = 3;
+}
+
+message ClutterGenerationRecord {
+  bool generated = 1;
+}
+
+message CollectingItem {
+  int32 item_id = 1;
+  int64 collected_num = 2;
+  int32 collect_price = 3;
+  bool is_high = 4;
+}
+
+message CollectionBook {
+  map<uint32, bool> mod_book_map = 1;
+}
+
+message CommonAwardInfo {
+  int32 id = 1;
+  EReceiveRewardStatus award_status = 2;
+}
+
+message CommunityAuthorityInfo {
+  map<int32, bool> authority = 1;
+}
+
+message CommunityBuildFurnitureInfo {
+  int64 build_uuid = 1;
+  int32 furniture_id = 2;
+  int32 furniture_count = 3;
+  int64 char_id = 4;
+  int64 start_time = 5;
+  int64 end_time = 6;
+  int32 accelerate_count = 7;
+  map<int32, int32> accelerate_items = 8;
+  repeated Item consume_items = 9;
+}
+
+message CommunityCharBasicData {
+  BasicData basic_data = 1;
+  AvatarInfo avatar_info = 2;
+  ProfessionData profession_data = 3;
+}
+
+message CommunityData {
+  int64 community_id = 1;
+  int64 homeland_id = 2;
+  repeated int64 cohabitant_ids = 3;
+  int64 last_exit_cohabitation_time = 4;
+  int32 buy_count = 5;
+  int32 level = 6;
+}
+
+message CommunityGetHomeLandBaseInfo {
+  CommunityGetHomeLandBaseInfoRequest v_request = 1;
+}
+
+message CommunityGetHomeLandBaseInfoReply {
+  HomelandBaseInfo homeland_base_info = 1;
+  EErrorCode err_code = 2;
+}
+
+message CommunityGetHomeLandBaseInfoRequest {
+  int64 community_id = 1;
+  int64 homeland_id = 2;
+}
+
+message CommunityGrainUpdateStructureReply {
+  EErrorCode err_code = 1;
+  repeated CommunityUpdateStructureReplyOpt structures = 2;
+}
+
+message CommunityHomeData {
+  int64 community_id = 1;
+  int64 homeland_id = 2;
+  int32 buy_count = 3;
+  map<int32, CommunityHomelandRecipe> unlocked_recipes = 4;
+  int32 level = 5;
+}
+
+message CommunityHomelandRecipe {
+  int32 id = 1;
+}
+
+message CommunityPlayerAuthorityInfo {
+  map<int32, bool> authority = 1;
+}
+
+message CommunityPlayerInfo {
+  CommunityCharBasicData community_char = 1;
+  CommunityPlayerAuthorityInfo player_authority_info = 2;
+  CommunityQuitCohabitant quit_cohabitant = 3;
+  HomeLandPlayerTaskInfo home_land_player_task_info = 4;
+}
+
+message CommunityQuitCohabitant {
+  bool is_initiative_quit = 1;
+  int64 time = 2;
+}
+
+message CommunityTransfer {
+  int64 char_id = 1;
+  int64 time = 2;
+  int64 last_time = 3;
+}
+
+message CommunityUpdateStructureReplyOpt {
+  EErrorCode err_code = 1;
+  StructureOp structure_op = 2;
+}
+
+message CompensationData {
+  int64 overflow_energy = 1;
+  int32 finish_times = 2;
+  int32 climb_up_layer_id = 3;
+}
+
+message CompensationRecord {
+  map<uint32, CompensationData> compensation_data = 1;
+}
+
+message CompensationSeasonStatistics {
+  map<uint32, CompensationRecord> week_data = 1;
+  map<uint32, int32> compensation = 2;
+  int32 max_climb_up_layer_id = 3;
+  repeated int64 raid_boss_ids = 4;
+  map<int64, int64> raid_boss_kill_time = 5;
+}
+
+message CompensationStatistics {
+  map<uint32, CompensationSeasonStatistics> season_data = 1;
+  uint32 last_season_id = 2;
+  int64 cur_point = 3;
+  int64 max_point = 4;
+  map<uint32, int32> last_week = 5;
+}
+
+message CompletedTargetInfo {
+  map<int32, bool> completed_target_list = 1;
+}
+
+message ConnectWorld {
+  RequestConnectWorld v_request = 1;
+}
+
+message ConnectWorldResult {
+  WorldReconnectStatus result = 1;
+  EErrorCode err_code = 2;
+  string ack_client_sequence = 3;
+  string session_token = 4;
+  string connect_guid = 5;
+}
+
+message CookBook {
+  uint32 create_time = 1;
+}
+
+message CookList {
+  map<uint32, CookBook> book_data = 1;
+}
+
+message CounterInfo {
+  int32 id = 1;
+  int64 counter = 2;
+  int64 accumulate_limit = 3;
+}
+
+message CounterList {
+  map<int32, CounterInfo> counter_map = 1;
+}
+
+message CraftEnergyRecord {
+  map<int32, int32> records = 1;
+}
+
+message CurrencyData {
+  int32 config_id = 1;
+  int64 count = 2;
+}
+
+message CutSceneInfo {
+  int32 cut_scene_id = 1;
+  uint32 flag = 2;
+  uint32 scene_id = 3;
+  EventData event_data = 4;
+}
+
+message CutSceneInfos {
+  map<int32, CutSceneInfo> cut_scene_infos = 1;
+  map<int32, bool> finished_cut_scenes = 2;
+  map<int64, bool> finished_infos = 3;
+}
+
+message CutScenePlayEnd {
+  string v_cut_scene_id = 1;
+}
+
+message CutScenePointInfo {
+  int32 cut_scene_id = 1;
+}
+
+message CutsState {
+  map<int32, int32> state_info = 1;
+}
+
+message DanceBall {
+  int32 dance_id = 1;
+  int64 begin_time = 2;
+  int64 end_time = 3;
+  int32 rand_index = 4;
+  map<int64, DancerInfo> dancers = 5;
+  int32 buff_id = 6;
+  int32 npc_id = 7;
+  int32 npc_pos_index = 8;
+  int32 sum_dance_score = 9;
+  bool has_notify_npc = 10;
+}
+
+message DancerInfo {
+  int64 char_id = 1;
+  int32 dance_secs = 2;
+  bool is_dancing = 3;
+  bool has_drawn = 4;
+  bool has_send = 5;
+}
+
+message DelayHitInfo {
+  int32 effect_id = 1;
+  int32 buff_uuid = 2;
+  int32 event_id = 3;
+  float play_time = 4;
+  repeated DelayHitTargetInfo target_infos = 5;
+}
+
+message DelayHitTargetInfo {
+  int64 target_uuid = 1;
+  Vec3 hit_pos = 2;
+  float delay_time = 3;
+}
+
+message DetachRideMagnetic {
+  EDetachMagneticType detach_type = 1;
+}
+
+message DirtyMask {
+  repeated int64 dirty_key = 1;
+}
+
+message DisappearEntity {
+  optional int64 uuid = 1;
+  optional EDisappearType type = 2;
+}
+
+message DrawingLines {
+  Vector3 color = 1;
+  string width = 2;
+  string delete_time = 3;
+  repeated Position points = 4;
+}
+
+message DropAwardHistory {
+  int32 id = 1;
+  int32 count = 2;
+  int64 cycle_time = 3;
+}
+
+message DropContainerInfo {
+  map<int32, DropContainerSingle> drop_containers = 1;
+  map<int32, DropAwardHistory> drop_award_histories = 2;
+}
+
+message DropContainerSingle {
+  int32 id = 1;
+  int32 count = 2;
+  int64 cycle_time = 3;
+  int32 history_count = 4;
+}
+
+message DroughtRecord {
+  int64 trigger_time = 1;
+  int32 segment_id = 2;
+  int64 duration = 3;
+  int64 actual_end_time = 4;
+  bool is_watered = 5;
+  bool is_expired = 6;
+}
+
+message DungeonAffixData {
+  repeated uint32 affix_data = 1;
+}
+
+message DungeonAward {
+  map<int64, Item> items = 1;
+  int32 flag_assist = 2;
+  int32 award_count = 3;
+  repeated int64 first_items = 4;
+}
+
+message DungeonBossRank {
+  map<int32, RankData> boss_rank = 1;
+}
+
+message DungeonDamage {
+  map<int64, int64> damages = 1;
+}
+
+message DungeonEnterCount {
+  uint32 enter_time = 1;
+  int32 enter_count = 2;
+}
+
+message DungeonEnterLimit {
+  map<int32, DungeonEnterCount> enter_count = 1;
+}
+
+message DungeonEvent {
+  map<int32, DungeonEventData> dungeon_event_data = 1;
+}
+
+message DungeonEventData {
+  int32 event_id = 1;
+  int32 start_time = 2;
+  DungeonEventState state = 3;
+  DungeonEventResult result = 4;
+  map<int32, DungeonTargetData> dungeon_target = 5;
+}
+
+message DungeonFlowInfo {
+  EDungeonState state = 1;
+  int32 active_time = 2;
+  int32 ready_time = 3;
+  int32 play_time = 4;
+  int32 end_time = 5;
+  int32 settlement_time = 6;
+  int32 dungeon_times = 7;
+  int32 result = 8;
+}
+
+message DungeonHeroKeyInfo {
+  int64 char_id = 1;
+  repeated Item hero_key_item = 2;
+  map<uint32, HeroKeyItemInfo> key_info = 3;
+  Item use_item = 4;
+  repeated Item hero_key_award_item = 5;
+}
+
+message DungeonInfo {
+  int32 dungeon_id = 1;
+  int32 complete_count = 2;
+  int32 award_flg = 3;
+  int32 score = 4;
+  int32 pass_time = 5;
+}
+
+message DungeonList {
+  map<int32, DungeonInfo> complete_dungeon = 1;
+  uint32 reset_time = 2;
+  uint32 normal_dungeon_pass_count = 3;
+  DungeonEnterLimit dungeon_enter_limit = 4;
+  DungeonWeekTargetList week_target = 5;
+  bool is_assist = 6;
+  map<int32, RaidRecord> raid_record_table = 7;
+}
+
+message DungeonPioneer {
+  map<int32, CompletedTargetInfo> completed_target_this_time = 1;
+}
+
+message DungeonPlanetMemoryRoom {
+  int32 room_id = 1;
+}
+
+message DungeonPlayerInfo {
+  int64 char_id = 1;
+  SocialData social_data = 2;
+}
+
+message DungeonPlayerList {
+  map<uint32, DungeonPlayerInfo> player_infos = 1;
+}
+
+message DungeonRaidInfo {
+}
+
+message DungeonRandomEntityConfigIdInfo {
+  map<int64, int32> random_entity_map = 1;
+}
+
+message DungeonRankInfo {
+  int32 num = 1;
+  int32 rank = 2;
+}
+
+message DungeonRankList {
+  map<int32, DungeonRankInfo> dungeon_rank_map = 1;
+}
+
+message DungeonReviveInfo {
+  repeated int32 revive_ids = 1;
+  map<int32, int32> revive_map = 2;
+}
+
+message DungeonSceneInfo {
+  int32 difficulty = 1;
+}
+
+message DungeonScore {
+  int32 total_score = 1;
+  int32 cur_ratio = 2;
+}
+
+message DungeonSettlement {
+  int32 pass_time = 1;
+  map<int64, DungeonAward> award = 2;
+  map<uint32, SettlementPosition> settlement_pos = 3;
+  DungeonWorldBossSettlement world_boss_settlement = 4;
+  int32 master_mode_score = 5;
+}
+
+message DungeonSyncData {
+  int64 scene_uuid = 1;
+  DungeonFlowInfo flow_info = 2;
+  DungeonTitle title = 3;
+  DungeonTarget target = 4;
+  DungeonDamage damage = 5;
+  DungeonVote vote = 6;
+  DungeonSettlement settlement = 7;
+  DungeonPioneer dungeon_pioneer = 8;
+  DungeonPlanetMemoryRoom planet_room_info = 9;
+  DungeonVar dungeon_var = 10;
+  DungeonRankList dungeon_rank = 11;
+  DungeonAffixData dungeon_affix_data = 12;
+  DungeonEvent dungeon_event = 13;
+  DungeonScore dungeon_score = 14;
+  DungeonTimerInfo timer_info = 15;
+  DungeonHeroKeyInfo hero_key = 16;
+  DungeonUnionInfo dungeon_union_info = 17;
+  DungeonPlayerList dungeon_player_list = 18;
+  DungeonReviveInfo revive_info = 19;
+  DungeonRandomEntityConfigIdInfo random_entity_config_id_info = 20;
+  DungeonSceneInfo dungeon_scene_info = 21;
+  DungeonVarAll dungeon_var_all = 22;
+  DungeonRaidInfo dungeon_raid_info = 23;
+  EErrorCode err_code = 24;
+}
+
+message DungeonTarget {
+  map<int32, DungeonTargetData> target_data = 1;
+}
+
+message DungeonTargetAward {
+  map<int32, DungeonTargetProgress> dungeon_target_progress = 1;
+}
+
+message DungeonTargetData {
+  int32 target_id = 1;
+  int32 nums = 2;
+  int32 complete = 3;
+}
+
+message DungeonTargetProgress {
+  int32 target_id = 1;
+  int32 target_progress = 2;
+  int32 award_state = 3;
+}
+
+message DungeonTimerInfo {
+  EDungeonTimerType type = 1;
+  int32 start_time = 2;
+  int32 dungeon_times = 3;
+  EDungeonTimerDirection direction = 4;
+  int32 index = 5;
+  int32 change_time = 6;
+  EDungeonTimerEffectType effect_type = 7;
+  int32 pause_time = 8;
+  int32 pause_total_time = 9;
+  EDungeonTimerTimerLookType out_look_type = 10;
+  int32 cur_pause_timestamp = 11;
+}
+
+message DungeonTitle {
+  map<int64, DungeonTitleList> title_list = 1;
+}
+
+message DungeonTitleInfo {
+  int64 uuid = 1;
+  int32 title_id = 2;
+}
+
+message DungeonTitleList {
+  map<int32, DungeonTitleInfo> title_info = 1;
+}
+
+message DungeonUnionInfo {
+  int64 union_id = 1;
+  map<int32, UnionBuilding> union_buildings = 2;
+  map<int32, UnionEScreenInfo> e_screen_infos = 3;
+  DanceBall dance_ball = 4;
+}
+
+message DungeonVar {
+  repeated DungeonVarData dungeon_var_data = 1;
+}
+
+message DungeonVarAll {
+  map<int64, DungeonVar> dungeon_var_all_map = 1;
+}
+
+message DungeonVarData {
+  string name = 1;
+  int32 value = 2;
+}
+
+message DungeonVote {
+  map<int64, int32> vote = 1;
+}
+
+message DungeonWeekTargetList {
+  map<int32, DungeonTargetProgress> week_target = 1;
+  uint32 refresh_time = 2;
+}
+
+message DungeonWorldBossSettlement {
+  int32 boss_hp_percent = 1;
+  DungeonBossRank dungeon_boss_rank = 2;
+  map<int64, DungeonAward> award = 3;
+  map<int64, DungeonAward> boss_rank_award = 4;
+  map<int64, DungeonAward> last_hit_award = 5;
+}
+
+message EditorUIPosition {
+  int32 id = 1;
+  float x = 2;
+  float y = 3;
+}
+
+message EditorUiPosition {
+  string id = 1;
+  string x = 2;
+  string y = 3;
+}
+
+message EnergyInfo {
+  uint32 energy_value = 1;
+  uint32 unlock_num = 2;
+  map<uint32, EnergyItemInfo> energy_item_info = 3;
+}
+
+message EnergyItem {
+  uint32 energy_limit = 1;
+  uint32 extra_energy_limit = 2;
+  map<uint32, EnergyInfo> energy_info = 3;
+}
+
+message EnergyItemInfo {
+  uint32 queue_id = 1;
+  uint32 column_id = 2;
+  uint32 refine_state = 3;
+  int64 gain_time = 4;
+}
+
+message EnterScene {
+  EnterSceneInfo enter_scene_info = 1;
+}
+
+message EnterSceneInfo {
+  AttrCollection scene_attrs = 1;
+  Entity player_ent = 2;
+  string scene_guid = 3;
+  string connect_guid = 4;
+  AttrCollection subscene_attrs = 5;
+}
+
+message Entity {
+  optional int64 uuid = 1;
+  optional EEntityType ent_type = 2;
+  AttrCollection attrs = 3;
+  TempAttrCollection temp_attrs = 4;
+  ActorBodyPartInfos body_part_infos = 5;
+  SeqPassiveSkillInfo passive_skill_infos = 6;
+  BuffInfoSync buff_infos = 7;
+  BuffEffectSync buff_effect = 8;
+  optional EAppearType appear_type = 9;
+  map<int64, MagneticQueueAppearInfo> magnetic_ride_queue_change_info_dict = 10;
+}
+
+message EquipAttr {
+  map<uint32, uint32> base_attrs = 4;
+  int32 perfection_value = 7;
+  int32 recast_count = 8;
+  int32 total_recast_count = 9;
+  map<int32, int32> basic_attr = 10;
+  map<int32, int32> advance_attr = 11;
+  map<int32, int32> recast_attr = 12;
+  int32 perfection_level = 13;
+  map<int32, int32> rare_quality_attr = 14;
+  int32 max_perfection_value = 15;
+  EquipAttrSet equip_attr_set = 17;
+  int32 break_through_time = 18;
+}
+
+message EquipAttrSet {
+  map<int32, int32> basic_attr = 1;
+  map<int32, int32> advance_attr = 2;
+  map<int32, int32> recast_attr = 3;
+  map<int32, int32> rare_quality_attr = 4;
+}
+
+message EquipData {
+  repeated EquipNine equip_infos = 1;
+}
+
+message EquipEnchantInfo {
+  int32 enchant_item_type_id = 1;
+  int32 enchant_level = 2;
+  EEquipEnchantType enchant_type = 3;
+}
+
+message EquipInfo {
+  int32 equip_slot = 1;
+  uint64 item_uuid = 2;
+  uint32 equip_slot_refine_level = 3;
+  uint32 equip_slot_refine_failed_count = 4;
+}
+
+message EquipList {
+  map<int32, EquipInfo> equip_list = 1;
+  EquipAttr equip_attr = 2;
+  map<uint64, EquipAttr> equip_recast_info = 4;
+  map<int64, EquipEnchantInfo> equip_enchant = 5;
+  map<int32, EquipSuitInfo> suit_info_dict = 6;
+}
+
+message EquipNine {
+  int32 slot = 1;
+  int32 equip_id = 2;
+}
+
+message EquipSuitInfo {
+  map<int32, int32> suit_attr = 3;
+  int32 attr_type = 4;
 }
 
 message EventData {
-  int32 event_type = 1;
+  optional int32 event_type = 1;
   repeated int32 int_params = 2;
   repeated int64 long_params = 3;
   repeated float float_params = 4;
@@ -4143,24 +4775,26 @@ message EventData {
 }
 
 message EventDataList {
-  int64 uuid = 1;
+  optional int64 uuid = 1;
   repeated EventData events = 2;
 }
 
 message ExchangeData {
-  string item_config_id = 1;
-  string unlock = 2;
-  string cur_exchange_count = 3;
-  string expire_time = 4;
-  string last_refresh_time = 5;
+  int32 item_config_id = 1;
+  int32 unlock = 2;
+  int32 cur_exchange_count = 3;
+  int64 expire_time = 4;
+  int64 last_refresh_time = 5;
 }
 
 message ExchangeInfo {
-  string id = 1;
-  map<string, string> exchange_data = 2;
+  int32 id = 1;
+  map<int32, ExchangeData> exchange_data = 2;
 }
 
-message ExchangeItem { map<string, string> exchange_info = 1; }
+message ExchangeItem {
+  map<int32, ExchangeInfo> exchange_info = 1;
+}
 
 message FaceData {
   map<int32, int32> face_info = 1;
@@ -4169,56 +4803,56 @@ message FaceData {
 }
 
 message FaceDataDb {
-  map<string, string> face_info = 1;
-  map<string, string> color_info = 2;
-  string height = 3;
+  map<int32, int32> face_info = 1;
+  map<int32, IntVec3Db> color_info = 2;
+  float height = 3;
 }
 
 message FakeBulletInfo {
-  int32 uuid = 1;
-  int32 bullet_id = 2;
-  int64 target_id = 3;
-  int32 part_id = 4;
+  optional int32 uuid = 1;
+  optional int32 bullet_id = 2;
+  optional int64 target_id = 3;
+  optional int32 part_id = 4;
   Vector3 offset = 5;
   Vector3 rotate = 6;
-  int32 skin_id = 7;
+  optional int32 skin_id = 7;
 }
 
 message FashionAdvanceInfo {
-  string fashion_id = 1;
-  string using_advance_id = 2;
-  repeated string advance_ids = 3;
+  int32 fashion_id = 1;
+  int32 using_advance_id = 2;
+  repeated int32 advance_ids = 3;
 }
 
 message FashionBenefit {
-  string last_reward_id = 1;
-  string level = 2;
-  string points_task = 3;
-  string points_cycle = 4;
-  string points_collection = 5;
-  map<string, string> task_list = 6;
+  int32 last_reward_id = 1;
+  int32 level = 2;
+  int32 points_task = 3;
+  int32 points_cycle = 4;
+  int32 points_collection = 5;
+  map<int32, FashionBenefitTaskInfo> task_list = 6;
   repeated FashionBenefitCollectionHistory collection_history = 7;
-  string next_refresh_time = 8;
-  string max_points = 9;
-  string last_add_time = 10;
-  string cur_day_max_points = 11;
-  string expire_cycle = 12;
-  string last_level = 13;
-  string firt_expire_time = 14;
-  repeated string last_reward_ids = 15;
+  int64 next_refresh_time = 8;
+  int32 max_points = 9;
+  int64 last_add_time = 10;
+  int32 cur_day_max_points = 11;
+  int32 expire_cycle = 12;
+  int32 last_level = 13;
+  int64 firt_expire_time = 14;
+  repeated int32 last_reward_ids = 15;
 }
 
 message FashionBenefitCollectionHistory {
-  string fashion_id = 1;
-  string time = 2;
-  string type = 3;
-  string parameter = 4;
+  int32 fashion_id = 1;
+  int64 time = 2;
+  int32 type = 3;
+  int32 parameter = 4;
 }
 
 message FashionBenefitTaskInfo {
-  string id = 1;
-  string count = 2;
-  string progress = 3;
+  int32 id = 1;
+  int32 count = 2;
+  int32 progress = 3;
 }
 
 message FashionColorInfo {
@@ -4227,7 +4861,9 @@ message FashionColorInfo {
   map<int32, IntVec3> attachment_color = 3;
 }
 
-message FashionData { repeated FashionInfo fashion_infos = 1; }
+message FashionData {
+  repeated FashionInfo fashion_infos = 1;
+}
 
 message FashionInfo {
   int32 slot = 1;
@@ -4236,43 +4872,45 @@ message FashionInfo {
 }
 
 message FashionMgr {
-  map<string, string> wear_info = 1;
-  map<string, string> fashion_datas = 2;
-  map<string, string> unlock_color = 3;
-  map<string, bool> fashion_reward = 4;
-  map<string, bool> all_fashion = 5;
-  map<string, bool> all_ride = 6;
-  map<string, bool> all_weapon_skin = 7;
-  map<string, string> fashion_advance = 8;
-  string fashion_collect_point = 9;
-  string ride_collect_point = 10;
-  string weapon_skin_collect_point = 11;
-  map<string, string> all_fashion_num = 12;
-  map<string, string> all_ride_num = 13;
-  map<string, string> all_weapon_skin_num = 14;
+  map<int32, int32> wear_info = 1;
+  map<int32, FashionColorInfo> fashion_datas = 2;
+  map<int32, UnlockColorInfo> unlock_color = 3;
+  map<int32, bool> fashion_reward = 4;
+  map<int32, bool> all_fashion = 5;
+  map<int32, bool> all_ride = 6;
+  map<int32, bool> all_weapon_skin = 7;
+  map<int32, FashionAdvanceInfo> fashion_advance = 8;
+  int32 fashion_collect_point = 9;
+  int32 ride_collect_point = 10;
+  int32 weapon_skin_collect_point = 11;
+  map<int32, int32> all_fashion_num = 12;
+  map<int32, int32> all_ride_num = 13;
+  map<int32, int32> all_weapon_skin_num = 14;
   bool is_fashion_init = 15;
   bool is_ride_init = 16;
   bool is_weapon_skin_init = 17;
 }
 
-message FashionQualityCollectInfo { map<int32, int32> quality_count = 1; }
+message FashionQualityCollectInfo {
+  map<int32, int32> quality_count = 1;
+}
 
 message FightPoint {
-  string total_fight_point = 1;
-  map<string, string> fight_point_data = 2;
+  int32 total_fight_point = 1;
+  map<int32, FightPointData> fight_point_data = 2;
 }
 
 message FightPointData {
-  string function_type = 1;
-  string total_point = 2;
-  string point = 3;
-  map<string, string> sub_function_data = 4;
+  int32 function_type = 1;
+  int32 total_point = 2;
+  int32 point = 3;
+  map<int32, FightPointSubData> sub_function_data = 4;
 }
 
 message FightPointSubData {
-  string function_type = 1;
-  string root_function_type = 2;
-  string point = 3;
+  int32 function_type = 1;
+  int32 root_function_type = 2;
+  int32 point = 3;
 }
 
 message FightResCD {
@@ -4283,34 +4921,21 @@ message FightResCD {
 }
 
 message FightResCd {
-  string res_id = 1;
-  string begin_time = 2;
-  string duration = 3;
-  string valid_cd_time = 4;
+  optional int32 res_id = 1;
+  optional int64 begin_time = 2;
+  optional int32 duration = 3;
+  optional int32 valid_cd_time = 4;
 }
 
 message FightSourceInfo {
-  int32 fight_source_type = 1;
-  int32 source_config_id = 2;
+  optional int32 fight_source_type = 1;
+  optional int32 source_config_id = 2;
 }
 
 message FirstPayInfo {
-  string first_pay_type = 1;
-  string timestamp = 2;
+  int32 first_pay_type = 1;
+  int64 timestamp = 2;
 }
-
-message FishingData {
-  string rod_id = 1;
-  string area_id = 2;
-  string fish_id = 3;
-  string stage = 4;
-  bool is_get_fish = 5;
-  string size = 6;
-}
-
-message FishingSetStage { FishingSetStageRequest v_request = 1; }
-
-message FishingSetStageRequest { string stage = 1; }
 
 message FishRecord {
   int32 fish_id = 1;
@@ -4325,19 +4950,40 @@ message FishRecord {
 }
 
 message FishSetting {
-  string bait_id = 2;
-  string experiences = 3;
-  string research_fish_id = 4;
-  map<string, string> fish_records = 5;
-  map<string, string> fish_rod_durability = 6;
-  string rod_uuid = 7;
-  map<string, bool> level_reward = 8;
-  map<string, string> zero_fish_times = 9;
+  int32 bait_id = 2;
+  int32 experiences = 3;
+  int32 research_fish_id = 4;
+  map<int32, FishRecord> fish_records = 5;
+  map<uint64, int32> fish_rod_durability = 6;
+  uint64 rod_uuid = 7;
+  map<int32, bool> level_reward = 8;
+  map<int32, int64> zero_fish_times = 9;
 }
 
-message FishSocialData { map<int32, FishRecord> fish_records = 1; }
+message FishSocialData {
+  map<int32, FishRecord> fish_records = 1;
+}
 
-message FlowPlayEnd { string v_flow_id = 1; }
+message FishingData {
+  int32 rod_id = 1;
+  int32 area_id = 2;
+  int32 fish_id = 3;
+  int32 stage = 4;
+  bool is_get_fish = 5;
+  int32 size = 6;
+}
+
+message FishingSetStage {
+  FishingSetStageRequest v_request = 1;
+}
+
+message FishingSetStageRequest {
+  int32 stage = 1;
+}
+
+message FlowPlayEnd {
+  string v_flow_id = 1;
+}
 
 message ForcedPullBack {
   Position cur_pos = 1;
@@ -4345,14 +4991,14 @@ message ForcedPullBack {
 }
 
 message FreightData {
-  string refresh_time = 1;
-  string goods_value = 2;
+  int64 refresh_time = 1;
+  int32 goods_value = 2;
   bool set_off = 3;
   bool can_receive = 4;
-  repeated string up_goods_list = 5;
-  repeated string keep_goods_list = 6;
-  repeated string down_goods_list = 7;
-  string can_reward_time = 8;
+  repeated int32 up_goods_list = 5;
+  repeated int32 keep_goods_list = 6;
+  repeated int32 down_goods_list = 7;
+  int64 can_reward_time = 8;
 }
 
 message FunctionData {
@@ -4361,60 +5007,67 @@ message FunctionData {
 }
 
 message FunctionTimeData {
-  string times = 1;
-  string timestamp = 2;
+  uint32 times = 1;
+  uint32 timestamp = 2;
 }
 
 message GameFunctionData {
-  string id = 1;
+  uint32 id = 1;
   bool state = 2;
-  string product_id = 3;
-  map<string, string> function_times = 4;
+  uint32 product_id = 3;
+  map<uint32, FunctionTimeData> function_times = 4;
 }
 
 message GashaData {
-  map<string, string> gasha_infos = 1;
-  map<string, string> gasha_guarantee_infos = 2;
+  map<uint32, GashaInfo> gasha_infos = 1;
+  map<uint32, GashaGuaranteeInfo> gasha_guarantee_infos = 2;
 }
 
 message GashaGuaranteeInfo {
-  string id = 1;
-  string guarantee_x = 2;
-  string guarantee_y = 3;
-  string residue_guarantee_time_x = 4;
-  string residue_guarantee_time_y = 5;
-  string residue_guarantee_time_z = 6;
-  string guarantee_z = 7;
+  uint32 id = 1;
+  uint32 guaranteex = 2;
+  uint32 guaranteey = 3;
+  int32 residue_guarantee_timex = 4;
+  int32 residue_guarantee_timey = 5;
+  int32 residue_guarantee_timez = 6;
+  uint32 guaranteez = 7;
 }
 
 message GashaInfo {
-  string id = 1;
-  string draw_count = 4;
-  string refresh_time = 5;
-  string wish_id = 8;
-  string wish_value = 9;
-  string wish_finish_count = 10;
-  string wish_reset_time = 11;
-  string wish_limit = 12;
+  uint32 id = 1;
+  uint32 draw_count = 4;
+  int64 refresh_time = 5;
+  uint32 wish_id = 8;
+  uint32 wish_value = 9;
+  uint32 wish_finish_count = 10;
+  int64 wish_reset_time = 11;
+  uint32 wish_limit = 12;
 }
 
-message GetClientOptions { GetClientOptionsRequest v_request = 1; }
+message GetClientOptions {
+  GetClientOptionsRequest v_request = 1;
+}
 
 message GetClientOptionsReply {
   map<string, string> options = 1;
   EErrorCode err_code = 2;
 }
 
-message GetClientOptionsRequest { repeated string keys = 1; }
+message GetClientOptionsRequest {
+  repeated string keys = 1;
+}
 
-message GetGitVersion { GetGitVersionRequest v_request = 1; }
+message GetGitVersion {
+  GetGitVersionRequest v_request = 1;
+}
 
 message GetGitVersionReply {
   string git_version = 1;
   EErrorCode err_code = 2;
 }
 
-message GetGitVersionRequest {}
+message GetGitVersionRequest {
+}
 
 message GetHomelandBuildFurnitureInfo {
   GetHomelandBuildFurnitureInfoRequest v_request = 1;
@@ -4425,40 +5078,52 @@ message GetHomelandBuildFurnitureInfoReply {
   EErrorCode err_code = 2;
 }
 
-message GetHomelandBuildFurnitureInfoRequest { string build_type = 1; }
+message GetHomelandBuildFurnitureInfoRequest {
+  int32 build_type = 1;
+}
 
-message GetLuaSceneAttr { string v_attribute_name = 1; }
+message GetLuaSceneAttr {
+  string v_attribute_name = 1;
+}
 
-message GetPath { GetPathRequest v_request = 1; }
+message GetPath {
+  GetPathRequest v_request = 1;
+}
 
 message GetPathReply {
   EErrorCode err_code = 1;
   bytes reply_bytes = 2;
 }
 
-message GetPathRequest { bytes request_bytes = 1; }
+message GetPathRequest {
+  bytes request_bytes = 1;
+}
 
-message GetSocialData { GetSocialDataRequest v_request = 1; }
+message GetSocialData {
+  GetSocialDataRequest v_request = 1;
+}
 
 message GetSocialDataReply {
   int64 mask = 1;
   SocialData data = 2;
-  uint32 err_code = 3;
+  EErrorCode err_code = 3;
 }
 
 message GetSocialDataRequest {
-  string char_id = 1;
-  string mask = 2;
+  int64 char_id = 1;
+  int64 mask = 2;
 }
 
 message GmCmd {
   string command = 1;
-  string target_char_id = 2;
+  int64 target_char_id = 2;
   EGmParsingType parsing_type = 3;
   string parameter = 4;
 }
 
-message GmCommand { GmCmd cmd = 1; }
+message GmCommand {
+  GmCmd cmd = 1;
+}
 
 message GmResult {
   bool success = 1;
@@ -4467,97 +5132,111 @@ message GmResult {
   EErrorCode err_code = 4;
 }
 
-message HandbookData {
-  map<string, string> unlock_note_important_role_map = 1;
-  map<string, string> unlock_note_reading_book_map = 2;
-  map<string, string> unlock_note_dictionary_map = 3;
-  map<string, string> unlock_note_post_card_map = 4;
-  map<string, string> unlock_note_month_card_map = 5;
+message HandBookStruct {
+  int32 id = 1;
+  bool unlock = 2;
 }
 
-message HandBookStruct {
-  string id = 1;
-  bool unlock = 2;
+message HandbookData {
+  map<int32, HandBookStruct> unlock_note_important_role_map = 1;
+  map<int32, HandBookStruct> unlock_note_reading_book_map = 2;
+  map<int32, HandBookStruct> unlock_note_dictionary_map = 3;
+  map<int32, HandBookStruct> unlock_note_post_card_map = 4;
+  map<int32, HandBookStruct> unlock_note_month_card_map = 5;
 }
 
 message HeroKeyItemInfo {
   Item item = 1;
-  map<string, string> roll_info = 2;
+  map<uint32, HeroKeyRollInfo> roll_info = 2;
 }
 
 message HeroKeyRollInfo {
   EHeroKeyRollType type = 1;
-  string char_id = 2;
+  int64 char_id = 2;
   string name = 3;
   AvatarInfo avatar = 4;
-  string roll_value = 5;
-}
-
-message HomelandBaseInfo {
-  string homeland_id = 1;
-  string level = 2;
-  string exp = 3;
-  string home_resource = 4;
-  string cleanliness = 5;
-  string lastsubtractcleanlinesstime = 6;
-  HomeLandClutterInfo home_land_clutter = 7;
-  HomeLandClutterGenerationRecord home_land_clutter_generation_record = 8;
-  HomeLandSellShopInfo home_land_sell_shop_info = 9;
-  map<string, string> slots = 11;
-  string capacity = 13;
-  string house_owner_char_id = 15;
-  string check_in_content = 17;
-  string introduction = 18;
-  CommunityTransfer transfer_community = 19;
-  map<string, string> furniture_state = 21;
-  string field_id = 23;
-  HomelandDecorationInfo inner_decoration_info = 25;
-  string housing_type = 27;
-  string inner_empty_land = 29;
+  uint32 roll_value = 5;
 }
 
 message HomeLandClutterGenerationRecord {
-  map<string, string> home_land_clutter_record = 1;
+  map<int32, ClutterGenerationRecord> home_land_clutter_record = 1;
 }
 
-message HomeLandClutterInfo { map<string, string> home_land_clutter = 1; }
-
-message HomelandDecorationInfo {
-  HomelandLamplightInfo lamplight_info = 1;
-  map<string, string> material_infos = 2;
+message HomeLandClutterInfo {
+  map<int64, Clutter> home_land_clutter = 1;
 }
 
 message HomeLandItemInstance {
-  string instance_id = 1;
-  string config_id = 2;
-  map<string, string> owner_to_stack_map = 3;
-}
-
-message HomelandLamplightInfo {
-  string lamplight_level = 1;
-  IntVec3 lamplight_color = 2;
-  string day_night_id = 3;
-  string mode = 4;
-}
-
-message HomelandMaterialInfo {
-  string material_id = 1;
-  string char_id = 2;
+  int64 instance_id = 1;
+  int32 config_id = 2;
+  map<int64, Item> owner_to_stack_map = 3;
 }
 
 message HomeLandPlayerTaskInfo {
-  string next_task_reflush_time = 1;
-  string cur_left_times = 2;
-  map<string, string> cur_task_map = 3;
+  int64 next_task_reflush_time = 1;
+  int32 cur_left_times = 2;
+  map<int32, HomeLandTask> cur_task_map = 3;
 }
 
 message HomeLandSellShopInfo {
   bool is_init = 1;
-  string next_reflush_time = 2;
-  map<string, string> collecting_items = 3;
+  int64 next_reflush_time = 2;
+  map<int32, CollectingItem> collecting_items = 3;
 }
 
-message HomeLandTask { bool finished = 1; }
+message HomeLandTask {
+  bool finished = 1;
+}
+
+message HomelandBaseInfo {
+  int64 homeland_id = 1;
+  int32 level = 2;
+  int64 exp = 3;
+  int64 home_resource = 4;
+  int32 cleanliness = 5;
+  int64 lastsubtractcleanlinesstime = 6;
+  HomeLandClutterInfo home_land_clutter = 7;
+  HomeLandClutterGenerationRecord home_land_clutter_generation_record = 8;
+  HomeLandSellShopInfo home_land_sell_shop_info = 9;
+  map<int64, HomeLandItemInstance> items = 10;
+  map<int64, int64> slots = 11;
+  map<int64, int64> item_to_slot = 12;
+  int64 capacity = 13;
+  int64 used_slots = 14;
+  int64 house_owner_char_id = 15;
+  string name = 16;
+  string check_in_content = 17;
+  string introduction = 18;
+  CommunityTransfer transfer_community = 19;
+  map<int64, CommunityPlayerInfo> cohabitant = 20;
+  map<int32, int32> furniture_state = 21;
+  CommunityAuthorityInfo authority_info = 22;
+  int32 field_id = 23;
+  HomelandDecorationInfo outer_decoration_info = 24;
+  HomelandDecorationInfo inner_decoration_info = 25;
+  repeated int32 unlocked_areas = 26;
+  int32 housing_type = 27;
+  int32 outer_empty_land = 28;
+  int32 inner_empty_land = 29;
+  int32 flowers_num = 30;
+}
+
+message HomelandDecorationInfo {
+  HomelandLamplightInfo lamplight_info = 1;
+  map<int32, HomelandMaterialInfo> material_infos = 2;
+}
+
+message HomelandLamplightInfo {
+  int32 lamplight_level = 1;
+  IntVec3 lamplight_color = 2;
+  int32 day_night_id = 3;
+  int32 mode = 4;
+}
+
+message HomelandMaterialInfo {
+  int32 material_id = 1;
+  int64 char_id = 2;
+}
 
 message HttpCachePhotoInfo {
   map<string, string> http_cache_photo_info_dict = 1;
@@ -4565,54 +5244,22 @@ message HttpCachePhotoInfo {
 
 message ImageInfo {
   EPictureType type = 1;
-  string size = 2;
-  string version = 3;
+  uint32 size = 2;
+  uint32 version = 3;
   string cos_url = 4;
   string extra_info = 5;
-  string review_start_time = 6;
+  uint32 review_start_time = 6;
 }
 
 message InitHomeLandInfo {
   bool is_outer = 1;
-  map<string, string> structures = 2;
+  map<int64, Structure> structures = 2;
   HomelandDecorationInfo decoration_info = 3;
 }
 
 message InstallResonanceSkillReq {
   string v_position = 1;
   string v_resonance_id = 2;
-}
-
-message Interaction { InteractionTemplateData v_info = 1; }
-
-message InteractionActionEnd {
-  string cur_stage = 1;
-  EInteractionAction action_type = 2;
-  bool is_success = 3;
-}
-
-message InteractionInfo {
-  string interaction_stage = 1;
-  string action_id = 2;
-  string originator_id = 3;
-  string invitee_id = 4;
-  bool is_originator = 5;
-  string interaction_type = 6;
-}
-
-message InteractionTemplateData {
-  EInteractionTemplateAction type = 1;
-  string object_id = 2;
-  string template_id = 3;
-  string homeland_id = 4;
-  string pos_id = 5;
-  string sub_template_id = 6;
-}
-
-message InteractionWithNotPlayer {
-  string v_entity_config_id = 1;
-  string v_entity_type = 2;
-  string v_action_id = 3;
 }
 
 message IntVec3 {
@@ -4622,25 +5269,59 @@ message IntVec3 {
 }
 
 message IntVec3Db {
-  string x = 1;
-  string y = 2;
-  string z = 3;
+  int32 x = 1;
+  int32 y = 2;
+  int32 z = 3;
+}
+
+message Interaction {
+  InteractionTemplateData v_info = 1;
+}
+
+message InteractionActionEnd {
+  string cur_stage = 1;
+  EInteractionAction action_type = 2;
+  bool is_success = 3;
+}
+
+message InteractionInfo {
+  int32 interaction_stage = 1;
+  int32 action_id = 2;
+  int64 originator_id = 3;
+  int64 invitee_id = 4;
+  bool is_originator = 5;
+  int32 interaction_type = 6;
+}
+
+message InteractionTemplateData {
+  EInteractionTemplateAction type = 1;
+  uint64 object_id = 2;
+  int32 template_id = 3;
+  int64 homeland_id = 4;
+  int32 pos_id = 5;
+  int32 sub_template_id = 6;
+}
+
+message InteractionWithNotPlayer {
+  string v_entity_config_id = 1;
+  string v_entity_type = 2;
+  string v_action_id = 3;
 }
 
 message InvestigateData {
-  string id = 1;
-  map<string, string> step_ids = 2;
+  uint32 id = 1;
+  map<int32, InvestigateStep> step_ids = 2;
 }
 
 message InvestigateList {
-  map<string, string> investigate_map = 1;
-  map<string, bool> comp_investigate_map = 2;
-  repeated string comp_reasoning_map = 3;
+  map<uint32, InvestigateData> investigate_map = 1;
+  map<uint32, bool> comp_investigate_map = 2;
+  repeated uint32 comp_reasoning_map = 3;
 }
 
 message InvestigateStep {
-  repeated string clues = 1;
-  map<string, string> reasoning_map = 2;
+  repeated int32 clues = 1;
+  map<int32, AnswerList> reasoning_map = 2;
 }
 
 message Item {
@@ -4660,11 +5341,12 @@ message Item {
   AffixData affix_data = 14;
   map<int32, ItemExtendData> extend_attr = 15;
   int32 reward_id = 16;
+  map<int32, int32> gene_sequence = 17;
 }
 
 message ItemCurrency {
   bool is_init = 1;
-  map<string, string> currency_datas = 2;
+  map<int32, CurrencyData> currency_datas = 2;
 }
 
 message ItemExtendData {
@@ -4686,12 +5368,6 @@ message LastSceneData {
   int32 scene_area_id = 3;
 }
 
-enum LaunchPlatform {
-  LaunchPlatformNull = 0;
-  LaunchPlatformWeXin = 1001;
-  LaunchPlatformQq = 1002;
-}
-
 message LaunchPrivilegeData {
   LaunchPlatform launch_platform = 1;
   bool is_privilege = 2;
@@ -4699,51 +5375,53 @@ message LaunchPrivilegeData {
   bool bak_privilege = 4;
 }
 
-message LearnExpressionAction { string expression_id = 1; }
+message LearnExpressionAction {
+  string expression_id = 1;
+}
 
 message LevelProficiency {
-  map<string, string> using_proficiency_map = 1;
-  map<string, string> unlock_proficiency_map = 2;
+  map<int32, int32> using_proficiency_map = 1;
+  map<int32, UnlockProficiency> unlock_proficiency_map = 2;
 }
 
 message LevelUpAward {
-  string drop_times = 1;
-  string last_drop_time = 2;
+  uint32 drop_times = 1;
+  int64 last_drop_time = 2;
 }
 
 message LifeProfession {
-  map<string, string> profession_info = 1;
-  map<string, string> life_target_info = 2;
-  map<string, string> life_profession_recipe = 3;
+  map<int32, LifeProfessionBasic> profession_info = 1;
+  map<int32, LifeProfessionTargetInfo> life_target_info = 2;
+  map<int32, LifeProfessionRecipe> life_profession_recipe = 3;
   LifeProfessionAlchemyInfo life_profession_alchemy_info = 4;
-  map<string, string> spare_energy = 5;
-  string point = 6;
+  map<int32, int32> spare_energy = 5;
+  int32 point = 6;
 }
 
 message LifeProfessionAlchemyInfo {
-  string failure_count = 1;
-  string rd_count = 2;
-  string last_reset_time = 3;
+  uint32 failure_count = 1;
+  uint32 rd_count = 2;
+  int64 last_reset_time = 3;
 }
 
 message LifeProfessionBasic {
-  string id = 1;
-  string level = 2;
-  string exp = 3;
-  map<string, string> specialization = 5;
-  string current_specialization_point = 6;
+  int32 id = 1;
+  int32 level = 2;
+  int32 exp = 3;
+  map<int32, LiftProfessionSpecialization> specialization = 5;
+  int32 current_specialization_point = 6;
 }
 
 message LifeProfessionRecipe {
-  string id = 1;
-  string unlock_time = 2;
+  int32 id = 1;
+  int64 unlock_time = 2;
 }
 
 message LifeProfessionTargetInfo {
-  string id = 1;
-  string value = 2;
-  string level = 3;
-  repeated string life_target_reward_states = 4;
+  int32 id = 1;
+  int32 value = 2;
+  int32 level = 3;
+  repeated uint32 life_target_reward_states = 4;
 }
 
 message LifeProfessionWork {
@@ -4752,30 +5430,34 @@ message LifeProfessionWork {
 }
 
 message LifeProfessionWorkInfo {
-  string life_profession_id = 1;
-  string begin_time = 2;
-  string end_time = 3;
-  string count = 4;
-  string cost = 5;
+  uint32 life_profession_id = 1;
+  uint32 begin_time = 2;
+  uint32 end_time = 3;
+  uint32 count = 4;
+  uint32 cost = 5;
   repeated Item reward = 6;
-  string cost_id = 7;
+  uint32 cost_id = 7;
 }
 
 message LiftProfessionSpecialization {
-  string id = 1;
-  string level = 2;
+  int32 id = 1;
+  int32 level = 2;
 }
 
-message LineDrawing { DrawingLines lines = 1; }
+message LineDrawing {
+  DrawingLines lines = 1;
+}
 
 message LinkingInfo {
   bool is_delete = 1;
-  string effectid = 2;
-  string buff_uuid = 3;
+  int32 effectid = 2;
+  int32 buff_uuid = 3;
   repeated ActorUuidStru target_uuids = 4;
 }
 
-message LoadMapSuccess { LoadMapSuccessParam v_param = 1; }
+message LoadMapSuccess {
+  LoadMapSuccessParam v_param = 1;
+}
 
 message LoadMapSuccessParam {
   string scene_guid = 1;
@@ -4789,20 +5471,20 @@ message LuaSceneAttrReply {
 }
 
 message LuckyValueInfo {
-  string luck_id = 1;
-  string luck_value = 2;
-  string next_time = 3;
+  int32 luck_id = 1;
+  int32 luck_value = 2;
+  int64 next_time = 3;
 }
 
 message LuckyValueMgr {
-  map<string, string> luck_value_info = 1;
+  map<int32, LuckyValueInfo> luck_value_info = 1;
   bool init_value = 2;
 }
 
 message MagneticQueueAppearInfo {
   repeated int64 passenger_uuid_list = 1;
-  bool is_circle = 2;
-  float path_length = 3;
+  optional bool is_circle = 2;
+  optional float path_length = 3;
 }
 
 message MagneticRidePassengerChangeInfo {
@@ -4814,76 +5496,80 @@ message MagneticRidePathPointChangeInfo {
 }
 
 message MagneticRideQueueChangeInfo {
-  int64 queue_uuid = 1;
+  optional int64 queue_uuid = 1;
   MagneticRidePassengerChangeInfo passenger_change_info = 2;
   MagneticRidePathPointChangeInfo path_point_change_info = 3;
-  bool is_circle = 4;
-  bool is_remove = 5;
-  float path_length = 6;
+  optional bool is_circle = 4;
+  optional bool is_remove = 5;
+  optional float path_length = 6;
 }
 
 message MailClaimedInfo {
-  repeated string attachment_mail_list = 1;
-  map<string, string> claimed_mails = 2;
+  repeated int64 attachment_mail_list = 1;
+  map<int64, int64> claimed_mails = 2;
 }
 
 message MapAttr {
-  bool is_clear = 1;
-  int32 id = 2;
+  optional bool is_clear = 1;
+  optional int32 id = 2;
   repeated MapAttrValue attrs = 3;
 }
 
 message MapAttrValue {
-  bool is_remove = 1;
-  bytes key = 2;
-  bytes value = 3;
+  optional bool is_remove = 1;
+  optional bytes key = 2;
+  optional bytes value = 3;
 }
 
 message MapBookInfo {
-  string id = 1;
-  map<string, string> map_sticker_map = 2;
-  string award_flag = 3;
+  uint32 id = 1;
+  map<uint32, MapStickerInfo> map_sticker_map = 2;
+  uint32 award_flag = 3;
 }
 
-message MapBookInfoList { map<string, string> map_book_map = 1; }
+message MapBookInfoList {
+  map<uint32, MapBookInfo> map_book_map = 1;
+}
 
 message MapData {
-  map<string, string> mark_data_map = 1;
-  map<string, bool> ares_map = 2;
-  string mark_uuid = 3;
+  map<int32, MarkData> mark_data_map = 1;
+  map<int32, bool> ares_map = 2;
+  int32 mark_uuid = 3;
 }
 
 message MapStickerInfo {
-  map<string, string> sticker_map = 1;
-  repeated string finish_map = 2;
-  string award_flag = 3;
+  map<uint32, MapStickerTaskInfo> sticker_map = 1;
+  repeated uint32 finish_map = 2;
+  uint32 award_flag = 3;
 }
 
 message MapStickerTaskInfo {
-  string task_id = 1;
-  map<string, string> target_num = 2;
+  uint32 task_id = 1;
+  map<int32, int32> target_num = 2;
 }
 
 message MarkData {
-  string id = 1;
-  map<string, string> mark_info_map = 2;
-  string mark_uuid = 3;
+  int32 id = 1;
+  map<int64, MarkInfo> mark_info_map = 2;
+  int32 mark_uuid = 3;
 }
 
 message MarkInfo {
-  string tag_id = 1;
+  int64 tag_id = 1;
   string title = 2;
   string content = 3;
-  string icon_id = 4;
+  uint32 icon_id = 4;
   MarkPosition position = 5;
 }
 
 message MarkPosition {
-  string x = 1;
-  string y = 2;
+  int32 x = 1;
+  int32 y = 2;
 }
 
-message MasterModeDiffDungeonInfo { map<string, string> dungeon_info = 1; }
+message MasterModeDiffDungeonInfo {
+  map<int32, DungeonInfo> dungeon_info = 1;
+}
 
 message MasterModeDungeonData {
   int32 season_score = 1;
@@ -4891,26 +5577,30 @@ message MasterModeDungeonData {
 }
 
 message MasterModeDungeonInfo {
-  map<string, string> master_mode_dungeon_info = 1;
+  map<int32, SeasonMasterModeDungeonInfo> master_mode_dungeon_info = 1;
   bool is_show = 2;
 }
 
 message MedalHole {
-  string hole_id = 1;
-  string hole_level = 2;
-  string cur_exp = 3;
+  uint32 hole_id = 1;
+  uint32 hole_level = 2;
+  uint32 cur_exp = 3;
 }
 
 message MedalNode {
-  string node_id = 1;
-  string node_level = 2;
+  uint32 node_id = 1;
+  uint32 node_level = 2;
   bool choose = 3;
-  string slot = 4;
+  int32 slot = 4;
 }
 
-message MiscInfo { map<string, string> expression_ids_learned = 1; }
+message MiscInfo {
+  map<int32, int32> expression_ids_learned = 1;
+}
 
-message Mlstring { int64 id = 1; }
+message Mlstring {
+  int64 id = 1;
+}
 
 message Mod {
   map<int32, int64> mod_slots = 1;
@@ -4928,24 +5618,29 @@ message ModAttrInfo {
   int32 type = 1;
   int32 id = 2;
   int32 value = 3;
-  map<int32, string> effect_parameter = 4;
+  map<uint32, string> effect_parameter = 4;
 }
 
 message ModInfo {
   repeated int32 part_ids = 1;
-  ModPartUpgradeRecord upgrade_records = 2;
+  repeated ModPartUpgradeRecord upgrade_records = 2;
   int32 success_rate = 3;
   repeated int32 init_link_nums = 4;
 }
 
-message ModNewAttr { repeated int32 mod_parts = 1; }
+message ModNewAttr {
+  repeated int32 mod_parts = 1;
+  repeated ModPartUpgradeRecord upgrade_records = 2;
+}
 
 message ModPartUpgradeRecord {
   int32 part_id = 1;
   bool is_success = 2;
 }
 
-message MonitorBehaviorTreeOfEntity { string entity_id = 1; }
+message MonitorBehaviorTreeOfEntity {
+  string entity_id = 1;
+}
 
 message MonsterCastSkill {
   string self_uuid = 1;
@@ -4955,84 +5650,90 @@ message MonsterCastSkill {
 
 message MonsterExploreInfo {
   bool is_unlock = 1;
-  map<string, string> target_num = 2;
-  string award_flag = 3;
+  map<int32, int32> target_num = 2;
+  uint32 award_flag = 3;
   bool is_flag = 4;
 }
 
-message MonsterExploreList { map<string, string> monster_explore_list = 1; }
+message MonsterExploreList {
+  map<int32, MonsterExploreInfo> monster_explore_list = 1;
+}
 
 message MonsterHuntInfo {
-  map<string, string> monster_hunt_list = 1;
-  string cur_level = 2;
-  string cur_exp = 3;
-  map<string, string> level_award_flag = 4;
-  map<string, string> monster_hunt_refrsh_time = 5;
+  map<int32, MonsterHuntTarget> monster_hunt_list = 1;
+  int32 cur_level = 2;
+  int32 cur_exp = 3;
+  map<int32, int32> level_award_flag = 4;
+  map<int32, int64> monster_hunt_refrsh_time = 6;
 }
 
 message MonsterHuntTarget {
-  string monster_id = 1;
-  map<string, string> target_info_list = 2;
+  int32 monster_id = 1;
+  map<int32, MonsterTargetInfo> target_info_list = 2;
 }
 
-message MonsterHuntUnlockMonster { UnlockInfo info = 1; }
-
-enum MonsterTargetAward {
-  Null = 0;
-  Get = 1;
-  Received = 2;
+message MonsterHuntUnlockMonster {
+  UnlockInfo info = 1;
 }
 
 message MonsterTargetInfo {
-  string id = 1;
-  string target_uuid = 2;
-  string target_type = 3;
-  string target_num = 4;
+  int32 id = 1;
+  int32 target_uuid = 2;
+  int32 target_type = 3;
+  int32 target_num = 4;
   MonsterTargetAward award_flag = 5;
 }
 
 message MonthCardItem {
-  string item_id = 1;
-  string create_time = 2;
+  int32 item_id = 1;
+  int64 create_time = 2;
 }
 
 message MonthlyCard {
-  string expire_time = 1;
-  map<string, string> monthly_card_info = 2;
-  string last_award_monthly_card_time = 3;
-  string tips_clicked = 4;
-  string tips_day = 5;
+  int64 expire_time = 1;
+  map<int32, MonthlyCardInfo> monthly_card_info = 2;
+  int32 last_award_monthly_card_time = 3;
+  int32 tips_clicked = 4;
+  int32 tips_day = 5;
   repeated Item items = 6;
-  map<string, string> monthly_card_buy_list = 7;
+  map<int64, MonthlyCardBuyList> monthly_card_buy_list = 7;
 }
 
 message MonthlyCardBuyList {
-  string begin_time = 1;
-  string end_time = 2;
-  string last_award_day_time = 3;
+  int64 begin_time = 1;
+  int64 end_time = 2;
+  int64 last_award_day_time = 3;
 }
 
 message MonthlyCardInfo {
   EReceiveRewardStatus limit_award_status = 1;
   EReceiveRewardStatus award_status = 2;
   MonthCardItem month_card_item = 3;
-  string begin_time = 4;
-  string end_time = 5;
+  int64 begin_time = 4;
+  int64 end_time = 5;
+}
+
+message NewMove {
+  UserControlInfo info = 1;
 }
 
 message NewbieData {
-  string total_online_time = 1;
+  int64 total_online_time = 1;
   bool is_newbie = 2;
   bool is_cancel_newbie = 3;
 }
 
-message NewMove { UserControlInfo info = 1; }
+message NotGetProceedAwardInfo {
+  map<uint32, uint32> award_id_times = 1;
+}
 
-message NotGetProceedAwardInfo { map<string, string> award_id_times = 1; }
+message NotifyAntiData {
+  NotifyAntiDataRequest v_request = 1;
+}
 
-message NotifyAntiData { NotifyAntiDataRequest v_request = 1; }
-
-message NotifyAntiDataRequest { TssAccountInfoProto tss_info = 1; }
+message NotifyAntiDataRequest {
+  TssAccountInfoProto tss_info = 1;
+}
 
 message NotifyBuffChange {
   string old_buff_id = 1;
@@ -5044,13 +5745,18 @@ message NotifyBuildFurnitureOp {
   CommunityBuildFurnitureInfo furniture = 2;
 }
 
-message NotifyClientKickOff { EErrorCode err_code = 1; }
+message NotifyClientKickOff {
+  EErrorCode err_code = 1;
+}
 
 message NotifyCommunityHomeLandDecorationInfo {
   NotifyCommunityHomeLandDecorationInfoRequest request = 1;
 }
 
-message NotifyCommunityHomeLandDecorationInfoRequest { bool is_outer = 1; }
+message NotifyCommunityHomeLandDecorationInfoRequest {
+  bool is_outer = 1;
+  HomelandDecorationInfo decoration_info = 2;
+}
 
 message NotifyCommunityHomeLandHousingTypeUpdate {
   NotifyCommunityHomeLandHousingTypeUpdateRequest request = 1;
@@ -5070,7 +5776,9 @@ message NotifyCommunityHomeLandUnlockedAreasUpdateRequest {
   repeated string unlock_outer_areas = 3;
 }
 
-message NotifyEnterWorld { NotifyEnterWorldRequest v_request = 1; }
+message NotifyEnterWorld {
+  NotifyEnterWorldRequest v_request = 1;
+}
 
 message NotifyEnterWorldRequest {
   string account_id = 1;
@@ -5081,24 +5789,33 @@ message NotifyEnterWorldRequest {
   SceneLineData scene_line_data = 6;
 }
 
-message NotifyFunctionParams { repeated string close_function = 1; }
+message NotifyFunctionParams {
+  repeated int32 close_function = 1;
+}
 
 message NotifyHomelandBuildFurnitureOp {
   NotifyHomelandBuildFurnitureOpRequest request = 1;
 }
 
 message NotifyHomelandBuildFurnitureOpRequest {
-  string community_id = 1;
-  string homeland_id = 2;
+  int64 community_id = 1;
+  int64 homeland_id = 2;
   bool is_outer = 3;
+  string scene_guid = 4;
   repeated NotifyBuildFurnitureOp build_furniture_infos = 5;
 }
 
-message NotifyKickOutOff { NotifyKickOutOffRequest v_request = 1; }
+message NotifyKickOutOff {
+  NotifyKickOutOffRequest v_request = 1;
+}
 
-message NotifyKickOutOffRequest { EErrorCode err_code = 1; }
+message NotifyKickOutOffRequest {
+  EErrorCode err_code = 1;
+}
 
-message NotifyLoadSceneEnd { NotifyLoadSceneEndResponse resp = 1; }
+message NotifyLoadSceneEnd {
+  NotifyLoadSceneEndResponse resp = 1;
+}
 
 message NotifyLoadSceneEndResponse {
   string scene_id = 1;
@@ -5114,23 +5831,41 @@ message NotifyPlayerBeginInteractionParam {
   string template_id = 2;
 }
 
-message NotifyReviveUser { string v_actor_uuid = 1; }
+message NotifyReviveUser {
+  string v_actor_uuid = 1;
+}
 
-message NotifyServerCloseFunction { NotifyFunctionParams v_param = 1; }
+message NotifyServerCloseFunction {
+  NotifyFunctionParams v_param = 1;
+}
 
-message NotifySwitchScene { NotifySwitchSceneRequest request = 1; }
+message NotifySwitchScene {
+  NotifySwitchSceneRequest request = 1;
+}
 
-message NotifySwitchSceneEnd { SwitchSceneResponse resp = 1; }
+message NotifySwitchSceneEnd {
+  SwitchSceneResponse resp = 1;
+}
 
-message NotifySwitchSceneRequest { TransferParam transfer_param = 1; }
+message NotifySwitchSceneRequest {
+  TransferParam transfer_param = 1;
+}
 
-message NotifyTimerList { NotifyTimerListParam timer_info = 1; }
+message NotifyTimerList {
+  NotifyTimerListParam timer_info = 1;
+}
 
-message NotifyTimerListParam { repeated TimerInfo timer_info_list = 1; }
+message NotifyTimerListParam {
+  repeated TimerInfo timer_info_list = 1;
+}
 
-message NotifyTimerUpdate { TimerInfo timer_info = 1; }
+message NotifyTimerUpdate {
+  TimerInfo timer_info = 1;
+}
 
-message NotifyUserCloseFunction { NotifyFunctionParams v_param = 1; }
+message NotifyUserCloseFunction {
+  NotifyFunctionParams v_param = 1;
+}
 
 message Package {
   int32 type = 1;
@@ -5138,30 +5873,33 @@ message Package {
   map<int32, int64> item_cd = 3;
   map<int64, Item> items = 4;
   int64 public_cd = 5;
+  int32 change_version = 6;
 }
 
 message ParkourRecord {
-  string time = 1;
-  string state = 2;
-  string perfect_time = 3;
+  uint32 time = 1;
+  uint32 state = 2;
+  uint32 perfect_time = 3;
 }
 
-message ParkourRecordList { map<string, string> record_list = 1; }
+message ParkourRecordList {
+  map<uint32, ParkourRecord> record_list = 1;
+}
 
 message PassengerChangeParam {
-  bool is_add_passenger = 1;
-  int64 add_or_remove_uuid = 2;
+  optional bool is_add_passenger = 1;
+  optional int64 add_or_remove_uuid = 2;
 }
 
 message PassiveSkillInfo {
-  int32 uuid = 1;
-  int64 target_uuid = 2;
-  int64 stage_begin_time = 3;
-  int64 begin_time = 4;
-  int32 stage_play_num = 5;
-  int32 skill_id = 6;
-  int32 skill_level = 7;
-  int32 skill_stage = 8;
+  optional int32 uuid = 1;
+  optional int64 target_uuid = 2;
+  optional int64 stage_begin_time = 3;
+  optional int64 begin_time = 4;
+  optional int32 stage_play_num = 5;
+  optional int32 skill_id = 6;
+  optional int32 skill_level = 7;
+  optional int32 skill_stage = 8;
 }
 
 message PathNode {
@@ -5179,76 +5917,91 @@ message PathNodeList {
 }
 
 message PathPointChangeParam {
-  int32 operation = 1;
+  optional int32 operation = 1;
   Position add_point = 2;
-  int32 remove_point_count = 3;
+  optional int32 remove_point_count = 3;
 }
 
-message PayData { map<string, string> pay_data = 1; }
+message PayData {
+  map<int32, FirstPayInfo> pay_data = 1;
+}
 
 message PayOrderList {
   repeated string pay_order_list = 1;
   repeated string pay_refund_list = 2;
   PayData first_pay = 3;
-  map<string, string> order_list = 4;
-  map<string, string> order_index_list = 5;
+  map<string, int32> order_list = 4;
+  map<int64, int32> order_index_list = 5;
+  map<int64, RefundItemInfo> order_index_refund_list = 6;
 }
 
 message PersonalGroupObjectUpdate {
   ServerStateObjectInteractionList v_param_list = 1;
 }
 
-message PersonalObject { map<string, string> scene_obj_data = 1; }
+message PersonalObject {
+  map<int32, ScenePersonalObject> scene_obj_data = 1;
+}
 
-message PersonalObjectAction { string v_obj_uuid = 1; }
+message PersonalObjectAction {
+  string v_obj_uuid = 1;
+}
 
-message PersonalObjectUpdate { ServerStateObjectInteractionParam v_param = 1; }
+message PersonalObjectUpdate {
+  ServerStateObjectInteractionParam v_param = 1;
+}
 
 message PersonalWorldBossInfo {
-  string score = 1;
-  map<string, string> score_award_info = 2;
-  map<string, string> boss_award_info = 3;
-  string uuid = 4;
+  int32 score = 1;
+  map<int32, CommonAwardInfo> score_award_info = 2;
+  map<int32, CommonAwardInfo> boss_award_info = 3;
+  int32 uuid = 4;
 }
 
 message PersonalZone {
-  repeated int32 online_periods = 1;
-  repeated int32 tags = 2;
-  map<int32, int32> medals = 3;
-  int32 theme_id = 4;
-  int32 business_card_style_id = 5;
-  int32 avatar_frame_id = 6;
-  ActionInfo action_info = 7;
-  repeated EditorUIPosition ui_position = 8;
-  int32 title_id = 9;
-  bool fashion_refresh_flag = 10;
-  int32 fashion_collect_point = 11;
-  map<int32, FashionQualityCollectInfo> fashion_collect_quality_count = 12;
-  repeated int32 photos = 13;
-  map<int32, int32> unlock_target_record = 14;
-  map<int32, bool> unlock_get_reward_record = 15;
-  int32 ride_collect_point = 16;
-  map<int32, RideQualityCollectInfo> ride_collect_quality_count = 17;
-  int32 weapon_skin_collect_point = 18;
-  map<int32, int32> photos_wall = 19;
+  repeated int32 online_periods = 2;
+  repeated int32 online_periods = 2;
+  repeated int32 tags = 3;
+  map<int32, int32> medals = 5;
+  int32 theme_id = 6;
+  int32 theme_id = 6;
+  int32 business_card_style_id = 7;
+  int32 avatar_frame_id = 8;
+  ActionInfo action_info = 9;
+  repeated EditorUIPosition ui_position = 10;
+  int32 title_id = 11;
+  bool fashion_refresh_flag = 12;
+  int32 fashion_collect_point = 13;
+  map<int32, FashionQualityCollectInfo> fashion_collect_quality_count = 14;
+  repeated int32 photos = 15;
+  map<int32, int32> unlock_target_record = 16;
+  map<int32, bool> unlock_get_reward_record = 17;
+  int32 ride_collect_point = 18;
+  map<int32, RideQualityCollectInfo> ride_collect_quality_count = 19;
+  int32 weapon_skin_collect_point = 20;
+  map<int32, int32> photos_wall = 21;
 }
 
-message PersonalZoneShow { map<int32, int32> medals = 1; }
+message PersonalZoneShow {
+  map<int32, int32> medals = 1;
+}
 
 message PhotoGraphShow {
-  string photo_id = 1;
+  uint32 photo_id = 1;
   repeated ImageInfo images = 2;
   string render_info = 3;
   string photo_desc = 4;
   PhotoOwnerData owner_info = 5;
 }
 
-message PhotoInfo { repeated string temp_photo_keys = 1; }
+message PhotoInfo {
+  repeated string temp_photo_keys = 1;
+}
 
 message PhotoOwnerData {
-  string upload_char_id = 1;
-  string expire_time = 2;
-  string show_id = 3;
+  int64 upload_char_id = 1;
+  int64 expire_time = 2;
+  int64 show_id = 3;
   string name = 4;
 }
 
@@ -5259,11 +6012,14 @@ message PictureInfo {
 
 message PictureVerify {
   uint32 size = 1;
-  uint32 review_start_time = 2;
-  int64 version = 3;
+  uint32 review_start_time = 3;
+  uint32 review_start_time = 3;
+  int64 version = 4;
 }
 
-message PioneerData { map<uint32, PioneerInfo> info_map = 1; }
+message PioneerData {
+  map<uint32, PioneerInfo> info_map = 1;
+}
 
 message PioneerInfo {
   uint32 current_total = 1;
@@ -5271,128 +6027,155 @@ message PioneerInfo {
   map<int32, bool> awards = 3;
   map<uint32, bool> entered_zones = 4;
   uint32 id = 5;
-  int32 error_code = 6;
+  EErrorCode err_code = 6;
 }
 
 message Pivot {
-  map<string, string> pivots = 1;
-  map<string, string> map_pivots = 2;
+  map<int32, PivotInfo> pivots = 1;
+  map<int32, PivotInfo> map_pivots = 2;
 }
 
 message PivotInfo {
-  string id = 1;
-  repeated string break_point = 2;
-  repeated string reward_stage = 3;
-  string reward_full_state = 4;
+  int32 id = 1;
+  repeated int32 break_point = 2;
+  repeated int32 reward_stage = 3;
+  int32 reward_full_state = 4;
 }
 
-message PlaceHolderBuff { string buff_id = 1; }
+message PlaceHolderBuff {
+  int32 buff_id = 1;
+}
 
 message PlaceHolderFishItem {
-  string fish_id = 1;
-  string size = 2;
+  int32 fish_id = 1;
+  int32 size = 2;
 }
 
 message PlaceHolderFishPersonalTotal {
-  string total = 1;
-  string myth_total = 2;
-  string sum_fish_type = 3;
-  string sum_sea_life_type = 4;
-  string sum_trash_type = 5;
-  string most_fish_id = 6;
-  string favour_zero = 7;
+  int64 total = 1;
+  int64 myth_total = 2;
+  int32 sum_fish_type = 3;
+  int32 sum_sea_life_type = 4;
+  int32 sum_trash_type = 5;
+  int32 most_fish_id = 6;
+  int32 favour_zero = 7;
   string user_name = 8;
   string union_name = 9;
   bool is_newbie = 10;
 }
 
 message PlaceHolderFishRank {
-  string fish_id = 1;
-  string size = 2;
-  string rank = 3;
+  int32 fish_id = 1;
+  int32 size = 2;
+  int32 rank = 3;
 }
 
 message PlaceHolderItem {
-  string config_id = 1;
+  uint32 config_id = 1;
   Item item_detail = 2;
 }
 
 message PlaceHolderMasterMode {
-  map<string, string> master_mode_info = 1;
+  map<int32, MasterModeDiffDungeonInfo> master_mode_info = 1;
   string user_name = 2;
-  string season_id = 3;
+  int32 season_id = 3;
 }
 
 message PlaceHolderPlayer {
-  string char_id = 1;
+  int64 char_id = 1;
   string name = 2;
 }
 
-message PlaceHolderStr { string text = 1; }
-
-message PlaceHolderTimestamp { string timestamp = 1; }
-
-message PlaceHolderUnion { string build = 1; }
-
-message PlaceHolderVal { string value = 1; }
-
-message PlanetMemory { repeated string pass_room = 1; }
-
-message PlayAction { PlayActionParam play_action_param = 1; }
-
-message PlayActionParam {
-  string action_id = 1;
-  bool is_upper = 2;
-  bool is_dance_together = 3;
-  string mount_id = 4;
-  string mount_size = 5;
+message PlaceHolderStr {
+  string text = 1;
 }
 
-message PlayEmote { string emote_id = 1; }
+message PlaceHolderTimestamp {
+  int64 timestamp = 1;
+}
 
-message PlayerBox { map<string, string> scenes = 1; }
+message PlaceHolderUnion {
+  uint32 build = 1;
+}
+
+message PlaceHolderVal {
+  uint32 value = 1;
+}
+
+message PlanetMemory {
+  repeated int32 pass_room = 1;
+}
+
+message PlayAction {
+  PlayActionParam play_action_param = 1;
+}
+
+message PlayActionParam {
+  int32 action_id = 1;
+  bool is_upper = 2;
+  bool is_dance_together = 3;
+  int32 mount_id = 4;
+  int32 mount_size = 5;
+}
+
+message PlayEmote {
+  string emote_id = 1;
+}
+
+message PlayHelper {
+  map<int32, bool> displayed_helper_list = 1;
+  map<int32, bool> completed_guide = 2;
+}
+
+message PlayerBox {
+  map<uint64, PlayerBoxData> scenes = 1;
+}
 
 message PlayerBoxData {
-  string scene_uuid = 1;
-  map<string, string> boxs = 2;
+  uint64 scene_uuid = 1;
+  map<int64, int64> boxs = 2;
 }
 
 message PlayerBuyRecord {
-  string count = 2;
-  string buy_timestamp = 3;
+  int32 count = 2;
+  int64 buy_timestamp = 3;
 }
 
-message PlayerOrderComtainerInfo { string index = 1; }
+message PlayerOrderComtainerInfo {
+  int32 index = 1;
+}
 
-message PlayerRecord { map<string, string> player_record_infos = 1; }
+message PlayerRecord {
+  map<int32, PlayerRecordInfo> player_record_infos = 1;
+}
 
-message PlayerRecordInfo { map<string, string> player_records = 1; }
+message PlayerRecordInfo {
+  map<int32, PlayerRecordSingle> player_records = 1;
+}
 
 message PlayerRecordSingle {
-  string id = 1;
-  string total_count = 2;
-  string cycle_count = 3;
-  string cycle_time = 4;
+  int32 id = 1;
+  int32 total_count = 2;
+  int64 cycle_count = 3;
+  int64 cycle_time = 4;
 }
 
-message PlayerRefreshShopRecord { repeated string items = 2; }
-
-message PlayHelper {
-  map<string, bool> displayed_helper_list = 1;
-  map<string, bool> completed_guide = 2;
+message PlayerRefreshShopRecord {
+  repeated int32 items = 2;
 }
 
 message Position {
-  float x = 1;
-  float y = 2;
-  float z = 3;
-  float dir = 4;
+  optional float x = 1;
+  optional float y = 2;
+  optional float z = 3;
+  optional float dir = 4;
 }
 
 message PositionParam {
-  ScenePointInfo scene_point_info = 1;
-  ScenePosIdInfo scene_pos_info = 2;
-  CutScenePointInfo cut_scene_point_info = 3;
+  ScenePointInfo scene_point_info = 2;
+  ScenePointInfo scene_point_info = 2;
+  ScenePosIdInfo scene_pos_info = 3;
+  CutScenePointInfo cut_scene_point_info = 4;
 }
 
 message PrivilegeData {
@@ -5402,10 +6185,10 @@ message PrivilegeData {
 }
 
 message PrivilegeEffectData {
-  string normal_pass_id = 1;
-  string prime_pass_id = 2;
-  map<string, bool> normal_pass_id_map = 3;
-  map<string, bool> prime_pass_id_map = 4;
+  int32 normal_pass_id = 1;
+  int32 prime_pass_id = 2;
+  map<int32, bool> normal_pass_id_map = 3;
+  map<int32, bool> prime_pass_id_map = 4;
 }
 
 message ProfessionData {
@@ -5414,30 +6197,39 @@ message ProfessionData {
 }
 
 message ProfessionInfo {
-  string profession_id = 1;
-  string level = 2;
-  string experience = 3;
-  map<string, string> skill_info_map = 4;
-  repeated string active_skill_ids = 6;
-  map<string, string> slot_skill_info_map = 7;
-  string use_skin_id = 8;
+  int32 profession_id = 1;
+  int32 level = 2;
+  int64 experience = 3;
+  map<int32, ProfessionSkillInfo> skill_info_map = 4;
+  repeated int32 active_skill_ids = 6;
+  map<int32, int32> slot_skill_info_map = 7;
+  int32 use_skin_id = 8;
 }
 
-message ProfessionList { int32 cur_profession_id = 1; }
+message ProfessionList {
+  int32 cur_profession_id = 1;
+  repeated int32 cur_assist_professions = 3;
+  map<int32, ProfessionInfo> profession_list = 4;
+  map<int32, ProfessionSkillInfo> aoyi_skill_info_map = 7;
+  uint32 total_talent_points = 8;
+  uint32 total_talent_reset_count = 9;
+  map<int32, ProfessionTalentInfo> talent_list = 10;
+}
 
 message ProfessionSkillInfo {
-  string skill_id = 1;
-  string level = 2;
-  repeated string replace_skill_ids = 3;
-  string remodel_level = 4;
-  string cur_skill_skin = 5;
-  map<string, bool> active_skill_skins = 6;
+  int32 skill_id = 1;
+  int32 level = 2;
+  repeated int32 replace_skill_ids = 3;
+  int32 remodel_level = 4;
+  int32 cur_skill_skin = 5;
+  map<int32, bool> active_skill_skins = 6;
 }
 
 message ProfessionTalentInfo {
-  string used_talent_points = 1;
-  repeated string talent_node_ids = 2;
-  string talent_stage_cfg_id = 3;
+  uint32 used_talent_points = 1;
+  repeated uint32 talent_node_ids = 2;
+  int32 talent_stage_cfg_id = 4;
+  int32 talent_ilegal_reset_count = 5;
 }
 
 message ProfileInfo {
@@ -5446,7 +6238,9 @@ message ProfileInfo {
   string half_body_url = 3;
 }
 
-message ProfileList { map<string, bool> unlock_profile_list = 1; }
+message ProfileList {
+  map<int32, bool> unlock_profile_list = 1;
+}
 
 message QuestData {
   uint32 id = 1;
@@ -5457,6 +6251,7 @@ message QuestData {
   int64 step_limit_time = 6;
   EQuestStepStatus step_status = 7;
   uint32 add_limit_time = 8;
+  map<int32, int32> target_type = 9;
 }
 
 message QuestDataList {
@@ -5469,47 +6264,72 @@ message QuestDataList {
   map<uint32, WorldQuestInfo> world_quest_info = 7;
   map<uint32, uint32> all_world_quest_list = 8;
   map<uint32, uint32> blue_world_quest_map = 9;
-  map<int32, WorldQuestList> filter_event_id = 10;
+  map<int32, worldQuestList> filter_event_id = 10;
   repeated uint32 accept_quest_list = 11;
   repeated uint32 follow_world_quest_list = 12;
   map<uint32, uint32> track_optional_quest = 13;
   map<uint32, uint32> finish_reset_quest_count = 14;
   map<uint32, bool> accept_quest_map = 15;
+  uint64 version = 16;
 }
 
-message QuestHistory { map<uint32, uint32> step_history = 1; }
+message QuestHistory {
+  map<uint32, uint32> step_history = 1;
+}
 
-message RaidRecord { map<string, string> boss_progress = 1; }
+message RaidRecord {
+  map<int32, BossProgress> boss_progress = 2;
+}
 
 message RankData {
-  string rank = 1;
-  string char_id = 2;
-  string score = 3;
+  int32 rank = 1;
+  int64 char_id = 2;
+  int32 score = 3;
 }
 
 message RechargeData {
-  string accumulate_amount = 1;
-  string last_recharge_time = 2;
-  string last_recharge_amount = 3;
-  string last_diamond_amount = 4;
+  int64 accumulate_amount = 1;
+  int64 last_recharge_time = 2;
+  int64 last_recharge_amount = 3;
+  int64 last_diamond_amount = 4;
 }
 
-message RecommendPlayData {}
+message RecommendPlayData {
+  int64 start_timestamp = 1;
+  int64 end_timestamp = 2;
+  bool is_open = 4;
+  int64 last_time_stamp = 5;
+  int64 last_end_time_stamp = 6;
+  int64 next_time_stamp = 7;
+  int64 next_end_time_stamp = 8;
+  ETimerExeType cur_type = 9;
+  ETimerType timer_type = 10;
+}
 
-message RecvAntiData { RecvAntiDataRequest v_request = 1; }
+message RecvAntiData {
+  RecvAntiDataRequest v_request = 1;
+}
 
-message RecvAntiDataRequest { TssAccountInfoProto tss_info = 1; }
+message RecvAntiDataRequest {
+  TssAccountInfoProto tss_info = 1;
+}
 
 message RedDotData {
-  map<string, bool> permanent_closed_red_dot = 1;
-  map<string, string> red_dot_count = 2;
+  map<int32, bool> permanent_closed_red_dot = 1;
+  map<int32, int32> red_dot_count = 2;
 }
 
-message RefundItemInfo {}
+message RefundItemInfo {
+  map<int32, int64> item_list = 1;
+}
 
-message ReqServerTime { string client_milliseconds = 1; }
+message ReqServerTime {
+  string client_milliseconds = 1;
+}
 
-message ReqSwitchScene { SwitchSceneRequest resp = 1; }
+message ReqSwitchScene {
+  SwitchSceneRequest resp = 1;
+}
 
 message RequestConnectWorld {
   string account_id = 1;
@@ -5527,39 +6347,63 @@ message ResetAttachVelocity {
 }
 
 message Resonance {
-  map<string, string> resonances = 1;
-  repeated string installed = 2;
+  map<uint32, int64> resonances = 1;
+  repeated uint32 installed = 2;
 }
 
-message ReturnMessageWrapper { GetSocialDataReply message = 1; }
+message ReturnMessageWrapper {
+  GetSocialDataReply message = 1;
+}
 
-message ReviveInfo { map<string, string> revive_count = 1; }
+message ReviveInfo {
+  map<int32, int32> revive_count = 1;
+}
 
-message RideData { string ride_id = 1; }
+message RideData {
+  int32 ride_id = 1;
+}
 
 message RideList {
-  map<string, string> rides = 1;
+  map<int32, RideData> rides = 1;
   ERidePropertyType type = 2;
-  map<string, string> skin_data = 3;
+  map<int32, RideSkinContainer> skin_data = 3;
 }
 
-message RideMagneticAttachTo { string target_uuid = 1; }
+message RideMagneticAttachTo {
+  string target_uuid = 1;
+}
 
-message RideQualityCollectInfo { map<int32, int32> quality_count = 1; }
+message RideQualityCollectInfo {
+  map<int32, int32> quality_count = 1;
+}
 
 message RideSkinContainer {
-  string ride_skin_id = 1;
-  map<string, string> sinks = 2;
+  int32 ride_skin_id = 1;
+  map<uint32, RideSkinData> sinks = 2;
 }
 
-message RideSkinData { string activate_time = 1; }
+message RideSkinData {
+  int64 activate_time = 1;
+}
 
 message RoleFace {
-  map<string, bool> unlock_item_map = 1;
+  map<int32, bool> unlock_item_map = 1;
   bool save_need_consume = 2;
 }
 
-message RoleLevel { int32 level = 1; }
+message RoleLevel {
+  int32 level = 1;
+  int64 cur_level_exp = 2;
+  map<int32, bool> received_level_list = 3;
+  LevelProficiency proficiency_info = 4;
+  map<int32, int64> active_exp_map = 5;
+  int32 last_season_day = 6;
+  int64 bless_exp_pool = 7;
+  int64 grant_bless_exp = 8;
+  int64 accumulate_bless_exp = 9;
+  int64 accumulate_exp = 10;
+  int32 prev_season_max_lv = 11;
+}
 
 message SaveUserSingleSceneCutsState {
   string cuts_key = 1;
@@ -5590,9 +6434,9 @@ message SceneData {
 }
 
 message SceneInteractionInfo {
-  string obj_id = 1;
-  string pos_id = 2;
-  Vector3 pos = 3;
+  int32 obj_id = 1;
+  int32 pos_id = 2;
+  Vec3 pos = 3;
 }
 
 message SceneLineData {
@@ -5601,9 +6445,13 @@ message SceneLineData {
   string scene_guid = 3;
 }
 
-message SceneLuaData { map<uint32, string> scene_lua_info = 1; }
+message SceneLuaData {
+  map<uint32, string> scene_lua_info = 1;
+}
 
-message ScenePersonalObject { map<string, string> personal_obj_data = 1; }
+message ScenePersonalObject {
+  map<int64, ServerStateObjectInteractionParam> personal_obj_data = 1;
+}
 
 message ScenePointInfo {
   Position position = 1;
@@ -5611,57 +6459,63 @@ message ScenePointInfo {
   int32 scene_area_id = 3;
 }
 
-message ScenePosIdInfo { int32 scene_pos_id = 1; }
-
-message SceneRecord {
-  string cnt = 1;
-  map<string, string> group_cnts = 2;
+message ScenePosIdInfo {
+  int32 scene_pos_id = 1;
 }
 
-message SchemeInfo { repeated string scheme_info_keys = 1; }
+message SceneRecord {
+  uint64 cnt = 1;
+  map<int32, uint64> group_cnts = 2;
+}
 
-message SeasonAchievement { map<string, string> season_achievement = 1; }
+message SchemeInfo {
+  repeated string scheme_info_keys = 1;
+}
+
+message SeasonAchievement {
+  map<uint32, Achievement> season_achievement = 1;
+}
 
 message SeasonAchievementList {
-  map<string, string> season_achievement_list = 1;
-  map<string, bool> has_init_dones = 2;
-  string version = 3;
+  map<uint32, SeasonAchievement> season_achievement_list = 1;
+  map<uint32, bool> has_init_dones = 2;
+  uint64 version = 3;
 }
 
 message SeasonActivation {
-  string season_id = 1;
-  string activation_point = 2;
-  string refresh_time = 3;
-  map<string, string> activation_targets = 4;
-  map<string, string> stage_reward_status = 5;
+  int32 season_id = 1;
+  int32 activation_point = 2;
+  int32 refresh_time = 3;
+  map<int32, SeasonActivationTarget> activation_targets = 4;
+  map<uint32, int32> stage_reward_status = 5;
 }
 
 message SeasonActivationTarget {
-  string id = 1;
-  string target_type = 2;
-  string target_uuid = 3;
-  string reward_rate = 4;
-  string progress = 5;
-  string completed_times = 6;
+  int32 id = 1;
+  int32 target_type = 2;
+  int32 target_uuid = 3;
+  int32 reward_rate = 4;
+  int32 progress = 5;
+  int32 completed_times = 6;
 }
 
 message SeasonBpQuestData {
-  string id = 1;
-  string target_num = 2;
-  string award = 3;
+  uint32 id = 1;
+  int32 target_num = 2;
+  int32 award = 3;
 }
 
 message SeasonBpQuestList {
-  map<string, string> season_map = 1;
-  repeated string random_map = 2;
-  string refresh_time_stamp = 3;
+  map<uint32, SeasonBpQuestData> season_map = 1;
+  repeated uint32 random_map = 2;
+  int64 refresh_time_stamp = 3;
 }
 
 message SeasonCenter {
-  string season_id = 1;
+  int32 season_id = 1;
   BattlePass battle_pass = 2;
   SeasonBpQuestList bp_quest_list = 3;
-  map<string, string> season_history = 4;
+  map<uint32, SeasonCenterHistory> season_history = 4;
 }
 
 message SeasonCenterHistory {
@@ -5670,61 +6524,67 @@ message SeasonCenterHistory {
 }
 
 message SeasonMasterModeDungeonInfo {
-  map<string, string> master_mode_diff_info = 1;
-  string dungeon_info_update_time = 2;
-  map<string, string> season_awards = 3;
+  map<int32, MasterModeDiffDungeonInfo> master_mode_diff_info = 1;
+  int64 dungeon_info_update_time = 2;
+  map<int32, int32> season_awards = 3;
 }
 
 message SeasonMedalInfo {
-  string season_id = 1;
-  map<string, string> normal_hole_infos = 2;
+  uint32 season_id = 1;
+  map<uint32, MedalHole> normal_hole_infos = 2;
   MedalHole core_hole_info = 3;
-  map<string, string> core_hole_node_infos = 4;
+  map<uint32, MedalNode> core_hole_node_infos = 4;
 }
 
 message SeasonQuestData {
-  string id = 1;
-  string target_num = 2;
-  string award = 3;
+  uint32 id = 1;
+  int32 target_num = 2;
+  int32 award = 3;
 }
 
 message SeasonQuestList {
-  map<string, string> season_map = 1;
-  string refresh_week = 2;
-  string refresh_time_stamp = 3;
+  map<uint32, SeasonQuestData> season_map = 1;
+  int32 refresh_week = 2;
+  int64 refresh_time_stamp = 3;
 }
 
-message SeasonRankData { map<uint32, uint32> season_ranks = 1; }
+message SeasonRankData {
+  map<uint32, uint32> season_ranks = 1;
+}
 
 message SeasonRankInfo {
-  string cur_ran_k_star = 1;
-  repeated string received_rank_star = 2;
+  uint32 cur_ran_k_star = 1;
+  repeated uint32 received_rank_star = 2;
 }
 
 message SeasonRankList {
-  map<string, string> season_rank_list = 1;
-  string show_armband_id = 2;
+  map<uint32, SeasonRankInfo> season_rank_list = 1;
+  uint32 show_armband_id = 2;
 }
 
-message SeasonTarget { map<string, string> target_info = 1; }
+message SeasonTarget {
+  map<int32, SeasonTargetInfo> target_info = 1;
+}
 
 message SeasonTargetInfo {
-  string target_id = 1;
-  string target_progress = 2;
-  string award_state = 3;
+  int32 target_id = 1;
+  int32 target_progress = 2;
+  int32 award_state = 3;
 }
 
 message SeqPassiveSkillEndInfo {
-  int64 actor_uuid = 1;
+  optional int64 actor_uuid = 1;
   repeated int64 uuids = 2;
 }
 
 message SeqPassiveSkillInfo {
-  int64 actor_uuid = 1;
+  optional int64 actor_uuid = 1;
   repeated PassiveSkillInfo passive_infos = 2;
 }
 
-message ServerData { string open_server_time = 1; }
+message ServerData {
+  string open_server_time = 1;
+}
 
 message ServerSkillStageEnd {
   string skill_uuid = 1;
@@ -5738,18 +6598,22 @@ message ServerStateObjectInteractionList {
 }
 
 message ServerStateObjectInteractionParam {
-  string obj_uuid = 1;
-  string state_value = 2;
-  string last_interaction_time = 3;
+  int64 obj_uuid = 1;
+  int32 state_value = 2;
+  int64 last_interaction_time = 3;
 }
 
 message ServerStateObjectUpdate {
   ServerStateObjectInteractionList v_object = 1;
 }
 
-message SetAiming { bool is_aiming = 1; }
+message SetAiming {
+  bool is_aiming = 1;
+}
 
-message SetAoiSyncUserCount { string v_count = 1; }
+message SetAoiSyncUserCount {
+  string v_count = 1;
+}
 
 message SetInteractionPartnerPos {
   Position v_cur_pos = 1;
@@ -5763,71 +6627,89 @@ message SetPersonalState {
   bool v_is_remove = 2;
 }
 
-message SetSlotAutoBattle { SetSlotAutoBattleRequest v_request = 1; }
+message SetSlotAutoBattle {
+  SetSlotAutoBattleRequest v_request = 1;
+}
 
-message SetSlotAutoBattleRequest { map<string, bool> slots = 1; }
+message SetSlotAutoBattleRequest {
+  map<int32, bool> slots = 1;
+}
 
-message SettingData { map<int32, string> setting_map = 1; }
+message SetTunnel {
+  string tunnel_id = 1;
+}
+
+message SettingData {
+  map<int32, string> setting_map = 1;
+}
 
 message SettlementPosition {
   Position pos = 1;
   Position rotate = 2;
 }
 
-message SetTunnel { string tunnel_id = 1; }
-
-message ShopCompensationData { map<string, string> items = 1; }
+message ShopCompensationData {
+  map<uint32, ShopCompensationInfo> items = 1;
+}
 
 message ShopCompensationInfo {
-  string entor_store_num = 1;
-  string buy_num = 2;
+  int64 entor_store_num = 1;
+  int64 buy_num = 2;
 }
 
 message ShopData {
-  map<string, string> refresh_list = 1;
-  map<string, string> normal_shop_records = 2;
-  map<string, string> season_shop_records = 3;
+  map<int32, ShopRefreshRecord> refresh_list = 1;
+  map<int32, PlayerBuyRecord> normal_shop_records = 2;
+  map<int32, PlayerBuyRecord> season_shop_records = 3;
   ShopCompensationData compensation_item_data = 4;
 }
 
 message ShopRefreshRecord {
-  string refresh_timestamp = 3;
-  string refresh_count = 4;
-  map<string, string> shop_refresh_records = 5;
+  int64 refresh_timestamp = 3;
+  int32 refresh_count = 4;
+  map<int32, PlayerRefreshShopRecord> shop_refresh_records = 5;
 }
 
 message ShowPieceAttr {
   ShowPiecePair piece_info = 1;
-  string begin_time = 2;
-  string end_time = 3;
+  int64 begin_time = 2;
+  int64 end_time = 3;
 }
 
-message ShowPieceAttrList { repeated ShowPieceAttr show_piece_attrs = 1; }
+message ShowPieceAttrList {
+  repeated ShowPieceAttr show_piece_attrs = 1;
+}
 
 message ShowPieceData {
-  map<string, string> often_use_type_list = 1;
-  map<string, string> unlock_type_list = 2;
-  map<string, string> roulette_pos_piece_info = 3;
+  map<int32, ShowPieceIdList> often_use_type_list = 1;
+  map<int32, ShowPieceIdList> unlock_type_list = 2;
+  map<int32, ShowPiecePair> roulette_pos_piece_info = 3;
 }
 
-message ShowPieceIdList { repeated string piece_ids = 1; }
+message ShowPieceIdList {
+  repeated int32 piece_ids = 1;
+}
 
 message ShowPiecePair {
   EShowPieceType piece_type = 1;
-  string piece_id = 2;
+  int32 piece_id = 2;
 }
 
-message SignInfo { map<string, string> sign_info = 1; }
+message SignInfo {
+  map<int32, SignStatusList> sign_info = 1;
+}
 
 message SignStatus {
   bool is_signed = 1;
   bool is_rewarded = 2;
   bool is_supplement = 3;
-  string sign_time = 4;
-  string reward_time = 5;
+  int64 sign_time = 4;
+  int64 reward_time = 5;
 }
 
-message SignStatusList { map<string, string> sign_status_data = 1; }
+message SignStatusList {
+  map<int32, SignStatus> sign_status_data = 1;
+}
 
 message SkillCD {
   int32 skill_level_id = 1;
@@ -5837,25 +6719,26 @@ message SkillCD {
   int32 valid_cd_time = 5;
 }
 
-message SkillCd {
-  string skill_level_id = 1;
-  string begin_time = 2;
-  string duration = 3;
-  ESkillCdType skill_cd_type = 4;
-  string valid_cd_time = 5;
-}
-
 message SkillCDInfo {
   int32 skill_level_id = 1;
   int64 skill_begin_time = 2;
   int32 duration = 3;
-  int32 skill_cd_type = 4;
-  int64 profession_hold_begin_time = 5;
-  int32 charge_count = 6;
-  int32 valid_cd_time = 7;
-  int32 sub_cd_ratio = 8;
-  int64 sub_cd_fixed = 9;
-  int32 accelerate_cd_ratio = 10;
+  uint32 skill_cd_type = 4;
+  int64 profession_hold_begin_time = 6;
+  int64 profession_hold_begin_time = 6;
+  int32 charge_count = 7;
+  int32 valid_cd_time = 8;
+  int32 sub_cd_ratio = 9;
+  int64 sub_cd_fixed = 10;
+  int32 accelerate_cd_ratio = 11;
+}
+
+message SkillCd {
+  optional int32 skill_level_id = 1;
+  optional int64 begin_time = 2;
+  optional int32 duration = 3;
+  optional ESkillCdType skill_cd_type = 4;
+  optional int32 valid_cd_time = 5;
 }
 
 message SkillCdInfo {
@@ -5872,32 +6755,36 @@ message SkillCdInfo {
 }
 
 message SkillEffect {
-  int64 uuid = 1;
+  optional int64 uuid = 1;
   repeated SyncDamageInfo damages = 2;
-  int64 total_damage = 3;
+  optional int64 total_damage = 3;
 }
 
 message SkillSkin {
-  string skill_id = 1;
-  string skin_id = 2;
+  uint32 skill_id = 1;
+  uint32 skin_id = 2;
 }
 
-message Slot { map<string, string> slots = 1; }
+message Slot {
+  map<int32, SlotInfo> slots = 1;
+}
 
-message SlotData { map<string, string> slots = 1; }
+message SlotData {
+  map<int32, SlotInfoData> slots = 1;
+}
 
 message SlotInfo {
-  string id = 1;
-  string skill_id = 2;
+  int32 id = 1;
+  int32 skill_id = 2;
   bool is_auto_battle_close = 3;
 }
 
 message SlotInfoData {
-  string id = 1;
-  string skill_id = 2;
+  int32 id = 1;
+  int32 skill_id = 2;
   bool is_replace = 3;
   bool show_effect = 4;
-  string cd = 5;
+  int64 cd = 5;
   bool is_auto_battle_close = 6;
 }
 
@@ -5932,25 +6819,29 @@ message StartPlayAction {
   bool v_is_upper = 3;
 }
 
-message StatisticsData { map<string, string> stat_record_map = 1; }
-
 message StatRecord {
-  string cnt = 1;
-  map<string, string> group_cnts = 2;
-  map<string, string> scene_records = 3;
+  uint64 cnt = 1;
+  map<int32, uint64> group_cnts = 2;
+  map<int32, SceneRecord> scene_records = 3;
 }
 
-message StopRide { bool is_force = 1; }
+message StatisticsData {
+  map<int32, StatRecord> stat_record_map = 1;
+}
+
+message StopRide {
+  bool is_force = 1;
+}
 
 message Structure {
-  string uuid = 1;
-  string client_uuid = 2;
-  string group_id = 3;
-  string item_id = 4;
-  string char_id = 5;
+  int64 uuid = 1;
+  int64 client_uuid = 2;
+  int64 group_id = 3;
+  int32 item_id = 4;
+  int64 char_id = 5;
   IntVec3 position = 6;
-  Vector4 quaternion = 7;
-  string operator_char_id = 8;
+  Vec4 quaternion = 7;
+  int64 operator_char_id = 8;
   string name = 9;
   StructureMaterialInfo material_info = 10;
   StructureLamplightInfo lamplight_info = 11;
@@ -5958,28 +6849,32 @@ message Structure {
 }
 
 message StructureFarmlandInfo {
-  string operator_char_id = 1;
+  int64 operator_char_id = 1;
   HomeLandItemInstance seed_instance = 2;
   bool need_water = 3;
   EFarmlandState farmland_state = 4;
-  string seeding_time = 5;
-  string grow_end_time = 6;
-  string pollinate_begin_time = 7;
-  string pollinate_end_time = 8;
-  string harvest_begin_time = 9;
-  string harvest_end_time = 10;
+  int64 seeding_time = 5;
+  int64 grow_end_time = 6;
+  int64 pollinate_begin_time = 7;
+  int64 pollinate_end_time = 8;
+  int64 harvest_begin_time = 9;
+  int64 harvest_end_time = 10;
   bool is_end = 11;
-  string next_segment_index = 13;
-  repeated string fertilizes = 15;
+  HomeLandItemInstance flower_instance = 12;
+  int32 next_segment_index = 13;
+  repeated DroughtRecord records = 14;
+  repeated int32 fertilizes = 15;
   HomeLandItemInstance pollen_instance = 16;
-  map<string, string> pick_up_players = 17;
+  map<int64, int32> pick_up_players = 17;
 }
 
-message StructureLamplightInfo { EHomelandLamplightState state = 1; }
+message StructureLamplightInfo {
+  EHomelandLamplightState state = 1;
+}
 
 message StructureMaterialInfo {
-  string material_id = 1;
-  string char_id = 2;
+  int32 material_id = 1;
+  int64 char_id = 2;
 }
 
 message StructureOp {
@@ -5987,13 +6882,9 @@ message StructureOp {
   Structure structure = 2;
 }
 
-enum StructureOpType {
-  Add = 0;
-  Update = 1;
-  Delete = 2;
+message SwitchSceneRequest {
+  TransferParam transfer_param = 1;
 }
-
-message SwitchSceneRequest { TransferParam transfer_param = 1; }
 
 message SwitchSceneResponse {
   TransferParam transfer_param = 1;
@@ -6004,47 +6895,57 @@ message SyncAllServerStateObject {
   ServerStateObjectInteractionList v_object = 1;
 }
 
-message SyncAwardData { map<string, string> level_up_award_infos = 1; }
+message SyncAwardData {
+  map<uint32, LevelUpAward> level_up_award_infos = 1;
+}
 
-message SyncBulletHitInfo { repeated ClientHitInfo hit_infos = 1; }
+message SyncBulletHitInfo {
+  repeated ClientHitInfo hit_infos = 1;
+}
 
-message SyncCirclePathLength { string path_length = 1; }
+message SyncCirclePathLength {
+  string path_length = 1;
+}
 
 message SyncClientUseSkill {
   string skill_target_uuid = 1;
   string skill_level_id = 2;
 }
 
-message SyncContainerData { CharSerialize v_data = 1; }
+message SyncContainerData {
+  optional bytes v_data = 1;
+}
 
-message SyncContainerDirtyData { BufferStream v_data = 1; }
+message SyncContainerDirtyData {
+  optional bytes v_data = 1;
+}
 
 message SyncDamageInfo {
-  EDamageSource damage_source = 1;
-  bool is_miss = 2;
-  bool is_crit = 3;
-  EDamageType type = 4;
-  int32 type_flag = 5;
-  int64 value = 6;
-  int64 actual_value = 7;
-  int64 lucky_value = 8;
-  int64 hp_lessen_value = 9;
-  int64 shield_lessen_value = 10;
-  int64 attacker_uuid = 11;
-  int32 owner_id = 12;
-  int32 owner_level = 13;
-  int32 owner_stage = 14;
-  int32 hit_event_id = 15;
-  bool is_normal = 16;
-  bool is_dead = 17;
-  EDamageProperty property = 18;
+  optional EDamageSource damage_source = 1;
+  optional bool is_miss = 2;
+  optional bool is_crit = 3;
+  optional EDamageType type = 4;
+  optional int32 type_flag = 5;
+  optional int64 value = 6;
+  optional int64 actual_value = 7;
+  optional int64 lucky_value = 8;
+  optional int64 hp_lessen_value = 9;
+  optional int64 shield_lessen_value = 10;
+  optional int64 attacker_uuid = 11;
+  optional int32 owner_id = 12;
+  optional int32 owner_level = 13;
+  optional int32 owner_stage = 14;
+  optional int32 hit_event_id = 15;
+  optional bool is_normal = 16;
+  optional bool is_dead = 17;
+  optional EDamageProperty property = 18;
   Vector3 damage_pos = 19;
   repeated ClientHitPartInfo part_infos = 20;
-  int64 top_summoner_id = 21;
+  optional int64 top_summoner_id = 21;
   Vector2 damage_weight = 22;
-  uint32 passive_uuid = 23;
-  bool is_rainbow = 24;
-  EDamageMode damage_mode = 25;
+  optional uint32 passive_uuid = 23;
+  optional bool is_rainbow = 24;
+  optional EDamageMode damage_mode = 25;
 }
 
 message SyncDirWhenAiming {
@@ -6052,45 +6953,75 @@ message SyncDirWhenAiming {
   string aim_dir = 2;
 }
 
-message SyncDungeonData { DungeonSyncData v_data = 1; }
+message SyncDungeonData {
+  DungeonSyncData v_data = 1;
+}
 
-message SyncDungeonDirtyData { BufferStream v_data = 1; }
+message SyncDungeonDirtyData {
+  BufferStream v_data = 1;
+}
 
 message SyncEntityBehaviorTree {
   string entity_id = 1;
   string json = 2;
 }
 
-message SyncFakeBulletHitInfo { repeated ClientHitInfo hit_infos = 1; }
+message SyncFakeBulletHitInfo {
+  repeated ClientHitInfo hit_infos = 1;
+}
 
-message SyncFieldOfView { string json = 1; }
+message SyncFieldOfView {
+  string json = 1;
+}
 
-message SyncHitInfo { repeated ClientHitInfo hit_infos = 1; }
+message SyncHitInfo {
+  repeated ClientHitInfo hit_infos = 1;
+}
 
-message SyncLog { string log = 1; }
+message SyncLog {
+  string log = 1;
+}
 
-message SyncNearDeltaInfo { repeated AoiSyncDelta delta_infos = 1; }
+message SyncNearDeltaInfo {
+  repeated AoiSyncDelta delta_infos = 1;
+}
 
 message SyncNearEntities {
   repeated Entity appear = 1;
   repeated DisappearEntity disappear = 2;
 }
 
-message SyncPathNode { string entity_id = 1; }
+message SyncPathNode {
+  string entity_id = 1;
+}
 
-message SyncPersonalObject { ScenePersonalObject v_datas = 1; }
+message SyncPersonalObject {
+  ScenePersonalObject v_datas = 1;
+}
 
-message SyncPlayCameraAnimation { string id = 1; }
+message SyncPlayCameraAnimation {
+  string id = 1;
+}
 
-message SyncSceneArea { string scene_area_id = 1; }
+message SyncSceneArea {
+  string scene_area_id = 1;
+}
 
-message SyncSceneAttrs { AttrCollection attrs = 1; }
+message SyncSceneAttrs {
+  AttrCollection attrs = 1;
+}
 
-message SyncSceneEvents { EventDataList evt = 1; }
+message SyncSceneEvents {
+  EventDataList evt = 1;
+}
 
-message SyncServerData { ServerData server_data = 1; }
+message SyncServerData {
+  ServerData server_data = 1;
+}
 
-message SyncServerSkillEnd { string skill_uuid = 1; }
+message SyncServerSkillEnd {
+  string skill_uuid = 1;
+}
 
 message SyncServerSkillSingingTimeSub {
   string skill_uuid = 1;
@@ -6102,8 +7033,8 @@ message SyncServerSkillStageEnd {
 }
 
 message SyncServerTime {
-  string client_milliseconds = 1;
-  string server_milliseconds = 2;
+  optional int64 client_milliseconds = 1;
+  optional int64 server_milliseconds = 2;
 }
 
 message SyncSkillLocation {
@@ -6124,17 +7055,12 @@ message SyncSubSceneAttrs {
   bool is_first_enter = 2;
 }
 
-message SyncToMeDeltaInfo { AoiSyncToMeDelta delta_info = 1; }
+message SyncToMeDeltaInfo {
+  AoiSyncToMeDelta delta_info = 1;
+}
 
-message SyncUserBeHitInfo { repeated ClientHitInfo behit_infos = 1; }
-
-enum SystemType {
-  SystemType_Null = 0;
-  SystemType_Android = 1;
-  SystemType_Ios = 2;
-  SystemType_Web = 3;
-  SystemType_Linux = 4;
-  SystemType_Windows = 5;
+message SyncUserBeHitInfo {
+  repeated ClientHitInfo behit_infos = 1;
 }
 
 message TakeOffShowPiece {
@@ -6142,29 +7068,25 @@ message TakeOffShowPiece {
   string v_piece_id = 2;
 }
 
-message TakeOnActivateRideSkin { TakeOnActivateRideSkinParam param = 1; }
+message TakeOnActivateRideSkin {
+  TakeOnActivateRideSkinParam param = 1;
+}
 
-message TakeOnActivateRideSkinParam { string skin_id = 1; }
+message TakeOnActivateRideSkinParam {
+  int32 skin_id = 1;
+}
 
-message TakeOnSetRideSkin { TakeOnSetRideSkinParam param = 1; }
+message TakeOnSetRideSkin {
+  TakeOnSetRideSkinParam param = 1;
+}
 
-message TakeOnSetRideSkinParam { string skin_id = 1; }
+message TakeOnSetRideSkinParam {
+  int32 skin_id = 1;
+}
 
 message TakeOnShowPiece {
   EShowPieceType v_piece_type = 1;
   string v_piece_id = 2;
-}
-
-message TeamMemberSocialData {
-  BasicData basic_data = 1;
-  AvatarInfo avatar_info = 2;
-  FaceData face_data = 3;
-  ProfessionData profession_data = 4;
-  EquipData equip_data = 5;
-  FashionData fashion_data = 6;
-  UserSceneInfo user_scene_info = 7;
-  UserAttrData user_attr_data = 8;
-  PersonalZoneShow personal_zone = 9;
 }
 
 message TeamMemData {
@@ -6179,18 +7101,38 @@ message TeamMemData {
   TeamMemberSocialData social_data = 9;
 }
 
-message Teleport { TeleportParams teleport_params = 1; }
-
-message TeleportParams { TransferParam transfer_params = 1; }
-
-message TempAttr {
-  int32 id = 1;
-  int32 value = 2;
+message TeamMemberSocialData {
+  BasicData basic_data = 1;
+  AvatarInfo avatar_info = 2;
+  FaceData face_data = 3;
+  ProfessionData profession_data = 4;
+  EquipData equip_data = 5;
+  FashionData fashion_data = 6;
+  UserSceneInfo user_scene_info = 7;
+  UserAttrData user_attr_data = 8;
+  PersonalZoneShow personal_zone = 9;
 }
 
-message TempAttrCollection { repeated TempAttr attrs = 1; }
+message Teleport {
+  TeleportParams teleport_params = 1;
+}
 
-message TempPhotoCache { map<string, string> temp_photo_cache_dict = 1; }
+message TeleportParams {
+  TransferParam transfer_params = 1;
+}
+
+message TempAttr {
+  optional int32 id = 1;
+  optional int32 value = 2;
+}
+
+message TempAttrCollection {
+  repeated TempAttr attrs = 1;
+}
+
+message TempPhotoCache {
+  map<string, string> temp_photo_cache_dict = 1;
+}
 
 message TempPhotoCacheInfo {
   string id = 1;
@@ -6205,11 +7147,11 @@ message TempPhotoCacheInfo {
 }
 
 message ThrowMoveInfo {
-  string target_uuid = 1;
-  string skill_id = 2;
-  string skill_level = 3;
-  string stage_id = 4;
-  string event_id = 5;
+  int64 target_uuid = 1;
+  int32 skill_id = 2;
+  int32 skill_level = 3;
+  int32 stage_id = 4;
+  int32 event_id = 5;
 }
 
 message TimerInfo {
@@ -6226,11 +7168,17 @@ message TimerInfo {
   string duration = 11;
 }
 
-message TimerRefreshDataList { map<string, string> refresh_data_list = 1; }
+message TimerRefreshDataList {
+  map<uint32, TimerRefreshList> refresh_data_list = 1;
+}
 
-message TimerRefreshInfo { string last_refresh_time = 1; }
+message TimerRefreshInfo {
+  int64 last_refresh_time = 1;
+}
 
-message TimerRefreshList { map<string, string> refresh_data = 1; }
+message TimerRefreshList {
+  map<uint32, TimerRefreshInfo> refresh_data = 1;
+}
 
 message TransferParam {
   int32 scene_id = 1;
@@ -6242,74 +7190,81 @@ message TransferParam {
   string scene_guid = 7;
   string connect_guid = 8;
   int64 sub_scene_uuid = 9;
+  bool is_revive = 10;
 }
 
-message TransferPoint { map<string, string> points = 1; }
+message TransferPoint {
+  map<int32, int32> points = 1;
+}
 
 message Treasure {
-  map<string, string> rows = 1;
-  map<string, string> history_rows = 2;
+  map<int32, TreasureItemRow> rows = 1;
+  map<int32, TreasureItemRow> history_rows = 2;
   bool flag = 3;
-  string refresh_time = 4;
-  repeated string selected_reward = 5;
-  string season_id = 6;
-  string last_season_id = 7;
-  string last_refresh_time = 8;
+  int64 refresh_time = 4;
+  repeated int32 selected_reward = 5;
+  int32 season_id = 6;
+  int32 last_season_id = 7;
+  int64 last_refresh_time = 8;
 }
 
 message TreasureItem {
   repeated Item items = 1;
-  string type = 2;
+  int32 type = 2;
 }
 
 message TreasureItemRow {
-  string config_id = 1;
-  map<string, string> main_targets = 2;
-  map<string, string> sub_targets = 3;
+  int32 config_id = 1;
+  map<int32, TreasureItemTarget> main_targets = 2;
+  map<int32, TreasureItemTarget> sub_targets = 3;
 }
 
 message TreasureItemTarget {
-  string target_id = 1;
-  string target_num = 2;
+  int32 target_id = 1;
+  int32 target_num = 2;
   TreasureItem reward = 3;
 }
 
 message TrialRoad {
-  repeated string pass_room = 1;
-  map<string, string> room_target_award = 2;
+  repeated int32 pass_room = 1;
+  map<int32, TrialRoadRoomTargetAward> room_target_award = 2;
   TrialRoadTargetAward target_award = 3;
 }
 
-message TrialRoadRoomTargetAward { map<string, string> target_progress = 1; }
+message TrialRoadRoomTargetAward {
+  map<int32, TrialRoadTargetProgress> target_progress = 1;
+}
 
-message TrialRoadTargetAward { map<string, string> target_progress = 1; }
+message TrialRoadTargetAward {
+  map<int32, TrialRoadTargetProgress> target_progress = 1;
+}
 
 message TrialRoadTargetProgress {
-  string target_id = 1;
-  string target_progress = 2;
-  string award_state = 3;
+  int32 target_id = 1;
+  int32 target_progress = 2;
+  int32 award_state = 3;
 }
 
 message TssAccountInfoProto {
   string account = 1;
-  string account_type = 2;
-  string plat_id = 3;
-  string game_id = 4;
-  string world_id = 5;
-  string channel_id = 6;
-  string role_id = 7;
+  uint32 account_type = 2;
+  uint32 plat_id = 3;
+  uint32 game_id = 4;
+  uint32 world_id = 5;
+  uint32 channel_id = 6;
+  int64 role_id = 7;
   bytes anti_data = 8;
   string account_id = 9;
   string client_ip = 10;
   string role_name = 11;
-  string index = 12;
+  uint32 index = 12;
 }
 
 message UnionBuilding {
-  string building_id = 1;
-  string building_level = 2;
-  string upgrade_finish_time = 3;
-  string has_speed_up_sec = 4;
+  int32 building_id = 1;
+  int32 building_level = 2;
+  int64 upgrade_finish_time = 3;
+  int64 has_speed_up_sec = 4;
 }
 
 message UnionDanceHistory {
@@ -6319,13 +7274,13 @@ message UnionDanceHistory {
 }
 
 message UnionData {
-  int64 union_id = 1;
+  int64 unionid = 1;
   string name = 2;
   int32 union_hunt_rank = 3;
 }
 
 message UnionEScreenInfo {
-  string e_screen_id = 1;
+  int32 e_screen_id = 1;
   repeated PhotoGraphShow photo_graphs = 2;
 }
 
@@ -6335,20 +7290,28 @@ message UnionHistoryActive {
 }
 
 message UnlockColorInfo {
-  map<string, bool> color_info_map = 1;
-  map<string, bool> color_block_info_map = 2;
+  map<int32, bool> color_info_map = 1;
+  map<int32, bool> color_block_info_map = 2;
 }
 
-message UnlockEmojiData { map<string, bool> unlock_map = 1; }
+message UnlockEmojiData {
+  map<int32, bool> unlock_map = 1;
+}
 
-message UnlockInfo { string object_id = 1; }
+message UnlockInfo {
+  uint64 object_id = 1;
+}
 
-message UnlockProficiency { repeated string unlock_buffer_id = 1; }
+message UnlockProficiency {
+  repeated int32 unlock_buffer_id = 1;
+}
 
-message UpdateStructure { UpdateStructureRequest v_request = 1; }
+message UpdateStructure {
+  UpdateStructureRequest v_request = 1;
+}
 
 message UpdateStructureRequest {
-  string home_id = 1;
+  int64 home_id = 1;
   repeated StructureOp ops = 2;
 }
 
@@ -6357,23 +7320,53 @@ message UploadTLogBody {
   string t_log_body = 2;
 }
 
-message UserActivityInfo {
-  string start_time = 2;
-  string end_time = 3;
-  map<string, string> rewards = 4;
+message UseSkill {
+  UseSkillParam param = 1;
 }
 
-message UserActivityList { map<string, string> activities = 1; }
+message UseSkillParam {
+  string skill_uuid = 1;
+  string skillid = 2;
+  string skill_level = 3;
+  string begin_time = 4;
+  string target_uuid = 5;
+  Position target_pos = 6;
+  Position cur_pos = 7;
+  string target_part_id = 8;
+  Position target_part_pos = 9;
+  bool is_passive = 10;
+  bool is_activate_roulette = 11;
+}
+
+message UseSlot {
+  UseSlotRequest v_request = 1;
+}
+
+message UseSlotRequest {
+  int32 slot_id = 1;
+  EUseSlotType use_type = 2;
+  bytes extra_data = 3;
+}
+
+message UserActivityInfo {
+  uint64 start_time = 2;
+  uint64 end_time = 3;
+  map<uint32, UserActivityRewardInfo> rewards = 4;
+}
+
+message UserActivityList {
+  map<int64, UserActivityInfo> activities = 1;
+}
 
 message UserActivityRewardInfo {
-  string id = 1;
-  string status = 2;
-  map<string, string> functions = 3;
+  uint32 id = 1;
+  uint32 status = 2;
+  map<uint32, GameFunctionData> functions = 3;
 }
 
 message UserAttrData {
-  int32 state = 1;
-  int64 fight_point = 2;
+  int32 state = 3;
+  int64 fight_point = 4;
 }
 
 message UserControlInfo {
@@ -6393,14 +7386,25 @@ message UserControlInfo {
   string move_version = 14;
 }
 
-message UserDoAction { string v_selected_str = 1; }
+message UserDoAction {
+  string v_selected_str = 1;
+}
 
 message UserFightAttr {
   int64 cur_hp = 1;
   int64 max_hp = 2;
+  float origin_energy = 3;
+  repeated uint32 resource_ids = 4;
+  repeated uint32 resources = 5;
+  int32 is_dead = 6;
+  int64 dead_time = 7;
+  int32 revive_id = 8;
+  repeated SkillCDInfo cd_info = 9;
 }
 
-message UserNotifyTrigger { UserNotifyTriggerInfo v_info = 1; }
+message UserNotifyTrigger {
+  UserNotifyTriggerInfo v_info = 1;
+}
 
 message UserNotifyTriggerInfo {
   ENotifyTrigger type = 1;
@@ -6411,7 +7415,9 @@ message UserNotifyTriggerInfo {
   string trigger_actor_table_uid = 6;
 }
 
-message UserRecommendPlayData { map<string, string> play_mail = 1; }
+message UserRecommendPlayData {
+  map<int32, int64> play_mail = 1;
+}
 
 message UserSceneInfo {
   int32 scene_id = 1;
@@ -6435,46 +7441,19 @@ message UserUnion {
   UserUnionHuntInfo user_union_hunt_info = 14;
 }
 
-message UserUnionHuntInfo { int32 hunt_rank = 1; }
-
-message UseSkill { UseSkillParam param = 1; }
-
-message UseSkillParam {
-  string skill_uuid = 1;
-  string skillid = 2;
-  string skill_level = 3;
-  string begin_time = 4;
-  string target_uuid = 5;
-  Position target_pos = 6;
-  Position cur_pos = 7;
-  string target_part_id = 8;
-  Position target_part_pos = 9;
-  bool is_passive = 10;
-  bool is_activate_roulette = 11;
-}
-
-message UseSlot { UseSlotRequest v_request = 1; }
-
-message UseSlotRequest {
-  string slot_id = 1;
-  EUseSlotType use_type = 2;
-  bytes extra_data = 3;
-}
-
-enum VDataOneofCase {
-  VDataOneofCaseNone = 0;
-  VData = 1;
+message UserUnionHuntInfo {
+  int32 hunt_rank = 1;
 }
 
 message Vector2 {
-  float x = 1;
-  float y = 2;
+  optional float x = 1;
+  optional float y = 2;
 }
 
 message Vector3 {
-  float x = 1;
-  float y = 2;
-  float z = 3;
+  optional float x = 1;
+  optional float y = 2;
+  optional float z = 3;
 }
 
 message Vector4 {
@@ -6484,13 +7463,15 @@ message Vector4 {
   string w = 4;
 }
 
-message WarehouseData { int64 warehouse_id = 1; }
+message WarehouseData {
+  int64 warehouse_id = 1;
+}
 
 message WeeklyTowerRecord {
-  string begin_time = 1;
-  string max_climb_up_id = 2;
-  repeated string award_climb_up_ids = 3;
-  string rule_id = 4;
+  int64 begin_time = 1;
+  int32 max_climb_up_id = 2;
+  repeated int32 award_climb_up_ids = 3;
+  int32 rule_id = 4;
 }
 
 message WorldEventData {
@@ -6500,13 +7481,15 @@ message WorldEventData {
 }
 
 message WorldEventMap {
-  map<string, string> event_map = 1;
-  string accept_count = 2;
-  string last_update_time = 3;
-  string refresh_time = 4;
+  map<uint32, worldEventData> event_map = 1;
+  int32 accept_count = 2;
+  int64 last_update_time = 3;
+  int64 refresh_time = 4;
 }
 
-message WorldNtfSyncPathNode { PathNodeList lists = 1; }
+message WorldNtfSyncPathNode {
+  PathNodeList lists = 1;
+}
 
 message WorldQuestInfo {
   uint32 finish_points = 1;
@@ -6514,9 +7497,6 @@ message WorldQuestInfo {
   uint32 exceeding_points = 3;
 }
 
-message WorldQuestList { repeated int32 quest_list = 1; }
-
-enum WorldReconnectStatus {
-  FastReconnect = 0;
-  NewSession = 1;
+message WorldQuestList {
+  repeated int32 quest_list = 1;
 }

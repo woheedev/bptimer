@@ -39,6 +39,7 @@ message CharBaseInfo {
   int64 char_id = 1;
   string account_id = 2;
   string name = 5;
+  int32 fight_point = 35;
 }
 
 message CharSerialize {
@@ -47,6 +48,7 @@ message CharSerialize {
   SceneData scene_data = 3;
   ItemPackage item_package = 7;
   Mod mod = 57;
+  ProfessionList profession_list = 61;
 }
 
 message DisappearEntity {
@@ -89,6 +91,9 @@ message Position {
   float z = 3;
 }
 
+message ProfessionList {
+  int32 cur_profession_id = 1;
+
 message SceneData {
   uint32 line_id = 15;
 }
@@ -125,4 +130,10 @@ message SyncNearEntities {
 
 message SyncToMeDeltaInfo {
   AoiSyncToMeDelta delta_info = 1;
+}
+
+message Vector3 {
+  float x = 1;
+  float y = 2;
+  float z = 3;
 }
