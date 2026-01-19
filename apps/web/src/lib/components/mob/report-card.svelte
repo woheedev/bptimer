@@ -39,7 +39,10 @@
 	const isSpecialUser = $derived(BYPASS_VOTE_USER_IDS.includes(report.user.id));
 	const isAdminUser = $derived(ADMIN_USER_IDS.includes(report.user.id));
 	const isApiUser = $derived(BYPASS_VOTE_USER_IDS.includes(report.user.id));
-	const displayName = $derived(API_USERS[report.user.id] ?? report.user.name);
+	const apiUser = $derived(API_USERS[report.user.id]);
+	const apiLabel = $derived(apiUser?.label ?? 'API');
+	const apiUrl = $derived(apiUser?.url);
+	const displayName = $derived(isApiUser ? apiLabel : (report.user.name ?? 'Unknown'));
 
 	// Reactive time for live updates
 	let now = $state(Date.now());
@@ -197,7 +200,18 @@
 				<p class="truncate text-sm font-medium">
 					Line {report.channel} • {report.hp_percentage}% HP
 				</p>
-				<p class="truncate text-xs">{displayName}</p>
+				{#if isApiUser && apiUrl}
+					<a
+						class="truncate text-xs text-muted-foreground underline-offset-2 hover:underline"
+						href={apiUrl}
+						target="_blank"
+						rel="noreferrer noopener external"
+					>
+						{displayName}
+					</a>
+				{:else}
+					<p class="truncate text-xs">{displayName}</p>
+				{/if}
 			</div>
 		</div>
 

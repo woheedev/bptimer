@@ -119,15 +119,33 @@ export const REPUTATION_BAD_DISPLAY_THRESHOLD = -10;
 export const LEADERBOARD_LIMIT = 50;
 
 // API users
-export const API_USERS: Record<string, string> = {
-	fovkhat7zlite07: 'BPTimer Companion',
-	d7v77edry2kmhp5: 'discord.gg/bpsrfarmers',
-	qctjhx7a061lhfq: 'tinyurl.com/bpsrlogs', // winjwinj
-	ku99bl6jmjbijj4: 'tinyurl.com/meter-bpsr', // geonode
-	gw8hsqxlvvbok37: 'BPTL - blueprotocol.fr', // kaws & solaray
-	fftlpj0jgvmmoge: 'tinyurl.com/mrsnakke', // mrsnakke
-	zdc1lhi31t05zco: 'tinyurl.com/gabrielsanbs', // gabrielsanbs
-	g9bavfjybj4ezhb: 'tinyurl.com/zdpsmeter' // xennma
+export const API_USERS: Record<string, { label: string; url?: string }> = {
+	fovkhat7zlite07: {
+		label: 'BPTimer Companion',
+		url: 'https://github.com/woheedev/bptimer/releases/latest'
+	},
+	d7v77edry2kmhp5: { label: 'BPSR Farmers', url: 'https://discord.gg/bpsrfarmers' },
+	qctjhx7a061lhfq: {
+		label: 'BPSR Logs',
+		url: 'https://github.com/winjwinj/bpsr-logs/releases/latest'
+	},
+	ku99bl6jmjbijj4: {
+		label: 'BPSR Meter (denoder)',
+		url: 'https://github.com/Denoder/BPSR-Meter/releases/latest'
+	},
+	gw8hsqxlvvbok37: { label: 'BPTL', url: 'https://blueprotocol.fr' },
+	fftlpj0jgvmmoge: {
+		label: 'BPSR Meter (mrsnakke)',
+		url: 'https://github.com/mrsnakke/BPSR-Meter/releases/latest'
+	},
+	zdc1lhi31t05zco: {
+		label: 'BPSR Meter (gabrielsanbs)',
+		url: 'https://github.com/gabrielsanbs/BPSR-Meter/releases/latest'
+	},
+	g9bavfjybj4ezhb: {
+		label: 'ZDPS Meter',
+		url: 'https://github.com/Blue-Protocol-Source/BPSR-ZDPS/releases/latest'
+	}
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
 
