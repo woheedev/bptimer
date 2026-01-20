@@ -193,20 +193,6 @@ export const voteInputSchema = z.object({
 	voteType: z.enum(['up', 'down'])
 });
 
-// Leaderboard
-export const leaderboardEntrySchema = z.object({
-	id: z
-		.string()
-		.regex(/^[a-z0-9]+$/)
-		.min(15)
-		.max(15),
-	username: z.string().min(1).max(100),
-	avatar: z.string().optional(),
-	reputation: z.number().int().optional().default(0)
-});
-
-export type LeaderboardEntry = z.infer<typeof leaderboardEntrySchema>;
-
 // Filter sort settings schema
 export const filterSortSettingsSchema = z.object({
 	sortField: z.enum(['channel', 'hp', 'report_time']),

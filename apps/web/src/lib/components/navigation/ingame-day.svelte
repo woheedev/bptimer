@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { calculateGameDay, getGameTimezone } from '$lib/utils/general-utils';
 	import { regionStore } from '$lib/stores/region.svelte';
 	import { SvelteDate } from 'svelte/reactivity';
@@ -24,6 +23,6 @@
 	});
 </script>
 
-<div>
-	<Badge variant="secondary">Day {days} - {formatter.format(gameTime)}</Badge>
-</div>
+<span class="text-[0.7rem] font-medium text-muted-foreground">
+	Day {days} • {formatter.format(gameTime)}
+</span>

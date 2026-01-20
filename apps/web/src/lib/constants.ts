@@ -171,11 +171,8 @@ import {
 	Heart,
 	ListTodo,
 	Map,
-	Sparkle,
 	Sparkles,
-	Swords,
-	Tractor,
-	Trophy
+	Swords
 } from '@lucide/svelte/icons';
 
 export const PAGES: PageItem[] = [
@@ -210,11 +207,6 @@ export const PAGES: PageItem[] = [
 		title: 'Tools & Resources',
 		url: '/tools',
 		icon: Hammer
-	},
-	{
-		title: 'Rep Leaderboard',
-		url: '/leaderboard',
-		icon: Trophy
 	}
 ];
 
@@ -235,18 +227,6 @@ export const PARTNER_PAGES: PageItem[] = [
 		title: 'Event Tracker',
 		url: 'https://bpevents.poofcakes.com/',
 		icon: Calendar,
-		external: true
-	},
-	{
-		title: 'Farmers Discord',
-		url: 'https://discord.gg/bpsrfarmers',
-		icon: Tractor,
-		external: true
-	},
-	{
-		title: 'Rarefarmers Discord',
-		url: 'https://discord.gg/xYeZx28Jc3',
-		icon: Sparkle,
 		external: true
 	}
 ];

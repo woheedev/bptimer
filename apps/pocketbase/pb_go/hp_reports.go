@@ -244,10 +244,6 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		hpReport.Set("reporter", userId)
 		hpReport.Set("region", region)
 
-		if data.UID != 0 {
-			hpReport.Set("player_uid", int(data.UID))
-		}
-
 		// Match the received position to the closest known location
 		if locationID, distSq := findClosestLocation(data.MonsterID, data.PosX, data.PosY, data.PosZ); locationID > 0 {
 			// Reject if distance exceeds maximum allowed distance

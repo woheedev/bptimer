@@ -5,6 +5,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { eventTimersStore } from '$lib/stores/event-timers.svelte';
 	import { ChevronDown, ChevronUp, Github, Moon, PanelLeft, Sun } from '@lucide/svelte/icons';
+	import Discord from '$lib/components/icons/discord.svelte';
 	import { toggleMode } from 'mode-watcher';
 
 	let { search }: { search?: { execute: (query: string) => void } } = $props();
@@ -53,6 +54,17 @@
 			aria-label="View source code on GitHub"
 		>
 			<Github class="h-4 w-4" />
+		</Button>
+		<Button
+			href="https://discord.gg/3UTC4pfCyC"
+			variant="outline"
+			size="icon-sm"
+			class="flex"
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-label="Join the Discord server"
+		>
+			<Discord />
 		</Button>
 	</header>
 	<EventTimers />

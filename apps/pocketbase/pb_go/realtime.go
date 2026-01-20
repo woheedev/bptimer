@@ -43,11 +43,6 @@ func InitRealtimeHooks(app core.App) {
 			locationImage = &locImg
 		}
 
-		var playerUid *int
-		if uidVal := e.Record.GetInt("player_uid"); uidVal != 0 {
-			playerUid = &uidVal
-		}
-
 		globalBatcher.Add(MobUpdate{
 			MobID:         mobID,
 			ChannelNumber: channelNumber,
@@ -56,7 +51,7 @@ func InitRealtimeHooks(app core.App) {
 			LocationImage: locationImage,
 		})
 
-		if err := updateMobChannelStatus(e.App, mobID, channelNumber, hpPercentage, region, locationImage, playerUid); err != nil {
+		if err := updateMobChannelStatus(e.App, mobID, channelNumber, hpPercentage, region, locationImage); err != nil {
 			log.Printf("[REALTIME] mob_channel_status update error=%v", err)
 		}
 
@@ -198,7 +193,7 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate, region string) {
 	}
 }
 
-func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPercentage int, region string, locationImage *int, playerUid *int) error {
+func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPercentage int, region string, locationImage *int) error {
 	record, err := app.FindFirstRecordByFilter(
 		COLLECTION_MOB_CHANNEL_STATUS,
 		"mob = {:mobId} && channel_number = {:channelNumber} && region = {:region}",
@@ -239,10 +234,6 @@ func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPer
 
 	if locationImage != nil {
 		record.Set("location_image", *locationImage)
-	}
-
-	if playerUid != nil {
-		record.Set("last_player_uid", *playerUid)
 	}
 
 	return app.Save(record)

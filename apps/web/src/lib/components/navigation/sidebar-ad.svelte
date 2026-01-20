@@ -4,11 +4,7 @@
 	import { ShieldOff } from '@lucide/svelte/icons';
 	import { onMount } from 'svelte';
 
-	const AD_CHECK_TIMEOUT_MS = 3000;
-
-	type WindowWithAds = Window & { adsbygoogle?: unknown[] };
-
-	let adElement: HTMLModElement | null = $state(null);
+	let adElement: HTMLDivElement | null = $state(null);
 	let adBlocked = $state(false);
 	let adUnfilled = $state(false);
 
@@ -16,14 +12,10 @@
 		if (!browser || !adElement) return;
 
 		let mutationObserver: MutationObserver | null = null;
-		let intervalId: ReturnType<typeof setInterval> | null = null;
 		let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-		const adsbygoogle = (window as WindowWithAds).adsbygoogle;
 
 		const cleanup = () => {
 			mutationObserver?.disconnect();
-			if (intervalId) clearInterval(intervalId);
 			if (timeoutId) clearTimeout(timeoutId);
 		};
 
@@ -40,49 +32,23 @@
 			}
 
 			if (adElement.children.length === 0) {
-				adBlocked = true;
+				adUnfilled = true;
 				cleanup();
 				return;
-			}
-
-			const status = adElement.getAttribute('data-adsbygoogle-status');
-			const adStatus = adElement.getAttribute('data-ad-status');
-
-			if (status === 'done') {
-				if (
-					adStatus === 'unfilled' ||
-					adStatus === 'unfill-optimized' ||
-					!adElement.getAttribute('data-google-query-id')
-				) {
-					adUnfilled = true;
-				}
-				cleanup();
 			}
 		};
 
-		try {
-			if (!adsbygoogle) {
-				adBlocked = true;
-				return;
-			}
-			adsbygoogle.push({});
-		} catch {
-			adBlocked = true;
-			return;
-		}
-
 		mutationObserver = new MutationObserver(checkStatus);
 		mutationObserver.observe(adElement, {
-			attributes: true,
-			attributeFilter: ['data-adsbygoogle-status', 'data-ad-status']
+			childList: true,
+			subtree: true,
+			attributes: true
 		});
-
-		intervalId = setInterval(checkStatus, 500);
 
 		timeoutId = setTimeout(() => {
 			checkStatus();
 			cleanup();
-		}, AD_CHECK_TIMEOUT_MS);
+		}, 3000);
 
 		return cleanup;
 	});
@@ -92,14 +58,11 @@
 	class="flex min-h-0 flex-1 overflow-hidden p-0 text-xs"
 	style={adBlocked || adUnfilled ? 'display: none;' : undefined}
 >
-	<ins
-		bind:this={adElement}
-		class="adsbygoogle block w-full"
-		style="height:100%;min-height:50px;"
-		data-ad-client="ca-pub-8392238124244371"
-		data-ad-slot="3487180796"
-	></ins>
+	<div bind:this={adElement} class="block w-full" style="height:100%;min-height:50px;">
+		<div class="content_desktop_hint"></div>
+	</div>
 </Alert.Root>
+
 {#if adBlocked}
 	<Alert.Root class="text-xs">
 		<ShieldOff />

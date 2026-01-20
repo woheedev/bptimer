@@ -33,20 +33,20 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- Leaderboard -->
-  <url>
-    <loc>https://bptimer.com/leaderboard</loc>
-    <lastmod>2025-11-27</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-
   <!-- Favorites -->
   <url>
     <loc>https://bptimer.com/favorites</loc>
     <lastmod>2025-11-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
+  </url>
+
+  <!-- Privacy Policy -->
+  <url>
+    <loc>https://bptimer.com/privacy</loc>
+    <lastmod>2025-11-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>
 

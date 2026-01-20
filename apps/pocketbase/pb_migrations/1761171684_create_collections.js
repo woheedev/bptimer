@@ -948,18 +948,6 @@ migrate(
           },
           {
             hidden: false,
-            id: 'number783959845',
-            max: null,
-            min: 0,
-            name: 'player_uid',
-            onlyInt: true,
-            presentable: false,
-            required: false,
-            system: false,
-            type: 'number'
-          },
-          {
-            hidden: false,
             id: 'autodate_created',
             name: 'created',
             onCreate: true,
@@ -1135,18 +1123,6 @@ migrate(
             max: 20,
             min: 1,
             name: 'location_image',
-            onlyInt: true,
-            presentable: false,
-            required: false,
-            system: false,
-            type: 'number'
-          },
-          {
-            hidden: false,
-            id: 'number3352178127',
-            max: null,
-            min: 0,
-            name: 'last_player_uid',
             onlyInt: true,
             presentable: false,
             required: false,
