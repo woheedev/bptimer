@@ -13,7 +13,7 @@ async function discordAuth(redirectPath: '/' | '/api-key'): Promise<void> {
 		await goto(resolve(redirectPath));
 	} catch (error) {
 		console.error('Discord OAuth error:', error);
-		throw new Error((error as Error).message || 'Discord authentication failed');
+		throw new Error((error as Error).message || 'Discord authentication failed', { cause: error });
 	}
 }
 

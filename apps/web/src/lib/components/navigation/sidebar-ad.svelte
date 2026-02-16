@@ -6,7 +6,7 @@
 
 	let adElement: HTMLDivElement | null = $state(null);
 	let adBlocked = $state(false);
-	let adUnfilled = $state(false);
+	let adLoaded = $state(false);
 
 	onMount(() => {
 		if (!browser || !adElement) return;
@@ -19,22 +19,40 @@
 			if (timeoutId) clearTimeout(timeoutId);
 		};
 
+		const checkForAd = () => {
+			if (!adElement) return false;
+
+			const iframe = adElement.querySelector('iframe');
+			if (iframe) {
+				const rect = iframe.getBoundingClientRect();
+				if (rect.height > 0 && rect.width > 0) {
+					return true;
+				}
+			}
+
+			const rect = adElement.getBoundingClientRect();
+			if (rect.height > 50) {
+				return true;
+			}
+
+			return false;
+		};
+
 		const checkStatus = () => {
 			if (!adElement) return;
 
 			const style = window.getComputedStyle(adElement);
-			const rect = adElement.getBoundingClientRect();
 
-			if (rect.height === 0 || rect.width === 0 || style.display === 'none') {
+			// Check if ad blocker hid the element
+			if (style.display === 'none' || style.visibility === 'hidden') {
 				adBlocked = true;
 				cleanup();
 				return;
 			}
 
-			if (adElement.children.length === 0) {
-				adUnfilled = true;
+			if (checkForAd()) {
+				adLoaded = true;
 				cleanup();
-				return;
 			}
 		};
 
@@ -48,7 +66,7 @@
 		timeoutId = setTimeout(() => {
 			checkStatus();
 			cleanup();
-		}, 3000);
+		}, 5000);
 
 		return cleanup;
 	});
@@ -56,9 +74,9 @@
 
 <Alert.Root
 	class="flex min-h-0 flex-1 overflow-hidden p-0 text-xs"
-	style={adBlocked || adUnfilled ? 'display: none;' : undefined}
+	style={adLoaded ? undefined : 'position: absolute; visibility: hidden; pointer-events: none;'}
 >
-	<div bind:this={adElement} class="block w-full" style="height:100%;min-height:50px;">
+	<div bind:this={adElement} class="block w-full" style="height:100%;">
 		<div class="content_desktop_hint"></div>
 	</div>
 </Alert.Root>

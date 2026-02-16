@@ -10,7 +10,7 @@
 
 	let mobs_data: MobContainer | undefined = $state();
 	const mobIds = $derived(Array.from(favoriteMobsStore.favoriteMobs));
-	const canonicalUrl = `https://bptimer.com${page.url.pathname}`;
+	const canonicalUrl = `${page.url.origin}${page.url.pathname}`;
 </script>
 
 <SeoHead

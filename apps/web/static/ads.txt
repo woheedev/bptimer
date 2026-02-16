@@ -1,8 +1,8 @@
 # PubNation Ads.txt v20260113
 managerdomain=pubnation.com
 contact=sales@pubnation.com
-ownerdomain=
-pubnation.com, 7347f077-bb36-48d4-a90b-3128776c43b3, DIRECT, 1363c924529b3998
+ownerdomain=bptimer.com
+pubnation.com, c1a38252e1f473cacba494a9c6bdf99f, DIRECT, 1363c924529b3998
 aps.amazon.com, b8e296dd-fc9f-4561-b5be-0262680b7abd, DIRECT
 appnexus.com, 13329, DIRECT, f5ab79cb980f11d1
 indexexchange.com, 199830, DIRECT, 50b1c356f2c5c8fc
@@ -79,6 +79,4 @@ loopme.com, 11530, DIRECT, 6c8d5f95897a5a3b
 adform.com, 2996, DIRECT
 risecodes.com, 6124caed9c7adb0001c028d8, DIRECT
 minutemedia.com, 01garg96c88b, DIRECT
-
-
-
+google.com, pub-8392238124244371, DIRECT, f08c47fec0942fa0

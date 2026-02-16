@@ -44,7 +44,7 @@
 	let activeTab = $state<'modules' | 'priorities' | 'results'>('modules');
 	let showClearDialog = $state(false);
 
-	const canonicalUrl = `https://bptimer.com${page.url.pathname}`;
+	const canonicalUrl = `${page.url.origin}${page.url.pathname}`;
 
 	// Decode and import module data from URL params
 	onMount(async () => {

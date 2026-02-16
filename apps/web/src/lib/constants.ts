@@ -145,6 +145,10 @@ export const API_USERS: Record<string, { label: string; url?: string }> = {
 	g9bavfjybj4ezhb: {
 		label: 'ZDPS Meter',
 		url: 'https://github.com/Blue-Protocol-Source/BPSR-ZDPS/releases/latest'
+	},
+	lmb7gpcnzge04di: {
+		label: 'Blue Meter Mobile',
+		url: 'https://github.com/jbourny/bluemetermobile/releases/latest'
 	}
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
@@ -339,6 +343,17 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				tags: 'EN|C#|.NET|Windows',
 				url: 'https://github.com/Blue-Protocol-Source/BPSR-ZDPS',
 				previewImage: '/images/tools/zdps-meter.webp'
+			},
+			{
+				title: 'Blue Meter Mobile',
+				description:
+					'BlueMeter is a mobile DPS/Heal meter for Blue Protocol: Star Resonance. The app provides real-time combat information through an Android floating overlay.',
+				author: 'jbourny',
+				badge: 'BPTimer',
+				badgeVariant: 'default',
+				tags: 'EN|FR|Flutter|Dart|Android',
+				url: 'https://github.com/jbourny/bluemetermobile',
+				previewImage: '/images/tools/blue-meter-mobile.webp'
 			},
 			{
 				title: 'BPSR Logs',

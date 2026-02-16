@@ -7,7 +7,7 @@ export async function createVote(reportId: string, voteType: 'up' | 'down') {
 		voteInputSchema.parse({ reportId, voteType });
 	} catch (error) {
 		console.error('Invalid vote input:', error);
-		throw new Error('Invalid vote parameters');
+		throw new Error('Invalid vote parameters', { cause: error });
 	}
 	try {
 		// Check if user already voted on this report

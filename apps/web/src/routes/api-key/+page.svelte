@@ -14,7 +14,7 @@
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { showToast } from '$lib/utils/toast';
 
-	const canonicalUrl = `https://bptimer.com${page.url.pathname}`;
+	const canonicalUrl = `${page.url.origin}${page.url.pathname}`;
 
 	let currentUser = $state<UserRecordModel | null>(null);
 	let apiKey = $state<string>('');

@@ -8,7 +8,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { Shield } from '@lucide/svelte/icons';
 
-	const canonicalUrl = `https://bptimer.com${page.url.pathname}`;
+	const canonicalUrl = `${page.url.origin}${page.url.pathname}`;
 </script>
 
 <SeoHead
@@ -99,8 +99,8 @@
 					<section>
 						<h2 class="text-base font-semibold text-foreground">Contact</h2>
 						<p>
-							If you have questions or privacy-related requests, you can reach out via the BP Timer
-							Discord server linked in the sidebar.
+							If you have questions or privacy-related requests, you can reach out via the BPSR Devs
+							Discord server linked in the resources page.
 						</p>
 					</section>
 				</div>

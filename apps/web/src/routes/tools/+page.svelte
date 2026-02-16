@@ -12,7 +12,7 @@
 	import { TOOLS_SECTIONS } from '$lib/constants';
 	import { Globe, Hammer, HeartHandshake, Monitor, Users } from '@lucide/svelte/icons';
 
-	const canonicalUrl = `https://bptimer.com${page.url.pathname}`;
+	const canonicalUrl = `${page.url.origin}${page.url.pathname}`;
 </script>
 
 <SeoHead

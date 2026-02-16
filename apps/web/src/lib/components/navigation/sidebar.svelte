@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import AnimatedGradientText from '$lib/components/animated-gradient-text.svelte';
 	import InGameDay from '$lib/components/navigation/ingame-day.svelte';
 	import NavigationMain from '$lib/components/navigation/main.svelte';
@@ -19,7 +20,7 @@
 	}: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
 
-<Sidebar.Root {collapsible} {...restProps}>
+<Sidebar.Root bind:ref {collapsible} {...restProps}>
 	<Sidebar.Content class="gap-0">
 		<Sidebar.Group class="pb-0">
 			<!-- Region Selection -->
@@ -87,8 +88,10 @@
 						rel="noopener noreferrer"
 						class="hover:underline"
 					>
-						Buy me a coffee ☕ | v1.5.0
+						Buy me a coffee ☕
 					</a>
+					<span class="mx-1">|</span>
+					<a href={resolve('/privacy')} class="hover:underline">Privacy</a>
 				</p>
 			</div>
 		</div>
