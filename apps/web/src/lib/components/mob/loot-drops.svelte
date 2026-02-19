@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as HoverCard from '$lib/components/ui/hover-card/index.js';
+	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Gift from '@lucide/svelte/icons/gift';
 	import { BOSS_LOOT_DROPS } from '$lib/constants';
@@ -7,7 +7,6 @@
 	let { mobName }: { mobName: string } = $props();
 
 	const lootDrops = $derived(BOSS_LOOT_DROPS[mobName] || []);
-	let hoverCardOpen = $state(false);
 
 	function parseItem(item: string): { rarity: string; itemType: string } {
 		const parts = item.split('_');
@@ -22,27 +21,13 @@
 </script>
 
 {#if lootDrops.length > 0}
-	<HoverCard.Root bind:open={hoverCardOpen} openDelay={200} closeDelay={100}>
-		<HoverCard.Trigger>
-			<Button
-				variant="secondary"
-				size="sm"
-				class="p-2"
-				aria-label="View loot drops for {mobName}"
-				onclick={(e) => {
-					e.stopPropagation();
-				}}
-				onmouseenter={() => {
-					hoverCardOpen = true;
-				}}
-				onmouseleave={() => {
-					hoverCardOpen = false;
-				}}
-			>
+	<Popover.Root>
+		<Popover.Trigger>
+			<Button variant="secondary" size="sm" class="p-2" aria-label="View loot drops for {mobName}">
 				<Gift size={16} />
 			</Button>
-		</HoverCard.Trigger>
-		<HoverCard.Content class="pointer-events-none w-auto pt-3">
+		</Popover.Trigger>
+		<Popover.Content side="top" class="w-auto pb-3">
 			<div class="space-y-2">
 				<h4 class="text-sm font-semibold">Gear Drops</h4>
 				<div class="flex flex-wrap gap-2">
@@ -76,6 +61,6 @@
 					{/each}
 				</div>
 			</div>
-		</HoverCard.Content>
-	</HoverCard.Root>
+		</Popover.Content>
+	</Popover.Root>
 {/if}

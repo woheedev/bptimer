@@ -69,3 +69,8 @@
 	</header>
 	<EventTimers />
 </div>
+
+<!-- PubNation LB -->
+<div class="flex justify-center border-b px-4 py-3">
+	<div class="pb-lb min-h-[90px] w-full"></div>
+</div>

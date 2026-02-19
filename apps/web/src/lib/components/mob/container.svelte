@@ -6,6 +6,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Empty } from '$lib/components/ui/empty';
 	import {
+		AD_SLOT_INTERVAL,
 		DEBOUNCE_DELAY,
 		LATEST_CHANNELS_DISPLAY_COUNT,
 		STALE_DATA_CHECK_INTERVAL
@@ -58,6 +59,14 @@
 
 	// Filtered mobs based on search query
 	const filteredMobs = $derived(filterMobsByName(mobs, searchQuery));
+
+	const mobChunks = $derived.by(() => {
+		const chunks: MobWithChannels[][] = [];
+		for (let i = 0; i < filteredMobs.length; i += AD_SLOT_INTERVAL) {
+			chunks.push(filteredMobs.slice(i, i + AD_SLOT_INTERVAL));
+		}
+		return chunks;
+	});
 
 	// Get live channels for the selected mob (updated via SSE)
 	const liveChannels = $derived.by(() => {
@@ -209,20 +218,27 @@
 					>
 				</Empty>
 			{:else}
-				<div
-					class="grid grid-cols-1 gap-4 px-4 md:grid-cols-2 lg:grid-cols-3 lg:px-6 xl:grid-cols-4"
-				>
-					{#each filteredMobs as mob (mob.id)}
-						<MobCard
-							{mob}
-							latestChannels={(mob.latestChannels || []).slice(0, LATEST_CHANNELS_DISPLAY_COUNT)}
-							onViewDetails={handleViewDetails}
-							onChannelClick={handleViewDetails}
-							type={isFavorites ? mob.type : type}
-							region={regionStore.value}
-						/>
-					{/each}
-				</div>
+				{#each mobChunks as chunk, chunkIndex (chunkIndex)}
+					{#if chunkIndex > 0}
+						<div class="flex justify-center px-4 lg:px-6">
+							<div class="pb-ic w-full"></div>
+						</div>
+					{/if}
+					<div
+						class="grid grid-cols-1 gap-4 px-4 md:grid-cols-2 lg:grid-cols-3 lg:px-6 xl:grid-cols-4"
+					>
+						{#each chunk as mob (mob.id)}
+							<MobCard
+								{mob}
+								latestChannels={(mob.latestChannels || []).slice(0, LATEST_CHANNELS_DISPLAY_COUNT)}
+								onViewDetails={handleViewDetails}
+								onChannelClick={handleViewDetails}
+								type={isFavorites ? mob.type : type}
+								region={regionStore.value}
+							/>
+						{/each}
+					</div>
+				{/each}
 			{/if}
 		</div>
 

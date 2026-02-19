@@ -4,7 +4,6 @@
 	import InGameDay from '$lib/components/navigation/ingame-day.svelte';
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
-	// import SidebarAd from '$lib/components/navigation/sidebar-ad.svelte';
 	// import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
@@ -57,7 +56,8 @@
 					</Alert.Description>
 				</Alert.Root>
 			-->
-				<!-- <SidebarAd /> -->
+				<!-- PubNation SB -->
+				<div class="pb-sb"></div>
 			</div>
 		</Sidebar.Group>
 	</Sidebar.Content>
