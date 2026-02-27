@@ -5,17 +5,22 @@
 	import MobModal from '$lib/components/mob/modal.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Empty } from '$lib/components/ui/empty';
+	import * as Select from '$lib/components/ui/select/index.js';
 	import {
 		DEBOUNCE_DELAY,
 		LATEST_CHANNELS_DISPLAY_COUNT,
 		STALE_DATA_CHECK_INTERVAL
 	} from '$lib/constants';
+	import { mobSortStore } from '$lib/stores/mob-sort.svelte';
 	import { realtimeMobsStore } from '$lib/stores/realtime-mobs.svelte';
 	import { regionStore } from '$lib/stores/region.svelte';
 	import type { MobWithChannels } from '$lib/types/mobs';
+	import type { MobSortField } from '$lib/types/ui';
 	import { loadMobsData } from '$lib/utils/mob-filtering';
 	import { updateLatestChannels } from '$lib/utils/mob-utils';
 	import { createDebouncedSearch, filterMobsByName } from '$lib/utils/search.svelte';
+	import ArrowDown from '@lucide/svelte/icons/arrow-down';
+	import ArrowUp from '@lucide/svelte/icons/arrow-up';
 
 	let {
 		type = 'boss',
@@ -59,6 +64,25 @@
 	// Filtered mobs based on search query
 	const filteredMobs = $derived(filterMobsByName(mobs, searchQuery));
 
+	const sortFieldOptions: { value: MobSortField; label: string }[] = [
+		{ value: 'level', label: 'Level' },
+		{ value: 'name', label: 'Name' }
+	];
+
+	const sortFieldLabel = $derived(
+		sortFieldOptions.find((o) => o.value === mobSortStore.field)?.label ?? 'Level'
+	);
+
+	// Sorted mobs based on sort preference
+	const sortedMobs = $derived.by(() => {
+		const dir = mobSortStore.direction === 'asc' ? 1 : -1;
+		return [...filteredMobs].sort((a, b) => {
+			if (mobSortStore.field === 'name') return a.name.localeCompare(b.name) * dir;
+			if (a.type !== b.type) return a.type === 'boss' ? -1 : 1;
+			return (a.uid - b.uid) * dir;
+		});
+	});
+
 	// Responsive ad interval
 	let gridCols = $state(4);
 	$effect(() => {
@@ -77,12 +101,12 @@
 			for (const q of queries) q.mq.removeEventListener('change', update);
 		};
 	});
-	const adSlotInterval = $derived(gridCols === 1 ? 3 : gridCols * 2);
+	const adSlotInterval = $derived(gridCols * 2);
 
 	const mobChunks = $derived.by(() => {
 		const chunks: MobWithChannels[][] = [];
-		for (let i = 0; i < filteredMobs.length; i += adSlotInterval) {
-			chunks.push(filteredMobs.slice(i, i + adSlotInterval));
+		for (let i = 0; i < sortedMobs.length; i += adSlotInterval) {
+			chunks.push(sortedMobs.slice(i, i + adSlotInterval));
 		}
 		return chunks;
 	});
@@ -203,16 +227,48 @@
 <div class="flex flex-1 flex-col">
 	<div class="@container/main flex flex-col gap-2">
 		<div class="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-			<!-- Search result count -->
-			{#if searchQuery && !loading}
-				<div class="px-4 lg:px-6">
-					<p class="text-sm text-muted-foreground">
-						Found {filteredMobs.length}
-						{filteredMobs.length === 1 ? singularName : pluralName}
-						{#if searchQuery}
-							matching "{searchQuery}"
+			{#if !loading}
+				<div class="-my-2 flex items-center justify-end gap-1 px-4 md:-my-4 lg:px-6">
+					{#if searchQuery}
+						<p class="mr-auto text-xs text-muted-foreground">
+							{filteredMobs.length}
+							{filteredMobs.length === 1 ? singularName : pluralName}
+						</p>
+					{/if}
+					<span class="text-sm">Sort by </span>
+					<Select.Root
+						type="single"
+						name="mobSort"
+						value={mobSortStore.field}
+						onValueChange={(v) => {
+							if (v) mobSortStore.field = v as MobSortField;
+						}}
+					>
+						<Select.Trigger class="h-6! px-2 py-0 [&_svg]:size-3!">
+							{sortFieldLabel}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Group>
+								{#each sortFieldOptions as option (option.value)}
+									<Select.Item value={option.value} label={option.label}>
+										{option.label}
+									</Select.Item>
+								{/each}
+							</Select.Group>
+						</Select.Content>
+					</Select.Root>
+					<Button
+						variant="outline"
+						class="size-6!"
+						onclick={() => mobSortStore.toggleDirection()}
+						aria-label={mobSortStore.direction === 'asc' ? 'Sort ascending' : 'Sort descending'}
+					>
+						{#if mobSortStore.direction === 'asc'}
+							<ArrowUp class="size-3.5!" />
+						{:else}
+							<ArrowDown class="size-3.5!" />
 						{/if}
-					</p>
+					</Button>
 				</div>
 			{/if}
 

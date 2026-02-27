@@ -36,6 +36,10 @@ export interface SortDirectionOption {
 	label: string;
 }
 
+// Mob-level sort types
+export type MobSortField = 'level' | 'name';
+export type MobSortDirection = 'asc' | 'desc';
+
 // Tools & Resources Types
 export interface ToolCard {
 	title: string;

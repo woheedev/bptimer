@@ -164,6 +164,7 @@ export const MODULES_OPTIMIZER_MODULES_STORAGE_KEY = 'modules-optimizer-modules'
 export const MODULES_OPTIMIZER_PRIORITY_EFFECTS_STORAGE_KEY = 'modules-optimizer-priority-effects';
 export const MODULES_OPTIMIZER_NUM_SLOTS_STORAGE_KEY = 'modules-optimizer-num-slots';
 export const MOB_NOTIFICATIONS_STORAGE_KEY = 'mob-notifications';
+export const MOB_SORT_STORAGE_KEY = 'mob-sort';
 export const REGION_STORAGE_KEY = 'selected-region';
 
 // import Discord from '$lib/components/icons/discord.svelte';
