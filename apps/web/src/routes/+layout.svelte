@@ -4,8 +4,11 @@
 	import { pb } from '$lib/pocketbase';
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { ModeWatcher } from 'mode-watcher';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import '../app.css';
+
+	const MEDIAVINE_SCRIPT_URL =
+		'https://scripts.pubnation.com/tags/7347f077-bb36-48d4-a90b-3128776c43b3.js';
 
 	let { children } = $props();
 
@@ -52,6 +55,16 @@
 
 	setContext('token', getToken);
 	setContext('user', getUser);
+
+	onMount(() => {
+		if (document.querySelector(`script[src="${MEDIAVINE_SCRIPT_URL}"]`)) return;
+		const script = document.createElement('script');
+		script.async = true;
+		script.setAttribute('data-noptimize', '1');
+		script.setAttribute('data-cfasync', 'false');
+		script.src = MEDIAVINE_SCRIPT_URL;
+		document.head.appendChild(script);
+	});
 </script>
 
 <svelte:head>

@@ -35,7 +35,6 @@ export const HP_LOW_THRESHOLD = 60; // %
 export const HP_HIGH_THRESHOLD = 80; // %
 
 // UI constants
-export const AD_SLOT_INTERVAL = 8;
 export const LATEST_CHANNELS_DISPLAY_COUNT = 15;
 export const MAX_REPORTS_LIMIT = 50;
 export const MAX_SEARCH_QUERY_LENGTH = 100;

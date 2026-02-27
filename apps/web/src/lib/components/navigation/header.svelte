@@ -4,7 +4,15 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { eventTimersStore } from '$lib/stores/event-timers.svelte';
-	import { ChevronDown, ChevronUp, Github, Moon, PanelLeft, Sun } from '@lucide/svelte/icons';
+	import {
+		ChevronDown,
+		ChevronUp,
+		Github,
+		Moon,
+		PanelLeft,
+		Scale,
+		Sun
+	} from '@lucide/svelte/icons';
 	import Discord from '$lib/components/icons/discord.svelte';
 	import { toggleMode } from 'mode-watcher';
 
@@ -48,12 +56,21 @@
 			href="https://github.com/woheedev/bptimer"
 			variant="outline"
 			size="icon-sm"
-			class="flex dark:text-foreground"
+			class="flex"
 			target="_blank"
 			rel="noopener noreferrer"
 			aria-label="View source code on GitHub"
 		>
 			<Github class="h-4 w-4" />
+		</Button>
+		<Button
+			href="/privacy"
+			variant="outline"
+			size="icon-sm"
+			class="flex"
+			aria-label="Privacy Policy"
+		>
+			<Scale class="h-4 w-4" />
 		</Button>
 		<Button
 			href="https://discord.gg/3UTC4pfCyC"
@@ -71,6 +88,4 @@
 </div>
 
 <!-- PubNation LB -->
-<div class="flex justify-center border-b px-4 py-3">
-	<div class="pb-lb min-h-[90px] w-full"></div>
-</div>
+<div class="pb-lb flex w-full justify-center border-b p-1"></div>

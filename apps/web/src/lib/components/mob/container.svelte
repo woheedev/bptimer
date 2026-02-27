@@ -6,7 +6,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Empty } from '$lib/components/ui/empty';
 	import {
-		AD_SLOT_INTERVAL,
 		DEBOUNCE_DELAY,
 		LATEST_CHANNELS_DISPLAY_COUNT,
 		STALE_DATA_CHECK_INTERVAL
@@ -60,10 +59,30 @@
 	// Filtered mobs based on search query
 	const filteredMobs = $derived(filterMobsByName(mobs, searchQuery));
 
+	// Responsive ad interval
+	let gridCols = $state(4);
+	$effect(() => {
+		if (!browser) return;
+		const queries = [
+			{ mq: window.matchMedia('(min-width: 1280px)'), cols: 4 },
+			{ mq: window.matchMedia('(min-width: 1024px)'), cols: 3 },
+			{ mq: window.matchMedia('(min-width: 768px)'), cols: 2 }
+		];
+		function update() {
+			gridCols = queries.find((q) => q.mq.matches)?.cols ?? 1;
+		}
+		update();
+		for (const q of queries) q.mq.addEventListener('change', update);
+		return () => {
+			for (const q of queries) q.mq.removeEventListener('change', update);
+		};
+	});
+	const adSlotInterval = $derived(gridCols === 1 ? 3 : gridCols * 2);
+
 	const mobChunks = $derived.by(() => {
 		const chunks: MobWithChannels[][] = [];
-		for (let i = 0; i < filteredMobs.length; i += AD_SLOT_INTERVAL) {
-			chunks.push(filteredMobs.slice(i, i + AD_SLOT_INTERVAL));
+		for (let i = 0; i < filteredMobs.length; i += adSlotInterval) {
+			chunks.push(filteredMobs.slice(i, i + adSlotInterval));
 		}
 		return chunks;
 	});
@@ -220,9 +239,7 @@
 			{:else}
 				{#each mobChunks as chunk, chunkIndex (chunkIndex)}
 					{#if chunkIndex > 0}
-						<div class="flex justify-center px-4 lg:px-6">
-							<div class="pb-ic w-full"></div>
-						</div>
+						<div class="pb-ic flex w-full justify-center border-y p-1"></div>
 					{/if}
 					<div
 						class="grid grid-cols-1 gap-4 px-4 md:grid-cols-2 lg:grid-cols-3 lg:px-6 xl:grid-cols-4"

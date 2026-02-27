@@ -4,12 +4,10 @@
 	import InGameDay from '$lib/components/navigation/ingame-day.svelte';
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
-	// import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { PAGES, PARTNER_PAGES, REGIONS } from '$lib/constants';
 	import { regionStore } from '$lib/stores/region.svelte';
-	// import { HeartHandshake } from '@lucide/svelte/icons';
 	import type { ComponentProps } from 'svelte';
 
 	let {
@@ -40,25 +38,7 @@
 			<NavigationMain items={PARTNER_PAGES} />
 		</Sidebar.Group>
 		<Sidebar.Group class="flex-1 group-data-[collapsible=icon]:hidden">
-			<div class="flex h-full flex-col gap-2 p-0">
-				<!--
-				<Alert.Root class="text-xs">
-					<HeartHandshake />
-					<Alert.Title class="text-sm font-bold">Looking to Collaborate?</Alert.Title>
-					<Alert.Description class="text-xs">
-						Use our API client to help crowdsource data. Join our Discord below for an API key or
-						more information. <a
-							href="https://github.com/woheedev/bptimer/tree/main/packages/bptimer-api-client"
-							target="_blank"
-							rel="noopener noreferrer"
-							class="underline hover:no-underline">Click here!</a
-						>
-					</Alert.Description>
-				</Alert.Root>
-			-->
-				<!-- PubNation SB -->
-				<div class="pb-sb"></div>
-			</div>
+			<div class="pb-sb h-full"></div>
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer class="p-2 group-data-[collapsible=icon]:hidden">
@@ -91,7 +71,7 @@
 						Buy me a coffee ☕
 					</a>
 					<span class="mx-1">|</span>
-					<a href={resolve('/privacy')} class="hover:underline">Privacy</a>
+					<a href={resolve('/privacy')} class="hover:underline">Privacy Policy</a>
 				</p>
 			</div>
 		</div>

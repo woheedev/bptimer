@@ -229,7 +229,17 @@
 	background-color: var(--hp-unknown);
 }
 
-ins.adsbygoogle[data-ad-status='unfilled'],
-ins.adsbygoogle[data-ad-status='unfill-optimized'] {
+@media (min-width: 768px) {
+	div[data-slot='sidebar-footer'][data-sidebar='footer'] {
+		padding-bottom: 0.5rem !important;
+	}
+}
+
+.pb-lb:empty,
+.pb-lb:has(.mv-empty-wrapper),
+.pb-ic:empty,
+.pb-ic:has(.mv-empty-wrapper),
+.pb-sb:empty,
+.pb-sb:has(.mv-empty-wrapper) {
 	display: none !important;
 }
