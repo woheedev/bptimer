@@ -32,7 +32,7 @@
       },
       "devDependencies": {
         "@internationalized/date": "^3.11.0",
-        "@lucide/svelte": "^0.575.0",
+        "@lucide/svelte": "^0.576.0",
         "@playwright/test": "^1.58.2",
         "@repo/eslint-config": "workspace:*",
         "@sveltejs/adapter-auto": "^7.0.1",
@@ -246,7 +246,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@lucide/svelte": ["@lucide/svelte@0.575.0", "", { "peerDependencies": { "svelte": "^5" } }, "sha512-FEFp/0McZwsjBqh1Dn8H+UBm1yHFQYk+utuVMFDw57155+wz2XMoc1pw027ylCPzs+bi14UEXYKbekFhuJKtnw=="],
+    "@lucide/svelte": ["@lucide/svelte@0.576.0", "", { "peerDependencies": { "svelte": "^5" } }, "sha512-/xO9QPnPj5F5hvmPVdos+f9TeDQm0DntBdD7SpNPG9ZB7hOjzl8qUbfR6RsMik3yHvNlT4rUKE/ZMqzoBoiFDQ=="],
 
     "@playwright/test": ["@playwright/test@1.58.2", "", { "dependencies": { "playwright": "1.58.2" }, "bin": { "playwright": "cli.js" } }, "sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA=="],
 

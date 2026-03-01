@@ -26,7 +26,7 @@
 	},
 	"devDependencies": {
 		"@internationalized/date": "^3.11.0",
-		"@lucide/svelte": "^0.575.0",
+		"@lucide/svelte": "^0.576.0",
 		"@playwright/test": "^1.58.2",
 		"@repo/eslint-config": "workspace:*",
 		"@sveltejs/adapter-auto": "^7.0.1",

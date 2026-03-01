@@ -4,10 +4,13 @@
 	import InGameDay from '$lib/components/navigation/ingame-day.svelte';
 	import NavigationMain from '$lib/components/navigation/main.svelte';
 	import NavigationUser from '$lib/components/navigation/user.svelte';
+	import * as Alert from '$lib/components/ui/alert/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { PAGES, PARTNER_PAGES, REGIONS } from '$lib/constants';
+	import { adBlockStore } from '$lib/stores/ad-block.svelte';
 	import { regionStore } from '$lib/stores/region.svelte';
+	import { ShieldOff } from '@lucide/svelte/icons';
 	import type { ComponentProps } from 'svelte';
 
 	let {
@@ -39,6 +42,15 @@
 		</Sidebar.Group>
 		<Sidebar.Group class="flex-1 group-data-[collapsible=icon]:hidden">
 			<div class="pb-sb h-full"></div>
+			{#if adBlockStore.value}
+				<Alert.Root class="text-xs">
+					<ShieldOff class="size-4" />
+					<Alert.Title class="text-sm font-bold">Ad Blocked</Alert.Title>
+					<Alert.Description class="text-xs">
+						Consider disabling adblock to support this project and future development!
+					</Alert.Description>
+				</Alert.Root>
+			{/if}
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer class="p-2 group-data-[collapsible=icon]:hidden">

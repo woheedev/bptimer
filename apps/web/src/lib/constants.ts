@@ -39,6 +39,7 @@ export const LATEST_CHANNELS_DISPLAY_COUNT = 15;
 export const MAX_REPORTS_LIMIT = 50;
 export const MAX_SEARCH_QUERY_LENGTH = 100;
 export const MOBILE_BREAKPOINT = 768; // px
+export const AD_CHECK_DELAY = 5 * SECOND;
 
 // Filter and sort settings defaults
 import type { FilterSortSettings } from '$lib/schemas';

@@ -3,6 +3,8 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { pb } from '$lib/pocketbase';
 	import type { UserRecordModel } from '$lib/types/auth';
+	import { AD_CHECK_DELAY } from '$lib/constants';
+	import { adBlockStore } from '$lib/stores/ad-block.svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import { onMount, setContext } from 'svelte';
 	import '../app.css';
@@ -58,12 +60,27 @@
 
 	onMount(() => {
 		if (document.querySelector(`script[src="${MEDIAVINE_SCRIPT_URL}"]`)) return;
+
+		let loaded = false;
 		const script = document.createElement('script');
 		script.async = true;
 		script.setAttribute('data-noptimize', '1');
 		script.setAttribute('data-cfasync', 'false');
 		script.src = MEDIAVINE_SCRIPT_URL;
+		script.onload = () => {
+			loaded = true;
+			adBlockStore.value = false;
+		};
+		script.onerror = () => {
+			adBlockStore.value = true;
+		};
 		document.head.appendChild(script);
+
+		const timeout = setTimeout(() => {
+			if (!loaded) adBlockStore.value = true;
+		}, AD_CHECK_DELAY);
+
+		return () => clearTimeout(timeout);
 	});
 </script>
 

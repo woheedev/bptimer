@@ -1,8 +1,10 @@
 <script lang="ts">
 	import EventTimers from '$lib/components/navigation/event-timers.svelte';
 	import SearchForm from '$lib/components/navigation/search.svelte';
+	import * as Alert from '$lib/components/ui/alert/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { adBlockStore } from '$lib/stores/ad-block.svelte';
 	import { eventTimersStore } from '$lib/stores/event-timers.svelte';
 	import {
 		ChevronDown,
@@ -11,6 +13,7 @@
 		Moon,
 		PanelLeft,
 		Scale,
+		ShieldOff,
 		Sun
 	} from '@lucide/svelte/icons';
 	import Discord from '$lib/components/icons/discord.svelte';
@@ -89,3 +92,15 @@
 
 <!-- PubNation LB -->
 <div class="pb-lb flex w-full justify-center border-b p-1"></div>
+
+{#if adBlockStore.value}
+	<div class="flex w-full justify-center border-b px-4 py-2 md:hidden">
+		<Alert.Root class="w-full text-xs">
+			<ShieldOff class="size-4" />
+			<Alert.Title class="text-sm font-bold">Ad Blocked</Alert.Title>
+			<Alert.Description class="text-xs">
+				Consider disabling adblock to support this project and future development!
+			</Alert.Description>
+		</Alert.Root>
+	</div>
+{/if}
