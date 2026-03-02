@@ -228,11 +228,12 @@
 .hp-fill.unknown {
 	background-color: var(--hp-unknown);
 }
+body:not(:has(.adhesion_wrapper)) div[data-slot='sidebar-footer'][data-sidebar='footer'] {
+	padding-bottom: 0.5rem !important;
+}
 
-@media (min-width: 768px) {
-	div[data-slot='sidebar-footer'][data-sidebar='footer'] {
-		padding-bottom: 0.5rem !important;
-	}
+body:has(.adhesion_wrapper) div[data-slot='sidebar-footer'][data-sidebar='footer'] {
+	padding-bottom: 6.5rem !important;
 }
 
 .pb-lb:empty,

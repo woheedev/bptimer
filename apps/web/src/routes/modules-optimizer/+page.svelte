@@ -24,6 +24,7 @@
 		MODULE_DEFAULT_NAME_PREFIX,
 		MODULE_MAX_PRIORITY_EFFECTS
 	} from '$lib/constants';
+	import type { Module } from '$lib/schemas';
 	import { modulesOptimizerStore } from '$lib/stores/modules-optimizer.svelte';
 	import type { OptimizationResult } from '$lib/types/modules';
 	import {
@@ -33,10 +34,11 @@
 		updateModuleEffect
 	} from '$lib/utils/modules';
 	import { showToast } from '$lib/utils/toast';
-	import { Calculator, Plus, Settings, Target, Trash, Zap } from '@lucide/svelte/icons';
+	import { Calculator, FileUp, Plus, Settings, Target, Trash, Zap } from '@lucide/svelte/icons';
 	import pako from 'pako';
 
 	let modules = $state(modulesOptimizerStore.modules);
+	let fileInputRef: HTMLInputElement;
 	let priorityEffects = $state(modulesOptimizerStore.priorityEffects);
 	let numSlots = $state(modulesOptimizerStore.numSlots);
 	let result = $state<OptimizationResult | null>(null);
@@ -46,76 +48,86 @@
 
 	const canonicalUrl = `${page.url.origin}${page.url.pathname}`;
 
-	// Decode and import module data from URL params
+	type ImportedModule = {
+		effects?: Array<{ id?: number; level?: number }>;
+	};
+
+	function parseModuleData(
+		input: string,
+		isGzipBase64: boolean
+	): { modules: ImportedModule[] } | null {
+		try {
+			let jsonStr: string;
+			if (isGzipBase64) {
+				let base64 = input.replace(/-/g, '+').replace(/_/g, '/');
+				while (base64.length % 4) base64 += '=';
+				const decoded = atob(base64);
+				const bytes = new Uint8Array(decoded.length);
+				for (let i = 0; i < decoded.length; i++) bytes[i] = decoded.charCodeAt(i);
+				jsonStr = pako.inflate(bytes, { to: 'string' });
+			} else {
+				jsonStr = input;
+			}
+			const data = JSON.parse(jsonStr);
+			return data?.modules && Array.isArray(data.modules) ? data : null;
+		} catch {
+			return null;
+		}
+	}
+
+	function applyImportedModules(moduleData: { modules: ImportedModule[] }) {
+		const unknownEffectIds = new SvelteSet<number>();
+		const importedModules: Module[] = moduleData.modules.map((m, index) => ({
+			id: `${MODULE_DEFAULT_NAME_PREFIX} ${index + 1}`,
+			effects: Array.from({ length: 3 }, (_, i) => {
+				const effect = m.effects?.[i];
+				if (effect?.id == null) return { name: '', level: 0 };
+				if (!isKnownEffectId(effect.id)) unknownEffectIds.add(effect.id);
+				return { name: getEffectName(effect.id), level: effect.level || 0 };
+			}) as Module['effects']
+		}));
+
+		modulesOptimizerStore.clearAll();
+		modulesOptimizerStore.setModules(importedModules);
+		modules = modulesOptimizerStore.modules;
+		result = null;
+		activeTab = 'modules';
+
+		showToast.success(`Imported ${importedModules.length} modules from game`);
+		if (unknownEffectIds.size > 0) {
+			showToast.warning(
+				`Some effects are not recognized (IDs: ${Array.from(unknownEffectIds)
+					.sort((a, b) => a - b)
+					.join(', ')}).`
+			);
+		}
+	}
+
+	async function handleFileImport(file: File) {
+		const text = await file.text();
+		const data = parseModuleData(text, false);
+		if (data) {
+			applyImportedModules(data);
+			await goto(resolve('/modules-optimizer'), { replaceState: true, noScroll: true });
+		} else {
+			const dataGzip = parseModuleData(text, true);
+			if (dataGzip) {
+				applyImportedModules(dataGzip);
+				await goto(resolve('/modules-optimizer'), { replaceState: true, noScroll: true });
+			} else {
+				showToast.error('Invalid module data format.');
+			}
+		}
+	}
+
 	onMount(async () => {
 		const encodedData = page.url.searchParams.get('data');
-
 		if (encodedData) {
-			try {
-				// Decode base64 URL-safe string (handle padding)
-				let base64 = encodedData.replace(/-/g, '+').replace(/_/g, '/');
-				while (base64.length % 4) {
-					base64 += '=';
-				}
-				const base64Decoded = atob(base64);
-
-				// Convert base64 string to Uint8Array for pako
-				const bytes = new Uint8Array(base64Decoded.length);
-				for (let i = 0; i < base64Decoded.length; i++) {
-					bytes[i] = base64Decoded.charCodeAt(i);
-				}
-
-				// Decompress gzip data
-				const decompressed = pako.inflate(bytes, { to: 'string' });
-				const moduleData = JSON.parse(decompressed);
-
-				if (moduleData.modules && Array.isArray(moduleData.modules)) {
-					modulesOptimizerStore.clearAll();
-
-					type ImportedModule = {
-						effects?: Array<{ id?: number; level?: number }>;
-					};
-
-					const unknownEffectIds = new SvelteSet<number>();
-
-					const importedModules = moduleData.modules.map((m: ImportedModule, index: number) => ({
-						id: `${MODULE_DEFAULT_NAME_PREFIX} ${index + 1}`,
-						effects: Array.from({ length: 3 }, (_, i) => {
-							const effect = m.effects?.[i];
-							if (effect?.id == null) {
-								return { name: '', level: 0 };
-							}
-
-							if (!isKnownEffectId(effect.id)) {
-								unknownEffectIds.add(effect.id);
-							}
-
-							return {
-								name: getEffectName(effect.id),
-								level: effect.level || 0
-							};
-						})
-					}));
-
-					modulesOptimizerStore.setModules(importedModules);
-					modules = modulesOptimizerStore.modules;
-
-					result = null;
-					activeTab = 'modules';
-
-					showToast.success(`Imported ${importedModules.length} modules from game`);
-					if (unknownEffectIds.size > 0) {
-						const idsList = Array.from(unknownEffectIds)
-							.sort((a, b) => a - b)
-							.join(', ');
-						showToast.warning(`Some effects in this import are not recognized (IDs: ${idsList}).`);
-					}
-
-					await goto(resolve('/modules-optimizer'), { replaceState: true, noScroll: true });
-				} else {
-					showToast.error('Invalid module data format.');
-				}
-			} catch {
+			const data = parseModuleData(encodedData, true);
+			if (data) {
+				applyImportedModules(data);
+				await goto(resolve('/modules-optimizer'), { replaceState: true, noScroll: true });
+			} else {
 				showToast.error('Failed to import module data. Please try again.');
 			}
 		}
@@ -260,7 +272,22 @@
 											Valid modules: {validModulesCount}/{modules.length}
 										</p>
 									</div>
-									<div class="flex gap-2">
+									<div class="flex flex-wrap gap-2">
+										<input
+											type="file"
+											accept=".json,application/json"
+											class="hidden"
+											bind:this={fileInputRef}
+											onchange={(e) => {
+												const file = (e.target as HTMLInputElement).files?.[0];
+												if (file) handleFileImport(file);
+												(e.target as HTMLInputElement).value = '';
+											}}
+										/>
+										<Button variant="outline" size="sm" onclick={() => fileInputRef?.click()}>
+											<FileUp class="h-4 w-4" />
+											Import From File (.json)
+										</Button>
 										<Button variant="outline" size="sm" onclick={() => (showClearDialog = true)}>
 											<Trash class="h-4 w-4" />
 											Clear All

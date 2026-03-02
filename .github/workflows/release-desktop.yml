@@ -11,8 +11,8 @@ env:
   BPTIMER_API_KEY: ${{ secrets.BPTIMER_API_KEY }}
   GITHUB_REPO_OWNER: ${{ github.repository_owner }}
   GITHUB_REPO_NAME: ${{ github.event.repository.name }}
-  NPCAP_INSTALLER_URL: ${{ vars.NPCAP_INSTALLER_URL || 'https://npcap.com/dist/npcap-1.85.exe' }}
-  NPCAP_SDK_URL: ${{ vars.NPCAP_SDK_URL || 'https://npcap.com/dist/npcap-sdk-1.15.zip' }}
+  NPCAP_INSTALLER_URL: ${{ vars.NPCAP_INSTALLER_URL || 'https://npcap.com/dist/npcap-1.87.exe' }}
+  NPCAP_SDK_URL: ${{ vars.NPCAP_SDK_URL || 'https://npcap.com/dist/npcap-sdk-1.16.zip' }}
 
 jobs:
   build-windows:

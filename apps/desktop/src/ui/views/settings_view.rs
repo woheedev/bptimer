@@ -627,21 +627,49 @@ pub fn render_settings_view(
                     "{}/modules-optimizer",
                     crate::utils::constants::BPTIMER_BASE_URL
                 );
-                let url = if !extracted_modules.is_empty() {
+                if extracted_modules.is_empty() {
+                    if let Err(e) = open::that(&base_url) {
+                        log::warn!("Failed to open module optimizer: {}", e);
+                    }
+                } else {
                     match crate::utils::modules::encode_module_data(extracted_modules) {
                         Ok(encoded) => {
-                            format!("{}?data={}", base_url, encoded)
+                            if encoded.len() <= crate::utils::modules::URL_DATA_LIMIT {
+                                let url = format!("{}?data={}", base_url, encoded);
+                                if let Err(e) = open::that(&url) {
+                                    log::warn!("Failed to open module optimizer: {}", e);
+                                }
+                            } else {
+                                match crate::utils::modules::save_module_data_to_file(extracted_modules)
+                                {
+                                    Ok(path) => {
+                                        if let Some(parent) = path.parent() {
+                                            let _ = open::that(parent);
+                                        }
+                                        if let Err(e) = open::that(&base_url) {
+                                            log::warn!("Failed to open module optimizer: {}", e);
+                                        }
+                                        log::info!(
+                                            "Modules saved to {} - use Import from file on the page",
+                                            path.display()
+                                        );
+                                    }
+                                    Err(e) => {
+                                        log::warn!("Failed to save module data: {}", e);
+                                        if let Err(e) = open::that(&base_url) {
+                                            log::warn!("Failed to open module optimizer: {}", e);
+                                        }
+                                    }
+                                }
+                            }
                         }
                         Err(e) => {
                             log::warn!("Failed to encode module data: {}", e);
-                            base_url.to_string()
+                            if let Err(e) = open::that(&base_url) {
+                                log::warn!("Failed to open module optimizer: {}", e);
+                            }
                         }
                     }
-                } else {
-                    base_url.to_string()
-                };
-                if let Err(e) = open::that(&url) {
-                    log::warn!("Failed to open module optimizer: {}", e);
                 }
             }
         });
