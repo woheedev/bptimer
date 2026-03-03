@@ -12,7 +12,6 @@
 		Github,
 		Moon,
 		PanelLeft,
-		Scale,
 		ShieldOff,
 		Sun
 	} from '@lucide/svelte/icons';
@@ -66,6 +65,7 @@
 		>
 			<Github class="h-4 w-4" />
 		</Button>
+		<!--
 		<Button
 			href="/privacy"
 			variant="outline"
@@ -75,6 +75,7 @@
 		>
 			<Scale class="h-4 w-4" />
 		</Button>
+		-->
 		<Button
 			href="https://discord.gg/3UTC4pfCyC"
 			variant="outline"
