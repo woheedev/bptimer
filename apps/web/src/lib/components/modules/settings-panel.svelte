@@ -5,16 +5,19 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import { Separator } from '$lib/components/ui/separator';
+	import { Switch } from '$lib/components/ui/switch';
 	import { MODULE_MAX_PRIORITY_EFFECTS, MODULE_SLOTS } from '$lib/constants';
 	import { Info, Settings, Sparkles } from '@lucide/svelte/icons';
 
 	interface Props {
 		numSlots: string;
 		priorityEffects: string[];
+		valueAllStats: boolean;
 		canCalculate: boolean;
 		isCalculating: boolean;
 		validModulesCount: number;
 		onSlotsChange: (value: string) => void;
+		onValueAllStatsChange: (value: boolean) => void;
 		onCalculate: () => void;
 		onManagePriorities: () => void;
 	}
@@ -22,10 +25,12 @@
 	let {
 		numSlots,
 		priorityEffects,
+		valueAllStats,
 		canCalculate,
 		isCalculating,
 		validModulesCount,
 		onSlotsChange,
+		onValueAllStatsChange,
 		onCalculate,
 		onManagePriorities
 	}: Props = $props();
@@ -83,6 +88,20 @@
 			<Button variant="outline" size="sm" class="w-full" onclick={onManagePriorities}>
 				Manage Priority Effects
 			</Button>
+		</div>
+
+		<Separator />
+
+		<div class="flex items-center justify-between">
+			<div>
+				<Label for="value-all-stats" class="text-sm font-medium">Include All Stats</Label>
+				<p class="text-xs text-muted-foreground">Score non-priority stats too</p>
+			</div>
+			<Switch
+				id="value-all-stats"
+				checked={valueAllStats}
+				onCheckedChange={onValueAllStatsChange}
+			/>
 		</div>
 
 		<Separator />

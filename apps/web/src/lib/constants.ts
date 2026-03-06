@@ -163,6 +163,10 @@ export const EVENT_TIMERS_COLLAPSED_STORAGE_KEY = 'event-timers-collapsed';
 export const FILTER_SORT_SETTINGS_STORAGE_KEY = 'filter-sort-settings';
 export const MODULES_OPTIMIZER_MODULES_STORAGE_KEY = 'modules-optimizer-modules';
 export const MODULES_OPTIMIZER_PRIORITY_EFFECTS_STORAGE_KEY = 'modules-optimizer-priority-effects';
+export const MODULES_OPTIMIZER_EFFECT_WEIGHTS_STORAGE_KEY = 'modules-optimizer-effect-weights';
+export const MODULES_OPTIMIZER_EFFECT_MIN_LEVELS_STORAGE_KEY =
+	'modules-optimizer-effect-min-levels';
+export const MODULES_OPTIMIZER_VALUE_ALL_STATS_STORAGE_KEY = 'modules-optimizer-value-all-stats';
 export const MODULES_OPTIMIZER_NUM_SLOTS_STORAGE_KEY = 'modules-optimizer-num-slots';
 export const MOB_NOTIFICATIONS_STORAGE_KEY = 'mob-notifications';
 export const MOB_SORT_STORAGE_KEY = 'mob-sort';
@@ -294,10 +298,13 @@ export const MODULE_TIER_THRESHOLDS = [
 	{ threshold: 1, score: 1 }
 ] as const;
 
+export const MODULE_MAX_STAT_LEVEL = 20;
 export const MODULE_PRIORITY_MULTIPLIERS = [10, 7, 5, 3, 2];
+export const MODULE_WEIGHT_MAX = 10;
 export const MODULE_OPTIMIZER_MAX_MODULES_FOR_FULL_SEARCH = 100;
 export const MODULE_OPTIMIZER_PREFILTER_TOP_PER_ATTR = 30;
 export const MODULE_OPTIMIZER_MAX_SOLUTIONS = 40;
+export const MODULE_OPTIMIZER_TOP_RESULTS_COUNT = 10;
 export const MODULE_OPTIMIZER_MAX_ATTEMPTS_MULTIPLIER = 15;
 export const MODULE_OPTIMIZER_GREEDY_CANDIDATE_LIMIT = 50;
 export const MODULE_OPTIMIZER_LOCAL_SEARCH_MAX_ITERATIONS = 20;

@@ -41,6 +41,8 @@
 	let fileInputRef: HTMLInputElement;
 	let priorityEffects = $state(modulesOptimizerStore.priorityEffects);
 	let numSlots = $state(modulesOptimizerStore.numSlots);
+	const effectWeights = $derived(modulesOptimizerStore.getEffectWeights());
+	const effectMinLevels = $derived(modulesOptimizerStore.getEffectMinLevels());
 	let result = $state<OptimizationResult | null>(null);
 	let isCalculating = $state(false);
 	let activeTab = $state<'modules' | 'priorities' | 'results'>('modules');
@@ -177,17 +179,6 @@
 		modulesOptimizerStore.setPriorityEffects(priorityEffects);
 	}
 
-	function movePriorityEffect(index: number, direction: 'up' | 'down') {
-		const newEffects = [...priorityEffects];
-		const newIndex = direction === 'up' ? index - 1 : index + 1;
-
-		if (newIndex >= 0 && newIndex < newEffects.length) {
-			[newEffects[index], newEffects[newIndex]] = [newEffects[newIndex], newEffects[index]];
-			priorityEffects = newEffects;
-			modulesOptimizerStore.setPriorityEffects(priorityEffects);
-		}
-	}
-
 	async function calculateOptimalSetup() {
 		if (!canCalculate) {
 			if (validModulesCount < parseInt(numSlots)) {
@@ -201,7 +192,11 @@
 		isCalculating = true;
 
 		try {
-			result = await findOptimalSetup(modules, parseInt(numSlots), priorityEffects);
+			result = await findOptimalSetup(modules, parseInt(numSlots), priorityEffects, {
+				effectWeights: modulesOptimizerStore.getEffectWeights(),
+				effectMinLevels: modulesOptimizerStore.getEffectMinLevels(),
+				valueAllStats: modulesOptimizerStore.valueAllStats
+			});
 			showToast.success(`Optimal setup found! Score: ${result.totalScore}`);
 			activeTab = 'results';
 		} catch (error) {
@@ -317,6 +312,7 @@
 								<SettingsPanel
 									{numSlots}
 									{priorityEffects}
+									valueAllStats={modulesOptimizerStore.valueAllStats}
 									{canCalculate}
 									{isCalculating}
 									{validModulesCount}
@@ -324,6 +320,7 @@
 										numSlots = value;
 										modulesOptimizerStore.setNumSlots(numSlots);
 									}}
+									onValueAllStatsChange={(value) => modulesOptimizerStore.setValueAllStats(value)}
 									onCalculate={calculateOptimalSetup}
 									onManagePriorities={() => (activeTab = 'priorities')}
 								/>
@@ -334,8 +331,21 @@
 					<Tabs.Content value="priorities" class="space-y-6">
 						<PriorityManager
 							{priorityEffects}
+							{effectWeights}
+							{effectMinLevels}
 							onToggle={togglePriorityEffect}
-							onMove={movePriorityEffect}
+							onWeightChange={(index, weight) => {
+								const current = modulesOptimizerStore.getEffectWeights();
+								const updated = [...current];
+								updated[index] = weight;
+								modulesOptimizerStore.setEffectWeights(updated);
+							}}
+							onMinLevelChange={(index, minLevel) => {
+								const current = modulesOptimizerStore.getEffectMinLevels();
+								const updated = [...current];
+								updated[index] = minLevel;
+								modulesOptimizerStore.setEffectMinLevels(updated);
+							}}
 						/>
 					</Tabs.Content>
 

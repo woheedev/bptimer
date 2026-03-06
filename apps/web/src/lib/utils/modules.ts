@@ -1,6 +1,7 @@
 import {
 	getEffectNames,
 	MODULE_DEFAULT_NAME_PREFIX,
+	MODULE_MAX_STAT_LEVEL,
 	MODULE_OPTIMIZER_GREEDY_CANDIDATE_LIMIT,
 	MODULE_OPTIMIZER_LOCAL_SEARCH_MAX_ITERATIONS,
 	MODULE_OPTIMIZER_LOCAL_SEARCH_MIN_RELEVANT_MODULES,
@@ -9,46 +10,66 @@ import {
 	MODULE_OPTIMIZER_MAX_MODULES_FOR_FULL_SEARCH,
 	MODULE_OPTIMIZER_MAX_SOLUTIONS,
 	MODULE_OPTIMIZER_PREFILTER_TOP_PER_ATTR,
+	MODULE_OPTIMIZER_TOP_RESULTS_COUNT,
 	MODULE_OPTIMIZER_YIELD_INTERVAL,
 	MODULE_PRIORITY_MULTIPLIERS,
 	MODULE_TIER_THRESHOLDS
 } from '$lib/constants';
 import type { Module } from '$lib/schemas';
-import type { OptimizationResult } from '$lib/types/modules';
+import type { OptimizerOptions, OptimizationResult } from '$lib/types/modules';
 
-function getScoreByLevel(level: number): number {
+function getTierScore(level: number): number {
 	for (const { threshold, score } of MODULE_TIER_THRESHOLDS) {
-		if (level >= threshold) {
-			return score;
-		}
+		if (level >= threshold) return score;
 	}
 	return 0;
 }
 
 /**
- * Calculates score for a module combination based on effect levels and priorities
+ * Tier-based scoring: within a tier, level doesn't matter.
+ * Best combos maximize highest tiers for desired effects.
  */
-export function calculateScore(combination: Module[], priorityEffects: string[]): number {
+export function calculateScore(
+	combination: Module[],
+	priorityEffects: string[],
+	opts?: OptimizerOptions
+): number {
 	const combinedEffects = getCombinedEffects(combination);
-	let totalScore = 0;
 
-	const priorityLookup = new Map<string, number>();
+	const weights =
+		opts?.effectWeights && opts.effectWeights.length === priorityEffects.length
+			? opts.effectWeights
+			: MODULE_PRIORITY_MULTIPLIERS;
+	const minLevels = opts?.effectMinLevels;
+	const valueAllStats = opts?.valueAllStats ?? false;
+
+	const priorityLookup = new Map<string, { weight: number; minLevel: number }>();
 	priorityEffects.forEach((effect, index) => {
-		if (index < MODULE_PRIORITY_MULTIPLIERS.length) {
-			priorityLookup.set(effect, MODULE_PRIORITY_MULTIPLIERS[index]);
-		}
+		priorityLookup.set(effect, {
+			weight: weights[index] ?? 1,
+			minLevel: minLevels?.[index] ?? 0
+		});
 	});
 
+	for (const [effectName, prio] of priorityLookup) {
+		if (prio.minLevel > 0) {
+			const level = combinedEffects[effectName] ?? 0;
+			if (level < prio.minLevel) return -1;
+		}
+	}
+
+	let totalScore = 0;
 	for (const effectName in combinedEffects) {
 		const level = combinedEffects[effectName];
-		let effectScore = getScoreByLevel(level);
+		const clamped = Math.min(level, MODULE_MAX_STAT_LEVEL);
+		const tierScore = getTierScore(clamped);
+		const prio = priorityLookup.get(effectName);
 
-		const multiplier = priorityLookup.get(effectName);
-		if (multiplier) {
-			effectScore *= multiplier;
+		if (prio) {
+			totalScore += tierScore * prio.weight;
+		} else if (valueAllStats) {
+			totalScore += tierScore;
 		}
-
-		totalScore += effectScore;
 	}
 
 	return totalScore;
@@ -116,17 +137,22 @@ function prefilterModules(modules: Module[], topPerAttr: number): Module[] {
 function greedyConstructSolution(
 	modules: Module[],
 	numSlots: number,
-	priorityEffects: string[]
+	priorityEffects: string[],
+	opts?: OptimizerOptions
 ): Module[] {
 	if (modules.length < numSlots) return [];
 
+	const weights =
+		opts?.effectWeights && opts.effectWeights.length === priorityEffects.length
+			? opts.effectWeights
+			: MODULE_PRIORITY_MULTIPLIERS;
 	const prioritySet = new Set(priorityEffects);
 	const scoredModules = modules.map((module) => {
 		let score = 0;
 		for (const effect of module.effects) {
 			if (effect.name && effect.level > 0 && prioritySet.has(effect.name)) {
 				const priorityIndex = priorityEffects.indexOf(effect.name);
-				const multiplier = MODULE_PRIORITY_MULTIPLIERS[priorityIndex] || 1;
+				const multiplier = weights[priorityIndex] ?? 1;
 				score += effect.level * multiplier;
 			}
 		}
@@ -148,7 +174,7 @@ function greedyConstructSolution(
 			if (current.includes(module)) continue;
 
 			const test = [...current, module];
-			const score = calculateScore(test, priorityEffects);
+			const score = calculateScore(test, priorityEffects, opts);
 
 			if (score > bestScore) {
 				bestScore = score;
@@ -167,10 +193,11 @@ function localSearchImprove(
 	solution: Module[],
 	allModules: Module[],
 	priorityEffects: string[],
-	maxIterations: number
+	maxIterations: number,
+	opts?: OptimizerOptions
 ): Module[] {
 	let best = [...solution];
-	let bestScore = calculateScore(best, priorityEffects);
+	let bestScore = calculateScore(best, priorityEffects, opts);
 
 	const prioritySet = new Set(priorityEffects);
 	const relevantModules = allModules.filter((module) => {
@@ -205,7 +232,7 @@ function localSearchImprove(
 				const newSolution = [...best];
 				newSolution[i] = newModule;
 
-				const newScore = calculateScore(newSolution, priorityEffects);
+				const newScore = calculateScore(newSolution, priorityEffects, opts);
 				if (newScore > bestScore) {
 					best = newSolution;
 					bestScore = newScore;
@@ -228,7 +255,8 @@ function localSearchImprove(
 export async function findOptimalSetup(
 	modules: Module[],
 	numSlots: number,
-	priorityEffects: string[]
+	priorityEffects: string[],
+	opts?: OptimizerOptions
 ): Promise<OptimizationResult> {
 	let validModules = getValidModules(modules);
 
@@ -253,14 +281,15 @@ export async function findOptimalSetup(
 	while (solutions.length < MODULE_OPTIMIZER_MAX_SOLUTIONS && attempts < MAX_ATTEMPTS) {
 		attempts++;
 
-		const initial = greedyConstructSolution(validModules, numSlots, priorityEffects);
+		const initial = greedyConstructSolution(validModules, numSlots, priorityEffects, opts);
 		if (initial.length === 0) continue;
 
 		const improved = localSearchImprove(
 			initial,
 			validModules,
 			priorityEffects,
-			MODULE_OPTIMIZER_LOCAL_SEARCH_MAX_ITERATIONS
+			MODULE_OPTIMIZER_LOCAL_SEARCH_MAX_ITERATIONS,
+			opts
 		);
 
 		const key = improved
@@ -271,7 +300,8 @@ export async function findOptimalSetup(
 		if (seen.has(key)) continue;
 		seen.add(key);
 
-		const score = calculateScore(improved, priorityEffects);
+		const score = calculateScore(improved, priorityEffects, opts);
+		if (score < 0) continue;
 		solutions.push({ modules: improved, score });
 
 		if (attempts % MODULE_OPTIMIZER_YIELD_INTERVAL === 0) {
@@ -284,22 +314,29 @@ export async function findOptimalSetup(
 	}
 
 	solutions.sort((a, b) => b.score - a.score);
-	const best = solutions[0];
+	const topN = solutions.slice(0, MODULE_OPTIMIZER_TOP_RESULTS_COUNT);
 
-	const combinedEffects = getCombinedEffects(best.modules);
-	const prioritizedEffects: Record<string, number> = {};
-
-	Object.entries(combinedEffects).forEach(([effect, level]) => {
-		if (priorityEffects.includes(effect)) {
-			prioritizedEffects[effect] = level;
-		}
+	const topResults = topN.map((s) => {
+		const combined = getCombinedEffects(s.modules);
+		const prioritized: Record<string, number> = {};
+		Object.entries(combined).forEach(([effect, level]) => {
+			if (priorityEffects.includes(effect)) prioritized[effect] = level;
+		});
+		return {
+			totalScore: s.score,
+			optimalModules: s.modules,
+			combinedEffects: combined,
+			prioritizedEffects: prioritized
+		};
 	});
 
+	const best = topResults[0];
 	return {
-		totalScore: best.score,
-		optimalModules: best.modules,
-		combinedEffects,
-		prioritizedEffects
+		totalScore: best.totalScore,
+		optimalModules: best.optimalModules,
+		combinedEffects: best.combinedEffects,
+		prioritizedEffects: best.prioritizedEffects,
+		topResults
 	};
 }
 

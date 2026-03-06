@@ -2,19 +2,50 @@
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { MODULE_MAX_PRIORITY_EFFECTS, MODULE_PRIORITY_MULTIPLIERS } from '$lib/constants';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import {
+		MODULE_MAX_PRIORITY_EFFECTS,
+		MODULE_PRIORITY_MULTIPLIERS,
+		MODULE_WEIGHT_MAX
+	} from '$lib/constants';
 	import { getAvailableEffects } from '$lib/utils/modules';
 	import { ArrowDown, ArrowUp, Info, Plus, Target, Trash } from '@lucide/svelte/icons';
 
 	interface Props {
 		priorityEffects: string[];
+		effectWeights: number[];
+		effectMinLevels: number[];
 		onToggle: (effect: string) => void;
-		onMove: (index: number, direction: 'up' | 'down') => void;
+		onWeightChange: (index: number, weight: number) => void;
+		onMinLevelChange: (index: number, minLevel: number) => void;
 	}
 
-	let { priorityEffects, onToggle, onMove }: Props = $props();
+	let {
+		priorityEffects,
+		effectWeights,
+		effectMinLevels,
+		onToggle,
+		onWeightChange,
+		onMinLevelChange
+	}: Props = $props();
 
 	const availableEffects = $derived(getAvailableEffects(priorityEffects));
+	const resolvedWeights = $derived(
+		priorityEffects.map((_, i) => effectWeights[i] ?? MODULE_PRIORITY_MULTIPLIERS[i] ?? 1)
+	);
+	const resolvedMinLevels = $derived(priorityEffects.map((_, i) => effectMinLevels[i] ?? 0));
+
+	const sortedRows = $derived(
+		priorityEffects
+			.map((effect, i) => ({
+				effect,
+				weight: resolvedWeights[i],
+				minLevel: resolvedMinLevels[i],
+				index: i
+			}))
+			.sort((a, b) => b.weight - a.weight || a.effect.localeCompare(b.effect))
+	);
 </script>
 
 <div class="grid gap-6 lg:grid-cols-2">
@@ -62,7 +93,7 @@
 				{/if}
 			</Card.Title>
 			<p class="text-sm text-muted-foreground">
-				Use arrows to reorder • Higher priority = higher score multiplier
+				Arrows adjust weight • Higher priority = higher multiplier
 			</p>
 		</Card.Header>
 		<Card.Content>
@@ -76,23 +107,39 @@
 				</div>
 			{:else}
 				<div class="space-y-2">
-					{#each priorityEffects as effect, index (effect)}
+					{#each sortedRows as row (row.effect)}
+						{@const idx = row.index}
 						<div class="flex items-center gap-2 rounded-lg border p-3">
-							<div class="flex flex-1 items-center gap-2">
-								<Badge variant="outline" class="font-mono text-xs">
-									{index + 1}
+							<div class="flex min-w-0 flex-1 items-center gap-2">
+								<Badge variant="outline" class="shrink-0 font-mono text-xs">
+									{row.weight}
 								</Badge>
-								<span class="font-medium">{effect}</span>
-								<Badge variant="secondary" class="text-xs">
-									×{MODULE_PRIORITY_MULTIPLIERS[index] ?? 0}
-								</Badge>
+								<span class="min-w-0 flex-1 truncate font-medium">{row.effect}</span>
+								<div class="ml-auto flex shrink-0 items-center gap-1">
+									<span class="text-xs text-muted-foreground">Minimum</span>
+									<Label for="min-{idx}" class="sr-only">Minimum level</Label>
+									<Input
+										id="min-{idx}"
+										type="number"
+										min={0}
+										max={20}
+										value={row.minLevel}
+										oninput={(e) => {
+											const v = parseInt((e.target as HTMLInputElement).value, 10);
+											if (!Number.isNaN(v) && v >= 0 && v <= 20) {
+												onMinLevelChange(idx, v);
+											}
+										}}
+										class="h-8 w-14 text-center"
+									/>
+								</div>
 							</div>
-							<div class="flex gap-1">
+							<div class="flex shrink-0 gap-1">
 								<Button
 									variant="ghost"
 									size="sm"
-									onclick={() => onMove(index, 'up')}
-									disabled={index === 0}
+									onclick={() => onWeightChange(idx, Math.min(MODULE_WEIGHT_MAX, row.weight + 1))}
+									disabled={row.weight >= MODULE_WEIGHT_MAX}
 									class="h-8 w-8 p-0"
 								>
 									<ArrowUp class="h-3 w-3" />
@@ -100,8 +147,8 @@
 								<Button
 									variant="ghost"
 									size="sm"
-									onclick={() => onMove(index, 'down')}
-									disabled={index === priorityEffects.length - 1}
+									onclick={() => onWeightChange(idx, Math.max(1, row.weight - 1))}
+									disabled={row.weight <= 1}
 									class="h-8 w-8 p-0"
 								>
 									<ArrowDown class="h-3 w-3" />
@@ -109,7 +156,7 @@
 								<Button
 									variant="ghost"
 									size="sm"
-									onclick={() => onToggle(effect)}
+									onclick={() => onToggle(row.effect)}
 									class="h-8 w-8 p-0 text-destructive hover:text-destructive"
 								>
 									<Trash class="h-3 w-3" />
