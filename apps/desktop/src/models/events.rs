@@ -77,10 +77,11 @@ pub struct PlayerAccountInfoUpdate {
     pub uid: i64,
 }
 
-/// Player line ID update event (from SyncContainerData.scene_data.line_id)
+/// Scene/line from CharSerialize.scene_data or SocialNtf notify (NotifySocialData → scene_data).
 #[derive(Debug, Clone)]
 pub struct PlayerLineInfoUpdate {
     pub line_id: u32,
+    pub level_map_id: Option<u32>,
 }
 
 /// Module data update event (extracted modules from SyncContainerData)

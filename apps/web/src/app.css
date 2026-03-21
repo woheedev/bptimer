@@ -236,6 +236,10 @@ body:has(.adhesion_wrapper) div[data-slot='sidebar-footer'][data-sidebar='footer
 	padding-bottom: 6.5rem !important;
 }
 
+.toaster [data-description] {
+	white-space: pre-line;
+}
+
 .pb-lb:empty,
 .pb-lb:has(.mv-empty-wrapper),
 .pb-ic:empty,

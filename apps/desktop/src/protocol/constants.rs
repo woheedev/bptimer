@@ -2,6 +2,10 @@
 /// Protocol-level constants not part of protobuf definitions
 /// Service UUID for Blue Protocol combat service
 pub const SERVICE_UUID: u64 = 0x63335342;
+/// SocialNtf (scene line / map via NotifySocialData)
+pub const SOCIAL_NTF_SERVICE_ID: u64 = 0x254C89A3;
+/// NotifySocialData
+pub const SOCIAL_NTF_NOTIFY_METHOD_ID: u32 = 1;
 
 /// Message type enumeration
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -123,6 +127,13 @@ pub mod tcp {
     pub const GAP_TIMEOUT: Duration = Duration::from_secs(2);
     pub const IDLE_TIMEOUT: Duration = Duration::from_secs(10);
     pub const MAX_PACKET_SIZE: u32 = 0x000FFFFF;
+    pub const MAX_TRACKED_CONNECTIONS: usize = 16;
+    pub const GAME_SUBNET_PREFIX_OCTETS: usize = 2;
+    pub const MIN_NON_SYSTEM_PORT: u16 = 1000;
+    pub const BP_DETECT_MIN_PAYLOAD: usize = 10;
+    pub const BP_DETECT_MAX_PAYLOAD: usize = 2000;
+    pub const TLS_PORT: u16 = 443;
+    pub const TLS_LARGE_PACKET_THRESHOLD: usize = 1400;
 }
 
 /// Entity attribute type enumeration

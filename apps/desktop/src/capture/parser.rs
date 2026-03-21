@@ -1,6 +1,7 @@
 use bytes::Bytes;
 use prost::Message;
 use std::convert::TryFrom;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc;
 
 use crate::capture::tcp::ServerEndpoint;
@@ -10,13 +11,21 @@ use crate::models::events::{
     PlayerClassUpdate, PlayerLineInfoUpdate, PlayerNameUpdate,
 };
 use crate::protocol::constants::{
-    MessageMethod, MessageType, SERVICE_UUID, entity, packet, packet_layout, server_detection,
+    MessageMethod, MessageType, SERVICE_UUID, SOCIAL_NTF_NOTIFY_METHOD_ID, SOCIAL_NTF_SERVICE_ID,
+    entity, packet, packet_layout, server_detection,
 };
 use crate::protocol::pb::{
-    AoiSyncDelta, AttrCollection, EDamageType, EEntityType, Position, SyncContainerData,
-    SyncNearDeltaInfo, SyncNearEntities, SyncToMeDeltaInfo,
+    AoiSyncDelta, AttrCollection, EDamageType, EEntityType, NotifySocialData, Position, SceneData,
+    SyncContainerData, SyncNearDeltaInfo, SyncNearEntities, SyncToMeDeltaInfo,
 };
 use crate::utils::constants::is_tracked_mob;
+
+// Last packed line+map emitted from SocialNtf (dedup; see process_notify_social_data).
+static LAST_SOCIAL_SCENE: AtomicU64 = AtomicU64::new(0);
+
+fn pack_scene(line_id: u32, level_map_id: Option<u32>) -> u64 {
+    ((level_map_id.unwrap_or(0) as u64) << 32) | (line_id as u64)
+}
 
 /// Global state for local player tracking
 static mut LOCAL_PLAYER_UUID: i64 = 0;
@@ -99,9 +108,7 @@ fn process_bp_packet_recursive(data: &[u8], tx: &mpsc::Sender<CombatEvent>, dept
         MessageType::Notify => {
             process_notify_packet(data, tx, is_compressed);
         }
-        MessageType::Return => {
-            process_return_packet(data, tx, is_compressed);
-        }
+        MessageType::Return => {}
         MessageType::FrameDown => {
             if data.len() < 10 {
                 return;
@@ -155,15 +162,7 @@ fn process_notify_packet(data: &[u8], tx: &mpsc::Sender<CombatEvent>, is_compres
         data[6], data[7], data[8], data[9], data[10], data[11], data[12], data[13],
     ]);
 
-    if service_uuid != SERVICE_UUID {
-        return;
-    }
-
     let method_id = u32::from_be_bytes([data[18], data[19], data[20], data[21]]);
-    let method = match MessageMethod::from_u32(method_id) {
-        Some(m) => m,
-        None => return,
-    };
 
     let payload_offset = 22;
     if payload_offset >= data.len() {
@@ -180,6 +179,28 @@ fn process_notify_packet(data: &[u8], tx: &mpsc::Sender<CombatEvent>, is_compres
         }
     } else {
         payload.to_vec()
+    };
+
+    if service_uuid == SOCIAL_NTF_SERVICE_ID {
+        if method_id == SOCIAL_NTF_NOTIFY_METHOD_ID {
+            match process_notify_social_data(&final_payload) {
+                Ok(Some(event)) => {
+                    let _ = tx.send(event);
+                }
+                Ok(None) => {}
+                Err(e) => log::warn!("SocialNtf decode failed: {}", e),
+            }
+        }
+        return;
+    }
+
+    if service_uuid != SERVICE_UUID {
+        return;
+    }
+
+    let method = match MessageMethod::from_u32(method_id) {
+        Some(m) => m,
+        None => return,
     };
 
     match method {
@@ -210,19 +231,12 @@ fn process_notify_packet(data: &[u8], tx: &mpsc::Sender<CombatEvent>, is_compres
                     let _ = tx.send(event);
                 }
             }
-            Err(e) => {
-                log::warn!(
-                    "[SyncContainerData] Error processing SyncContainerData: {}",
-                    e
-                );
-            }
+            Err(e) => log::warn!("SyncContainerData: {}", e),
         },
         MessageMethod::SyncContainerDirtyData => {}
         MessageMethod::SyncServerTime => {}
     }
 }
-
-fn process_return_packet(_data: &[u8], _tx: &mpsc::Sender<CombatEvent>, _is_compressed: bool) {}
 
 /// Process SyncNearDeltaInfo (method_id=45) - damage/healing data and position updates
 fn process_sync_near_delta(payload: &[u8]) -> Result<Vec<CombatEvent>, Box<dyn std::error::Error>> {
@@ -695,10 +709,8 @@ fn process_sync_container_data(
         }
 
         if let Some(scene_data) = &v_data.scene_data {
-            if scene_data.line_id > 0 {
-                events.push(CombatEvent::PlayerLineInfo(PlayerLineInfoUpdate {
-                    line_id: scene_data.line_id,
-                }));
+            if let Some(update) = player_line_info_from_scene_data(scene_data) {
+                events.push(CombatEvent::PlayerLineInfo(update));
             }
         }
 
@@ -720,6 +732,42 @@ fn process_sync_container_data(
     }
 
     Ok(events)
+}
+
+fn player_line_info_from_scene_data(scene_data: &SceneData) -> Option<PlayerLineInfoUpdate> {
+    let level_map_id = (scene_data.level_map_id > 0).then_some(scene_data.level_map_id);
+    if scene_data.line_id > 0 || level_map_id.is_some() {
+        Some(PlayerLineInfoUpdate {
+            line_id: scene_data.line_id,
+            level_map_id,
+        })
+    } else {
+        None
+    }
+}
+
+fn process_notify_social_data(
+    payload: &[u8],
+) -> Result<Option<CombatEvent>, Box<dyn std::error::Error>> {
+    let notify = NotifySocialData::decode(Bytes::copy_from_slice(payload))
+        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+
+    let Some(update) = notify
+        .v_request
+        .as_ref()
+        .and_then(|r| r.data.as_ref())
+        .and_then(|s| s.scene_data.as_ref())
+        .and_then(player_line_info_from_scene_data)
+    else {
+        return Ok(None);
+    };
+
+    let packed = pack_scene(update.line_id, update.level_map_id);
+    if LAST_SOCIAL_SCENE.swap(packed, Ordering::Relaxed) == packed {
+        return Ok(None);
+    }
+
+    Ok(Some(CombatEvent::PlayerLineInfo(update)))
 }
 
 /// Decode a protobuf varint-encoded int32 from raw bytes

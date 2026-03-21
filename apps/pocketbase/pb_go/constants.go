@@ -86,8 +86,9 @@ var BypassVoteUserIDs = map[string]bool{
 // Minimum required versions for known apps
 // Apps not in this map are allowed (for backwards compatibility with unknown clients)
 var MinAppVersions = map[string]string{
-	"BPSR-Logs": "0.23.0",
-	// "BPTimer-Desktop-Companion": "0.0.0", // Not needed yet
+	"BPSR-Logs":                 "0.24.0",
+	"BPTimer-Desktop-Companion": "0.2.0",
+	"ZDPS":                      "0.1.6.2",
 	// "BPTimer-API-Client":        "0.0.0", // Not needed yet
 }
 

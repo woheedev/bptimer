@@ -1,5 +1,7 @@
+use crate::models::events::{CombatEvent, ServerChangeUpdate};
 use crate::protocol::constants::tcp;
 use std::collections::{HashMap, VecDeque};
+use std::sync::mpsc;
 use std::time::SystemTime;
 
 /// Server endpoint
@@ -27,77 +29,49 @@ impl ServerEndpoint {
             self.src_addr, self.src_port, self.dst_addr, self.dst_port
         )
     }
-
-    pub fn reverse(&self) -> ServerEndpoint {
-        ServerEndpoint::new(
-            self.dst_addr.clone(),
-            self.dst_port,
-            self.src_addr.clone(),
-            self.src_port,
-        )
-    }
 }
 
-use crate::models::events::CombatEvent;
-use std::sync::mpsc;
+/// Directional key for a TCP stream (order-dependent)
+fn conn_key(ep: &ServerEndpoint) -> String {
+    format!(
+        "{}:{}>{}:{}",
+        ep.src_addr, ep.src_port, ep.dst_addr, ep.dst_port
+    )
+}
 
-/// TCP Stream Processor
+/// Per-connection TCP reassembly state
 #[derive(Debug)]
-pub struct TcpStreamProcessor {
-    pub current_server: Option<ServerEndpoint>,
-    pub next_seq: Option<u32>,
-    pub tcp_cache: HashMap<u32, Vec<u8>>,
-    pub stream_buffer: VecDeque<u8>,
-    pub last_packet_time: Option<SystemTime>,
-    pub last_any_packet_time: Option<SystemTime>,
-    pub waiting_gap_since: Option<SystemTime>,
-    pub tx: mpsc::Sender<CombatEvent>,
+struct ConnectionState {
+    next_seq: Option<u32>,
+    tcp_cache: HashMap<u32, Vec<u8>>,
+    stream_buffer: VecDeque<u8>,
+    last_any_packet_time: Option<SystemTime>,
+    waiting_gap_since: Option<SystemTime>,
 }
 
-impl TcpStreamProcessor {
-    pub fn new(tx: mpsc::Sender<CombatEvent>) -> Self {
+impl ConnectionState {
+    fn new() -> Self {
         Self {
-            current_server: None,
             next_seq: None,
             tcp_cache: HashMap::new(),
             stream_buffer: VecDeque::new(),
-            last_packet_time: None,
             last_any_packet_time: None,
             waiting_gap_since: None,
-            tx,
         }
     }
 
-    /// Reset processor state
-    pub fn reset(&mut self) {
-        self.current_server = None;
-        self.next_seq = None;
-        self.last_packet_time = None;
-        self.last_any_packet_time = None;
-        self.waiting_gap_since = None;
-        self.tcp_cache.clear();
-        self.stream_buffer.clear();
-    }
-
-    /// Sequence comparison with 32-bit wrapping
     fn seq_cmp(a: u32, b: u32) -> i32 {
         a.wrapping_sub(b) as i32
     }
 
-    pub fn force_reconnect(&mut self, reason: &str) {
-        log::info!("Reconnect due to {}", reason);
-        self.reset();
-    }
-
-    pub fn force_resync_to(&mut self, seq: u32) {
+    fn force_resync_to(&mut self, seq: u32) {
         self.tcp_cache.clear();
         self.stream_buffer.clear();
         self.next_seq = Some(seq);
         self.waiting_gap_since = None;
-        self.last_packet_time = Some(SystemTime::now());
     }
 
-    pub fn process_segment(&mut self, seq: u32, payload: &[u8]) -> Vec<Vec<u8>> {
+    fn process_segment(&mut self, seq: u32, payload: &[u8]) -> Vec<Vec<u8>> {
         let mut complete_packets = Vec::new();
         let now = SystemTime::now();
 
@@ -132,24 +106,20 @@ impl TcpStreamProcessor {
             self.tcp_cache.insert(seq, payload.to_vec());
         }
 
-        // Assemble contiguous segments from cache
         while let Some(next_seq) = self.next_seq {
             if let Some(segment) = self.tcp_cache.remove(&next_seq) {
                 self.stream_buffer.extend(&segment);
                 self.next_seq = Some(next_seq.wrapping_add(segment.len() as u32));
-                self.last_packet_time = Some(now);
             } else {
                 break;
             }
         }
 
-        // Extract complete packets from assembled buffer
         while self.try_extract_packet(&mut complete_packets) {}
 
         complete_packets
     }
 
-    // Extract complete packet from stream buffer (4-byte size header)
     fn try_extract_packet(&mut self, complete_packets: &mut Vec<Vec<u8>>) -> bool {
         if self.stream_buffer.len() < 4 {
             return false;
@@ -174,6 +144,55 @@ impl TcpStreamProcessor {
         let packet: Vec<u8> = self.stream_buffer.drain(..packet_size).collect();
         complete_packets.push(packet);
         true
+    }
+}
+
+/// TCP Stream Processor — tracks multiple game connections
+#[derive(Debug)]
+pub struct TcpStreamProcessor {
+    pub current_server: Option<ServerEndpoint>,
+    connections: HashMap<String, ConnectionState>,
+    game_server_prefix: Option<String>,
+    pub tx: mpsc::Sender<CombatEvent>,
+}
+
+impl TcpStreamProcessor {
+    pub fn new(tx: mpsc::Sender<CombatEvent>) -> Self {
+        Self {
+            current_server: None,
+            connections: HashMap::new(),
+            game_server_prefix: None,
+            tx,
+        }
+    }
+
+    fn extract_ip_prefix(addr: &str) -> Option<String> {
+        let parts: Vec<&str> = addr.split('.').collect();
+        if parts.len() >= tcp::GAME_SUBNET_PREFIX_OCTETS {
+            Some(format!("{}.{}.", parts[0], parts[1]))
+        } else {
+            None
+        }
+    }
+
+    fn is_game_subnet(&self, addr: &str) -> bool {
+        if let Some(ref prefix) = self.game_server_prefix {
+            addr.starts_with(prefix)
+        } else {
+            false
+        }
+    }
+
+    fn process_conn_segments(
+        conn: &mut ConnectionState,
+        seq: u32,
+        payload: &[u8],
+        tx: &mpsc::Sender<CombatEvent>,
+    ) {
+        let segments = conn.process_segment(seq, payload);
+        for segment in segments {
+            crate::capture::parser::process_bp_packet(&segment, tx);
+        }
     }
 
     pub fn process_packet(&mut self, packet_data: &[u8]) {
@@ -202,90 +221,94 @@ impl TcpStreamProcessor {
             return;
         }
 
-        let endpoint = ServerEndpoint::new(src_addr, src_port, dst_addr, dst_port);
+        let endpoint = ServerEndpoint::new(src_addr.clone(), src_port, dst_addr.clone(), dst_port);
+        let key = conn_key(&endpoint);
 
-        let is_match = if let Some(ref server) = self.current_server {
-            endpoint == *server || endpoint == server.reverse()
-        } else {
-            false
-        };
+        // Already-tracked connection
+        if self.connections.contains_key(&key) {
+            let now = SystemTime::now();
+            let conn = self.connections.get_mut(&key).unwrap();
 
-        if !is_match {
-            let payload_len = payload.len();
-            let is_likely_bp = payload_len >= 10
-                && payload_len < 2000
-                && payload[4] == 0
-                && !((src_port == 443 || dst_port == 443) && payload_len >= 1400);
-
-            if is_likely_bp && crate::capture::parser::detect_server_in_packet(payload, &endpoint) {
-                self.current_server = Some(endpoint.clone());
-                self.next_seq = Some(
-                    tcp_header
-                        .sequence_number()
-                        .wrapping_add(payload.len() as u32),
-                );
-                self.last_any_packet_time = Some(std::time::SystemTime::now());
-
-                log::info!(
-                    "Blue Protocol server detected! Server: {}",
-                    endpoint.to_string()
-                );
-
-                let _ = self
-                    .tx
-                    .send(crate::models::events::CombatEvent::ServerChange(
-                        crate::models::events::ServerChangeUpdate {
-                            server_endpoint: endpoint.to_string(),
-                        },
-                    ));
-
-                let segments = self.process_segment(tcp_header.sequence_number(), payload);
-                for segment in segments {
-                    crate::capture::parser::process_bp_packet(&segment, &self.tx);
-                }
-            }
-        } else {
-            let now = std::time::SystemTime::now();
-
-            if let Some(last_any) = self.last_any_packet_time {
+            if let Some(last_any) = conn.last_any_packet_time {
                 if now.duration_since(last_any).unwrap_or_default() > tcp::IDLE_TIMEOUT {
-                    self.force_reconnect("idle timeout");
-                    if crate::capture::parser::detect_server_in_packet(payload, &endpoint) {
-                        log::info!(
-                            "Blue Protocol server detected after reconnect: {}",
-                            endpoint.to_string()
-                        );
-                        self.current_server = Some(endpoint.clone());
-                        self.next_seq = Some(
-                            tcp_header
-                                .sequence_number()
-                                .wrapping_add(payload.len() as u32),
-                        );
-                        self.last_any_packet_time = Some(now);
-                        let _ = self
-                            .tx
-                            .send(crate::models::events::CombatEvent::ServerChange(
-                                crate::models::events::ServerChangeUpdate {
-                                    server_endpoint: endpoint.to_string(),
-                                },
-                            ));
-                        let segments = self.process_segment(tcp_header.sequence_number(), payload);
-                        for segment in segments {
-                            crate::capture::parser::process_bp_packet(&segment, &self.tx);
+                    log::info!("Removing idle connection: {}", endpoint.to_string());
+                    self.connections.remove(&key);
+                    if let Some(ref server) = self.current_server {
+                        let server_key = conn_key(server);
+                        let server_rev_key = conn_key(&ServerEndpoint::new(
+                            server.dst_addr.clone(),
+                            server.dst_port,
+                            server.src_addr.clone(),
+                            server.src_port,
+                        ));
+                        if key == server_key || key == server_rev_key {
+                            self.current_server = None;
                         }
                     }
-                } else {
-                    let segments = self.process_segment(tcp_header.sequence_number(), payload);
-                    for segment in segments {
-                        crate::capture::parser::process_bp_packet(&segment, &self.tx);
-                    }
-                }
-            } else {
-                let segments = self.process_segment(tcp_header.sequence_number(), payload);
-                for segment in segments {
-                    crate::capture::parser::process_bp_packet(&segment, &self.tx);
+                    return;
                 }
             }
+
+            Self::process_conn_segments(conn, tcp_header.sequence_number(), payload, &self.tx);
+            return;
+        }
+
+        // New connection — check for game server signature
+        let payload_len = payload.len();
+        let is_likely_bp = payload_len >= tcp::BP_DETECT_MIN_PAYLOAD
+            && payload_len < tcp::BP_DETECT_MAX_PAYLOAD
+            && payload[4] == 0
+            && !((src_port == tcp::TLS_PORT || dst_port == tcp::TLS_PORT)
+                && payload_len >= tcp::TLS_LARGE_PACKET_THRESHOLD);
+
+        if is_likely_bp && crate::capture::parser::detect_server_in_packet(payload, &endpoint) {
+            if self.game_server_prefix.is_none() {
+                self.game_server_prefix = Self::extract_ip_prefix(&src_addr);
+                if let Some(ref prefix) = self.game_server_prefix {
+                    log::info!("Game server subnet detected: {}*", prefix);
+                }
+            }
+
+            self.current_server = Some(endpoint.clone());
+
+            log::info!(
+                "Blue Protocol server detected! Server: {}",
+                endpoint.to_string()
+            );
+
+            let _ = self.tx.send(CombatEvent::ServerChange(ServerChangeUpdate {
+                server_endpoint: endpoint.to_string(),
+            }));
+
+            let mut conn = ConnectionState::new();
+            conn.last_any_packet_time = Some(SystemTime::now());
+
+            Self::process_conn_segments(&mut conn, tcp_header.sequence_number(), payload, &self.tx);
+
+            self.connections.insert(key, conn);
+            return;
+        }
+
+        if self.is_game_subnet(&src_addr) || self.is_game_subnet(&dst_addr) {
+            if src_port <= tcp::MIN_NON_SYSTEM_PORT || dst_port <= tcp::MIN_NON_SYSTEM_PORT {
+                return;
+            }
+
+            if self.connections.len() >= tcp::MAX_TRACKED_CONNECTIONS {
+                return;
+            }
+
+            log::info!(
+                "Auto-tracking game subnet connection: {}",
+                endpoint.to_string()
+            );
+
+            let mut conn = ConnectionState::new();
+            conn.last_any_packet_time = Some(SystemTime::now());
+
+            Self::process_conn_segments(&mut conn, tcp_header.sequence_number(), payload, &self.tx);
+
+            self.connections.insert(key, conn);
         }
     }
 }

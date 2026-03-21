@@ -6,6 +6,7 @@ pub struct PlayerState {
     pub account_id: Option<String>,
     pub uid: Option<i64>,
     pub line_id: Option<u32>,
+    pub level_map_id: Option<u32>,
 }
 
 impl PlayerState {
@@ -20,8 +21,15 @@ impl PlayerState {
         }
     }
 
-    pub fn set_line_id(&mut self, line_id: u32) {
-        self.line_id = Some(line_id);
+    pub fn apply_line_scene_info(&mut self, line_id: u32, level_map_id: Option<u32>) {
+        if line_id > 0 {
+            self.line_id = Some(line_id);
+        }
+        if let Some(mid) = level_map_id {
+            if mid > 0 {
+                self.level_map_id = Some(mid);
+            }
+        }
     }
 
     pub fn get_line_id(&self) -> i32 {

@@ -493,9 +493,16 @@ impl eframe::App for DpsMeterApp {
                             .set_account_info(update.account_id.clone(), update.uid);
                     }
                     events::CombatEvent::PlayerLineInfo(update) => {
-                        self.player_state.set_line_id(update.line_id);
-                        self.radar_state.clear();
-                        self.last_radar_update_time = None;
+                        let prev_line = self.player_state.line_id;
+                        let prev_map = self.player_state.level_map_id;
+                        self.player_state
+                            .apply_line_scene_info(update.line_id, update.level_map_id);
+                        if prev_line != self.player_state.line_id
+                            || prev_map != self.player_state.level_map_id
+                        {
+                            self.radar_state.clear();
+                            self.last_radar_update_time = None;
+                        }
                     }
                     events::CombatEvent::ModuleData(update) => {
                         self.extracted_modules = update.modules;

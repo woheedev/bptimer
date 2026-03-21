@@ -1,6 +1,6 @@
 [package]
 name = "bptimer-desktop"
-version = "0.1.10"
+version = "0.2.0"
 edition = "2024"
 
 [dependencies]
@@ -21,15 +21,15 @@ eventsource-stream = "0.2.3"
 flate2 = "1.1"
 futures = "0.3.32"
 global-hotkey = "0.7"
-image = { version = "0.25.9", features = ["webp"] }
+image = { version = "0.25.10", features = ["webp"] }
 instant = "0.1.13"
 log = "0.4"
-netdev = "0.40.1"
+netdev = "0.41.0"
 open = "5.3"
 pcap = { version = "2.4.0", features = ["capture-stream"] }
 prost = "0.14.3"
 reqwest = { version = "0.13.2", features = ["json", "stream", "rustls", "blocking"], default-features = false }
-self_update = "0.42.0"
+self_update = "0.43.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.50.0", features = ["full"] }

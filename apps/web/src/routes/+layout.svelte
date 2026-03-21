@@ -5,10 +5,12 @@
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { AD_CHECK_DELAY } from '$lib/constants';
 	import { adBlockStore } from '$lib/stores/ad-block.svelte';
+	import { showToast } from '$lib/utils/toast';
 	import { ModeWatcher } from 'mode-watcher';
 	import { onMount, setContext } from 'svelte';
 	import '../app.css';
 
+	const METER_BREAKING_NOTICE_KEY = 'bptimer:meter-breaking-notice-v1';
 	const MEDIAVINE_SCRIPT_URL =
 		'https://scripts.pubnation.com/tags/7347f077-bb36-48d4-a90b-3128776c43b3.js';
 
@@ -59,6 +61,17 @@
 	setContext('user', getUser);
 
 	onMount(() => {
+		if (browser && !sessionStorage.getItem(METER_BREAKING_NOTICE_KEY)) {
+			showToast.warning(
+				'Due to breaking changes from the latest game update, make sure your meter is updated to the latest version.',
+				{
+					duration: 12000,
+					description: 'BPTimer Companion: 0.2.0+\nZDPS: 0.1.6.2+\nOthers: Pending fix'
+				}
+			);
+			sessionStorage.setItem(METER_BREAKING_NOTICE_KEY, '1');
+		}
+
 		if (document.querySelector(`script[src="${MEDIAVINE_SCRIPT_URL}"]`)) return;
 
 		let loaded = false;
