@@ -304,9 +304,15 @@ pub fn render_player_table(
                             let is_sorted = col_def.sortable && *sort_column == Some(col_def.index);
                             let sort_indicator = if is_sorted {
                                 if *sort_descending {
-                                    format!(" {}", egui_material_icons::icons::ICON_ARROW_DOWNWARD)
+                                    format!(
+                                        " {}",
+                                        egui_material_icons::icons::ICON_ARROW_DOWNWARD.codepoint
+                                    )
                                 } else {
-                                    format!(" {}", egui_material_icons::icons::ICON_ARROW_UPWARD)
+                                    format!(
+                                        " {}",
+                                        egui_material_icons::icons::ICON_ARROW_UPWARD.codepoint
+                                    )
                                 }
                             } else {
                                 String::new()

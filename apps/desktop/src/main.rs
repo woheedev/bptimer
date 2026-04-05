@@ -73,6 +73,7 @@ fn main() -> eframe::Result {
             .with_transparent(true)
             .with_always_on_top()
             .with_resizable(true),
+        renderer: eframe::Renderer::Glow,
         ..Default::default()
     };
 

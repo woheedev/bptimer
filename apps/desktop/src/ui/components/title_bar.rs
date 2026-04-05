@@ -89,7 +89,7 @@ pub fn render_title_bar(
     ui.painter().text(
         close_btn_rect.center(),
         egui::Align2::CENTER_CENTER,
-        egui_material_icons::icons::ICON_CLOSE,
+        egui_material_icons::icons::ICON_CLOSE.codepoint,
         egui::FontId::proportional(14.0),
         text_color,
     );
@@ -125,7 +125,7 @@ pub fn render_title_bar(
     ui.painter().text(
         minimize_btn_rect.center(),
         egui::Align2::CENTER_CENTER,
-        egui_material_icons::icons::ICON_REMOVE,
+        egui_material_icons::icons::ICON_REMOVE.codepoint,
         egui::FontId::proportional(14.0),
         text_color,
     );
@@ -169,7 +169,7 @@ pub fn render_title_bar(
     ui.painter().text(
         settings_btn_rect.center(),
         egui::Align2::CENTER_CENTER,
-        settings_icon,
+        settings_icon.codepoint,
         egui::FontId::proportional(14.0),
         text_color,
     );
@@ -219,7 +219,7 @@ pub fn render_title_bar(
     ui.painter().text(
         refresh_btn_rect.center(),
         egui::Align2::CENTER_CENTER,
-        egui_material_icons::icons::ICON_REFRESH,
+        egui_material_icons::icons::ICON_REFRESH.codepoint,
         egui::FontId::proportional(14.0),
         text_color,
     );
@@ -261,7 +261,7 @@ pub fn render_title_bar(
     ui.painter().text(
         click_through_btn_rect.center(),
         egui::Align2::CENTER_CENTER,
-        egui_material_icons::icons::ICON_TOUCH_APP,
+        egui_material_icons::icons::ICON_TOUCH_APP.codepoint,
         egui::FontId::proportional(14.0),
         if *click_through {
             Color32::from_rgb(100, 150, 255)
@@ -305,7 +305,7 @@ pub fn render_title_bar(
     ui.painter().text(
         lock_btn_rect.center(),
         egui::Align2::CENTER_CENTER,
-        lock_icon,
+        lock_icon.codepoint,
         egui::FontId::proportional(14.0),
         text_color,
     );
@@ -347,7 +347,7 @@ pub fn render_title_bar(
     ui.painter().text(
         bptimer_btn_rect.center(),
         egui::Align2::CENTER_CENTER,
-        egui_material_icons::icons::ICON_OPEN_IN_NEW,
+        egui_material_icons::icons::ICON_OPEN_IN_NEW.codepoint,
         egui::FontId::proportional(14.0),
         text_color,
     );
@@ -390,7 +390,7 @@ pub fn render_title_bar(
         ui.painter().text(
             combat_btn_rect.center(),
             egui::Align2::CENTER_CENTER,
-            egui_material_icons::icons::ICON_SWORDS,
+            egui_material_icons::icons::ICON_SWORDS.codepoint,
             egui::FontId::proportional(14.0),
             text_color,
         );
@@ -432,7 +432,7 @@ pub fn render_title_bar(
         ui.painter().text(
             bosses_btn_rect.center(),
             egui::Align2::CENTER_CENTER,
-            egui_material_icons::icons::ICON_RADAR,
+            egui_material_icons::icons::ICON_RADAR.codepoint,
             egui::FontId::proportional(14.0),
             text_color,
         );

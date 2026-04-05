@@ -6,16 +6,9 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { adBlockStore } from '$lib/stores/ad-block.svelte';
 	import { eventTimersStore } from '$lib/stores/event-timers.svelte';
-	import {
-		ChevronDown,
-		ChevronUp,
-		Github,
-		Moon,
-		PanelLeft,
-		ShieldOff,
-		Sun
-	} from '@lucide/svelte/icons';
+	import { ChevronDown, ChevronUp, Moon, PanelLeft, ShieldOff, Sun } from '@lucide/svelte/icons';
 	import Discord from '$lib/components/icons/discord.svelte';
+	import Github from '$lib/components/icons/github.svelte';
 	import { toggleMode } from 'mode-watcher';
 
 	let { search }: { search?: { execute: (query: string) => void } } = $props();
@@ -63,7 +56,7 @@
 			rel="noopener noreferrer"
 			aria-label="View source code on GitHub"
 		>
-			<Github class="h-4 w-4" />
+			<Github />
 		</Button>
 		<!--
 		<Button

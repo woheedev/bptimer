@@ -352,6 +352,8 @@ impl DpsMeterApp {
 }
 
 impl eframe::App for DpsMeterApp {
+    fn ui(&mut self, _ui: &mut egui::Ui, _frame: &mut eframe::Frame) {}
+
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
         egui::Rgba::TRANSPARENT.to_array()
     }
@@ -764,7 +766,7 @@ impl eframe::App for DpsMeterApp {
 
         ctx.set_pixels_per_point(self.settings.font_scale);
 
-        let mut style = (*ctx.style()).clone();
+        let mut style = (*ctx.global_style()).clone();
         style.visuals = egui::Visuals::dark();
         let text_color = Color32::from_rgba_unmultiplied(
             self.settings.text_color[0],
@@ -773,7 +775,7 @@ impl eframe::App for DpsMeterApp {
             self.settings.text_color[3],
         );
         style.visuals.override_text_color = Some(text_color);
-        ctx.set_style(style);
+        ctx.set_global_style(style);
 
         let bg_color = Color32::from_rgba_unmultiplied(
             colors::BG_RGB[0],
@@ -783,6 +785,7 @@ impl eframe::App for DpsMeterApp {
         );
         let corner_radius = layout::CORNER_RADIUS;
 
+        #[allow(deprecated)]
         egui::CentralPanel::default()
             .frame(egui::Frame::NONE)
             .show(ctx, |ui| {
