@@ -286,7 +286,8 @@ export function getEffectName(id: number): string {
 export const MODULE_SLOTS = [
 	{ value: 2, label: '2 Slots' },
 	{ value: 3, label: '3 Slots' },
-	{ value: 4, label: '4 Slots' }
+	{ value: 4, label: '4 Slots' },
+	{ value: 5, label: '5 Slots' }
 ] as const;
 
 export const MODULE_TIER_THRESHOLDS = [

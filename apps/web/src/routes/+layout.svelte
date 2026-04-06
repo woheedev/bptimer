@@ -9,6 +9,7 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import { onMount, setContext } from 'svelte';
 	import '../app.css';
+	import MeterNotice from '$lib/components/meter-notice.svelte';
 
 	const METER_BREAKING_NOTICE_KEY = 'bptimer:meter-breaking-notice-v1';
 	const MEDIAVINE_SCRIPT_URL =
@@ -66,7 +67,7 @@
 				'Due to breaking changes from the latest game update, make sure your meter is updated to the latest version.',
 				{
 					duration: 12000,
-					description: 'BPTimer Companion: 0.2.0+\nZDPS: 0.1.6.2+\nOthers: Pending fix'
+					description: MeterNotice
 				}
 			);
 			sessionStorage.setItem(METER_BREAKING_NOTICE_KEY, '1');
