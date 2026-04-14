@@ -81,6 +81,7 @@ var BypassVoteUserIDs = map[string]bool{
 	"zdc1lhi31t05zco": true, // github.com/gabrielsanbs/BPSR-Meter
 	"g9bavfjybj4ezhb": true, // github.com/Blue-Protocol-Source/BPSR-ZDPS
 	"lmb7gpcnzge04di": true, // github.com/jbourny/bluemetermobile
+	"pfifcrw3ta5w6ed": true, // https://github.com/susTuna/bluemetermobileSEA
 }
 
 // Minimum required versions for known apps

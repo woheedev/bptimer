@@ -150,6 +150,10 @@ export const API_USERS: Record<string, { label: string; url?: string }> = {
 	lmb7gpcnzge04di: {
 		label: 'Blue Meter Mobile',
 		url: 'https://github.com/jbourny/bluemetermobile/releases/latest'
+	},
+	pfifcrw3ta5w6ed: {
+		label: 'Blue Meter SEA',
+		url: 'https://github.com/susTuna/bluemetermobileSEA/releases/latest'
 	}
 };
 export const BYPASS_VOTE_USER_IDS = Object.keys(API_USERS);
@@ -363,6 +367,16 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				badgeVariant: 'default',
 				tags: 'EN|FR|Flutter|Dart|Android',
 				url: 'https://github.com/jbourny/bluemetermobile',
+				previewImage: '/images/tools/blue-meter-mobile.webp'
+			},
+			{
+				title: 'Blue Meter SEA',
+				description: 'BlueMeter SEA is a port of BlueMeter Mobile for the SEA region.',
+				author: 'susTuna',
+				badge: 'BPTimer',
+				badgeVariant: 'default',
+				tags: 'EN|FR|Flutter|Dart|Android',
+				url: 'https://github.com/susTuna/bluemetermobileSEA',
 				previewImage: '/images/tools/blue-meter-mobile.webp'
 			},
 			{
