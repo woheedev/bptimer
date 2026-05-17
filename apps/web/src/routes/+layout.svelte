@@ -5,13 +5,13 @@
 	import type { UserRecordModel } from '$lib/types/auth';
 	import { AD_CHECK_DELAY } from '$lib/constants';
 	import { adBlockStore } from '$lib/stores/ad-block.svelte';
-	import { showToast } from '$lib/utils/toast';
+	// import { showToast } from '$lib/utils/toast';
 	import { ModeWatcher } from 'mode-watcher';
 	import { onMount, setContext } from 'svelte';
 	import '../app.css';
-	import MeterNotice from '$lib/components/meter-notice.svelte';
+	// import MeterNotice from '$lib/components/meter-notice.svelte';
 
-	const METER_BREAKING_NOTICE_KEY = 'bptimer:meter-breaking-notice-v1';
+	// const METER_BREAKING_NOTICE_KEY = 'bptimer:meter-breaking-notice-v1';
 	const MEDIAVINE_SCRIPT_URL =
 		'https://scripts.pubnation.com/tags/7347f077-bb36-48d4-a90b-3128776c43b3.js';
 
@@ -62,16 +62,17 @@
 	setContext('user', getUser);
 
 	onMount(() => {
-		if (browser && !sessionStorage.getItem(METER_BREAKING_NOTICE_KEY)) {
-			showToast.warning(
-				'Due to breaking changes from the latest game update, make sure your meter is updated to the latest version.',
-				{
-					duration: 12000,
-					description: MeterNotice
-				}
-			);
-			sessionStorage.setItem(METER_BREAKING_NOTICE_KEY, '1');
-		}
+		// Meter breaking-update notice — uncomment imports/constants above and this block to re-enable.
+		// if (browser && !sessionStorage.getItem(METER_BREAKING_NOTICE_KEY)) {
+		// 	showToast.warning(
+		// 		'Due to breaking changes from the latest game update, make sure your meter is updated to the latest version.',
+		// 		{
+		// 			duration: 12000,
+		// 			description: MeterNotice
+		// 		}
+		// 	);
+		// 	sessionStorage.setItem(METER_BREAKING_NOTICE_KEY, '1');
+		// }
 
 		if (document.querySelector(`script[src="${MEDIAVINE_SCRIPT_URL}"]`)) return;
 
