@@ -70,8 +70,8 @@ export const mobSchema = z.object({
 		.regex(/^[a-z0-9]+$/)
 		.min(15)
 		.max(15),
-	uid: z.number().int().min(1).max(40),
-	monster_id: z.number().int().min(10000).max(100000),
+	uid: z.number().int().min(1).max(60),
+	monster_id: z.number().int().min(100).max(100000),
 	type: z.enum(['boss', 'magical_creature']),
 	name: z.string().min(1).max(100),
 	map: z
