@@ -1186,7 +1186,7 @@ migrate(
             hidden: false,
             id: 'number3321827875',
             max: 100000,
-            min: 10000,
+            min: 100,
             name: 'monster_id',
             onlyInt: true,
             presentable: false,

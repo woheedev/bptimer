@@ -19,6 +19,8 @@ use crate::protocol::pb::{
     SyncContainerData, SyncNearDeltaInfo, SyncNearEntities, SyncToMeDeltaInfo,
 };
 use crate::utils::constants::is_tracked_mob;
+use std::collections::HashSet;
+use std::sync::{LazyLock, Mutex};
 
 // Last packed line+map emitted from SocialNtf (dedup; see process_notify_social_data).
 static LAST_SOCIAL_SCENE: AtomicU64 = AtomicU64::new(0);
@@ -32,6 +34,42 @@ static mut LOCAL_PLAYER_UUID: i64 = 0;
 
 /// Global UUID -> base_id mapping for mobs (populated when mobs first appear)
 static mut MOB_UUID_TO_BASE_ID: *mut std::collections::HashMap<i64, u32> = std::ptr::null_mut();
+
+// Used to debug and obtain mob uids
+static LOGGED_NEARBY_MOBS: LazyLock<Mutex<HashSet<u32>>> =
+    LazyLock::new(|| Mutex::new(HashSet::new()));
+
+fn log_nearby_monster(base_id: u32, position: Option<&crate::models::events::Position>) {
+    let should_log = {
+        let mut seen = LOGGED_NEARBY_MOBS.lock().unwrap();
+        seen.insert(base_id)
+    };
+
+    if !should_log {
+        return;
+    }
+
+    let mob_name =
+        crate::utils::constants::get_mob_name(base_id).unwrap_or_else(|| "Unknown".to_string());
+
+    match position {
+        Some(pos) => log::info!(
+            "[DEBUG MOB ENCOUNTER] monster_id={} name={} pos=({:.2}, {:.2}, {:.2}) tracked={}",
+            base_id,
+            mob_name,
+            pos.x,
+            pos.y,
+            pos.z,
+            is_tracked_mob(base_id)
+        ),
+        None => log::info!(
+            "[DEBUG MOB ENCOUNTER] monster_id={} name={} pos=(unknown) tracked={}",
+            base_id,
+            mob_name,
+            is_tracked_mob(base_id)
+        ),
+    }
+}
 
 pub fn detect_server_in_packet(payload: &[u8], endpoint: &ServerEndpoint) -> bool {
     if payload.len() == server_detection::LOGIN_RETURN_SIGNATURE_SIZE {
@@ -282,8 +320,10 @@ fn process_sync_near_delta(payload: &[u8]) -> Result<Vec<CombatEvent>, Box<dyn s
 
         if let Some(base_id) = base_id {
             if let Some(attrs) = &delta.attrs {
+                let position = extract_position_from_attrs(&Some(attrs.clone()));
+                log_nearby_monster(base_id, position.as_ref());
+
                 if is_tracked_mob(base_id) {
-                    let position = extract_position_from_attrs(&Some(attrs.clone()));
                     let (current_hp, max_hp) = extract_hp_from_attrs(&Some(attrs.clone()));
 
                     // (mob can take damage without moving)
@@ -623,6 +663,9 @@ fn process_sync_near_entities(
                 continue;
             }
 
+            let position = extract_position_from_attrs(&entity.attrs);
+            log_nearby_monster(monster_base_id, position.as_ref());
+
             unsafe {
                 if MOB_UUID_TO_BASE_ID.is_null() {
                     let map = Box::into_raw(Box::new(std::collections::HashMap::new()));
@@ -634,7 +677,6 @@ fn process_sync_near_entities(
             }
 
             if is_tracked_mob(monster_base_id) {
-                let position = extract_position_from_attrs(&entity.attrs);
                 let (current_hp, max_hp) = extract_hp_from_attrs(&entity.attrs);
                 if let Some(pos) = position {
                     events.push(CombatEvent::EntityPosition(EntityPositionUpdate {
