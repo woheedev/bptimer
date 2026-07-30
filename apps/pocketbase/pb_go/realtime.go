@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 	"sync"
 	"time"
 
@@ -37,6 +36,7 @@ func InitRealtimeHooks(app core.App) {
 		channelNumber := e.Record.GetInt("channel_number")
 		hpPercentage := e.Record.GetInt("hp_percentage")
 		region := e.Record.GetString("region")
+		playerName := e.Record.GetString("player_name")
 
 		var locationImage *int
 		if locImg := e.Record.GetInt("location_image"); locImg > 0 {
@@ -49,9 +49,10 @@ func InitRealtimeHooks(app core.App) {
 			HPPercentage:  hpPercentage,
 			Region:        region,
 			LocationImage: locationImage,
+			PlayerName:    playerName,
 		})
 
-		if err := updateMobChannelStatus(e.App, mobID, channelNumber, hpPercentage, region, locationImage); err != nil {
+		if err := updateMobChannelStatus(e.App, mobID, channelNumber, hpPercentage, region, locationImage, playerName); err != nil {
 			log.Printf("[REALTIME] mob_channel_status update error=%v", err)
 		}
 
@@ -108,16 +109,6 @@ func (b *UpdateBatcher) flush() {
 	}
 }
 
-// getHPUpdatesTopic returns the topic name for HP updates based on region.
-// NA uses the default topic (mob_hp_updates) for backwards compatibility,
-// other regions use region-specific topics (e.g., mob_hp_updates_sea for SEA).
-func getHPUpdatesTopic(region string) string {
-	if region == "NA" {
-		return SSE_TOPIC_HP_UPDATES
-	}
-	return fmt.Sprintf("mob_hp_updates_%s", strings.ToLower(region))
-}
-
 func (b *UpdateBatcher) broadcast(updates []*MobUpdate, region string) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -125,11 +116,9 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate, region string) {
 		}
 	}()
 
-	broker := b.app.SubscriptionsBroker()
-	clients := broker.Clients()
+	topic := regionTopic(SSE_TOPIC_HP_UPDATES, region)
 
-	topic := getHPUpdatesTopic(region)
-
+	// Legacy format: [[mobId, channel, hp, locationImage], ...]
 	batchPayload := make([][]interface{}, 0, len(updates))
 	for _, update := range updates {
 		payload := make([]interface{}, 4)
@@ -149,16 +138,50 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate, region string) {
 		log.Printf("[REALTIME] batch marshal error=%v", err)
 		return
 	}
+	broadcastToTopic(b.app, topic, data)
 
+	// JSON format: [{mob_id, channel, hp, location_image?, player_name?}, ...]
+	type HPUpdateJSON struct {
+		MobID         string `json:"mob_id"`
+		Channel       int    `json:"channel"`
+		HP            int    `json:"hp"`
+		LocationImage *int   `json:"location_image,omitempty"`
+		PlayerName    string `json:"player_name,omitempty"`
+	}
+
+	jsonPayload := make([]HPUpdateJSON, 0, len(updates))
+	for _, update := range updates {
+		jsonPayload = append(jsonPayload, HPUpdateJSON{
+			MobID:         update.MobID,
+			Channel:       update.ChannelNumber,
+			HP:            update.HPPercentage,
+			LocationImage: update.LocationImage,
+			PlayerName:    update.PlayerName,
+		})
+	}
+
+	jsonData, err := json.Marshal(jsonPayload)
+	if err != nil {
+		log.Printf("[REALTIME] json batch marshal error=%v", err)
+		return
+	}
+	broadcastToTopic(b.app, topic+"_json", jsonData)
+}
+
+// broadcastToTopic sends data to all realtime clients subscribed to the given topic.
+// Sends are non-blocking: clients with full channels are skipped and counted.
+func broadcastToTopic(app core.App, topic string, data []byte) {
 	message := subscriptions.Message{
 		Name: topic,
 		Data: data,
 	}
 
-	droppedCount := 0
-	sentCount := 0
+	broker := app.SubscriptionsBroker()
+	clients := broker.Clients()
 
-	// Send to all subscribed clients
+	sentCount := 0
+	droppedCount := 0
+
 	for _, client := range clients {
 		if !client.HasSubscription(topic) {
 			continue
@@ -170,7 +193,7 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate, region string) {
 				if r := recover(); r != nil {
 					droppedCount++
 					if droppedCount%100 == 1 {
-						log.Printf("[REALTIME] client panic (likely closed channel): %v", r)
+						log.Printf("[REALTIME] client panic topic=%s (likely closed channel): %v", topic, r)
 					}
 				}
 			}()
@@ -181,19 +204,18 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate, region string) {
 			default:
 				droppedCount++
 				if droppedCount%100 == 1 {
-					log.Printf("[REALTIME] dropped=%d sent=%d (client channels full)", droppedCount, sentCount)
+					log.Printf("[REALTIME] client channel full topic=%s dropped=%d sent=%d", topic, droppedCount, sentCount)
 				}
 			}
 		}()
 	}
 
-	// Log summary if there were significant drops
 	if droppedCount > 0 {
-		log.Printf("[REALTIME] broadcast complete: region=%s sent=%d dropped=%d total_clients=%d", region, sentCount, droppedCount, len(clients))
+		log.Printf("[REALTIME] broadcast complete topic=%s sent=%d dropped=%d total_clients=%d", topic, sentCount, droppedCount, len(clients))
 	}
 }
 
-func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPercentage int, region string, locationImage *int) error {
+func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPercentage int, region string, locationImage *int, playerName string) error {
 	record, err := app.FindFirstRecordByFilter(
 		COLLECTION_MOB_CHANNEL_STATUS,
 		"mob = {:mobId} && channel_number = {:channelNumber} && region = {:region}",
@@ -230,7 +252,12 @@ func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPer
 	}
 
 	record.Set("last_hp", hpPercentage)
-	record.Set("last_update", time.Now().Format("2006-01-02 15:04:05"))
+	// NOTE: last_update is an autodate field — PocketBase sets it to now (UTC) on
+	// every save and ignores manual Set() calls. The shrink cron relies on it as
+	// the "last HP report activity" signal; the mob respawn cron deliberately
+	// updates records via raw SQL so it doesn't bump it. Any new save path for
+	// this collection would also bump it, so add one only with care.
+	record.Set("last_player_name", playerName)
 
 	if locationImage != nil {
 		record.Set("location_image", *locationImage)

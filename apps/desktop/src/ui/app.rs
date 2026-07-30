@@ -95,23 +95,31 @@ pub struct DpsMeterApp {
     pub last_hotkey_press: Option<Instant>,
 }
 
-pub(crate) fn determine_effective_region(
-    region: &Option<crate::config::MobTimersRegion>,
-    account_id: Option<&String>,
+/// Parse a region name string into a MobTimersRegion variant
+fn parse_region_str(s: &str) -> Option<crate::config::MobTimersRegion> {
+    use crate::config::MobTimersRegion;
+    match s {
+        "NA" => Some(MobTimersRegion::NA),
+        "EU" => Some(MobTimersRegion::EU),
+        "SEA" => Some(MobTimersRegion::SEA),
+        "JP" => Some(MobTimersRegion::JP),
+        "KR" => Some(MobTimersRegion::KR),
+        _ => None,
+    }
+}
+
+/// Resolve the effective region for mob timers. Once a scene_ip packet has been
+/// received it is the sole source of truth: a known ip maps to its region, an
+/// unknown ip means the region is not supported (None). Until the first packet
+/// arrives, fall back to the region cached from a previous session.
+pub(crate) fn refine_region_with_scene_ip(
+    last_cached: Option<crate::config::MobTimersRegion>,
+    scene_ip: Option<&String>,
 ) -> Option<crate::config::MobTimersRegion> {
-    match region {
-        None => {
-            // Auto mode - determine from account_id
-            if let Some(acc_id) = account_id {
-                let prefix = if acc_id.len() >= 2 { &acc_id[..2] } else { "" };
-                crate::utils::constants::account_id_regions::get_mob_timers_region_from_prefix(
-                    prefix,
-                )
-            } else {
-                None
-            }
-        }
-        Some(region) => Some(*region),
+    match scene_ip {
+        Some(ip) => crate::utils::constants::account_id_regions::get_region_from_scene_ip(ip)
+            .and_then(parse_region_str),
+        None => last_cached,
     }
 }
 
@@ -175,9 +183,11 @@ impl DpsMeterApp {
         let mut initial_pb_client: Option<Arc<PocketBaseClient>> = None;
         let mut initial_shutdown_tx: Option<tokio::sync::watch::Sender<bool>> = None;
         let mut initial_pb_task: Option<std::thread::JoinHandle<()>> = None;
-
         let initial_effective_region = if settings.show_mob_timers {
-            determine_effective_region(&settings.mob_timers_region, None)
+            settings
+                .last_effective_region
+                .as_deref()
+                .and_then(parse_region_str)
         } else {
             None
         };
@@ -314,11 +324,26 @@ impl DpsMeterApp {
 
         let line = self.player_state.get_line_id();
         if line <= 0 {
+            info!(
+                "[BPTimer] HP report skipped: mob_id={} line={} (<=0)",
+                mob_id, line
+            );
             return;
         }
 
         let account_id = self.player_state.get_account_id();
         let uid = self.player_state.get_uid();
+
+        let player_name = uid.and_then(|uid| self.player_info_cache.get_name(uid));
+        let scene_ip = self.player_state.get_scene_ip();
+        if scene_ip.as_deref().map_or(true, |s| s.is_empty()) {
+            info!(
+                "[BPTimer] HP report skipped: mob_id={} line={} scene_ip is missing or empty",
+                mob_id, line
+            );
+            return;
+        }
+
         if let Some(client) = self.bptimer_client.clone() {
             client.report_hp(
                 mob_id,
@@ -329,6 +354,8 @@ impl DpsMeterApp {
                 Some(position.z),
                 account_id,
                 uid,
+                player_name,
+                scene_ip,
             );
         }
     }
@@ -352,8 +379,6 @@ impl DpsMeterApp {
 }
 
 impl eframe::App for DpsMeterApp {
-    fn ui(&mut self, _ui: &mut egui::Ui, _frame: &mut eframe::Frame) {}
-
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
         egui::Rgba::TRANSPARENT.to_array()
     }
@@ -366,7 +391,8 @@ impl eframe::App for DpsMeterApp {
         );
     }
 
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        let ctx = ui.ctx().clone();
         // Fallback if current view is disabled
         match self.view_mode {
             ViewMode::Combat if !self.settings.show_combat_data => {
@@ -395,10 +421,24 @@ impl eframe::App for DpsMeterApp {
             while self.mob_receiver.try_recv().is_ok() {}
         }
 
-        // Determine effective region for Auto mode
-        let account_id = self.player_state.get_account_id();
-        let effective_region =
-            determine_effective_region(&self.settings.mob_timers_region, account_id.as_ref());
+        // Determine region via scene_ip
+        let scene_ip = self.player_state.get_scene_ip();
+        let last_cached = self
+            .settings
+            .last_effective_region
+            .as_deref()
+            .and_then(parse_region_str);
+        let effective_region = refine_region_with_scene_ip(last_cached, scene_ip.as_ref());
+
+        // Persist effective region to settings when it changes
+        if let Some(region) = effective_region {
+            let region_str =
+                crate::utils::constants::account_id_regions::get_region_string(&region);
+            if self.settings.last_effective_region.as_deref() != Some(region_str) {
+                self.settings.last_effective_region = Some(region_str.to_string());
+                self.settings_save_timer = Some(Instant::now());
+            }
+        }
 
         // Check if we need to restart:
         // 1. show_mob_timers setting changed
@@ -599,6 +639,15 @@ impl eframe::App for DpsMeterApp {
                             self.radar_state.update_player_position(update.position);
                         }
                     }
+                    events::CombatEvent::SceneIp(ip) => {
+                        if ip.is_empty() {
+                            if self.player_state.scene_ip.take().is_some() {
+                                info!("Scene IP cleared (left world)");
+                            }
+                        } else if self.player_state.set_scene_ip(ip.clone()) {
+                            info!("Scene IP changed to: {}", ip);
+                        }
+                    }
                 }
             }
         }
@@ -785,10 +834,9 @@ impl eframe::App for DpsMeterApp {
         );
         let corner_radius = layout::CORNER_RADIUS;
 
-        #[allow(deprecated)]
         egui::CentralPanel::default()
             .frame(egui::Frame::NONE)
-            .show(ctx, |ui| {
+            .show(ui, |ui| {
                 let app_rect = ui.max_rect();
                 ui.painter().rect_filled(app_rect, corner_radius, bg_color);
 
@@ -800,7 +848,7 @@ impl eframe::App for DpsMeterApp {
                 title_bar::render_title_bar(
                     ui,
                     title_bar_rect,
-                    ctx,
+                    &ctx,
                     self.settings.window_opacity,
                     &mut self.settings.click_through,
                     &mut self.window_locked,
@@ -897,7 +945,8 @@ impl eframe::App for DpsMeterApp {
                                         ui,
                                         &visible_mobs,
                                         &mut self.settings,
-                                        account_id.as_ref(),
+                                        effective_region,
+                                        scene_ip.as_deref(),
                                     );
                                 }
                             });

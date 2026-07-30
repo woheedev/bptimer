@@ -22,6 +22,8 @@ type RealtimeEventData = {
 	type: 'hp_update' | 'reset';
 };
 
+type HpEntry = [string, number, number, number | null];
+
 function createRealtimeMobsStore() {
 	let isConnected = $state(false);
 	let connectionAttempts = 0;
@@ -57,17 +59,15 @@ function createRealtimeMobsStore() {
 		try {
 			// Subscribe to HP updates topic
 			// Format: [[mobId, channel, hp, locationImage], ...] (batched)
-			// Topic depends on region: mob_hp_updates (NA), mob_hp_updates_sea, mob_hp_updates_jpkr
+			// Topic depends on region: mob_hp_updates (NA), mob_hp_updates_sea, mob_hp_updates_jp, etc.
 			const topicSuffix = region === DEFAULT_REGION ? '' : `_${region.toLowerCase()}`;
 			const hpTopic = `mob_hp_updates${topicSuffix}`;
 
 			pbRealtime.realtime.subscribe(hpTopic, (e) => {
-				const batch = typeof e === 'string' ? JSON.parse(e) : e;
+				const batch: HpEntry[] = typeof e === 'string' ? JSON.parse(e) : e;
 
-				// Process each update in the batch
-				for (const data of batch) {
-					const [mobId, channel, hp, locationImage] = data;
-
+				for (const entry of batch) {
+					const [mobId, channel, hp, locationImage] = entry;
 					const record: Record<string, unknown> = {
 						mob: mobId,
 						channel_number: channel,
@@ -75,7 +75,7 @@ function createRealtimeMobsStore() {
 						last_update: new Date().toISOString()
 					};
 
-					if (locationImage) {
+					if (locationImage != null) {
 						record.location_image = locationImage;
 					}
 
@@ -91,7 +91,7 @@ function createRealtimeMobsStore() {
 			const resetsTopic = `mob_resets${topicSuffix}`;
 
 			pbRealtime.realtime.subscribe(resetsTopic, (e) => {
-				const mobIds = typeof e === 'string' ? JSON.parse(e) : e;
+				const mobIds: string[] = typeof e === 'string' ? JSON.parse(e) : e;
 
 				for (const mobId of mobIds) {
 					debouncedCallback({

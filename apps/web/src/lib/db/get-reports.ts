@@ -28,7 +28,8 @@ function mapReportToMobReport(
 		downvotes: (report.downvotes as number) || 0,
 		reporter_id: report.reporter as string,
 		reporter_reputation: reporter?.reputation ?? 0,
-		location_image: report.location_image as number | undefined
+		location_image: report.location_image as number | undefined,
+		player_name: (report.player_name as string) || undefined
 	};
 }
 

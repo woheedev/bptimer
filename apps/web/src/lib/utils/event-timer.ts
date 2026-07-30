@@ -33,7 +33,11 @@ export const EVENT_CONFIGS: EventConfig[] = [
 				days: [0, 1, 2, 3, 4, 5, 6],
 				hour: 22, // 6:00 UTC+8
 				minute: 0
-			}
+			},
+			// EU: same as NA
+			EU: { days: [0, 1, 2, 3, 4, 5, 6], hour: 7, minute: 0 },
+			JP: { days: [0, 1, 2, 3, 4, 5, 6], hour: 20, minute: 0 },
+			KR: { days: [0, 1, 2, 3, 4, 5, 6], hour: 20, minute: 0 }
 		}
 	},
 	{
@@ -50,7 +54,11 @@ export const EVENT_CONFIGS: EventConfig[] = [
 				days: [0],
 				hour: 22, // 6:00 UTC+8
 				minute: 0
-			}
+			},
+			// EU: same as NA
+			EU: { days: [1], hour: 7, minute: 0 },
+			JP: { days: [0], hour: 20, minute: 0 },
+			KR: { days: [0], hour: 20, minute: 0 }
 		}
 	},
 	{
@@ -67,6 +75,23 @@ export const EVENT_CONFIGS: EventConfig[] = [
 			SEA: {
 				days: [0, 1, 2, 3, 4, 5, 6],
 				hour: 13, // 21:30 - 23:00 UTC+8
+				minute: 30,
+				durationHours: 1,
+				durationMinutes: 30
+			},
+			// EU: same as NA
+			EU: { days: [0, 1, 2, 3, 4, 5, 6], hour: 18, minute: 0, durationHours: 6 },
+			// JP/KR share SEA's local-time schedule — 20:30 - 22:00 UTC+9
+			JP: {
+				days: [0, 1, 2, 3, 4, 5, 6],
+				hour: 11,
+				minute: 30,
+				durationHours: 1,
+				durationMinutes: 30
+			},
+			KR: {
+				days: [0, 1, 2, 3, 4, 5, 6],
+				hour: 11,
 				minute: 30,
 				durationHours: 1,
 				durationMinutes: 30
@@ -89,7 +114,12 @@ export const EVENT_CONFIGS: EventConfig[] = [
 				hour: 3, // 11:00 - 01:00 UTC+8
 				minute: 0,
 				durationHours: 14
-			}
+			},
+			// EU: same as NA
+			EU: { days: [5, 6, 0], hour: 16, minute: 0, durationHours: 14 },
+			// JP/KR share SEA's local-time schedule — 10:00 - 00:00 UTC+9
+			JP: { days: [5, 6, 0], hour: 1, minute: 0, durationHours: 14 },
+			KR: { days: [5, 6, 0], hour: 1, minute: 0, durationHours: 14 }
 		}
 	},
 	{
@@ -109,7 +139,12 @@ export const EVENT_CONFIGS: EventConfig[] = [
 				minute: 30,
 				durationHours: 0,
 				durationMinutes: 25
-			}
+			},
+			// EU: same as NA
+			EU: { days: [5], hour: 17, minute: 30, durationHours: 12 },
+			// JP/KR share SEA's local-time schedule — 19:30 - 19:55 UTC+9
+			JP: { days: [5], hour: 10, minute: 30, durationHours: 0, durationMinutes: 25 },
+			KR: { days: [5], hour: 10, minute: 30, durationHours: 0, durationMinutes: 25 }
 		}
 	},
 	{
@@ -127,8 +162,36 @@ export const EVENT_CONFIGS: EventConfig[] = [
 				inverted: true
 			},
 			SEA: {
-				days: [0], // TODO: NEED TO VERIFY ACTUAL TIME / RESET DATE
+				days: [0],
 				hour: 19,
+				minute: 0,
+				durationHours: 3,
+				intervalWeeks: 2,
+				referenceDate: '2025-12-08',
+				inverted: true
+			},
+			// EU: same as NA
+			EU: {
+				days: [1],
+				hour: 4,
+				minute: 0,
+				durationHours: 3,
+				intervalWeeks: 2,
+				referenceDate: '2025-10-20',
+				inverted: true
+			},
+			JP: {
+				days: [0],
+				hour: 17,
+				minute: 0,
+				durationHours: 3,
+				intervalWeeks: 2,
+				referenceDate: '2025-12-08',
+				inverted: true
+			},
+			KR: {
+				days: [0],
+				hour: 17,
 				minute: 0,
 				durationHours: 3,
 				intervalWeeks: 2,

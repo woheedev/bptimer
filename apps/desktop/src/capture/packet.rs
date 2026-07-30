@@ -1,3 +1,4 @@
+use log::error;
 use netdev::interface::get_interfaces;
 use netdev::interface::types::InterfaceType;
 use pcap::{Capture, Device};
@@ -89,7 +90,7 @@ impl PacketCapture {
                     Ok(Some(new_idx)) => current_idx = new_idx,
                     Ok(None) => break, // Shutdown
                     Err(e) => {
-                        log::error!("Packet capture error: {}", e);
+                        error!("Packet capture error: {}", e);
                         break;
                     }
                 }
@@ -194,7 +195,7 @@ fn capture_loop(
             }
             Err(pcap::Error::TimeoutExpired) => {}
             Err(e) => {
-                log::error!("Error capturing packet: {}", e);
+                error!("Error capturing packet: {}", e);
             }
         }
 

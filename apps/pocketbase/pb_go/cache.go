@@ -104,6 +104,31 @@ func (s *MobCacheService) GetCachedByID(id string) (CachedMobData, bool) {
 	return CachedMobData{}, false
 }
 
+// Clear removes all cached entries, forcing a fresh load on next access.
+func (s *MobCacheService) Clear() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.byID = make(map[string]CachedMobData)
+	s.byMonsterID = make(map[string]CachedMobData)
+}
+
+// InvalidateMap removes all cache entries whose MapID matches the given map record ID.
+func (s *MobCacheService) InvalidateMap(mapID string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for id, data := range s.byID {
+		if data.MapID == mapID {
+			delete(s.byID, id)
+		}
+	}
+	for key, data := range s.byMonsterID {
+		if data.MapID == mapID {
+			delete(s.byMonsterID, key)
+		}
+	}
+}
+
 // GetByID retrieves a mob by ID, loading it from the DB if missing or expired.
 func (s *MobCacheService) GetByID(app core.App, id string) (CachedMobData, error) {
 	if data, ok := s.GetCachedByID(id); ok {
@@ -175,6 +200,17 @@ func (s *MobCacheService) GetByMonsterID(app core.App, monsterID int, region str
 	return data, nil
 }
 
+func regionCountToInt(v interface{}) (int, bool) {
+	switch n := v.(type) {
+	case float64:
+		return int(n), true
+	case int:
+		return n, true
+	default:
+		return 0, false
+	}
+}
+
 // parseRegionData extracts region map from region_data field, handling different types PocketBase may return.
 func parseRegionData(regionData interface{}) (map[string]interface{}, error) {
 	var regionMap map[string]interface{}
@@ -229,21 +265,22 @@ func loadMobDataFromRecord(app core.App, mob *core.Record, region string) (Cache
 			return CachedMobData{}, fmt.Errorf("region %s not found in region_data for mob %s", region, mob.GetString("name"))
 		}
 
-		channels, ok := regionChannels.(float64)
+		channels, ok := regionCountToInt(regionChannels)
 		if !ok {
 			return CachedMobData{}, fmt.Errorf("invalid channel count type for region %s in mob %s", region, mob.GetString("name"))
 		}
-		totalChannels = int(channels)
 
-		if totalChannels <= 0 {
+		if channels < 0 {
 			return CachedMobData{}, fmt.Errorf("invalid total_channels for mob %s in region %s", mob.GetString("name"), region)
 		}
+		totalChannels = channels
 	}
 
 	return CachedMobData{
 		MobID:         mob.Id,
 		MonsterID:     mob.GetInt("monster_id"),
 		Name:          mob.GetString("name"),
+		MapID:         mapRecord.Id,
 		TotalChannels: totalChannels,
 		MobType:       mob.GetString("type"),
 		RespawnTime:   mob.GetInt("respawn_time"),

@@ -7,6 +7,10 @@ const POS_Y = 142;
 const POS_Z = 32;
 const ACCOUNT_ID = '4_1234567890';
 const UID = 1234567890;
+const PLAYER_NAME = 'Wohee';
+// NA: gamesvr.playbpsr.com | EU: gamesvr-eu.playbpsr.com | SEA: bpm-sea-gamesvra.haoplay.net
+// JP: bpm-jp-gamesvra.xdg.com | KR: bpm-kr-gamesvra.xdg.com
+const SCENE_IP = 'gamesvr.playbpsr.com';
 
 class BPTimer {
   constructor(apiKey) {
@@ -26,7 +30,18 @@ class BPTimer {
   }
 
   // Create HP report
-  async createHpReport(monsterId, hpPct, line, posX, posY, posZ, accountId, uid) {
+  async createHpReport(
+    monsterId,
+    hpPct,
+    line,
+    posX,
+    posY,
+    posZ,
+    accountId,
+    uid,
+    playerName,
+    sceneIp
+  ) {
     try {
       const payload = {
         monster_id: monsterId,
@@ -48,6 +63,14 @@ class BPTimer {
         payload.uid = uid;
       }
 
+      if (playerName !== undefined) {
+        payload.player_name = playerName;
+      }
+
+      if (sceneIp !== undefined) {
+        payload.scene_ip = sceneIp;
+      }
+
       const response = await this.request('/api/create-hp-report', {
         method: 'POST',
         body: JSON.stringify(payload)
@@ -65,12 +88,16 @@ class BPTimer {
   }
 }
 
-const [apiKey] = process.argv.slice(2);
+const [apiKey, lineArg, sceneIpArg] = process.argv.slice(2);
 
 if (!apiKey) {
-  console.error('Usage: bun create-hp-report.mjs <api_key>');
+  console.error('Usage: bun create-hp-report.mjs <api_key> [line] [scene_ip]');
   process.exit(1);
 }
+
+// Optional overrides
+const line = lineArg !== undefined ? parseInt(lineArg, 10) : LINE;
+const sceneIp = sceneIpArg ?? SCENE_IP;
 
 const app = new BPTimer(apiKey);
 
@@ -78,12 +105,14 @@ try {
   const result = await app.createHpReport(
     MONSTER_ID,
     HP_PCT,
-    LINE,
+    line,
     POS_X,
     POS_Y,
     POS_Z,
     ACCOUNT_ID,
-    UID
+    UID,
+    PLAYER_NAME,
+    sceneIp
   );
   console.log('HP Report created successfully:', result);
 } catch (error) {

@@ -14,6 +14,7 @@ export interface MobReport {
 	reporter_id: string;
 	reporter_reputation: number;
 	location_image?: number;
+	player_name?: string;
 }
 
 export type UserVoteInfo = {

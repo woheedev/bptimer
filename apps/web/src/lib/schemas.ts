@@ -112,6 +112,7 @@ export const hpReportSchema = z.object({
 		.union([z.number().int().min(1).max(20), z.literal(0), z.literal(null)])
 		.optional()
 		.transform((val) => (val === 0 || val === null ? undefined : val)),
+	player_name: z.string().max(100).optional(),
 	region: z.string()
 });
 

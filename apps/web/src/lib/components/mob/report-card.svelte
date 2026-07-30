@@ -32,9 +32,6 @@
 	const getUser = getContext<() => UserRecordModel | null>('user');
 	const currentUser = $derived(getUser());
 
-	// Get user initials for avatar fallback
-	const userInitials = $derived(getInitials(report.user.name));
-
 	// Special user configuration
 	const isSpecialUser = $derived(BYPASS_VOTE_USER_IDS.includes(report.user.id));
 	const isAdminUser = $derived(ADMIN_USER_IDS.includes(report.user.id));
@@ -42,7 +39,12 @@
 	const apiUser = $derived(API_USERS[report.user.id]);
 	const apiLabel = $derived(apiUser?.label ?? 'API');
 	const apiUrl = $derived(apiUser?.url);
-	const displayName = $derived(isApiUser ? apiLabel : (report.user.name ?? 'Unknown'));
+	const displayName = $derived(
+		report.player_name ? report.player_name : isApiUser ? apiLabel : (report.user.name ?? 'Unknown')
+	);
+
+	// Get user initials for avatar fallback (from whatever name is being displayed)
+	const userInitials = $derived(getInitials(displayName));
 
 	// Reactive time for live updates
 	let now = $state(Date.now());

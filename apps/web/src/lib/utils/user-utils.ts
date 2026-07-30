@@ -9,10 +9,7 @@ import type { UserRecordModel } from '$lib/types/auth';
  */
 export function getAvatarUrl(
 	model:
-		| UserRecordModel
-		| { id: string; avatar?: string; collectionName?: string }
-		| null
-		| undefined
+		UserRecordModel | { id: string; avatar?: string; collectionName?: string } | null | undefined
 ): string | undefined {
 	if (!model) return undefined;
 	if (typeof model.avatar !== 'string' || !model.avatar) return undefined;

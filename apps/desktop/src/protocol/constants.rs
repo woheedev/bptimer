@@ -6,6 +6,8 @@ pub const SERVICE_UUID: u64 = 0x63335342;
 pub const SOCIAL_NTF_SERVICE_ID: u64 = 0x254C89A3;
 /// NotifySocialData
 pub const SOCIAL_NTF_NOTIFY_METHOD_ID: u32 = 1;
+pub const ENTER_WORLD_SERVICE_ID: u64 = 0x04A84519; // WorldLoginNtf
+pub const ENTER_WORLD_NOTIFY_METHOD_ID: u32 = 3;
 
 /// Message type enumeration
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
