@@ -1,6 +1,7 @@
 use crate::ui::app::ViewMode;
 use egui::{Color32, Context, Rect, Ui, Vec2};
 use egui_material_icons;
+use log::warn;
 
 pub fn render_title_bar(
     ui: &mut Ui,
@@ -354,7 +355,7 @@ pub fn render_title_bar(
 
     if bptimer_response.clicked() {
         if let Err(e) = open::that(crate::utils::constants::BPTIMER_BASE_URL) {
-            log::warn!("Failed to open BPTimer website: {}", e);
+            warn!("Failed to open BPTimer website: {}", e);
         }
     }
 

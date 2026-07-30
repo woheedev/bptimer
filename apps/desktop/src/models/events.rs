@@ -119,4 +119,5 @@ pub enum CombatEvent {
     ModuleData(ModuleDataUpdate),
     PlayerClass(PlayerClassUpdate),
     PlayerAbilityScore(PlayerAbilityScoreUpdate),
+    SceneIp(String),
 }

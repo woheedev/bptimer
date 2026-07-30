@@ -73,6 +73,15 @@ message NotifySocialData { NotifySocialDataRequest v_request = 1; }
 
 message NotifySocialDataRequest { SocialData data = 1; }
 
+message NotifyEnterWorld { NotifyEnterWorldRequest v_request = 1; }
+
+message NotifyEnterWorldRequest {
+  string account_id = 1;
+  string token = 2;
+  string scene_ip = 3;
+  int32 scene_port = 4;
+}
+
 message Package { map<int64, Item> items = 4; }
 
 message Position {

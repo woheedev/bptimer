@@ -1,4 +1,5 @@
 use crate::utils::constants;
+use log::{error, info, warn};
 use std::collections::{HashMap, HashSet};
 use std::sync::mpsc::{self, Sender};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -86,19 +87,15 @@ fn get_hp_report_sender() -> &'static Sender<HpReportTask> {
                                 }
                                 _ => String::new(),
                             };
-                            log::info!(
+                            info!(
                                 "[BPTimer] Reported {}% HP for {} ({}) on Line {}{}",
-                                task.rounded_hp_pct,
-                                mob_name,
-                                task.monster_id,
-                                task.line,
-                                pos_info
+                                task.rounded_hp_pct, mob_name, task.monster_id, task.line, pos_info
                             );
                         } else {
                             let status = resp.status();
                             if status.as_u16() == 409 {
                                 // 409 Conflict is expected when multiple clients are on the same line
-                                log::info!(
+                                info!(
                                     "[BPTimer] HP Report skipped: Already reported by another user."
                                 );
                             } else {
@@ -116,12 +113,12 @@ fn get_hp_report_sender() -> &'static Sender<HpReportTask> {
                                 let error_msg = message
                                     .map(|m| format!("{} - {}", status, m))
                                     .unwrap_or_else(|| status.to_string());
-                                log::warn!("[BPTimer] Failed to report HP: {}", error_msg);
+                                warn!("[BPTimer] Failed to report HP: {}", error_msg);
                             }
                         }
                     }
                     Err(e) => {
-                        log::warn!("[BPTimer] Failed to report HP: {}", e);
+                        warn!("[BPTimer] Failed to report HP: {}", e);
                     }
                 };
 
@@ -169,6 +166,8 @@ impl BPTimerClient {
         pos_z: Option<f32>,
         account_id: Option<String>,
         uid: Option<i64>,
+        player_name: Option<String>,
+        scene_ip: Option<String>,
     ) {
         // Check API credentials
         if self.api_key.is_empty() || self.api_url.is_empty() {
@@ -252,6 +251,8 @@ impl BPTimerClient {
             "pos_z": rounded_pos_z,
             "account_id": account_id,
             "uid": uid,
+            "player_name": player_name,
+            "scene_ip": scene_ip,
         });
 
         let task = HpReportTask {
@@ -269,7 +270,7 @@ impl BPTimerClient {
         };
 
         if let Err(e) = get_hp_report_sender().send(task) {
-            log::error!("[BPTimer] Failed to queue HP report: {}", e);
+            error!("[BPTimer] Failed to queue HP report: {}", e);
             //  Worker thread died - reset cache to prevent blocking future reports
             if let Ok(mut cache_guard) = self.cache.lock()
                 && let Some(entry) = cache_guard.get_mut(&cache_key)
@@ -296,16 +297,16 @@ impl BPTimerClient {
             match client.get(&url).send() {
                 Ok(resp) => {
                     if resp.status().is_success() {
-                        log::info!("[BPTimer] API connection test successful");
+                        info!("[BPTimer] API connection test successful");
                     } else {
-                        log::warn!(
+                        warn!(
                             "[BPTimer] API connection test failed: status {}",
                             resp.status()
                         );
                     }
                 }
                 Err(e) => {
-                    log::warn!("[BPTimer] API connection test error: {:?}", e);
+                    warn!("[BPTimer] API connection test error: {:?}", e);
                 }
             }
         });
@@ -331,7 +332,7 @@ impl BPTimerClient {
             match client.get(&url).send() {
                 Ok(resp) => {
                     if !resp.status().is_success() {
-                        log::warn!("[BPTimer] Prefetch failed: status {}", resp.status());
+                        warn!("[BPTimer] Prefetch failed: status {}", resp.status());
                         return;
                     }
 
@@ -356,19 +357,18 @@ impl BPTimerClient {
                             constants::set_mob_mapping(mob_mapping);
                             constants::set_location_tracked_mobs(location_tracked_mobs);
 
-                            log::info!(
+                            info!(
                                 "[BPTimer] Prefetched {} mobs ({} location-tracked)",
-                                mob_count,
-                                location_count
+                                mob_count, location_count
                             );
                         }
                         Err(e) => {
-                            log::warn!("[BPTimer] Prefetch failed to parse response: {}", e);
+                            warn!("[BPTimer] Prefetch failed to parse response: {}", e);
                         }
                     }
                 }
                 Err(e) => {
-                    log::warn!("[BPTimer] Prefetch failed: {}", e);
+                    warn!("[BPTimer] Prefetch failed: {}", e);
                 }
             }
         });

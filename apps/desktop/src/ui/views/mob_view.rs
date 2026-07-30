@@ -1,9 +1,8 @@
-use crate::config::Settings;
+use crate::config::{MobTimersRegion, Settings};
 use crate::models::mob::Mob;
-use crate::ui::app::determine_effective_region;
 use crate::ui::constants::{spacing, style, theme};
 use crate::utils::constants::{
-    account_id_regions, get_location_name, get_monster_id_from_name, is_location_tracked_mob,
+    get_location_name, get_monster_id_from_name, is_location_tracked_mob,
 };
 use egui::{Align2, Color32, FontId, Pos2, Rect, RichText, Sense, Stroke, StrokeKind, Ui, Vec2};
 
@@ -29,45 +28,32 @@ pub fn render_mob_view(
     ui: &mut Ui,
     mobs: &[Mob],
     settings: &mut Settings,
-    account_id: Option<&String>,
+    effective_region: Option<MobTimersRegion>,
+    scene_ip: Option<&str>,
 ) -> bool {
-    let effective_region = determine_effective_region(&settings.mob_timers_region, account_id);
+    if effective_region.is_none() {
+        // If we have a scene_ip but no resolved region, the player is on a region we don't
+        // track. Otherwise we simply haven't received the first scene_ip packet yet.
+        let is_unsupported_region = scene_ip.is_some();
 
-    if settings.mob_timers_region.is_none() && account_id.is_none() {
         ui.vertical_centered(|ui| {
             let available_height = ui.available_height();
             let vertical_padding = (available_height * 0.2).min(50.0);
             ui.add_space(vertical_padding);
             ui.label(
-                RichText::new("Waiting for player data...")
-                    .size(16.0)
-                    .color(theme::text_color(settings)),
-            );
-            ui.add_space(spacing::MD);
-            ui.spinner();
-            ui.add_space(vertical_padding);
-        });
-        return false;
-    }
-
-    if effective_region.is_none() {
-        let is_unsupported_region = if let Some(acc_id) = account_id {
-            let prefix = if acc_id.len() >= 2 { &acc_id[..2] } else { "" };
-            account_id_regions::is_prefix_known_but_disabled(prefix)
-        } else {
-            false
-        };
-
-        ui.vertical_centered(|ui| {
-            ui.add_space(spacing::LG);
-            ui.label(
                 RichText::new(if is_unsupported_region {
                     "Region not supported for mob timers"
                 } else {
-                    "Unable to determine region from account ID"
+                    "Waiting for region data..."
                 })
+                .size(16.0)
                 .color(theme::text_color(settings)),
             );
+            if !is_unsupported_region {
+                ui.add_space(spacing::MD);
+                ui.spinner();
+            }
+            ui.add_space(vertical_padding);
         });
         return false;
     }

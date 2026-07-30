@@ -35,7 +35,7 @@
 	} from '$lib/utils/modules';
 	import { showToast } from '$lib/utils/toast';
 	import { Calculator, FileUp, Plus, Settings, Target, Trash, Zap } from '@lucide/svelte/icons';
-	import pako from 'pako';
+	import { inflate } from 'pako';
 
 	let modules = $state(modulesOptimizerStore.modules);
 	let fileInputRef: HTMLInputElement;
@@ -66,7 +66,7 @@
 				const decoded = atob(base64);
 				const bytes = new Uint8Array(decoded.length);
 				for (let i = 0; i < decoded.length; i++) bytes[i] = decoded.charCodeAt(i);
-				jsonStr = pako.inflate(bytes, { to: 'string' });
+				jsonStr = inflate(bytes, { toText: true });
 			} else {
 				jsonStr = input;
 			}

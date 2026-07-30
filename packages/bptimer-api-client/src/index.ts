@@ -49,7 +49,18 @@ export class BPTimerClient {
   }
 
   async reportHP(params: ReportHPParams): Promise<ReportResponse> {
-    const { monster_id, hp_pct, line, pos_x, pos_y, pos_z, account_id, uid } = params;
+    const {
+      monster_id,
+      hp_pct,
+      line,
+      pos_x,
+      pos_y,
+      pos_z,
+      account_id,
+      uid,
+      player_name,
+      scene_ip
+    } = params;
 
     const rounded_pos_x = pos_x !== undefined ? Math.round(pos_x * 100) / 100 : undefined;
     const rounded_pos_y = pos_y !== undefined ? Math.round(pos_y * 100) / 100 : undefined;
@@ -142,7 +153,9 @@ export class BPTimerClient {
         ...(rounded_pos_y !== undefined && { pos_y: rounded_pos_y }),
         ...(rounded_pos_z !== undefined && { pos_z: rounded_pos_z }),
         ...(account_id !== undefined && { account_id }),
-        ...(uid !== undefined && { uid })
+        ...(uid !== undefined && { uid }),
+        ...(player_name !== undefined && { player_name }),
+        ...(scene_ip !== undefined && { scene_ip })
       };
 
       const response = await fetch(`${this.api_url}/api/create-hp-report`, {

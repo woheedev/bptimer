@@ -1,4 +1,5 @@
 use bytes::Bytes;
+use log::{error, info, warn};
 use prost::Message;
 use std::convert::TryFrom;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -11,12 +12,13 @@ use crate::models::events::{
     PlayerClassUpdate, PlayerLineInfoUpdate, PlayerNameUpdate,
 };
 use crate::protocol::constants::{
-    MessageMethod, MessageType, SERVICE_UUID, SOCIAL_NTF_NOTIFY_METHOD_ID, SOCIAL_NTF_SERVICE_ID,
-    entity, packet, packet_layout, server_detection,
+    ENTER_WORLD_NOTIFY_METHOD_ID, ENTER_WORLD_SERVICE_ID, MessageMethod, MessageType, SERVICE_UUID,
+    SOCIAL_NTF_NOTIFY_METHOD_ID, SOCIAL_NTF_SERVICE_ID, entity, packet, packet_layout,
+    server_detection,
 };
 use crate::protocol::pb::{
-    AoiSyncDelta, AttrCollection, EDamageType, EEntityType, NotifySocialData, Position, SceneData,
-    SyncContainerData, SyncNearDeltaInfo, SyncNearEntities, SyncToMeDeltaInfo,
+    AoiSyncDelta, AttrCollection, EDamageType, EEntityType, NotifyEnterWorld, NotifySocialData,
+    Position, SceneData, SyncContainerData, SyncNearDeltaInfo, SyncNearEntities, SyncToMeDeltaInfo,
 };
 use crate::utils::constants::is_tracked_mob;
 use std::collections::HashSet;
@@ -53,7 +55,7 @@ fn log_nearby_monster(base_id: u32, position: Option<&crate::models::events::Pos
         crate::utils::constants::get_mob_name(base_id).unwrap_or_else(|| "Unknown".to_string());
 
     match position {
-        Some(pos) => log::info!(
+        Some(pos) => info!(
             "[DEBUG MOB ENCOUNTER] monster_id={} name={} pos=({:.2}, {:.2}, {:.2}) tracked={}",
             base_id,
             mob_name,
@@ -62,7 +64,7 @@ fn log_nearby_monster(base_id: u32, position: Option<&crate::models::events::Pos
             pos.z,
             is_tracked_mob(base_id)
         ),
-        None => log::info!(
+        None => info!(
             "[DEBUG MOB ENCOUNTER] monster_id={} name={} pos=(unknown) tracked={}",
             base_id,
             mob_name,
@@ -77,7 +79,7 @@ pub fn detect_server_in_packet(payload: &[u8], endpoint: &ServerEndpoint) -> boo
             && payload[0..10] == server_detection::LOGIN_RETURN_SIGNATURE[0..10]
             && payload[14..20] == server_detection::LOGIN_RETURN_SIGNATURE[14..20]
         {
-            log::info!(
+            info!(
                 "Detected login return signature from {}",
                 endpoint.to_string()
             );
@@ -112,7 +114,7 @@ pub fn detect_server_in_packet(payload: &[u8], endpoint: &ServerEndpoint) -> boo
                 if data[signature_start..signature_start + server_detection::SERVER_SIGNATURE.len()]
                     == server_detection::SERVER_SIGNATURE[..]
                 {
-                    log::info!(
+                    info!(
                         "Detected server signature in packet from {}",
                         endpoint.to_string()
                     );
@@ -226,7 +228,20 @@ fn process_notify_packet(data: &[u8], tx: &mpsc::Sender<CombatEvent>, is_compres
                     let _ = tx.send(event);
                 }
                 Ok(None) => {}
-                Err(e) => log::warn!("SocialNtf decode failed: {}", e),
+                Err(e) => warn!("SocialNtf decode failed: {}", e),
+            }
+        }
+        return;
+    }
+
+    if service_uuid == ENTER_WORLD_SERVICE_ID {
+        if method_id == ENTER_WORLD_NOTIFY_METHOD_ID {
+            match process_notify_enter_world(&final_payload) {
+                Ok(Some(event)) => {
+                    let _ = tx.send(event);
+                }
+                Ok(None) => {}
+                Err(e) => warn!("NotifyEnterWorld decode failed: {}", e),
             }
         }
         return;
@@ -269,7 +284,7 @@ fn process_notify_packet(data: &[u8], tx: &mpsc::Sender<CombatEvent>, is_compres
                     let _ = tx.send(event);
                 }
             }
-            Err(e) => log::warn!("SyncContainerData: {}", e),
+            Err(e) => warn!("SyncContainerData: {}", e),
         },
         MessageMethod::SyncContainerDirtyData => {}
         MessageMethod::SyncServerTime => {}
@@ -650,10 +665,9 @@ fn process_sync_near_entities(
                 None => {
                     // UUID fallback
                     let uuid_id = entity::get_player_uid(entity.uuid) as u32;
-                    log::warn!(
+                    warn!(
                         "[RADAR] Monster entity detected but no AttrId found, using UUID fallback: base_id={}, uuid={}",
-                        uuid_id,
-                        entity.uuid
+                        uuid_id, entity.uuid
                     );
                     uuid_id
                 }
@@ -702,7 +716,7 @@ fn process_sync_container_data(
     let sync_data = match SyncContainerData::decode(Bytes::copy_from_slice(payload)) {
         Ok(data) => data,
         Err(e) => {
-            log::error!(
+            error!(
                 "[SyncContainerData] Failed to decode SyncContainerData: {}",
                 e
             );
@@ -714,7 +728,7 @@ fn process_sync_container_data(
     if let Some(v_data) = &sync_data.v_data {
         let player_uid = v_data.char_id;
         if player_uid == 0 {
-            log::warn!("[SyncContainerData] player_uid is 0, returning early");
+            warn!("[SyncContainerData] player_uid is 0, returning early");
             return Ok(events);
         }
 
@@ -810,6 +824,31 @@ fn process_notify_social_data(
     }
 
     Ok(Some(CombatEvent::PlayerLineInfo(update)))
+}
+
+fn process_notify_enter_world(
+    payload: &[u8],
+) -> Result<Option<CombatEvent>, Box<dyn std::error::Error>> {
+    let notify = NotifyEnterWorld::decode(Bytes::copy_from_slice(payload))
+        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+
+    let scene_ip = notify
+        .v_request
+        .as_ref()
+        .map(|r| r.scene_ip.clone())
+        .unwrap_or_default();
+
+    if scene_ip.is_empty() {
+        info!(
+            "[NotifyEnterWorld] decoded but scene_ip is empty (payload_len={}, v_request present: {})",
+            payload.len(),
+            notify.v_request.is_some()
+        );
+        return Ok(None);
+    }
+
+    info!("[NotifyEnterWorld] scene_ip={}", scene_ip);
+    Ok(Some(CombatEvent::SceneIp(scene_ip)))
 }
 
 /// Decode a protobuf varint-encoded int32 from raw bytes

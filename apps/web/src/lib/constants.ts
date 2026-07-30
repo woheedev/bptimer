@@ -56,11 +56,17 @@ export const DEFAULT_FILTER_SORT_SETTINGS: FilterSortSettings = {
 export const MAGICAL_CREATURE_RESET_HOURS: Record<string, Record<string, number[]>> = {
 	'Lovely Boarlet': {
 		NA: [12, 16, 20], // 10AM, 2PM, 6PM UTC-2
-		SEA: [3, 7, 11] // 1AM, 5AM, 9AM UTC-2
+		SEA: [3, 7, 11], // 1AM, 5AM, 9AM UTC-2
+		EU: [12, 16, 20], // Same as NA
+		JP: [1, 5, 9], // 10AM, 2PM, 6PM UTC+9
+		KR: [1, 5, 9] // Same as JP
 	},
 	'Breezy Boarlet': {
 		NA: [14, 18, 22], // 12PM, 4PM, 8PM UTC-2
-		SEA: [5, 9, 13] // 3AM, 7AM, 11AM UTC-2
+		SEA: [5, 9, 13], // 3AM, 7AM, 11AM UTC-2
+		EU: [14, 18, 22], // Same as NA
+		JP: [3, 7, 11], // 12PM, 4PM, 8PM UTC+9
+		KR: [3, 7, 11] // Same as JP
 	}
 };
 
@@ -321,11 +327,17 @@ export const MODULE_OPTIMIZER_YIELD_INTERVAL = 10;
 export const DEFAULT_REGION = 'NA';
 export const REGION_LAUNCH_DATES: Record<string, string> = {
 	NA: '2025-10-09',
-	SEA: '2025-12-17'
+	EU: '2025-10-09',
+	SEA: '2025-12-17',
+	JP: '2025-12-17',
+	KR: '2025-12-17'
 };
 export const REGIONS: RegionOption[] = [
-	{ value: 'NA', label: 'GLOBAL' },
-	{ value: 'SEA', label: 'SEA' }
+	{ value: 'NA', label: 'NA' },
+	{ value: 'EU', label: 'EU' },
+	{ value: 'SEA', label: 'SEA' },
+	{ value: 'JP', label: 'JP' },
+	{ value: 'KR', label: 'KR' }
 ];
 
 // Tools & Resources constants

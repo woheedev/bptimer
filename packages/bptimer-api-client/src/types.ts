@@ -23,6 +23,8 @@ export interface ReportHPParams {
   pos_z?: number;
   account_id?: string;
   uid?: number;
+  player_name?: string;
+  scene_ip?: string;
 }
 
 export interface ReportPayload extends Omit<ReportHPParams, 'monster_id'> {

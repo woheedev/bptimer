@@ -947,6 +947,20 @@ migrate(
             type: 'number'
           },
           {
+            autogeneratePattern: '',
+            hidden: false,
+            id: 'text_player_name',
+            max: 100,
+            min: 0,
+            name: 'player_name',
+            pattern: '',
+            presentable: false,
+            primaryKey: false,
+            required: false,
+            system: false,
+            type: 'text'
+          },
+          {
             hidden: false,
             id: 'autodate_created',
             name: 'created',
@@ -1130,10 +1144,24 @@ migrate(
             type: 'number'
           },
           {
+            autogeneratePattern: '',
+            hidden: false,
+            id: 'text_mcs_last_player_name',
+            max: 100,
+            min: 0,
+            name: 'last_player_name',
+            pattern: '',
+            presentable: false,
+            primaryKey: false,
+            required: false,
+            system: false,
+            type: 'text'
+          },
+          {
             hidden: false,
             id: 'autodate304265122',
             name: 'last_update',
-            onCreate: false,
+            onCreate: true,
             onUpdate: true,
             presentable: false,
             system: false,

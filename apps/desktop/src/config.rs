@@ -35,8 +35,6 @@ pub struct Settings {
     pub show_radar: bool,
     #[serde(default = "default_true")]
     pub show_mob_timers: bool,
-    #[serde(default)]
-    pub mob_timers_region: Option<MobTimersRegion>,
     #[serde(default = "default_true")]
     pub show_combat_data: bool,
     #[serde(default = "default_true")]
@@ -70,6 +68,9 @@ pub struct Settings {
     pub sort_column: Option<usize>,
     #[serde(default = "default_true")]
     pub sort_descending: bool,
+    // Last detected region
+    #[serde(default)]
+    pub last_effective_region: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -122,7 +123,10 @@ pub enum MobTimersRegion {
     INT,
     TW,
     NA,
-    JPKR,
+    EU,
+    #[serde(alias = "JPKR")]
+    JP,
+    KR,
     SEA,
 }
 
@@ -235,7 +239,6 @@ impl Default for Settings {
             window_size: Some((485.0, 500.0)),
             show_radar: true,
             show_mob_timers: true,
-            mob_timers_region: None, // None = Auto mode
             show_combat_data: true,
             bptimer_enabled: true,
             hidden_mobs: std::collections::HashSet::new(),
@@ -249,6 +252,7 @@ impl Default for Settings {
             dps_calculation_cutoff_seconds: default_dps_cutoff_seconds(),
             sort_column: Some(2),
             sort_descending: true,
+            last_effective_region: None,
         }
     }
 }

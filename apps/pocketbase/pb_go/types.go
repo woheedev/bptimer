@@ -5,20 +5,23 @@ import (
 )
 
 type CreateHPReportRequest struct {
-	MonsterID int     `json:"monster_id" form:"monster_id"`           // Game monster ID (from meter)
-	HPPct     int     `json:"hp_pct" form:"hp_pct"`                   // HP percentage (0-100)
-	Channel   int     `json:"line" form:"line"`                       // Channel/Line number
-	PosX      float64 `json:"pos_x,omitempty" form:"pos_x"`           // X coordinate
-	PosY      float64 `json:"pos_y,omitempty" form:"pos_y"`           // Y coordinate
-	PosZ      float64 `json:"pos_z,omitempty" form:"pos_z"`           // Z coordinate
-	AccountID string  `json:"account_id,omitempty" form:"account_id"` // User account ID (pending implementation)
-	UID       int64   `json:"uid,omitempty" form:"uid"`               // User Unique ID (pending implementation)
+	MonsterID  int     `json:"monster_id" form:"monster_id"`             // Game monster ID (from meter)
+	HPPct      int     `json:"hp_pct" form:"hp_pct"`                     // HP percentage (0-100)
+	Channel    int     `json:"line" form:"line"`                         // Channel/Line number
+	PosX       float64 `json:"pos_x,omitempty" form:"pos_x"`             // X coordinate
+	PosY       float64 `json:"pos_y,omitempty" form:"pos_y"`             // Y coordinate
+	PosZ       float64 `json:"pos_z,omitempty" form:"pos_z"`             // Z coordinate
+	AccountID  string  `json:"account_id,omitempty" form:"account_id"`   // User account ID (pending implementation)
+	UID        int64   `json:"uid,omitempty" form:"uid"`                 // User Unique ID (pending implementation)
+	SceneIP    string  `json:"scene_ip,omitempty" form:"scene_ip"`       // Scene server IP for region identification
+	PlayerName string  `json:"player_name,omitempty" form:"player_name"` // Player name from game
 }
 
 type CachedMobData struct {
 	MobID         string    // PocketBase mob record ID
 	MonsterID     int       // Game monster ID
 	Name          string    // Mob name
+	MapID         string    // PocketBase map record ID
 	TotalChannels int       // Number of channels for this mob's map
 	MobType       string    // Mob type (boss or magical_creature)
 	RespawnTime   int       // Respawn time in minutes (0-59)
@@ -43,6 +46,7 @@ type MobUpdate struct {
 	HPPercentage  int    // HP percentage
 	Region        string // Region code
 	LocationImage *int   // Location image ID (nil if not set)
+	PlayerName    string // Player display name
 }
 
 type LogData = map[string]any // Type alias for optData in return log errors

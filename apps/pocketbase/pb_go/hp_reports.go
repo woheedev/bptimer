@@ -2,6 +2,7 @@ package pb_go
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -15,6 +16,10 @@ import (
 
 // isInSubmissionBlackout checks if we're in the blackout period for a mob in a specific region.
 func isInSubmissionBlackout(monsterID int, region string) bool {
+	if DISABLE_MAGICAL_CREATURE_BLACKOUT {
+		return false // Blackout disabled: always allow submissions
+	}
+
 	regionHours, exists := MagicalCreatureResetHours[monsterID]
 	if !exists {
 		return false // Not a magical creature
@@ -177,14 +182,24 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 			return e.BadRequestError("Missing account_id", nil)
 		}
 
-		// Extract region for logging and validation
-		region, regionEnabled := getRegionFromAccountID(data.AccountID)
+		var region string
+		var regionEnabled bool
 
-		// Validate region exists
+		if data.SceneIP != "" {
+			if sceneIPRegion, exists := SCENE_IP_REGIONS[data.SceneIP]; exists {
+				region = sceneIPRegion
+				regionEnabled = true // SceneIp-mapped regions are always considered enabled
+			}
+		}
+
+		// Fallback to account_id prefix if SceneIp is not provided (legacy clients - temp)
 		if region == "" {
-			return e.BadRequestError("Invalid account_id", LogData{
-				"account_id": data.AccountID,
-			})
+			region, regionEnabled = getRegionFromAccountID(data.AccountID)
+			if region == "" {
+				return e.BadRequestError("Invalid account_id", LogData{
+					"account_id": data.AccountID,
+				})
+			}
 		}
 
 		// Validate region is enabled
@@ -210,6 +225,11 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 				"mob_name": mobData.Name,
 				"region":   region,
 			})
+		}
+
+		// Auto-grow if the submitted channel exceeds the current total, expand region_data
+		if data.Channel > mobData.TotalChannels && data.Channel <= MAX_CHANNELS {
+			mobData.TotalChannels = autoGrowChannels(e.App, mobData, region, data.Channel)
 		}
 
 		// Validate channel number against region-specific channel count
@@ -244,6 +264,13 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		hpReport.Set("reporter", userId)
 		hpReport.Set("region", region)
 
+		if data.SceneIP != "" {
+			hpReport.Set("scene_ip", data.SceneIP)
+		}
+		if data.PlayerName != "" {
+			hpReport.Set("player_name", data.PlayerName)
+		}
+
 		// Match the received position to the closest known location
 		if locationID, distSq := findClosestLocation(data.MonsterID, data.PosX, data.PosY, data.PosZ); locationID > 0 {
 			// Reject if distance exceeds maximum allowed distance
@@ -276,11 +303,68 @@ func CreateHPReportHandler(app core.App) func(e *core.RequestEvent) error {
 		if data.UID != 0 {
 			logArgs = append(logArgs, "uid", data.UID)
 		}
+		if data.SceneIP != "" {
+			logArgs = append(logArgs, "scene_ip", data.SceneIP)
+		}
+		if data.PlayerName != "" {
+			logArgs = append(logArgs, "player_name", data.PlayerName)
+		}
 
 		app.Logger().Info("HP report saved", logArgs...)
 
 		return e.JSON(http.StatusOK, successResponse)
 	}
+}
+
+func autoGrowChannels(app core.App, mobData CachedMobData, region string, newChannel int) int {
+	mapRecord, err := app.FindRecordById("maps", mobData.MapID)
+	if err != nil {
+		app.Logger().Error("Auto-grow: failed to fetch map", "error", err, "mapID", mobData.MapID)
+		return mobData.TotalChannels
+	}
+
+	regionMap, err := parseRegionData(mapRecord.Get("region_data"))
+	if err != nil {
+		app.Logger().Error("Auto-grow: failed to parse region_data",
+			"error", err, "map", mapRecord.GetString("name"))
+		return mobData.TotalChannels
+	}
+
+	// Compare against the freshly read value rather than mobData.TotalChannels
+	// (which may be a stale cache entry)
+	freshCurrent, ok := regionCountToInt(regionMap[region])
+	if !ok {
+		freshCurrent = 0
+	}
+	if newChannel <= freshCurrent {
+		return freshCurrent
+	}
+
+	regionMap[region] = newChannel
+	updatedJSON, err := json.Marshal(regionMap)
+	if err != nil {
+		app.Logger().Error("Auto-grow: failed to marshal region_data",
+			"error", err, "map", mapRecord.GetString("name"))
+		return mobData.TotalChannels
+	}
+
+	mapRecord.Set("region_data", string(updatedJSON))
+	if err := app.Save(mapRecord); err != nil {
+		app.Logger().Error("Auto-grow: failed to save map",
+			"error", err, "map", mapRecord.GetString("name"), "region", region)
+		return mobData.TotalChannels
+	}
+
+	app.Logger().Info("Auto-grew channels",
+		"map", mapRecord.GetString("name"),
+		"region", region,
+		"from", freshCurrent,
+		"to", newChannel)
+
+	// Invalidate cache so the next request sees the updated value
+	MobCache.InvalidateMap(mobData.MapID)
+
+	return newChannel
 }
 
 // InitHPReportsHooks registers validation hooks for HP reports.

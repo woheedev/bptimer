@@ -28,7 +28,7 @@ fn get_realtime_topics(region: &MobTimersRegion) -> Vec<String> {
     vec![hp_updates_topic, resets_topic]
 }
 
-fn get_region_string(region: &MobTimersRegion) -> String {
+fn get_region_string(region: &MobTimersRegion) -> &'static str {
     account_id_regions::get_region_string(region)
 }
 
@@ -359,7 +359,7 @@ impl PocketBaseClient {
                                     if let Some(region_data_obj) = region_data.as_object() {
                                         let region_str = get_region_string(&self.region);
                                         if let Some(region_channels) =
-                                            region_data_obj.get(&region_str)
+                                            region_data_obj.get(region_str)
                                         {
                                             if let Some(total_channels) = region_channels.as_i64() {
                                                 mob.total_channels = total_channels as i32;

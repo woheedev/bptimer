@@ -62,27 +62,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         // Configure Npcap SDK library path for linking
-        if let Ok(libdir) = env::var("PCAP_LIBDIR") {
-            println!("cargo:rustc-link-search=native={}", libdir);
-        } else {
-            // Fallback: try common installation paths
-            let common_paths = [
-                "C:\\npcap-sdk\\Lib\\x64",
-                "C:\\Program Files\\Npcap\\Lib\\x64",
-            ];
-            let mut found = false;
-            for path in &common_paths {
-                if std::path::Path::new(path).exists() {
-                    println!("cargo:rustc-link-search=native={}", path);
-                    found = true;
-                    break;
-                }
-            }
-            if !found {
-                eprintln!("Warning: PCAP_LIBDIR not set and no Npcap SDK found in common paths.");
-                eprintln!("Set PCAP_LIBDIR environment variable or install Npcap SDK.");
+        // Auto-detect bundled SDK
+        let bundled_sdk = manifest_dir.join("sdk").join("Lib").join("x64");
+        if bundled_sdk.exists() {
+            println!("cargo:rustc-link-search=native={}", bundled_sdk.display());
+        }
+
+        // Check LIBPCAP_LIBDIR env var as override
+        if let Ok(libdir) = env::var("LIBPCAP_LIBDIR") {
+            println!("cargo:rustc-link-search=native={libdir}");
+        }
+
+        // Fallback: try common installation paths
+        let common_paths = [
+            "C:\\npcap-sdk\\Lib\\x64",
+            "C:\\Program Files\\Npcap\\Lib\\x64",
+        ];
+        for path in &common_paths {
+            if std::path::Path::new(path).exists() {
+                println!("cargo:rustc-link-search=native={}", path);
             }
         }
+
+        println!("cargo:rustc-link-lib=wpcap");
+        println!("cargo:rustc-link-lib=Packet");
     }
 
     println!("cargo:rerun-if-changed=src/pb.proto");
@@ -90,7 +93,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-env-changed=BPTIMER_API_KEY");
     println!("cargo:rerun-if-env-changed=GITHUB_REPO_OWNER");
     println!("cargo:rerun-if-env-changed=GITHUB_REPO_NAME");
-    println!("cargo:rerun-if-env-changed=PCAP_LIBDIR");
+    println!("cargo:rerun-if-env-changed=LIBPCAP_LIBDIR");
 
     Ok(())
 }

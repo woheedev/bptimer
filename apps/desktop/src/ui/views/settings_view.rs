@@ -2,10 +2,10 @@ use crate::capture::packet;
 use crate::config::Settings;
 use crate::hotkeys::{HotkeyAction, HotkeyManager};
 use crate::ui::constants::{responsive, spacing, style, theme};
-use crate::utils::constants::account_id_regions;
 use egui::{Ui, Window};
 use global_hotkey::hotkey::{HotKey, Modifiers};
 use instant::Instant;
+use log::{info, warn};
 
 const FONT_SCALE_MIN: f32 = 0.5;
 const FONT_SCALE_MAX: f32 = 2.0;
@@ -532,32 +532,6 @@ pub fn render_settings_view(
             ui.label(egui::RichText::new("Mob Timers").strong().color(text_color));
             ui.add_space(spacing::SM);
 
-            ui.horizontal(|ui| {
-                ui.label("Timers Region:");
-                let region_str = account_id_regions::get_region_display_name(&settings.mob_timers_region);
-
-                if egui::ComboBox::from_id_salt("timers_region_settings")
-                    .selected_text(region_str)
-                    .show_ui(ui, |ui| {
-                        ui.selectable_value(&mut settings.mob_timers_region, None, "Auto");
-                        for region_info in account_id_regions::REGIONS.iter().filter(|r| r.enabled) {
-                            if let Some(region) = region_info.region {
-                                ui.selectable_value(
-                                    &mut settings.mob_timers_region,
-                                    Some(region),
-                                    region_info.display_name,
-                                );
-                            }
-                        }
-                    })
-                    .response
-                    .changed()
-                {
-                    *settings_save_timer = Some(Instant::now());
-                }
-            });
-            ui.add_space(spacing::SM);
-
             ui.label(
                 egui::RichText::new("Hide/Show Mobs")
                     .strong()
@@ -629,7 +603,7 @@ pub fn render_settings_view(
                 );
                 if extracted_modules.is_empty() {
                     if let Err(e) = open::that(&base_url) {
-                        log::warn!("Failed to open module optimizer: {}", e);
+                        warn!("Failed to open module optimizer: {}", e);
                     }
                 } else {
                     match crate::utils::modules::encode_module_data(extracted_modules) {
@@ -637,7 +611,7 @@ pub fn render_settings_view(
                             if encoded.len() <= crate::utils::modules::URL_DATA_LIMIT {
                                 let url = format!("{}?data={}", base_url, encoded);
                                 if let Err(e) = open::that(&url) {
-                                    log::warn!("Failed to open module optimizer: {}", e);
+                                    warn!("Failed to open module optimizer: {}", e);
                                 }
                             } else {
                                 match crate::utils::modules::save_module_data_to_file(extracted_modules)
@@ -647,26 +621,26 @@ pub fn render_settings_view(
                                             let _ = open::that(parent);
                                         }
                                         if let Err(e) = open::that(&base_url) {
-                                            log::warn!("Failed to open module optimizer: {}", e);
+                                            warn!("Failed to open module optimizer: {}", e);
                                         }
-                                        log::info!(
+                                        info!(
                                             "Modules saved to {} - use Import from file on the page",
                                             path.display()
                                         );
                                     }
                                     Err(e) => {
-                                        log::warn!("Failed to save module data: {}", e);
+                                        warn!("Failed to save module data: {}", e);
                                         if let Err(e) = open::that(&base_url) {
-                                            log::warn!("Failed to open module optimizer: {}", e);
+                                            warn!("Failed to open module optimizer: {}", e);
                                         }
                                     }
                                 }
                             }
                         }
                         Err(e) => {
-                            log::warn!("Failed to encode module data: {}", e);
+                            warn!("Failed to encode module data: {}", e);
                             if let Err(e) = open::that(&base_url) {
-                                log::warn!("Failed to open module optimizer: {}", e);
+                                warn!("Failed to open module optimizer: {}", e);
                             }
                         }
                     }

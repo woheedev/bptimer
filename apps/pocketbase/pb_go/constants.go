@@ -1,6 +1,10 @@
 package pb_go
 
-import "time"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
 
 // Cache
 const MOB_CACHE_TTL_MINUTES = 60
@@ -10,10 +14,9 @@ const MAX_LOCATION_DISTANCE = 30.0
 
 // SSE
 const SSE_BATCH_INTERVAL_MS = 200
-const SSE_IDLE_TIMEOUT_MINUTES = 2
+const SSE_IDLE_TIMEOUT_MINUTES = 30
 const SSE_TOPIC_HP_UPDATES = "mob_hp_updates"
 const SSE_TOPIC_RESETS = "mob_resets"
-const SSE_TOPIC_RESETS_SEA = "mob_resets_sea"
 const COLLECTION_CACHE_KEY = "pb_mob_channel_status_collection"
 
 // Collection names
@@ -28,6 +31,7 @@ const COLLECTION_API_KEYS = "api_keys"
 const CRON_MOB_RESPAWN_SCHEDULE = "* * * * *"
 const CRON_CLEANUP_HP_REPORTS_SCHEDULE = "20 * * * *"
 const CRON_CLEANUP_MOB_CHANNEL_STATUS_SCHEDULE = "15 0 * * *"
+const CRON_SHRINK_CHANNELS_SCHEDULE = "30 0 * * *"
 
 // Junk time windows
 const HP_REPORTS_CLEANUP_HOURS = 2
@@ -35,6 +39,7 @@ const DUPLICATE_CHECK_WINDOW_MINUTES = 5
 
 // Validation constants
 const HP_REPORT_INTERVAL = 5
+const MAX_CHANNELS = 200
 
 // Voting and Rep
 const REPUTATION_UPVOTE_GAIN = 3
@@ -60,15 +65,25 @@ var MagicalCreatureResetHours = map[int]map[string][]int{
 	10902: { // Lovely Boarlet
 		"NA":  {12, 16, 20}, // 10AM, 2PM, 6PM UTC-2
 		"SEA": {3, 7, 11},   // 1AM, 5AM, 9AM UTC-2
+		"EU":  {12, 16, 20}, // Same as NA (Global)
+		"JP":  {1, 5, 9},    // 10AM, 2PM, 6PM UTC+9
+		"KR":  {1, 5, 9},    // Same as JP
 	},
 	10903: { // Breezy Boarlet
 		"NA":  {14, 18, 22}, // 12PM, 4PM, 8PM UTC-2
 		"SEA": {5, 9, 13},   // 3AM, 7AM, 11AM UTC-2
+		"EU":  {14, 18, 22}, // Same as NA (Global)
+		"JP":  {3, 7, 11},   // 12PM, 4PM, 8PM UTC+9
+		"KR":  {3, 7, 11},   // Same as JP
 	},
 }
 
 // Hours after last magical creature reset to stop accepting HP report submissions
 const MAGICAL_CREATURE_CUTOFF_HOURS = 2
+
+// DISABLE_MAGICAL_CREATURE_BLACKOUT temporarily disables the submission blackout for magical creatures.
+// Set to true to allow HP report submissions at any time, bypassing the reset window check.
+const DISABLE_MAGICAL_CREATURE_BLACKOUT = true
 
 // API users that bypass vote and rate limiting checks
 var BypassVoteUserIDs = map[string]bool{
@@ -100,8 +115,28 @@ var ACCOUNT_ID_REGIONS = map[string]RegionInfo{
 	"2_": {Name: "INT", Enabled: false},
 	"3_": {Name: "TW", Enabled: false},
 	"4_": {Name: "NA", Enabled: true},
-	"5_": {Name: "JPKR", Enabled: false},
+	"5_": {Name: "JP", Enabled: true},
 	"6_": {Name: "SEA", Enabled: true},
+}
+
+// SCENE_IP_REGIONS maps SceneIp values from game packets to region names
+var SCENE_IP_REGIONS = map[string]string{
+	"gamesvr.playbpsr.com":         "NA",
+	"gamesvr-eu.playbpsr.com":      "EU",
+	"bpm-sea-gamesvra.haoplay.net": "SEA",
+	"bpm-jp-gamesvra.xdg.com":      "JP",
+	"bpm-kr-gamesvra.xdg.com":      "KR",
+}
+
+var ALL_ACTIVE_REGIONS = []string{"NA", "EU", "SEA", "JP", "KR"}
+
+// regionTopic returns the SSE topic name for a base topic and region.
+// NA uses the bare topic for backwards compatibility; others get a lowercase suffix.
+func regionTopic(baseTopic, region string) string {
+	if region == "NA" {
+		return baseTopic
+	}
+	return fmt.Sprintf("%s_%s", baseTopic, strings.ToLower(region))
 }
 
 // MOB_LOCATIONS maps game monster IDs to their known spawn coordinates

@@ -1,38 +1,38 @@
 [package]
 name = "bptimer-desktop"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 
 [dependencies]
-anyhow = "1.0.102"
-base64 = "0.22"
-bytes = "1.11.1"
-chrono = "0.4.44"
+anyhow = "1.0.104"
+base64 = "0.23"
+bytes = "1.12.1"
+chrono = "0.4.45"
 dirs = "6.0.0"
 dotenvy = "0.15"
-eframe = { version = "0.34", default-features = true, features = ["glow"] }
-egui = "0.34"
-egui_extras = "0.34.3"
-egui_material_icons = "0.6.0"
-egui_plot = "0.35"
-env_logger = { version = "0.11.10", features = ["auto-color", "humantime"] }
-etherparse = "0.20"
+eframe = { version = "0.35", default-features = true, features = ["glow"] }
+egui = "0.35"
+egui_extras = "0.35.0"
+egui_material_icons = "0.7.0"
+egui_plot = "0.36"
+env_logger = { version = "0.11.11", features = ["auto-color", "humantime"] }
+etherparse = "0.21"
 eventsource-stream = "0.2.3"
 flate2 = "1.1"
-futures = "0.3.32"
+futures = "0.3.33"
 global-hotkey = "0.8"
 image = { version = "0.25.10", features = ["webp"] }
 instant = "0.1.13"
 log = "0.4"
-netdev = "0.43.0"
-open = "5.3"
+netdev = "0.45.0"
+open = "5.4"
 pcap = { version = "2.4.0", features = ["capture-stream"] }
-prost = "0.14.3"
+prost = "0.14.4"
 reqwest = { version = "0.13.4", features = ["json", "stream", "rustls", "blocking"], default-features = false }
 self_update = "0.44.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tokio = { version = "1.52.3", features = ["full"] }
+tokio = { version = "1.53.1", features = ["full"] }
 windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_System_Console", "Win32_System_Recovery"] }
 zstd = "0.13.3"
 
@@ -46,5 +46,5 @@ strip = true
 opt-level = 1
 
 [build-dependencies]
-prost-build = "0.14.3"  # protobuf code generation
+prost-build = "0.14.4"  # protobuf code generation
 winres = "0.1.12"

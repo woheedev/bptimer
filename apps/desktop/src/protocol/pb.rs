@@ -104,6 +104,22 @@ pub struct NotifySocialDataRequest {
     #[prost(message, optional, tag = "1")]
     pub data: ::core::option::Option<SocialData>,
 }
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct NotifyEnterWorld {
+    #[prost(message, optional, tag = "1")]
+    pub v_request: ::core::option::Option<NotifyEnterWorldRequest>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct NotifyEnterWorldRequest {
+    #[prost(string, tag = "1")]
+    pub account_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub token: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub scene_ip: ::prost::alloc::string::String,
+    #[prost(int32, tag = "4")]
+    pub scene_port: i32,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Package {
     #[prost(map = "int64, message", tag = "4")]

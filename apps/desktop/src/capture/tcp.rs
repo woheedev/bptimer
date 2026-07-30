@@ -1,6 +1,7 @@
 use crate::models::events::{CombatEvent, ServerChangeUpdate};
 use crate::protocol::constants::tcp;
-use std::collections::{HashMap, VecDeque};
+use log::info;
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::mpsc;
 use std::time::SystemTime;
 
@@ -152,7 +153,7 @@ impl ConnectionState {
 pub struct TcpStreamProcessor {
     pub current_server: Option<ServerEndpoint>,
     connections: HashMap<String, ConnectionState>,
-    game_server_prefix: Option<String>,
+    game_server_prefixes: HashSet<String>,
     pub tx: mpsc::Sender<CombatEvent>,
 }
 
@@ -161,7 +162,7 @@ impl TcpStreamProcessor {
         Self {
             current_server: None,
             connections: HashMap::new(),
-            game_server_prefix: None,
+            game_server_prefixes: HashSet::new(),
             tx,
         }
     }
@@ -176,11 +177,9 @@ impl TcpStreamProcessor {
     }
 
     fn is_game_subnet(&self, addr: &str) -> bool {
-        if let Some(ref prefix) = self.game_server_prefix {
-            addr.starts_with(prefix)
-        } else {
-            false
-        }
+        self.game_server_prefixes
+            .iter()
+            .any(|p| addr.starts_with(p))
     }
 
     fn process_conn_segments(
@@ -231,7 +230,7 @@ impl TcpStreamProcessor {
 
             if let Some(last_any) = conn.last_any_packet_time {
                 if now.duration_since(last_any).unwrap_or_default() > tcp::IDLE_TIMEOUT {
-                    log::info!("Removing idle connection: {}", endpoint.to_string());
+                    info!("Removing idle connection: {}", endpoint.to_string());
                     self.connections.remove(&key);
                     if let Some(ref server) = self.current_server {
                         let server_key = conn_key(server);
@@ -262,16 +261,15 @@ impl TcpStreamProcessor {
                 && payload_len >= tcp::TLS_LARGE_PACKET_THRESHOLD);
 
         if is_likely_bp && crate::capture::parser::detect_server_in_packet(payload, &endpoint) {
-            if self.game_server_prefix.is_none() {
-                self.game_server_prefix = Self::extract_ip_prefix(&src_addr);
-                if let Some(ref prefix) = self.game_server_prefix {
-                    log::info!("Game server subnet detected: {}*", prefix);
+            if let Some(prefix) = Self::extract_ip_prefix(&src_addr) {
+                if self.game_server_prefixes.insert(prefix.clone()) {
+                    info!("Game server subnet detected: {}*", prefix);
                 }
             }
 
             self.current_server = Some(endpoint.clone());
 
-            log::info!(
+            info!(
                 "Blue Protocol server detected! Server: {}",
                 endpoint.to_string()
             );
@@ -298,7 +296,7 @@ impl TcpStreamProcessor {
                 return;
             }
 
-            log::info!(
+            info!(
                 "Auto-tracking game subnet connection: {}",
                 endpoint.to_string()
             );
