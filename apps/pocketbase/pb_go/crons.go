@@ -127,7 +127,7 @@ func batchUpdateMobChannelStatus(app core.App, mobResets []MobReset) error {
 
 	// Build conditions for (mob, region) pairs
 	conditions := make([]string, 0, len(mobResets))
-	params := dbx.Params{"timestamp": time.Now().Format("2006-01-02 15:04:05")}
+	params := dbx.Params{"timestamp": time.Now().UTC().Format("2006-01-02 15:04:05")}
 
 	for i, reset := range mobResets {
 		mobKey := fmt.Sprintf("mob%d", i)
@@ -182,7 +182,7 @@ func broadcastMobResets(app core.App, mobIds []string, region string) error {
 // handleCleanupHpReports deletes HP reports older than 2 hours.
 // Runs hourly at :20
 func handleCleanupHpReports(app core.App) {
-	cutoffTime := time.Now().Add(-time.Duration(HP_REPORTS_CLEANUP_HOURS) * time.Hour)
+	cutoffTime := time.Now().UTC().Add(-time.Duration(HP_REPORTS_CLEANUP_HOURS) * time.Hour)
 	cutoffStr := cutoffTime.Format("2006-01-02 15:04:05")
 
 	countResult := struct {

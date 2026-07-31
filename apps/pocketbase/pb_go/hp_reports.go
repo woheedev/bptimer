@@ -96,7 +96,7 @@ func authenticateAPIKey(app core.App, apiKey string) (string, error) {
 
 	if cached := app.Store().Get(cacheKey); cached != nil {
 		entry := cached.(ApiKeyCacheEntry)
-		if time.Now().Before(entry.ExpiresAt) {
+		if time.Now().UTC().Before(entry.ExpiresAt) {
 			return entry.UserID, nil
 		}
 		app.Store().Remove(cacheKey)
@@ -112,7 +112,7 @@ func authenticateAPIKey(app core.App, apiKey string) (string, error) {
 
 	app.Store().Set(cacheKey, ApiKeyCacheEntry{
 		UserID:    userID,
-		ExpiresAt: time.Now().Add(apiKeyCacheTTL),
+		ExpiresAt: time.Now().UTC().Add(apiKeyCacheTTL),
 	})
 
 	return userID, nil
@@ -418,7 +418,7 @@ func validateHPReport(e *core.RecordEvent) error {
 	hpPercentage := hpReport.GetInt("hp_percentage")
 	region := hpReport.GetString("region")
 
-	defaultCutoff := time.Now().Add(-time.Duration(DUPLICATE_CHECK_WINDOW_MINUTES) * time.Minute)
+	defaultCutoff := time.Now().UTC().Add(-time.Duration(DUPLICATE_CHECK_WINDOW_MINUTES) * time.Minute)
 	cutoffTime := calculateBossRespawnCutoff(e, mobId, defaultCutoff)
 	cutoffStr := cutoffTime.Format("2006-01-02 15:04:05")
 

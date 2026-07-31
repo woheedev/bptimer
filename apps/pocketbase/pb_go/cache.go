@@ -284,6 +284,6 @@ func loadMobDataFromRecord(app core.App, mob *core.Record, region string) (Cache
 		TotalChannels: totalChannels,
 		MobType:       mob.GetString("type"),
 		RespawnTime:   mob.GetInt("respawn_time"),
-		Cached:        time.Now(),
+		Cached:        time.Now().UTC(),
 	}, nil
 }
