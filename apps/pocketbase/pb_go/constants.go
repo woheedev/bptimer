@@ -88,12 +88,7 @@ const DISABLE_MAGICAL_CREATURE_BLACKOUT = true
 // API users that bypass vote and rate limiting checks
 var BypassVoteUserIDs = map[string]bool{
 	"fovkhat7zlite07": true, // BPTimer Companion
-	"d7v77edry2kmhp5": true, // discord.gg/bpsrfarmers
 	"qctjhx7a061lhfq": true, // github.com/winjwinj/bpsr-logs
-	"ku99bl6jmjbijj4": true, // github.com/Denoder/BPSR-Meter
-	"gw8hsqxlvvbok37": true, // BPTL - blueprotocol.fr
-	"fftlpj0jgvmmoge": true, // github.com/mrsnakke/BPSR-Meter
-	"zdc1lhi31t05zco": true, // github.com/gabrielsanbs/BPSR-Meter
 	"g9bavfjybj4ezhb": true, // github.com/Blue-Protocol-Source/BPSR-ZDPS
 	"lmb7gpcnzge04di": true, // github.com/jbourny/bluemetermobile
 	"pfifcrw3ta5w6ed": true, // https://github.com/susTuna/bluemetermobileSEA

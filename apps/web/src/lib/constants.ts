@@ -131,23 +131,9 @@ export const API_USERS: Record<string, { label: string; url?: string }> = {
 		label: 'BPTimer Companion',
 		url: 'https://github.com/woheedev/bptimer/releases/latest'
 	},
-	d7v77edry2kmhp5: { label: 'BPSR Farmers', url: 'https://discord.gg/bpsrfarmers' },
 	qctjhx7a061lhfq: {
 		label: 'BPSR Logs',
 		url: 'https://github.com/winjwinj/bpsr-logs/releases/latest'
-	},
-	ku99bl6jmjbijj4: {
-		label: 'BPSR Meter (denoder)',
-		url: 'https://github.com/Denoder/BPSR-Meter/releases/latest'
-	},
-	gw8hsqxlvvbok37: { label: 'BPTL', url: 'https://blueprotocol.fr' },
-	fftlpj0jgvmmoge: {
-		label: 'BPSR Meter (mrsnakke)',
-		url: 'https://github.com/mrsnakke/BPSR-Meter/releases/latest'
-	},
-	zdc1lhi31t05zco: {
-		label: 'BPSR Meter (gabrielsanbs)',
-		url: 'https://github.com/gabrielsanbs/BPSR-Meter/releases/latest'
 	},
 	g9bavfjybj4ezhb: {
 		label: 'ZDPS Meter',
@@ -371,27 +357,6 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				previewImage: '/images/tools/zdps-meter.webp'
 			},
 			{
-				title: 'Blue Meter Mobile',
-				description:
-					'BlueMeter is a mobile DPS/Heal meter for Blue Protocol: Star Resonance. The app provides real-time combat information through an Android floating overlay.',
-				author: 'jbourny',
-				badge: 'BPTimer',
-				badgeVariant: 'default',
-				tags: 'EN|FR|Flutter|Dart|Android',
-				url: 'https://github.com/jbourny/bluemetermobile',
-				previewImage: '/images/tools/blue-meter-mobile.webp'
-			},
-			{
-				title: 'Blue Meter SEA',
-				description: 'BlueMeter SEA is a port of BlueMeter Mobile for the SEA region.',
-				author: 'susTuna',
-				badge: 'BPTimer',
-				badgeVariant: 'default',
-				tags: 'EN|FR|Flutter|Dart|Android',
-				url: 'https://github.com/susTuna/bluemetermobileSEA',
-				previewImage: '/images/tools/blue-meter-mobile.webp'
-			},
-			{
 				title: 'BPSR Logs',
 				description:
 					'BPSR Logs is a "blazingly fast" open source Blue Protocol: Star Resonance DPS meter, written in Rust by winj. It is heavily inspired by loa-logs, and uses reverse engineering work done by StarResonanceDamageCounter and @Yuerino.',
@@ -404,51 +369,25 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				previewImage: '/images/tools/bpsr-logs.webp'
 			},
 			{
-				title: 'BPSR Meter',
+				title: 'Blue Meter Mobile',
 				description:
-					"BPSR Meter is yet another fork of NeRooNx's BPSR Meter which is a fork of MrSnakke BPSR-Meter which is a customized version of Dimole's Star Resonance counter.",
-				author: 'geonode',
-				badge: 'BPTimer',
+					'BlueMeter is a mobile DPS/Heal meter for Blue Protocol: Star Resonance. The app provides real-time combat information through an Android floating overlay.',
+				author: 'jbourny',
+				badge: 'Original',
 				badgeVariant: 'default',
-				driver: 'both',
-				tags: 'EN|React|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/Denoder/BPSR-Meter',
-				previewImage: '/images/tools/bpsr-meter-denoder.webp'
+				tags: 'EN|FR|Flutter|Dart|Android',
+				url: 'https://github.com/jbourny/bluemetermobile',
+				previewImage: '/images/tools/blue-meter-mobile.webp'
 			},
 			{
-				title: 'BPSR-Meter',
-				description:
-					'A real-time DPS meter for Blue Protocol: Star Resonance. It captures game data and converts it into performance statistics.',
-				author: 'mrsnakke',
-				badge: 'BPTimer',
-				badgeVariant: 'default',
-				driver: 'npcap',
-				tags: 'EN|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/mrsnakke/BPSR-Meter',
-				previewImage: '/images/tools/bpsr-meter-mrsnakke.webp'
-			},
-			{
-				title: 'BPSR Meter',
-				description:
-					'BPSR Meter - Damage Meter for Blue Protocol | Real-time DPS tracking, multilingual fight history, optimized performance.',
-				author: 'gabrielsanbs',
-				badge: 'BPTimer',
-				badgeVariant: 'default',
-				driver: 'npcap',
-				tags: 'EN|ES|PT-BR|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/gabrielsanbs/BPSR-Meter',
-				previewImage: '/images/tools/bpsr-meter-gabrielsanbs.webp'
-			},
-			{
-				title: 'BPSR-PSO-SX',
-				description:
-					'BPSR-PSO-SX is an overlay / monitoring tool for Blue Protocol that tracks player performance metrics such as DPS/HPS on a per-second basis and provides extended functionality over the original toolset.',
-				author: 'Sola-Ray',
+				title: 'Blue Meter SEA',
+				description: 'BlueMeter SEA is a port of BlueMeter Mobile for the SEA region.',
+				author: 'susTuna',
 				badge: 'Fork',
-				driver: 'npcap',
-				tags: 'EN|Electron|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/Sola-Ray/BPSR-PSO-SX',
-				previewImage: '/images/tools/bpsr-pso-sx.webp'
+				badgeVariant: 'default',
+				tags: 'EN|FR|Flutter|Dart|Android',
+				url: 'https://github.com/susTuna/bluemetermobileSEA',
+				previewImage: '/images/tools/blue-meter-mobile.webp'
 			},
 			{
 				title: 'Star Resonance DPS EN',
@@ -471,17 +410,6 @@ export const TOOLS_SECTIONS: ToolsSections = {
 				tags: 'CN|C#|.NET|WPF|Windows',
 				url: 'https://github.com/anying1073/StarResonanceDps',
 				previewImage: '/images/tools/star-resonance-dps-anying1073.webp'
-			},
-			{
-				title: 'Star Resonance Damage Counter',
-				description:
-					'Star Resonance Damage Counter is a real-time combat data tool for Blue Protocol: Star Resonance, providing detailed damage and healing statistics through packet interception.',
-				author: 'dmlgzs',
-				badge: 'Original',
-				driver: 'npcap',
-				tags: 'CN|EN|JavaScript|Node.js|Express|Socket.IO',
-				url: 'https://github.com/dmlgzs/StarResonanceDamageCounter',
-				previewImage: '/images/tools/star-resonance-damage-counter-dmlgzs.webp'
 			}
 		]
 	},
