@@ -43,14 +43,19 @@ func InitRealtimeHooks(app core.App) {
 			locationImage = &locImg
 		}
 
-		globalBatcher.Add(MobUpdate{
+		update := MobUpdate{
 			MobID:         mobID,
 			ChannelNumber: channelNumber,
 			HPPercentage:  hpPercentage,
 			Region:        region,
 			LocationImage: locationImage,
 			PlayerName:    playerName,
-		})
+		}
+
+		globalBatcher.Add(update)
+
+		// Broadcast JSON format immediately (no batching) to the _json topic.
+		broadcastHPUpdateJSON(app, update)
 
 		if err := updateMobChannelStatus(e.App, mobID, channelNumber, hpPercentage, region, locationImage, playerName); err != nil {
 			log.Printf("[REALTIME] mob_channel_status update error=%v", err)
@@ -139,33 +144,38 @@ func (b *UpdateBatcher) broadcast(updates []*MobUpdate, region string) {
 		return
 	}
 	broadcastToTopic(b.app, topic, data)
+}
 
-	// JSON format: [{mob_id, channel, hp, location_image?, player_name?}, ...]
+// broadcastHPUpdateJSON sends a single HP update (no batching) to the _json topic.
+func broadcastHPUpdateJSON(app core.App, update MobUpdate) {
+	topic := regionTopic(SSE_TOPIC_HP_UPDATES, update.Region) + "_json"
+
 	type HPUpdateJSON struct {
 		MobID         string `json:"mob_id"`
 		Channel       int    `json:"channel"`
 		HP            int    `json:"hp"`
-		LocationImage *int   `json:"location_image,omitempty"`
-		PlayerName    string `json:"player_name,omitempty"`
+		LocationImage int    `json:"location_image"`
+		PlayerName    string `json:"player_name"`
+		Timestamp     int64  `json:"timestamp"`
 	}
 
-	jsonPayload := make([]HPUpdateJSON, 0, len(updates))
-	for _, update := range updates {
-		jsonPayload = append(jsonPayload, HPUpdateJSON{
-			MobID:         update.MobID,
-			Channel:       update.ChannelNumber,
-			HP:            update.HPPercentage,
-			LocationImage: update.LocationImage,
-			PlayerName:    update.PlayerName,
-		})
+	payload := HPUpdateJSON{
+		MobID:      update.MobID,
+		Channel:    update.ChannelNumber,
+		HP:         update.HPPercentage,
+		PlayerName: update.PlayerName,
+		Timestamp:  time.Now().Unix(),
+	}
+	if update.LocationImage != nil {
+		payload.LocationImage = *update.LocationImage
 	}
 
-	jsonData, err := json.Marshal(jsonPayload)
+	data, err := json.Marshal(payload)
 	if err != nil {
-		log.Printf("[REALTIME] json batch marshal error=%v", err)
+		log.Printf("[REALTIME] json marshal error=%v", err)
 		return
 	}
-	broadcastToTopic(b.app, topic+"_json", jsonData)
+	broadcastToTopic(app, topic, data)
 }
 
 // broadcastToTopic sends data to all realtime clients subscribed to the given topic.
@@ -252,11 +262,7 @@ func updateMobChannelStatus(app core.App, mobID string, channelNumber int, hpPer
 	}
 
 	record.Set("last_hp", hpPercentage)
-	// NOTE: last_update is an autodate field — PocketBase sets it to now (UTC) on
-	// every save and ignores manual Set() calls. The shrink cron relies on it as
-	// the "last HP report activity" signal; the mob respawn cron deliberately
-	// updates records via raw SQL so it doesn't bump it. Any new save path for
-	// this collection would also bump it, so add one only with care.
+	record.Set("last_report", time.Now().UTC())
 	record.Set("last_player_name", playerName)
 
 	if locationImage != nil {

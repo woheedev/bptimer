@@ -1166,6 +1166,15 @@ migrate(
             presentable: false,
             system: false,
             type: 'autodate'
+          },
+          {
+            hidden: false,
+            id: 'date_last_report',
+            name: 'last_report',
+            presentable: false,
+            required: false,
+            system: false,
+            type: 'date'
           }
         ],
         id: 'pbc_3682110470',

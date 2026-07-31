@@ -6,17 +6,35 @@ migrate(
     // Seed maps first (upsert)
     const mapsCollection = app.findCollectionByNameOrId('maps');
     const mapsData = [
-      { uid: 1, name: 'Asterleeds', region_data: { NA: 101, EU: 1, SEA: 100, JP: 1, KR: 1 } },
+      { uid: 1, name: 'Asterleeds', region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 } },
       {
         uid: 2,
         name: 'Underground District',
-        region_data: { NA: 10, EU: 1, SEA: 10, JP: 1, KR: 1 }
+        region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 }
       },
-      { uid: 3, name: 'Asteria Plains', region_data: { NA: 70, EU: 1, SEA: 70, JP: 1, KR: 1 } },
-      { uid: 4, name: 'Windhowl Canyon', region_data: { NA: 10, EU: 1, SEA: 5, JP: 1, KR: 1 } },
-      { uid: 5, name: "Skimmer's Lair", region_data: { NA: 10, EU: 1, SEA: 10, JP: 1, KR: 1 } },
-      { uid: 6, name: 'Duskdye Woods', region_data: { NA: 10, EU: 1, SEA: 10, JP: 1, KR: 1 } },
-      { uid: 7, name: 'Everfall Forest', region_data: { NA: 10, EU: 1, SEA: 10, JP: 1, KR: 1 } }
+      { uid: 3, name: 'Asteria Plains', region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 } },
+      { uid: 4, name: 'Windhowl Canyon', region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 } },
+      { uid: 5, name: "Skimmer's Lair", region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 } },
+      { uid: 6, name: 'Duskdye Woods', region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 } },
+      { uid: 7, name: 'Everfall Forest', region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 } },
+      {
+        uid: 8,
+        name: 'Bahamar Highlands',
+        region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 }
+      },
+      {
+        uid: 9,
+        name: 'Moonshadow Wilds',
+        region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 }
+      },
+      { uid: 10, name: 'Stray Starway', region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 } },
+      { uid: 11, name: 'Sunset Wilds', region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 } },
+      {
+        uid: 12,
+        name: 'Sunken Corridor',
+        region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 }
+      },
+      { uid: 13, name: 'Gloomy Depths', region_data: { NA: 50, EU: 50, SEA: 50, JP: 50, KR: 50 } }
     ];
 
     const mapRecords = [];
@@ -197,6 +215,94 @@ migrate(
         map: mapRecords[2].id,
         respawn_time: 0,
         monster_id: 10901
+      },
+      {
+        uid: 20,
+        type: 'boss',
+        name: 'Basilisk',
+        map: mapRecords[7].id,
+        respawn_time: 0,
+        monster_id: 11007
+      },
+      {
+        uid: 21,
+        type: 'boss',
+        name: 'Goblin Chief',
+        map: mapRecords[7].id,
+        respawn_time: 30,
+        monster_id: 11014
+      },
+      {
+        uid: 22,
+        type: 'boss',
+        name: 'Cabbage Kingpin',
+        map: mapRecords[7].id,
+        respawn_time: 0,
+        monster_id: 10118
+      },
+      {
+        uid: 23,
+        type: 'boss',
+        name: 'Blackstone Captain',
+        map: mapRecords[7].id,
+        respawn_time: 30,
+        monster_id: 10119
+      },
+      {
+        uid: 24,
+        type: 'boss',
+        name: 'Crimson Foxen',
+        map: mapRecords[8].id,
+        respawn_time: 0,
+        monster_id: 10041
+      },
+      {
+        uid: 25,
+        type: 'boss',
+        name: 'Flamehorn',
+        map: mapRecords[9].id,
+        respawn_time: 30,
+        monster_id: 11023
+      },
+      {
+        uid: 26,
+        type: 'boss',
+        name: 'Predator Arachnocrab',
+        map: mapRecords[7].id,
+        respawn_time: 0,
+        monster_id: 11203
+      },
+      {
+        uid: 27,
+        type: 'boss',
+        name: 'Rebel King',
+        map: mapRecords[7].id,
+        respawn_time: 30,
+        monster_id: 11207
+      },
+      {
+        uid: 28,
+        type: 'boss',
+        name: 'Ridge Fang',
+        map: mapRecords[10].id,
+        respawn_time: 0,
+        monster_id: 11211
+      },
+      {
+        uid: 29,
+        type: 'boss',
+        name: 'Bloodthirsty Furball',
+        map: mapRecords[11].id,
+        respawn_time: 30,
+        monster_id: 11215
+      },
+      {
+        uid: 30,
+        type: 'boss',
+        name: 'Void Watcher',
+        map: mapRecords[12].id,
+        respawn_time: 0,
+        monster_id: 11219
       }
     ];
 
@@ -264,6 +370,7 @@ migrate(
             statusRecord.set('last_hp', 100);
             app.save(statusRecord);
             statusRecord.set('last_update', statusRecord.getDateTime('created'));
+            statusRecord.set('last_report', statusRecord.getDateTime('created'));
             app.save(statusRecord);
             mobChannelStatusCount++;
           }

@@ -127,7 +127,7 @@ func batchUpdateMobChannelStatus(app core.App, mobResets []MobReset) error {
 
 	// Build conditions for (mob, region) pairs
 	conditions := make([]string, 0, len(mobResets))
-	params := dbx.Params{}
+	params := dbx.Params{"timestamp": time.Now().Format("2006-01-02 15:04:05")}
 
 	for i, reset := range mobResets {
 		mobKey := fmt.Sprintf("mob%d", i)
@@ -138,7 +138,7 @@ func batchUpdateMobChannelStatus(app core.App, mobResets []MobReset) error {
 	}
 
 	query := fmt.Sprintf(
-		"UPDATE %s SET last_hp = 100, last_player_name = 'Respawned' WHERE %s",
+		"UPDATE %s SET last_hp = 100, last_update = {:timestamp}, last_player_name = 'Respawned' WHERE %s",
 		COLLECTION_MOB_CHANNEL_STATUS,
 		strings.Join(conditions, " OR "),
 	)
@@ -161,12 +161,16 @@ func broadcastMobResets(app core.App, mobIds []string, region string) error {
 	}
 	broadcastToTopic(app, topic, data)
 
-	// Broadcast JSON format to _json topic: wrapper object with mobs string array
-	type MobResetsWrapper struct {
-		Mobs []string `json:"mobs"`
+	// Broadcast JSON format to _json topic: object with mob_ids array and timestamp.
+	type MobResetsJSON struct {
+		MobIDs    []string `json:"mob_ids"`
+		Timestamp int64    `json:"timestamp"`
 	}
 
-	jsonData, err := json.Marshal(MobResetsWrapper{Mobs: mobIds})
+	jsonData, err := json.Marshal(MobResetsJSON{
+		MobIDs:    mobIds,
+		Timestamp: time.Now().Unix(),
+	})
 	if err != nil {
 		return fmt.Errorf("failed to marshal JSON mob resets: %w", err)
 	}
@@ -414,7 +418,7 @@ func handleShrinkChannels(app core.App) {
 		// with an HP report within the cutoff window.
 		activityQuery := fmt.Sprintf(
 			"SELECT COALESCE(MAX(channel_number), 0) as max_all, "+
-				"COALESCE(MAX(CASE WHEN last_update > {:cutoff} THEN channel_number END), 0) as max_active "+
+				"COALESCE(MAX(CASE WHEN last_report > {:cutoff} THEN channel_number END), 0) as max_active "+
 				"FROM %s WHERE mob IN (%s) AND region = {:region}",
 			COLLECTION_MOB_CHANNEL_STATUS,
 			strings.Join(placeholders, ","),
