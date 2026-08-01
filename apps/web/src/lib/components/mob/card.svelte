@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ChannelPill from '$lib/components/mob/channel-pill.svelte';
+	import LootDrops from '$lib/components/mob/loot-drops.svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -14,9 +15,9 @@
 		SECOND,
 		SPECIAL_MAGICAL_CREATURES
 	} from '$lib/constants';
-	import type { ChannelEntry } from '$lib/types/mobs';
 	import { favoriteMobsStore } from '$lib/stores/favorite-mobs.svelte';
 	import { mobNotificationsStore } from '$lib/stores/mob-notifications.svelte';
+	import type { ChannelEntry } from '$lib/types/mobs';
 	import { formatCountdown } from '$lib/utils/event-timer';
 	import {
 		calculateRespawnProgress,
@@ -27,7 +28,6 @@
 	import { requestNotificationPermission } from '$lib/utils/notifications';
 	import Heart from '@lucide/svelte/icons/heart';
 	import MapPin from '@lucide/svelte/icons/map-pin';
-	import LootDrops from '$lib/components/mob/loot-drops.svelte';
 
 	let {
 		mob,
@@ -160,24 +160,24 @@
 	});
 </script>
 
-<Card.Root class="@container/card flex h-full flex-col justify-between gap-3">
-	<Card.Header>
-		<Card.Title class="text-xl font-semibold tabular-nums @[250px]/card:text-2xl">
+<Card.Root class="@container/card h-full gap-2 py-4">
+	<Card.Header class="px-4">
+		<Card.Title class="text-lg tabular-nums @[250px]/card:text-xl">
 			{mob.name}
 		</Card.Title>
 		<Card.Action>
-			<Avatar.Root class="h-16 w-16">
+			<Avatar.Root class="size-12">
 				<Avatar.Image src={getMobImagePath(type, mob.name)} alt={mob.name} />
-				<Avatar.Fallback class="bg-red-500 text-lg font-bold text-white">
+				<Avatar.Fallback class="text-md bg-red-500 font-bold text-white">
 					{initials}
 				</Avatar.Fallback>
 			</Avatar.Root>
 		</Card.Action>
 	</Card.Header>
 
-	<Card.Content class="space-y-4">
+	<Card.Content class="mt-auto space-y-2 px-4">
 		<!-- Progress bar area / Notification toggle -->
-		<div class="mt-2 flex h-6 flex-col justify-end">
+		<div class="flex h-6 flex-col justify-end">
 			{#if isSpecialMagicalCreature}
 				<!-- Notification toggle for special magical creatures -->
 				<div class="flex items-center justify-between">
@@ -204,12 +204,12 @@
 									}}
 									variant="outline"
 									size="sm"
-									class="h-8 w-8 p-0"
+									class="size-8 p-0"
 									aria-label={mapPinToggled
 										? 'Unpin location map (peek mode)'
 										: 'Pin location map (always show)'}
 								>
-									<MapPin class="h-4 w-4" strokeWidth={1.5} />
+									<MapPin class="size-4" strokeWidth={1.5} />
 								</Toggle>
 							</Popover.Trigger>
 							<Popover.Content
@@ -237,7 +237,7 @@
 						</Popover.Root>
 					{:else}
 						<!-- Spacer keeps layout aligned when no locations are available -->
-						<div class="h-8 w-8" aria-hidden="true"></div>
+						<div class="size-8" aria-hidden="true"></div>
 					{/if}
 					<div class="flex items-center gap-2">
 						<label for="notifications-{mob.id}" class="text-sm text-muted-foreground">
@@ -260,18 +260,22 @@
 				</div>
 			{:else if nextRespawnTime}
 				<!-- Progress bar for regular mobs -->
-				<div class="space-y-2">
+				<div class="space-y-1">
 					<div class="flex justify-between text-xs text-muted-foreground">
 						<span>Time Until Respawn</span>
 						<span>{countdownText}</span>
 					</div>
-					<Progress value={progressValue} class="h-2" aria-label="Time until {mob.name} respawn" />
+					<Progress
+						value={progressValue}
+						class="h-1.5"
+						aria-label="Time until {mob.name} respawn"
+					/>
 				</div>
 			{/if}
 		</div>
 
-		<!-- Latest 15 Reported Channels (5x3 Grid) -->
-		<div class="grid grid-cols-5 justify-center gap-2">
+		<!-- Latest Reported Channels -->
+		<div class="grid grid-cols-5 gap-1.5">
 			{#each channelPills as pill, index (index)}
 				<ChannelPill
 					channelNumber={pill.channelNumber}
@@ -287,29 +291,27 @@
 		</div>
 	</Card.Content>
 
-	<Card.Footer class="flex items-center justify-between gap-2 text-sm">
-		<Button onclick={handleViewDetails} class="flex-1" variant="secondary" size="sm"
-			>View Details</Button
+	<Card.Footer class="gap-1.5 px-4">
+		<Button onclick={handleViewDetails} class="flex-1" variant="secondary" size="sm">
+			View Details
+		</Button>
+		{#if type === 'boss'}
+			<LootDrops mobName={mob.name} />
+		{/if}
+		<Toggle
+			pressed={isFavorited}
+			onPressedChange={() => favoriteMobsStore.toggleFavoriteMob(mob.id)}
+			variant="outline"
+			size="sm"
+			class="size-8 p-0"
+			aria-label={isFavorited
+				? `Remove ${mob.name} from favorites`
+				: `Add ${mob.name} to favorites`}
 		>
-		<div class="flex items-center gap-2">
-			{#if type === 'boss'}
-				<LootDrops mobName={mob.name} />
-			{/if}
-			<Toggle
-				pressed={isFavorited}
-				onPressedChange={() => favoriteMobsStore.toggleFavoriteMob(mob.id)}
-				variant="outline"
-				size="sm"
-				class="p-2"
-				aria-label={isFavorited
-					? `Remove ${mob.name} from favorites`
-					: `Add ${mob.name} to favorites`}
-			>
-				<Heart
-					class={isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}
-					size={16}
-				/>
-			</Toggle>
-		</div>
+			<Heart
+				class={isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}
+				size={16}
+			/>
+		</Toggle>
 	</Card.Footer>
 </Card.Root>
