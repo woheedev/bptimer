@@ -1,4 +1,4 @@
-# PubNation Ads.txt v20260728
+# PubNation Ads.txt v20260814
 managerdomain=pubnation.com
 contact=sales@pubnation.com
 ownerdomain=bptimer.com
@@ -132,6 +132,8 @@ smartadserver.com, 3860, RESELLER
 sharethrough.com, 47b99924, RESELLER, d53b998a7bd4ecd2
 sharethrough.com, 3860, RESELLER, d53b998a7bd4ecd2
 nativo.com, 5705, RESELLER, 59521ca7cc5e9fee
+nativo.com, 6153, RESELLER, 59521ca7cc5e9fee
+nativo.com, 6078, RESELLER, 59521ca7cc5e9fee
 themediagrid.com, 8CAIJY, RESELLER, 9fac4a4a87c2a44f
 undertone.com, 4238, RESELLER
 openx.com, 537153564, RESELLER, 6a698e2ec38604c6
@@ -164,6 +166,7 @@ smartadserver.com, 4111, RESELLER
 minutemedia.com, 01hkmpfn2nne, RESELLER
 pubmatic.com, 161683, RESELLER, 5d62403b186f2ace
 rubiconproject.com, 17598, RESELLER, 0bfd66d529a55807
+media.net, 8CUWNDO6S, RESELLER
 yieldmo.com, 2954622693783052507, RESELLER
 33across.com, 0013300001jlr99AAA, RESELLER, bbea06d9c4d2853c
 smaato.com, 1100059964, RESELLER, d641df8625486a7b
@@ -186,9 +189,9 @@ xandr.com, 14082, RESELLER
 seedtag.com, 68d41e72450be60007156a5a, RESELLER
 xandr.com, 4009, RESELLER, f5ab79cb980f11d1
 smartadserver.com, 3050, RESELLER
-beachfront.com, 15250, RESELLER, e2541279e8e2ca4d
 rubiconproject.com, 17280, RESELLER, 0bfd66d529a55807
 pubmatic.com, 157743, RESELLER, 5d62403b186f2ace
+sharethrough.com, 3050, RESELLER, d53b998a7bd4ecd2
 inmobi.com, d7ada47670d044a69337cb48018d1d94, RESELLER, 83e75a7ae333ca9d
 ssp.cadent.com, 3695, RESELLER, 1e1d41537f7cad7f
 
