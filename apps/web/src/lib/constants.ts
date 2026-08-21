@@ -2,7 +2,7 @@
  * Constants for common values used throughout the app
  */
 
-import type { PageItem, ToolsSections, RegionOption } from '$lib/types/ui';
+import type { PageItem, RegionOption, ToolsSections } from '$lib/types/ui';
 
 // Time constants
 export const SECOND = 1000;
@@ -320,10 +320,10 @@ export const REGION_LAUNCH_DATES: Record<string, string> = {
 };
 export const REGIONS: RegionOption[] = [
 	{ value: 'NA', label: 'NA' },
-	{ value: 'EU', label: 'EU' },
+	// { value: 'EU', label: 'EU' },
 	{ value: 'SEA', label: 'SEA' },
-	{ value: 'JP', label: 'JP' },
-	{ value: 'KR', label: 'KR' }
+	{ value: 'JP', label: 'JP' }
+	// { value: 'KR', label: 'KR' }
 ];
 
 // Tools & Resources constants
