@@ -41,7 +41,11 @@ static mut MOB_UUID_TO_BASE_ID: *mut std::collections::HashMap<i64, u32> = std::
 static LOGGED_NEARBY_MOBS: LazyLock<Mutex<HashSet<u32>>> =
     LazyLock::new(|| Mutex::new(HashSet::new()));
 
-fn log_nearby_monster(base_id: u32, position: Option<&crate::models::events::Position>) {
+fn log_nearby_monster(
+    base_id: u32,
+    position: Option<&crate::models::events::Position>,
+    attrs: Option<&AttrCollection>,
+) {
     let should_log = {
         let mut seen = LOGGED_NEARBY_MOBS.lock().unwrap();
         seen.insert(base_id)
@@ -54,21 +58,25 @@ fn log_nearby_monster(base_id: u32, position: Option<&crate::models::events::Pos
     let mob_name =
         crate::utils::constants::get_mob_name(base_id).unwrap_or_else(|| "Unknown".to_string());
 
+    let (_, max_hp) = extract_hp_from_attrs(attrs);
+
     match position {
         Some(pos) => info!(
-            "[DEBUG MOB ENCOUNTER] monster_id={} name={} pos=({:.2}, {:.2}, {:.2}) tracked={}",
+            "[DEBUG MOB ENCOUNTER] monster_id={} name={} pos=({:.2}, {:.2}, {:.2}) tracked={} max_hp={:?}",
             base_id,
             mob_name,
             pos.x,
             pos.y,
             pos.z,
-            is_tracked_mob(base_id)
+            is_tracked_mob(base_id),
+            max_hp
         ),
         None => info!(
-            "[DEBUG MOB ENCOUNTER] monster_id={} name={} pos=(unknown) tracked={}",
+            "[DEBUG MOB ENCOUNTER] monster_id={} name={} pos=(unknown) tracked={} max_hp={:?}",
             base_id,
             mob_name,
-            is_tracked_mob(base_id)
+            is_tracked_mob(base_id),
+            max_hp
         ),
     }
 }
@@ -336,10 +344,10 @@ fn process_sync_near_delta(payload: &[u8]) -> Result<Vec<CombatEvent>, Box<dyn s
         if let Some(base_id) = base_id {
             if let Some(attrs) = &delta.attrs {
                 let position = extract_position_from_attrs(&Some(attrs.clone()));
-                log_nearby_monster(base_id, position.as_ref());
+                log_nearby_monster(base_id, position.as_ref(), Some(attrs));
 
                 if is_tracked_mob(base_id) {
-                    let (current_hp, max_hp) = extract_hp_from_attrs(&Some(attrs.clone()));
+                    let (current_hp, max_hp) = extract_hp_from_attrs(Some(attrs));
 
                     // (mob can take damage without moving)
                     let has_position = position.is_some();
@@ -527,8 +535,8 @@ fn extract_combat_events_from_aoi_delta(delta: &AoiSyncDelta) -> Vec<CombatEvent
 /// Extract HP from AttrCollection if available
 /// AttrHp (0x2C2E = 11310) contains current HP as varint-encoded uint64
 /// AttrMaxHp (0x2C38 = 11320) contains max HP as varint-encoded uint64
-fn extract_hp_from_attrs(attrs: &Option<AttrCollection>) -> (Option<u64>, Option<u64>) {
-    let attrs = match attrs.as_ref() {
+fn extract_hp_from_attrs(attrs: Option<&AttrCollection>) -> (Option<u64>, Option<u64>) {
+    let attrs = match attrs {
         Some(a) => a,
         None => return (None, None),
     };
@@ -633,7 +641,7 @@ fn process_sync_near_entities(
             }
 
             if let Some(pos) = position {
-                let (current_hp, max_hp) = extract_hp_from_attrs(&entity.attrs);
+                let (current_hp, max_hp) = extract_hp_from_attrs(entity.attrs.as_ref());
                 events.push(CombatEvent::EntityPosition(EntityPositionUpdate {
                     uuid: entity.uuid,
                     entity_type: crate::models::events::EntityType::Player,
@@ -678,7 +686,7 @@ fn process_sync_near_entities(
             }
 
             let position = extract_position_from_attrs(&entity.attrs);
-            log_nearby_monster(monster_base_id, position.as_ref());
+            log_nearby_monster(monster_base_id, position.as_ref(), entity.attrs.as_ref());
 
             unsafe {
                 if MOB_UUID_TO_BASE_ID.is_null() {
@@ -691,7 +699,7 @@ fn process_sync_near_entities(
             }
 
             if is_tracked_mob(monster_base_id) {
-                let (current_hp, max_hp) = extract_hp_from_attrs(&entity.attrs);
+                let (current_hp, max_hp) = extract_hp_from_attrs(entity.attrs.as_ref());
                 if let Some(pos) = position {
                     events.push(CombatEvent::EntityPosition(EntityPositionUpdate {
                         uuid: entity.uuid,
